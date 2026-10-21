@@ -149,7 +149,60 @@ van het halen eindigt in teruggeven.
 Het balverlies-aandeel op het middenveld (hoger dan bij anderen) is de kostenpost van dat profiel: een bal die je op
 het middenveld komt halen en verliest, ligt dichter bij je eigen doel dan een steekpass die op hun helft mislukt.
 
-## 5. Wat je hieruit níet mag concluderen
+## 5. Lees profielen met de rol in gedachten
+
+De tabel in punt 4 vergelijkt spelers ongeacht hun rol, en dat vertekent. Een spits hoort weinig aan de bal te zijn.
+EA's `pos` kent maar vier klassen (keeper, verdediger, middenvelder, aanvaller) en de game zet dezelfde speler de ene
+wedstrijd als "forward" en de andere als "midfielder" neer; Neegek staat 9 keer als aanvaller en 9 keer als middenvelder
+in de data. Per 90 minuten, alleen aanvallers (`pos = forward`) en ter vergelijking de middenvelders van tegenstanders:
+
+| | KFH Guip | Neegek als aanvaller | Neegek als middenvelder | tegenstander-aanvallers | tegenstander-middenvelders |
+|---|---|---|---|---|---|
+| wedstrijden | 6 | 9 | 9 | 33 | 36 |
+| balacties | 31,7 | 38,6 | 40,5 | 31,1 | 39,4 |
+| passpogingen | 16,5 | 19,7 | 19,1 | 16,5 | 21,0 |
+| aandeel passes vooruit | 0,36 | 0,44 | 0,58 | 0,45 | 0,59 |
+| passes ineens | 4,8 | 2,8 | 3,1 | 4,9 | 3,7 |
+| geslaagde steekpasses | 2,2 | 3,3 | 3,2 | 2,8 | 4,2 |
+| goals | 0,8 | 0,5 | 0,2 | 0,8 | 0,3 |
+| assists | 0,5 | 0,7 | 0,9 | 0,4 | 0,4 |
+| schoten | 2,8 | 1,9 | 2,4 | 2,5 | 0,9 |
+| schoten binnen de zestien | 2,3 | 0,9 | 2,0 | 1,9 | 0,6 |
+| gewonnen luchtduels aanvallend | 3,8 | 1,1 | 1,0 | 2,1 | 0,3 |
+| geslaagde dribbels | 10,8 | 16,0 | 17,0 | 11,3 | 16,5 |
+| tegenstanders uitgespeeld | 2,2 | 1,9 | 3,0 | 2,7 | 2,3 |
+| balverlies middenveld / hun helft | 1,2 / 1,7 | 2,1 / 1,1 | 0,9 / 1,3 | 1,9 / 2,9 | 1,5 / 1,2 |
+| "uit positie" (219) | 2,8 | 9,1 | 8,7 | 4,2 | 6,5 |
+| "goed gepositioneerd" (111) | 20,1 | 9,0 | 9,8 | 18,1 | 12,5 |
+
+**Wat betekent dat.**
+
+- **KFH Guip is een klassieke spits.** Veel passes ineens en veel passes achteruit (kaatsen met de rug naar het doel),
+  de meeste gewonnen luchtduels, de meeste schoten van binnen de zestien, het hoogste 111 en het laagste 219. Weinig
+  balacties is bij die rol geen gebrek maar het kenmerk. De aanvallers van tegenstanders zien er hetzelfde uit.
+- **Neegek speelt als aanvaller meetbaar als middenvelder.** Balacties en dribbels liggen op het niveau van de
+  middenvelders van tegenstanders, niet van hun aanvallers; 219 en 111 wijken juist het sterkst af van de spitsen.
+  Dat is de "veredelde CAM" in cijfers: aanbieden, de bal komen halen, doorspelen.
+- **De prijs daarvan is zichtbaar in de zestien.** Als aanvaller schiet Neegek 0,9 keer per 90 van binnen de zestien,
+  als middenvelder 2,0 keer. Als de spits uitzakt om de bal te halen, staat er minder vaak iemand in het strafschopgebied,
+  en dat zie je terug in zijn eigen schoten. Als aanvaller speelt hij ook relatief vaker terug (0,44 vooruit tegen 0,58
+  als middenvelder) en verliest hij de bal vaker op het middenveld (2,1 tegen 0,9). Negen tegen negen wedstrijden:
+  een aanwijzing, geen vonnis.
+
+### Waar balverlies valt en wat het kost
+
+Per 90 minuten en per veldderde (eigen helft / middenveld / hun helft): Frambroos-middenvelders 0,3 / 0,7 / 0,8,
+Frambroos-aanvallers 0,1 / 1,3 / 1,2, tegenstander-aanvallers 0,2 / 1,9 / 2,9. Balverlies valt dus waar gespeeld wordt
+en waar je door iemand heen moet; op de eigen helft gebeurt het nauwelijks. Dat het echt verlies is blijkt uit de
+tegenpartij: ons balverlies op het middenveld correleert 0,63 met hun balwinst op het middenveld in dezelfde wedstrijd.
+
+Wat het kost is met 36 team-wedstrijden niet zichtbaar: balverlies op het middenveld correleert 0,06 met tegengoals en
+0,13 met schoten tegen; verlies op hun helft zelfs −0,15, omdat je de bal daar vooral verliest als je veel aanvalt.
+Dat verlies op het middenveld gevaarlijker is dan verlies voorin is plausibel, maar hier niet aangetoond. Eén gat in
+de data speelt mee: wie op hun helft de bal van ons afpakt is meestal hun AI-verdediger, en die staat niet in de data
+(ons verlies op hun helft correleert 0,00 met de balwinst van hun menselijke spelers op hun eigen helft).
+
+## 6. Wat je hieruit níet mag concluderen
 
 - **Geen oorzaak-gevolg.** "Steekpasses ~ doelsaldo" kan ook betekenen dat een team dat voorstaat ruimte krijgt voor
   steekpasses.
@@ -157,6 +210,7 @@ het middenveld komt halen en verliest, ligt dichter bij je eigen doel dan een st
   die alleen staat zonder medespelers in de buurt krijgt ook 175.
 - **Geen mislukte steekpasses.** Alles wat niet aankwam is "mislukte pass (vooruit)". Hoeveel daarvan steekpasses
   waren, weet niemand.
+- **Rol vertekent.** Vergelijk spelers binnen dezelfde rol (punt 5); EA's `pos` is grof en wisselt per wedstrijd.
 - **Kleine aantallen.** 18 wedstrijden, 6 vaste spelers. Draai `npm run decode-events` en
   `node src/context-events.js --player Neegek` opnieuw na een week verzamelen.
 - **Tegenstanders zijn geen zuivere referentie.** Hun rijen bevatten 2 tot 7 mensen; de rest is AI en ontbreekt.
