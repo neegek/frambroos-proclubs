@@ -10,6 +10,7 @@
   "scripts": {
     "find-club": "node src/find-club.js",
     "collect": "node src/collect.js",
+    "decode-events": "node src/decode-events.js",
     "sync": "git remote get-url origin >/dev/null 2>&1 && git checkout -q -- data/proclubs.sqlite && git pull --ff-only --quiet || true",
     "predashboard": "npm run --silent sync",
     "dashboard": "node src/server.js",

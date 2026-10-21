@@ -49,5 +49,8 @@ De lokale planner logt naar `data/collect.log` en draait alleen als de Mac wakke
 
 Per speler per wedstrijd: goals, assists, schoten, passes (gemaakt/gepoogd), tackles, rating,
 saves, clean sheets, rode kaarten, man of the match, positie (grof), speelseconden, archetype
-en een gecodeerde event-string (`event_aggregate`, nog niet ontcijferd).
-Niet beschikbaar: balbezit, xG, gele kaarten, exacte positie.
+en een gecodeerde event-string (`event_aggregate`). Die string is grotendeels ontcijferd: zie
+[docs/event-codes.md](docs/event-codes.md) (codeboek met bewijs), `src/events.js` (`decodeEvents`) en
+`npm run decode-events` (de analyse). Hij bevat o.a. passrichting en -lengte, schoten binnen/buiten de zestien,
+gewonnen tackles, onderscheppingen, balwinst/-verlies per veldderde, gele kaarten, overtredingen en positiefeedback.
+Niet beschikbaar: balbezit, xG, exacte positie, echte balcontacten.

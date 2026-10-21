@@ -2,6 +2,7 @@
 // nieuwe wedstrijden op. Draai dit elk kwartier om een volledige historie op te bouwen.
 import { ea } from './ea.js';
 import { openDb, config } from './db.js';
+import { fullEventString } from './events.js';
 import { appendFileSync } from 'node:fs';
 
 const db = openDb();
@@ -28,7 +29,23 @@ const q = {
       pro_overall, pro_name, favorite_position, pass_success_rate, shot_success_rate, tackle_success_rate, raw) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`),
   insRun: db.prepare('INSERT INTO collect_runs (started_at) VALUES (?)'),
   finishRun: db.prepare('UPDATE collect_runs SET finished_at = ?, new_matches = ?, error = ? WHERE started_at = ?'),
+  fixEvents: db.prepare('UPDATE player_match_stats SET event_aggregate = ? WHERE match_id = ? AND club_id = ? AND player_name = ? AND event_aggregate IS NOT ?'),
 };
+
+// EA kapt match_event_aggregate_0 af op ~250 tekens en zet de rest in _1.._3. Oudere rijen
+// bevatten alleen _0; vul ze eenmalig aan vanuit de ruwe JSON. Geeft het aantal herstelde rijen.
+function backfillEventAggregates() {
+  let fixed = 0;
+  for (const { match_id, raw } of db.prepare('SELECT match_id, raw FROM matches').all()) {
+    const match = JSON.parse(raw);
+    for (const cid of Object.keys(match.players || {}))
+      for (const p of Object.values(match.players[cid])) {
+        const events = fullEventString(p) || null;
+        fixed += q.fixEvents.run(events, match_id, cid, p.playername, events).changes;
+      }
+  }
+  return fixed;
+}
 
 function resultOf(entry) {
   if (num(entry.wins) === 1) return 'W';
@@ -56,7 +73,7 @@ function storeMatch(match, matchType) {
         num(p.tackleattempts), num(p.tacklesmade), num(p.rating), num(p.saves), num(p.goalsconceded),
         num(p.cleansheetsgk), num(p.cleansheetsdef), num(p.cleansheetsany),
         num(p.redcards), num(p.mom), num(p.secondsPlayed), num(p.archetypeid), p.vproattr ?? null,
-        p.match_event_aggregate_0 ?? null,
+        fullEventString(p) || null,
       );
     }
   }
@@ -92,6 +109,8 @@ let newMatches = 0;
 let changed = false;
 let error = null;
 try {
+  const fixed = backfillEventAggregates();
+  if (fixed) { changed = true; console.log(`${fixed} eventstrings aangevuld vanuit de ruwe JSON`); }
   const opponents = new Set();
   for (const matchType of ['leagueMatch', 'playoffMatch']) {
     const matches = (await ea.matches(platform, clubId, matchType)) || [];
