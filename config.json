@@ -1,0 +1,7 @@
+{
+  "clubId": "837250",
+  "clubName": "Frambroos",
+  "platform": "common-gen5",
+  "dbPath": "data/proclubs.sqlite",
+  "dashboardPort": 3737
+}

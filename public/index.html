@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Frambroos Stats</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1 id="club-name">…</h1>
+    <p class="sub" id="club-sub">Data wordt geladen…</p>
+  </div>
+  <div class="top-right">
+    <label class="filter">Periode
+      <select id="range">
+        <option value="all">Alles</option>
+        <option value="30">Laatste 30 dagen</option>
+        <option value="7">Laatste 7 dagen</option>
+      </select>
+    </label>
+    <label class="filter">Type
+      <select id="type">
+        <option value="all">League + playoff</option>
+        <option value="leagueMatch">League</option>
+        <option value="playoffMatch">Playoff</option>
+      </select>
+    </label>
+    <button id="theme" type="button" title="Licht/donker">◐</button>
+  </div>
+</header>
+
+<main id="app">
+  <section class="tiles" id="tiles"></section>
+
+  <section class="card">
+    <h2>Resultaten per wedstrijd</h2>
+    <p class="hint">Doelsaldo per wedstrijd. Beweeg over een balk voor tegenstander, score en opstelling.</p>
+    <div id="chart-results"></div>
+  </section>
+
+  <div class="grid-2">
+    <section class="card">
+      <h2>Met en zonder speler</h2>
+      <p class="hint">Winstpercentage als iemand wél meespeelt tegenover wedstrijden zonder die persoon. Kleine aantallen zijn grijs.</p>
+      <div id="tbl-with-without"></div>
+    </section>
+    <section class="card">
+      <h2>Opstellingen</h2>
+      <p class="hint">Welke combinatie van spelers wint het vaakst (minimaal 2 wedstrijden).</p>
+      <div id="tbl-lineups"></div>
+    </section>
+  </div>
+
+  <div class="grid-2">
+    <section class="card">
+      <h2>Speler per positie</h2>
+      <p class="hint">Winstpercentage en gemiddelde rating per positie waarop iemand speelde.</p>
+      <div id="tbl-positions"></div>
+    </section>
+    <section class="card">
+      <h2>Tegenstandersterkte</h2>
+      <p class="hint">Skill rating van de tegenstander tegenover het doelsaldo. Rechtsboven is knap, linksonder is pijnlijk.</p>
+      <div id="chart-opponents"></div>
+      <div id="tbl-opponents"></div>
+    </section>
+  </div>
+
+  <div class="grid-3">
+    <section class="card">
+      <h2>Hoeveelste pot van de avond</h2>
+      <p class="hint">Winstpercentage per volgnummer binnen een speelsessie (nieuwe sessie na 90 minuten pauze).</p>
+      <div id="chart-session"></div>
+    </section>
+    <section class="card">
+      <h2>Dag van de week</h2>
+      <p class="hint">Winstpercentage per weekdag.</p>
+      <div id="chart-weekday"></div>
+    </section>
+    <section class="card">
+      <h2>Tijdstip</h2>
+      <p class="hint">Winstpercentage per uur waarop de wedstrijd eindigde.</p>
+      <div id="chart-hour"></div>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>Vorm per speler</h2>
+    <p class="hint">Rating per wedstrijd. Beweeg over de grafiek voor de wedstrijd.</p>
+    <div id="chart-form"></div>
+  </section>
+
+  <section class="card">
+    <h2>Afwerking en opbouw</h2>
+    <p class="hint">Totalen in de gekozen periode. Schoten per goal: lager is beter.</p>
+    <div id="tbl-players"></div>
+  </section>
+
+  <section class="card">
+    <h2>Alle wedstrijden</h2>
+    <div id="tbl-matches"></div>
+  </section>
+</main>
+<div id="tooltip" class="tooltip" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>

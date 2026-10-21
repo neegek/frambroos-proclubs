@@ -1,0 +1,19 @@
+{
+  "name": "frambroos-proclubs",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Tracker en dashboard voor de FC27 Pro Clubs-data van Frambroos",
+  "engines": {
+    "node": ">=22.5"
+  },
+  "scripts": {
+    "find-club": "node src/find-club.js",
+    "collect": "node src/collect.js",
+    "sync": "git remote get-url origin >/dev/null 2>&1 && git pull --ff-only --quiet || true",
+    "predashboard": "npm run --silent sync",
+    "dashboard": "node src/server.js",
+    "schedule:install": "bash scripts/install-schedule.sh",
+    "schedule:uninstall": "bash scripts/uninstall-schedule.sh"
+  }
+}
