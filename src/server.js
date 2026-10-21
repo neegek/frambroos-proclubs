@@ -23,6 +23,11 @@ function buildData() {
     ORDER BY m.ts ASC`).all(clubId);
   const playersFor = db.prepare('SELECT * FROM player_match_stats WHERE match_id = ? AND club_id = ? ORDER BY player_name');
   const oppCount = db.prepare('SELECT COUNT(*) AS c FROM player_match_stats WHERE match_id = ? AND club_id = ?');
+  const mapPlayer = p => ({
+    name: p.player_name, pos: p.pos, goals: p.goals, assists: p.assists, shots: p.shots,
+    passAttempts: p.pass_attempts, passesMade: p.passes_made, tackleAttempts: p.tackle_attempts, tacklesMade: p.tackles_made,
+    rating: p.rating, mom: p.mom, redCards: p.red_cards, secondsPlayed: p.seconds_played, archetypeId: p.archetype_id, saves: p.saves,
+  });
   const matches = matchRows.map(r => {
     const opp = r.opponent_id ? latestSnapshot.get(r.opponent_id) : null;
     return {
@@ -35,11 +40,8 @@ function buildData() {
         bestDivision: opp?.best_division ?? null,
         humanPlayers: r.opponent_id ? oppCount.get(r.match_id, r.opponent_id).c : null,
       },
-      players: playersFor.all(r.match_id, clubId).map(p => ({
-        name: p.player_name, pos: p.pos, goals: p.goals, assists: p.assists, shots: p.shots,
-        passAttempts: p.pass_attempts, passesMade: p.passes_made, tackleAttempts: p.tackle_attempts, tacklesMade: p.tackles_made,
-        rating: p.rating, mom: p.mom, redCards: p.red_cards, secondsPlayed: p.seconds_played, archetypeId: p.archetype_id,
-      })),
+      players: playersFor.all(r.match_id, clubId).map(mapPlayer),
+      opponentPlayers: r.opponent_id ? playersFor.all(r.match_id, r.opponent_id).map(mapPlayer) : [],
     };
   });
   return {

@@ -40,18 +40,59 @@
     <div id="chart-results"></div>
   </section>
 
+  <section class="card">
+    <h2>Prestatie tegenover verwachting</h2>
+    <p class="hint" id="model-hint">Verwacht doelsaldo op basis van het verschil in skill rating en het verschil in aantal mensen. De balk is wat jullie méér of minder deden dan verwacht; daar worden de spelersanalyses hieronder op gemeten.</p>
+    <div id="chart-residual"></div>
+  </section>
+
   <div class="grid-2">
     <section class="card">
       <h2>Met en zonder speler</h2>
-      <p class="hint">Winstpercentage als iemand wél meespeelt tegenover wedstrijden zonder die persoon. Kleine aantallen zijn grijs.</p>
+      <p class="hint">Punten per wedstrijd en prestatie tegenover verwachting als iemand wél meespeelt, tegenover de wedstrijden zonder die persoon. Kleine aantallen zijn grijs.</p>
       <div id="tbl-with-without"></div>
     </section>
     <section class="card">
-      <h2>Opstellingen</h2>
-      <p class="hint">Welke combinatie van spelers wint het vaakst (minimaal 2 wedstrijden).</p>
-      <div id="tbl-lineups"></div>
+      <h2>Synergie: tweetallen</h2>
+      <p class="hint">Doen twee spelers het samen beter dan apart? "Samen" is wedstrijden met beiden, "apart" met precies één van de twee. Minimaal 3 wedstrijden samen.</p>
+      <div id="tbl-pairs"></div>
     </section>
   </div>
+
+  <div class="grid-2">
+    <section class="card">
+      <h2>Opstellingen</h2>
+      <p class="hint">Welke combinatie van spelers presteert het beste (minimaal 2 wedstrijden).</p>
+      <div id="tbl-lineups"></div>
+    </section>
+    <section class="card">
+      <h2>Speler per positie</h2>
+      <p class="hint">Prestatie en gemiddelde rating per positie waarop iemand speelde.</p>
+      <div id="tbl-positions"></div>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>Verdedigend lek</h2>
+    <p class="hint">Hoeveel schoten en goals jullie weggeven, en wie daar in de data mee samenhangt. "Gemiste tackles" is pogingen min geslaagd. De correlatie is tussen iemands gemiste tackles en de schoten tegen in diezelfde wedstrijd (−1 tot 1; boven 0,3 is het kijken waard).</p>
+    <div class="chart-pair">
+      <div>
+        <h3>Schoten tegen en goals tegen per wedstrijd</h3>
+        <div id="chart-defence"></div>
+      </div>
+      <div>
+        <h3>Team bij winst en gelijk/verlies</h3>
+        <div id="tbl-defence-team"></div>
+      </div>
+    </div>
+    <div id="tbl-defence"></div>
+  </section>
+
+  <section class="card">
+    <h2>Aanval en rolverdeling</h2>
+    <p class="hint">Wie schiet, wie scoort, wie geeft. Aandelen zijn van het teamtotaal in de wedstrijden die iemand speelde. "Per 90" is genormaliseerd op speeltijd.</p>
+    <div id="tbl-attack"></div>
+  </section>
 
   <section class="card">
     <div class="card-head">
@@ -80,19 +121,33 @@
     <div id="tbl-quality"></div>
   </section>
 
-  <div class="grid-2">
-    <section class="card">
-      <h2>Speler per positie</h2>
-      <p class="hint">Winstpercentage en gemiddelde rating per positie waarop iemand speelde.</p>
-      <div id="tbl-positions"></div>
-    </section>
-    <section class="card">
-      <h2>Tegenstandersterkte</h2>
-      <p class="hint">Skill rating van de tegenstander tegenover het doelsaldo. Rechtsboven is knap, linksonder is pijnlijk.</p>
-      <div id="chart-opponents"></div>
-      <div id="tbl-opponents"></div>
-    </section>
-  </div>
+  <section class="card">
+    <h2>Tegenstanders</h2>
+    <p class="hint">Context van de tegenstander: sterkte, aantal mensen, menselijke keeper, opstelling (verdedigers-middenvelders-aanvallers) en archetypes. Archetype-namen geeft EA niet; de nummers zijn wel stabiel, dus patronen zijn te volgen.</p>
+    <div class="chart-pair">
+      <div>
+        <h3>Skill rating tegenover doelsaldo</h3>
+        <div id="chart-opponents"></div>
+        <div id="tbl-opponents"></div>
+      </div>
+      <div>
+        <h3>Aantal mensen bij de tegenstander</h3>
+        <div id="tbl-opp-humans"></div>
+        <h3>Menselijke keeper</h3>
+        <div id="tbl-opp-gk"></div>
+      </div>
+    </div>
+    <div class="chart-pair">
+      <div>
+        <h3>Opstelling van de tegenstander (V-M-A, mensen)</h3>
+        <div id="tbl-opp-shape"></div>
+      </div>
+      <div>
+        <h3>Archetypes van tegenstanders</h3>
+        <div id="tbl-opp-archetypes"></div>
+      </div>
+    </div>
+  </section>
 
   <div class="grid-3">
     <section class="card">

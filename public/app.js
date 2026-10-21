@@ -160,11 +160,20 @@ const resultColor = r => r === 'W' ? 'var(--pos)' : r === 'L' ? 'var(--neg)' : '
 const summarize = list => {
   const W = list.filter(m => m.result === 'W').length, D = list.filter(m => m.result === 'D').length, L = list.length - W - D;
   const gf = list.reduce((a, m) => a + m.goals, 0), ga = list.reduce((a, m) => a + m.goalsAgainst, 0);
-  return { n: list.length, W, D, L, winPct: pct(W, list.length), ppg: list.length ? +((3 * W + D) / list.length).toFixed(2) : null, gf, ga, gfAvg: list.length ? +(gf / list.length).toFixed(1) : null, gaAvg: list.length ? +(ga / list.length).toFixed(1) : null };
+  const resid = list.length ? +(list.reduce((a, m) => a + (m.resid ?? 0), 0) / list.length).toFixed(2) : null;
+  return { n: list.length, W, D, L, winPct: pct(W, list.length), ppg: list.length ? +((3 * W + D) / list.length).toFixed(2) : null, resid, gf, ga, gfAvg: list.length ? +(gf / list.length).toFixed(1) : null, gaAvg: list.length ? +(ga / list.length).toFixed(1) : null };
 };
 const lineupOf = m => m.players.map(p => p.name).sort().join(' · ');
-const deltaCell = d => d === null ? '–' : `<span class="${d > 0 ? 'delta-pos' : d < 0 ? 'delta-neg' : ''}">${d > 0 ? '+' : ''}${d} pt</span>`;
-const matchTip = m => `<b>${esc(m.opponent.name || 'Onbekend')} ${m.goals}–${m.goalsAgainst} (${m.result})</b>${fmtDateTime(m.ts)} · ${m.matchType === 'playoffMatch' ? 'playoff' : 'league'}${m.opponent.skillRating ? ` · skill ${m.opponent.skillRating}` : ''}<br>${esc(m.players.map(p => p.name).join(', '))}`;
+const deltaCell = (d, unit = ' pt', digits = 0) => d === null || d === undefined ? '–' : `<span class="${d > 0.005 ? 'delta-pos' : d < -0.005 ? 'delta-neg' : ''}">${d > 0 ? '+' : ''}${(+d).toFixed(digits)}${unit}</span>`;
+const avg = xs => xs.length ? xs.reduce((x, y) => x + y, 0) / xs.length : null;
+const residCell = v => deltaCell(v, '', 2);
+// Correlatie waarbij positief slecht nieuws is (meer gemiste tackles, meer schoten tegen): rood boven 0,3.
+const corrCell = v => v === null || v === undefined ? '–' : `<span class="${v >= 0.3 ? 'delta-neg' : v <= -0.3 ? 'delta-pos' : ''}">${v.toFixed(2)}</span>`;
+const corr = (xs, ys) => { const n = xs.length; if (n < 3) return null; const mx = xs.reduce((a, b) => a + b, 0) / n, my = ys.reduce((a, b) => a + b, 0) / n; let sxy = 0, sx = 0, sy = 0; for (let i = 0; i < n; i++) { sxy += (xs[i] - mx) * (ys[i] - my); sx += (xs[i] - mx) ** 2; sy += (ys[i] - my) ** 2; } return sx && sy ? +(sxy / Math.sqrt(sx * sy)).toFixed(2) : null; };
+const oppShots = m => m.opponentPlayers.reduce((a, p) => a + (p.shots || 0), 0);
+const hasHumanGk = m => m.opponentPlayers.some(p => p.pos === 'goalkeeper');
+const shapeOf = m => { const c = { defender: 0, midfielder: 0, forward: 0 }; for (const p of m.opponentPlayers) if (c[p.pos] !== undefined) c[p.pos]++; return `${c.defender}-${c.midfielder}-${c.forward}${hasHumanGk(m) ? ' +K' : ''}`; };
+const matchTip = m => `<b>${esc(m.opponent.name || 'Onbekend')} ${m.goals}–${m.goalsAgainst} (${m.result})</b>${fmtDateTime(m.ts)} · ${m.matchType === 'playoffMatch' ? 'playoff' : 'league'}${m.opponent.skillRating ? ` · skill ${m.opponent.skillRating}` : ''} · ${m.opponentPlayers.length} mensen${m.resid !== undefined ? ` · tov verwachting ${m.resid > 0 ? '+' : ''}${m.resid.toFixed(1)}` : ''}<br>${esc(m.players.map(p => p.name).join(', '))}`;
 
 function enrich(matches) {
   const sorted = [...matches].sort((a, b) => a.ts - b.ts);
@@ -177,6 +186,42 @@ function enrich(matches) {
     prev = m;
   }
   return sorted;
+}
+
+// Verwachtingsmodel: doelsaldo ~ a + b·(skillverschil/100) + c·(mensen tegenstander − eigen mensen).
+// Kleinste kwadraten op alle wedstrijden; bij te weinig data vaste, voorzichtige coëfficiënten.
+function solve3(A, b) {
+  const M = A.map((row, i) => [...row, b[i]]);
+  for (let c = 0; c < 3; c++) {
+    let piv = c; for (let r = c + 1; r < 3; r++) if (Math.abs(M[r][c]) > Math.abs(M[piv][c])) piv = r;
+    [M[c], M[piv]] = [M[piv], M[c]];
+    if (Math.abs(M[c][c]) < 1e-9) return null;
+    for (let r = 0; r < 3; r++) if (r !== c) { const f = M[r][c] / M[c][c]; for (let k = c; k < 4; k++) M[r][k] -= f * M[c][k]; }
+  }
+  return M.map((row, i) => row[3] / row[i]);
+}
+function fitModel(matches, ownRating) {
+  const rows = matches.map(m => ({ x1: m.opponent.skillRating && ownRating ? (m.opponent.skillRating - ownRating) / 100 : 0, x2: m.opponentPlayers.length - m.players.length, y: m.goalDiff }));
+  let coef = null, fitted = false;
+  if (rows.length >= 10) {
+    const A = [[0, 0, 0], [0, 0, 0], [0, 0, 0]], b = [0, 0, 0];
+    for (const r of rows) { const x = [1, r.x1, r.x2]; for (let i = 0; i < 3; i++) { b[i] += x[i] * r.y; for (let k = 0; k < 3; k++) A[i][k] += x[i] * x[k]; } }
+    coef = solve3(A, b);
+    // Alleen accepteren als de richting klopt (sterkere tegenstander of meer mensen = lager saldo).
+    if (coef && coef[1] <= 0 && coef[2] <= 0 && Math.abs(coef[1]) < 5 && Math.abs(coef[2]) < 3) fitted = true;
+    else {
+      // Mensen-effect vast op −0,4; alleen intercept en skill-effect schatten.
+      const C2 = -0.4, ys = rows.map(r => r.y - C2 * r.x2), xs = rows.map(r => r.x1);
+      const n = rows.length, mx = avg(xs), my = avg(ys);
+      let sxy = 0, sxx = 0; for (let i = 0; i < n; i++) { sxy += (xs[i] - mx) * (ys[i] - my); sxx += (xs[i] - mx) ** 2; }
+      const b1 = sxx ? sxy / sxx : 0;
+      coef = b1 <= 0 && b1 > -5 ? [my - b1 * mx, b1, C2] : null;
+      fitted = !!coef;
+    }
+  }
+  if (!coef) coef = [0, -0.6, -0.4];
+  const predict = m => coef[0] + coef[1] * (m.opponent.skillRating && ownRating ? (m.opponent.skillRating - ownRating) / 100 : 0) + coef[2] * (m.opponentPlayers.length - m.players.length);
+  return { coef, fitted, n: rows.length, predict };
 }
 
 function filtered() {
@@ -208,19 +253,46 @@ function render() {
   barChart(resEl, ms.map((m, i) => ({ label: i === 0 || ms[i - 1].session !== m.session ? fmtDate(m.ts) : '', value: m.goalDiff, color: resultColor(m.result), tip: matchTip(m) })), { yMin: -1, zeroLine: true });
   if (ms.length) legend(resEl, [{ label: 'Gewonnen', color: 'var(--pos)' }, { label: 'Gelijk', color: 'var(--neutral)' }, { label: 'Verloren', color: 'var(--neg)' }]);
 
+  // Prestatie tegenover verwachting
+  const mdl = DATA.model, c = mdl.coef;
+  $('#model-hint').textContent = `Verwacht doelsaldo = ${c[0].toFixed(2)} ${c[1] < 0 ? '−' : '+'} ${Math.abs(c[1]).toFixed(2)} per 100 punten skill rating boven jullie (${DATA.snapshot?.skillRating ?? '?'}) ${c[2] < 0 ? '−' : '+'} ${Math.abs(c[2]).toFixed(2)} per extra mens bij de tegenstander. ${mdl.fitted ? `Geschat op ${mdl.n} wedstrijden.` : `Standaardwaarden; vanaf 10 wedstrijden met skill rating wordt het model op jullie eigen data geschat.`} De balk is wat jullie méér of minder deden dan verwacht.`;
+  barChart($('#chart-residual'), ms.map((m, i) => ({ label: i === 0 || ms[i - 1].session !== m.session ? fmtDate(m.ts) : '', value: +m.resid.toFixed(2), color: m.resid >= 0 ? 'var(--pos)' : 'var(--neg)', tip: `${matchTip(m)}<br>verwacht ${m.expected > 0 ? '+' : ''}${m.expected.toFixed(1)}, werkelijk ${m.goalDiff > 0 ? '+' : ''}${m.goalDiff}` })), { yMin: -1, zeroLine: true });
+  if (ms.length) legend($('#chart-residual'), [{ label: 'Beter dan verwacht', color: 'var(--pos)' }, { label: 'Slechter dan verwacht', color: 'var(--neg)' }]);
+
   // Met / zonder
   const ww = players.map(name => {
     const withP = ms.filter(m => m.players.some(p => p.name === name)), without = ms.filter(m => !m.players.some(p => p.name === name));
     const a = summarize(withP), b = summarize(without);
     const ratings = withP.map(m => m.players.find(p => p.name === name).rating).filter(r => r !== null);
-    return { name, n: a.n, nWithout: b.n, withPct: a.winPct, withoutPct: b.winPct, delta: a.winPct !== null && b.winPct !== null ? a.winPct - b.winPct : null, gf: a.gfAvg, ga: a.gaAvg, rating: ratings.length ? +(ratings.reduce((x, y) => x + y, 0) / ratings.length).toFixed(2) : null };
-  }).sort((x, y) => (y.delta ?? -999) - (x.delta ?? -999));
+    return { name, n: a.n, nWithout: b.n, withPpg: a.ppg, withoutPpg: b.ppg, delta: a.ppg !== null && b.ppg !== null ? +(a.ppg - b.ppg).toFixed(2) : null, residWith: a.resid, residWithout: b.resid, rating: avg(ratings) };
+  }).sort((x, y) => (y.residWith ?? -99) - (x.residWith ?? -99));
   table($('#tbl-with-without'), [
-    { label: 'Speler', key: 'name' }, { label: 'Met', num: true, render: r => `${fmtPct(r.withPct)} <small>(${r.n})</small>` },
-    { label: 'Zonder', num: true, render: r => `${fmtPct(r.withoutPct)} <small>(${r.nWithout})</small>` },
-    { label: 'Verschil', num: true, render: r => deltaCell(r.delta) },
-    { label: 'Voor–tegen', num: true, render: r => `${r.gf ?? '–'} – ${r.ga ?? '–'}` }, { label: 'Rating', num: true, render: r => r.rating ?? '–' },
-  ], ww, { rowClass: r => (r.n < 3 || r.nWithout < 3) ? 'low' : '' });
+    { label: 'Speler', key: 'name' },
+    { label: 'Met: punten/wed.', num: true, render: r => `${r.withPpg ?? '–'} <small>(${r.n})</small>` },
+    { label: 'Zonder', num: true, render: r => `${r.withoutPpg ?? '–'} <small>(${r.nWithout})</small>` },
+    { label: 'Verschil', num: true, render: r => deltaCell(r.delta, '', 2) },
+    { label: 'Tov verwachting met', num: true, render: r => residCell(r.residWith) },
+    { label: 'Zonder', num: true, render: r => residCell(r.residWithout) },
+    { label: 'Rating', num: true, render: r => r.rating === null ? '–' : r.rating.toFixed(2) },
+  ], ww, { rowClass: r => (r.n < 5 || r.nWithout < 5) ? 'low' : '' });
+
+  // Synergie: tweetallen
+  const pairs = [];
+  for (let a = 0; a < players.length; a++) for (let b = a + 1; b < players.length; b++) {
+    const A = players[a], B = players[b];
+    const has = (m, n) => m.players.some(p => p.name === n);
+    const both = ms.filter(m => has(m, A) && has(m, B)), one = ms.filter(m => has(m, A) !== has(m, B));
+    if (both.length < 3) continue;
+    const sb = summarize(both), so = summarize(one);
+    pairs.push({ pair: `${A} + ${B}`, nBoth: sb.n, ppgBoth: sb.ppg, residBoth: sb.resid, nOne: so.n, residOne: so.resid, synergy: sb.resid !== null && so.resid !== null ? +(sb.resid - so.resid).toFixed(2) : null });
+  }
+  pairs.sort((x, y) => (y.synergy ?? -99) - (x.synergy ?? -99));
+  table($('#tbl-pairs'), [
+    { label: 'Tweetal', key: 'pair' }, { label: 'Samen', num: true, render: r => `${r.ppgBoth} pt <small>(${r.nBoth})</small>` },
+    { label: 'Tov verwachting samen', num: true, render: r => residCell(r.residBoth) },
+    { label: 'Apart', num: true, render: r => `${residCell(r.residOne)} <small>(${r.nOne})</small>` },
+    { label: 'Synergie', num: true, render: r => residCell(r.synergy) },
+  ], pairs, { empty: 'Nog geen tweetal dat zowel samen als apart speelde.', rowClass: r => (r.nBoth < 5 || r.nOne < 3) ? 'low' : '' });
 
   // Opstellingen
   const groups = new Map();
@@ -228,14 +300,13 @@ function render() {
   const lineups = [...groups].map(([lineup, list]) => ({ lineup, ...summarize(list) })).filter(l => l.n >= 2).sort((a, b) => b.n - a.n || b.winPct - a.winPct);
   table($('#tbl-lineups'), [
     { label: 'Opstelling', wrap: true, render: r => esc(r.lineup) }, { label: 'N', num: true, key: 'n' },
-    { label: 'Winst', num: true, render: r => `<span class="bar" style="width:${r.winPct * 0.6}px"></span>${fmtPct(r.winPct)}` },
-    { label: 'W-G-V', num: true, render: r => `${r.W}-${r.D}-${r.L}` }, { label: 'Voor–tegen', num: true, render: r => `${r.gfAvg} – ${r.gaAvg}` },
+    { label: 'Punten/wed.', num: true, render: r => `<span class="bar" style="width:${r.ppg * 20}px"></span>${r.ppg}` },
+    { label: 'W-G-V', num: true, render: r => `${r.W}-${r.D}-${r.L}` }, { label: 'Tov verwachting', num: true, render: r => residCell(r.resid) }, { label: 'Voor–tegen', num: true, render: r => `${r.gfAvg} – ${r.gaAvg}` },
   ], lineups, { empty: 'Nog geen opstelling met 2 of meer wedstrijden.' });
 
   // Betrokkenheid: aandeel van een speler in de balacties van het team
   const actions = p => (p.passAttempts || 0) + (p.shots || 0) + (p.tackleAttempts || 0);
   const invRows = ms.map(m => { const total = m.players.reduce((a, p) => a + actions(p), 0); return { m, total, byName: Object.fromEntries(m.players.map(p => [p.name, { acts: actions(p), share: total ? actions(p) / total : null, passes: p.passAttempts || 0 }])) }; });
-  const avg = xs => xs.length ? xs.reduce((x, y) => x + y, 0) / xs.length : null;
   const invTable = players.map(name => {
     const rows = invRows.filter(r => r.byName[name]?.share !== null && r.byName[name] !== undefined);
     if (!rows.length) return null;
@@ -296,7 +367,7 @@ function render() {
   const positions = [...posMap.values()].map(e => ({ ...e, ...summarize(e.list), rating: e.ratings.length ? +(e.ratings.reduce((a, b) => a + b, 0) / e.ratings.length).toFixed(2) : null })).sort((a, b) => a.name.localeCompare(b.name) || b.n - a.n);
   table($('#tbl-positions'), [
     { label: 'Speler', key: 'name' }, { label: 'Positie', render: r => POS_NL[r.pos] || r.pos }, { label: 'N', num: true, key: 'n' },
-    { label: 'Winst', num: true, render: r => fmtPct(r.winPct) }, { label: 'Rating', num: true, render: r => r.rating ?? '–' }, { label: 'G + A', num: true, render: r => `${r.goals} + ${r.assists}` },
+    { label: 'Punten/wed.', num: true, key: 'ppg' }, { label: 'Tov verwachting', num: true, render: r => residCell(r.resid) }, { label: 'Rating', num: true, render: r => r.rating ?? '–' }, { label: 'G + A', num: true, render: r => `${r.goals} + ${r.assists}` },
   ], positions, { rowClass: r => r.n < 3 ? 'low' : '' });
 
   // Tegenstanders
@@ -307,6 +378,62 @@ function render() {
     { label: 'Skill rating', key: 'label' }, { label: 'N', num: true, key: 'n' }, { label: 'Winst', num: true, render: r => fmtPct(r.winPct) },
     { label: 'Punten/wed.', num: true, key: 'ppg' }, { label: 'Voor–tegen', num: true, render: r => `${r.gfAvg} – ${r.gaAvg}` },
   ], buckets);
+
+  // Verdedigend lek
+  const defEl = $('#chart-defence');
+  barChart(defEl, ms.map((m, i) => ({ label: i === 0 || ms[i - 1].session !== m.session ? fmtDate(m.ts) : '', value: oppShots(m), color: resultColor(m.result), tip: `${matchTip(m)}<br>${oppShots(m)} schoten tegen, ${m.goalsAgainst} goals tegen (${fmtPct(pct(m.goalsAgainst, oppShots(m)))})` })), { height: 200 });
+  if (ms.length) legend(defEl, [{ label: 'Gewonnen', color: 'var(--pos)' }, { label: 'Gelijk', color: 'var(--neutral)' }, { label: 'Verloren', color: 'var(--neg)' }]);
+  const teamSide = list => { const n = list.length; if (!n) return null; const own = k => list.reduce((a, m) => a + m.players.reduce((x, p) => x + (p[k] || 0), 0), 0); const opp = k => list.reduce((a, m) => a + m.opponentPlayers.reduce((x, p) => x + (p[k] || 0), 0), 0);
+    return { n, shotsAg: (opp('shots') / n).toFixed(1), ga: (list.reduce((a, m) => a + m.goalsAgainst, 0) / n).toFixed(1), convAg: fmtPct(pct(list.reduce((a, m) => a + m.goalsAgainst, 0), opp('shots'))), tackles: `${(own('tacklesMade') / n).toFixed(1)} / ${(own('tackleAttempts') / n).toFixed(1)}`, tacklePct: fmtPct(pct(own('tacklesMade'), own('tackleAttempts'))), shotsFor: (own('shots') / n).toFixed(1) }; };
+  const dW = teamSide(ms.filter(m => m.result === 'W')), dR = teamSide(ms.filter(m => m.result !== 'W'));
+  const defRows = [['Wedstrijden', 'n'], ['Schoten tegen', 'shotsAg'], ['Goals tegen', 'ga'], ['Conversie tegenstander', 'convAg'], ['Tackles geslaagd / pogingen', 'tackles'], ['Tackle-percentage', 'tacklePct'], ['Eigen schoten', 'shotsFor']].map(([label, k]) => ({ label, w: dW?.[k] ?? '–', r: dR?.[k] ?? '–' }));
+  table($('#tbl-defence-team'), [{ label: '', key: 'label' }, { label: 'Winst', num: true, key: 'w' }, { label: 'Gelijk/verlies', num: true, key: 'r' }], defRows);
+  const defPlayers = players.map(name => {
+    const withP = ms.filter(m => m.players.some(p => p.name === name)), without = ms.filter(m => !m.players.some(p => p.name === name));
+    if (!withP.length) return null;
+    const rows = withP.map(m => ({ p: m.players.find(p => p.name === name), m }));
+    const att = rows.reduce((a, r) => a + (r.p.tackleAttempts || 0), 0), made = rows.reduce((a, r) => a + (r.p.tacklesMade || 0), 0);
+    const missed = rows.map(r => (r.p.tackleAttempts || 0) - (r.p.tacklesMade || 0));
+    const defShare = pct(rows.filter(r => r.p.pos === 'defender').length, rows.length);
+    return { name, n: rows.length, attPer: (att / rows.length).toFixed(1), tacklePct: pct(made, att), missedPer: (missed.reduce((a, b) => a + b, 0) / rows.length).toFixed(1), corrShots: corr(missed, rows.map(r => oppShots(r.m))), corrGa: corr(missed, rows.map(r => r.m.goalsAgainst)), shotsAgWith: (withP.reduce((a, m) => a + oppShots(m), 0) / withP.length).toFixed(1), shotsAgWithout: without.length ? (without.reduce((a, m) => a + oppShots(m), 0) / without.length).toFixed(1) : null, defShare };
+  }).filter(Boolean).sort((x, y) => (y.corrShots ?? -9) - (x.corrShots ?? -9));
+  table($('#tbl-defence'), [
+    { label: 'Speler', key: 'name' }, { label: 'N', num: true, key: 'n' }, { label: 'Als verdediger', num: true, render: r => fmtPct(r.defShare) },
+    { label: 'Tackle-pogingen/wed.', num: true, key: 'attPer' }, { label: 'Geslaagd', num: true, render: r => fmtPct(r.tacklePct) }, { label: 'Gemist/wed.', num: true, key: 'missedPer' },
+    { label: 'Corr. gemist ↔ schoten tegen', num: true, render: r => corrCell(r.corrShots) },
+    { label: 'Corr. gemist ↔ goals tegen', num: true, render: r => corrCell(r.corrGa) },
+    { label: 'Schoten tegen met / zonder', num: true, render: r => `${r.shotsAgWith} / ${r.shotsAgWithout ?? '–'}` },
+  ], defPlayers, { rowClass: r => r.n < 5 ? 'low' : '' });
+
+  // Aanval en rolverdeling
+  const attack = players.map(name => {
+    const rows = ms.map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p);
+    if (!rows.length) return null;
+    const own = k => rows.reduce((a, r) => a + (r.p[k] || 0), 0), team = k => rows.reduce((a, r) => a + r.m.players.reduce((x, p) => x + (p[k] || 0), 0), 0);
+    const mins = rows.reduce((a, r) => a + (r.p.secondsPlayed || 0), 0) / 60, per90 = v => mins ? (90 * v / mins).toFixed(2) : '–';
+    return { name, n: rows.length, minPer: (mins / rows.length).toFixed(0), shotShare: pct(own('shots'), team('shots')), goalShare: pct(own('goals'), team('goals')), assistShare: pct(own('assists'), team('assists')), conv: pct(own('goals'), own('shots')), shots90: per90(own('shots')), ga90: per90(own('goals') + own('assists')), goals: own('goals'), assists: own('assists') };
+  }).filter(Boolean).sort((x, y) => parseFloat(y.ga90) - parseFloat(x.ga90));
+  table($('#tbl-attack'), [
+    { label: 'Speler', key: 'name' }, { label: 'N', num: true, key: 'n' }, { label: 'Min/wed.', num: true, key: 'minPer' },
+    { label: 'Aandeel schoten', num: true, render: r => fmtPct(r.shotShare) }, { label: 'Aandeel goals', num: true, render: r => fmtPct(r.goalShare) }, { label: 'Aandeel assists', num: true, render: r => fmtPct(r.assistShare) },
+    { label: 'Conversie', num: true, render: r => fmtPct(r.conv) }, { label: 'Schoten per 90', num: true, key: 'shots90' }, { label: 'G + A per 90', num: true, key: 'ga90' }, { label: 'G + A', num: true, render: r => `${r.goals} + ${r.assists}` },
+  ], attack, { rowClass: r => r.n < 5 ? 'low' : '' });
+
+  // Tegenstanderscontext: mensen, keeper, opstelling, archetypes
+  const groupTable = (elId, keyFn, labelFn = k => k, sortFn) => {
+    const g = new Map();
+    for (const m of ms) { const k = keyFn(m); if (k === null || k === undefined) continue; if (!g.has(k)) g.set(k, []); g.get(k).push(m); }
+    const rows = [...g].map(([k, list]) => ({ key: k, label: labelFn(k), ...summarize(list) })).sort(sortFn || ((a, b) => (typeof a.key === 'number' ? a.key - b.key : b.n - a.n)));
+    table($(elId), [{ label: '', key: 'label' }, { label: 'N', num: true, key: 'n' }, { label: 'W-G-V', num: true, render: r => `${r.W}-${r.D}-${r.L}` }, { label: 'Punten/wed.', num: true, key: 'ppg' }, { label: 'Tov verwachting', num: true, render: r => residCell(r.resid) }, { label: 'Voor–tegen', num: true, render: r => `${r.gfAvg} – ${r.gaAvg}` }], rows, { rowClass: r => r.n < 4 ? 'low' : '' });
+  };
+  groupTable('#tbl-opp-humans', m => m.opponentPlayers.length, k => `${k} mensen`);
+  groupTable('#tbl-opp-gk', m => hasHumanGk(m) ? 1 : 0, k => k ? 'Menselijke keeper' : 'AI-keeper');
+  groupTable('#tbl-opp-shape', m => m.opponentPlayers.length ? shapeOf(m) : null);
+  const arch = new Map();
+  for (const m of ms) for (const id of new Set(m.opponentPlayers.map(p => p.archetypeId).filter(v => v !== null))) { if (!arch.has(id)) arch.set(id, { id, matches: [], count: 0 }); arch.get(id).matches.push(m); }
+  for (const m of ms) for (const p of m.opponentPlayers) if (p.archetypeId !== null && arch.has(p.archetypeId)) arch.get(p.archetypeId).count++;
+  const archRows = [...arch.values()].map(a => ({ label: `Archetype ${a.id}`, count: a.count, ...summarize(a.matches) })).sort((x, y) => y.count - x.count);
+  table($('#tbl-opp-archetypes'), [{ label: '', key: 'label' }, { label: 'Spelers gezien', num: true, key: 'count' }, { label: 'Wedstrijden', num: true, key: 'n' }, { label: 'Punten/wed.', num: true, key: 'ppg' }, { label: 'Tov verwachting', num: true, render: r => residCell(r.resid) }, { label: 'Goals tegen', num: true, key: 'gaAvg' }], archRows, { rowClass: r => r.n < 4 ? 'low' : '' });
 
   // Sessie, weekdag, uur
   const bucketChart = (elId, keyFn, labels) => {
@@ -357,7 +484,7 @@ function render() {
     { label: 'Datum', render: r => fmtDateTime(r.ts) }, { label: 'Type', render: r => r.matchType === 'playoffMatch' ? 'playoff' : 'league' },
     { label: 'Tegenstander', render: r => esc(r.opponent.name) }, { label: 'Score', num: true, render: r => `${r.goals}–${r.goalsAgainst}` },
     { label: 'Uitslag', render: r => `<span class="res-${r.result}">${r.result}</span>` }, { label: 'Skill tegenst.', num: true, render: r => r.opponent.skillRating ?? '–' },
-    { label: 'Mensen tegenst.', num: true, render: r => r.opponent.humanPlayers ?? '–' }, { label: 'Opstelling', render: r => esc(r.lineup) },
+    { label: 'Mensen tegenst.', num: true, render: r => r.opponentPlayers.length }, { label: 'Vorm tegenst.', render: r => r.opponentPlayers.length ? shapeOf(r) : '–' }, { label: 'Tov verw.', num: true, render: r => residCell(r.resid) }, { label: 'Opstelling', render: r => esc(r.lineup) },
   ], [...ms].reverse());
 }
 
@@ -365,6 +492,8 @@ async function load() {
   const res = await fetch('/api/data');
   DATA = await res.json();
   DATA.matches = enrich(DATA.matches);
+  DATA.model = fitModel(DATA.matches, DATA.snapshot?.skillRating);
+  for (const m of DATA.matches) { m.expected = DATA.model.predict(m); m.resid = m.goalDiff - m.expected; }
   const counts = new Map();
   for (const m of DATA.matches) for (const p of m.players) counts.set(p.name, (counts.get(p.name) || 0) + 1);
   [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).forEach(([name], i) => playerSlot.set(name, i));
