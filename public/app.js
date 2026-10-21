@@ -92,17 +92,17 @@ function barChart(container, items, { height = 220, yMin = 0, yMax, fmt = v => v
   });
 }
 
-function scatter(container, points, { height = 240, xLabel, yLabel, xPad = 50, xFmt = v => v } = {}) {
+function scatter(container, points, { height = 240, xLabel, yLabel, xPad = 50, xFmt = v => v, yZero = true } = {}) {
   if (!points.length) { container.innerHTML = '<p class="empty">Nog geen tegenstanders met skill rating.</p>'; return; }
   const width = Math.max(320, Math.min(1100, container.clientWidth || 520));
   const { svg, inner } = frame(container, width, height, { l: 40, t: 12, r: 12, b: 36 });
   const xs = points.map(p => p.x), ys = points.map(p => p.y);
-  const xt = niceTicks(Math.min(...xs) - xPad, Math.max(...xs) + xPad, 5), yt = niceTicks(Math.min(0, ...ys) - 1, Math.max(0, ...ys) + 1, 4);
+  const xt = niceTicks(Math.min(...xs) - xPad, Math.max(...xs) + xPad, 5), yt = yZero ? niceTicks(Math.min(0, ...ys) - 1, Math.max(0, ...ys) + 1, 4) : niceTicks(Math.min(...ys) - 0.5, Math.max(...ys) + 0.5, 4);
   const x0 = xt[0], x1 = xt[xt.length - 1], y0 = yt[0], y1 = yt[yt.length - 1];
   const sx = v => inner.x + (v - x0) / (x1 - x0) * inner.w, sy = v => inner.y + inner.h - (v - y0) / (y1 - y0) * inner.h;
   yAxis(svg, inner, sy, yt);
   for (const t of xt) text(svg, sx(t), inner.y + inner.h + 18, xFmt(t), { class: 'tick', 'text-anchor': 'middle' });
-  el('line', { x1: inner.x, x2: inner.x + inner.w, y1: sy(0), y2: sy(0), stroke: 'var(--axis)' }, svg);
+  if (yZero) el('line', { x1: inner.x, x2: inner.x + inner.w, y1: sy(0), y2: sy(0), stroke: 'var(--axis)' }, svg);
   if (xLabel) text(svg, inner.x + inner.w, inner.y + inner.h + 32, xLabel, { class: 'tick', 'text-anchor': 'end' });
   if (yLabel) text(svg, inner.x, inner.y - 2, yLabel, { class: 'tick' });
   for (const p of points) {
@@ -252,6 +252,33 @@ function render() {
   const who = invSel.value;
   const invPts = invRows.filter(r => r.byName[who]?.share !== null && r.byName[who] !== undefined).map(r => ({ x: Math.round(r.byName[who].share * 1000) / 10, y: r.m.goalDiff, color: resultColor(r.m.result), tip: `<b>${esc(r.m.opponent.name)} ${r.m.goals}–${r.m.goalsAgainst} (${r.m.result})</b>${esc(who)}: ${r.byName[who].acts} balacties van ${r.total} (${Math.round(r.byName[who].share * 100)}%)<br>${fmtDateTime(r.m.ts)}` }));
   scatter($('#chart-involvement'), invPts, { xLabel: `aandeel balacties ${who}`, yLabel: 'doelsaldo', xPad: 2, xFmt: v => v + '%' });
+  const qualPts = invRows.filter(r => r.byName[who]).map(r => { const p = r.m.players.find(p => p.name === who); return { x: p.passAttempts || 0, y: p.rating ?? 0, color: resultColor(r.m.result), tip: `<b>${esc(r.m.opponent.name)} ${r.m.goals}–${r.m.goalsAgainst} (${r.m.result})</b>${esc(who)}: ${p.passAttempts} passpogingen (${fmtPct(pct(p.passesMade, p.passAttempts))} raak), ${p.goals} goals, ${p.assists} assists, rating ${p.rating}<br>${fmtDateTime(r.m.ts)}` }; });
+  scatter($('#chart-quality'), qualPts, { xLabel: `passpogingen ${who}`, yLabel: 'rating', xPad: 2, yZero: false });
+  legend($('#chart-quality'), [{ label: 'Gewonnen', color: 'var(--pos)' }, { label: 'Gelijk', color: 'var(--neutral)' }, { label: 'Verloren', color: 'var(--neg)' }]);
+
+  // Kwaliteit versus kwantiteit per speler, gesplitst op resultaat
+  const splitCell = (w, r, fmt = v => v) => w === null && r === null ? '–' : `<span class="split"><span class="res-W">${fmt(w)}</span> <small>/</small> <span class="res-L">${fmt(r)}</span></span>`;
+  const qualRows = players.map(name => {
+    const rows = ms.map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p);
+    if (!rows.length) return null;
+    const side = list => {
+      const n = list.length, sum = k => list.reduce((a, r) => a + (r.p[k] || 0), 0);
+      const ratings = list.map(r => r.p.rating).filter(v => v !== null);
+      return { n, passes: n ? sum('passAttempts') / n : null, passPct: pct(sum('passesMade'), sum('passAttempts')), ga: n ? (sum('goals') + sum('assists')) / n : null, rating: avg(ratings), perGA: (sum('goals') + sum('assists')) ? sum('passAttempts') / (sum('goals') + sum('assists')) : null };
+    };
+    return { name, n: rows.length, w: side(rows.filter(r => r.m.result === 'W')), r: side(rows.filter(r => r.m.result !== 'W')) };
+  }).filter(Boolean).sort((x, y) => (y.w.rating ?? 0) - (x.w.rating ?? 0));
+  const f1 = v => v === null ? '–' : (+v).toFixed(1), f2 = v => v === null ? '–' : (+v).toFixed(2);
+  table($('#tbl-quality'), [
+    { label: 'Speler', key: 'name' }, { label: 'N (W / GV)', num: true, render: r => `${r.n} <small>(${r.w.n} / ${r.r.n})</small>` },
+    { label: 'Passpogingen', num: true, render: r => splitCell(r.w.passes, r.r.passes, f1) },
+    { label: 'Pass %', num: true, render: r => splitCell(r.w.passPct, r.r.passPct, fmtPct) },
+    { label: 'G + A per wedstrijd', num: true, render: r => splitCell(r.w.ga, r.r.ga, f2) },
+    { label: 'Passes per G + A', num: true, render: r => splitCell(r.w.perGA, r.r.perGA, f1) },
+    { label: 'Rating', num: true, render: r => splitCell(r.w.rating, r.r.rating, f2) },
+  ], qualRows, { rowClass: r => r.n < 6 ? 'low' : '' });
+  $('#tbl-quality').insertAdjacentHTML('afterbegin', '<div class="legend"><span style="--c:var(--pos)">bij winst</span><span style="--c:var(--neg)">bij gelijk/verlies</span></div>');
+
   table($('#tbl-involvement'), [
     { label: 'Speler', key: 'name' }, { label: 'N', num: true, key: 'n' },
     { label: 'Aandeel bij winst', num: true, render: r => r.shareW === null ? '–' : `${Math.round(r.shareW * 100)}%` },
@@ -314,6 +341,16 @@ function render() {
     { label: 'Pass %', num: true, render: r => fmtPct(pct(r.passM, r.passA)) }, { label: 'Tackle %', num: true, render: r => fmtPct(pct(r.tackM, r.tackA)) },
     { label: 'Rating', num: true, render: r => r.rating ?? '–' }, { label: 'MOTM', num: true, key: 'mom' }, { label: 'Rood', num: true, key: 'reds' },
   ], totals);
+
+  // Totalen volgens EA over alle wedstrijden (ook die van vóór de verzamelaar)
+  table($('#tbl-totals'), [
+    { label: 'Speler', key: 'name' }, { label: 'Pro', render: r => `${esc(r.proName || '')} <small>(${r.proOverall ?? '–'})</small>` },
+    { label: 'Wedstrijden', num: true, key: 'gamesPlayed' }, { label: 'Winst', num: true, render: r => fmtPct(r.winRate) },
+    { label: 'Goals', num: true, key: 'goals' }, { label: 'Assists', num: true, key: 'assists' },
+    { label: 'G + A per wedstrijd', num: true, render: r => r.gamesPlayed ? ((r.goals + r.assists) / r.gamesPlayed).toFixed(2) : '–' },
+    { label: 'Rating', num: true, key: 'ratingAve' }, { label: 'MOTM', num: true, key: 'mom' },
+    { label: 'Pass %', num: true, render: r => fmtPct(r.passSuccessRate) }, { label: 'Schot %', num: true, render: r => fmtPct(r.shotSuccessRate) }, { label: 'Tackle %', num: true, render: r => fmtPct(r.tackleSuccessRate) },
+  ], [...DATA.members].sort((a, b) => b.gamesPlayed - a.gamesPlayed), { empty: 'Nog geen ledensnapshot opgehaald.' });
 
   // Alle wedstrijden
   table($('#tbl-matches'), [

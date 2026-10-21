@@ -76,3 +76,7 @@ td .bar { display: inline-block; height: 8px; border-radius: 4px; background: va
 .empty { color: var(--muted); font-size: 13px; padding: 12px 0; }
 .res-W { color: var(--pos); font-weight: 600; } .res-L { color: var(--neg); font-weight: 600; } .res-D { color: var(--muted); font-weight: 600; }
 @media (max-width: 600px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } h1 { font-size: 22px; } }
+.chart-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 12px; }
+.chart-pair h3 { margin: 0 0 4px; font-size: 13px; font-weight: 500; color: var(--ink-2); }
+td.split { white-space: nowrap; }
+td.split small { color: var(--muted); }

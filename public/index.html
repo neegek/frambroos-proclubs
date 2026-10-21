@@ -61,8 +61,23 @@
       </div>
       <label class="filter">Speler <select id="inv-player"></select></label>
     </div>
-    <div id="chart-involvement"></div>
+    <div class="chart-pair">
+      <div>
+        <h3>Aandeel balacties tegenover doelsaldo</h3>
+        <div id="chart-involvement"></div>
+      </div>
+      <div>
+        <h3>Passpogingen tegenover rating</h3>
+        <div id="chart-quality"></div>
+      </div>
+    </div>
     <div id="tbl-involvement"></div>
+  </section>
+
+  <section class="card">
+    <h2>Kwaliteit versus kwantiteit</h2>
+    <p class="hint">Per speler: hoeveel je aan de bal bent (passpogingen) tegenover wat het oplevert (nauwkeurigheid, goals plus assists, rating), gesplitst op winst en gelijk/verlies.</p>
+    <div id="tbl-quality"></div>
   </section>
 
   <div class="grid-2">
@@ -107,6 +122,12 @@
     <h2>Afwerking en opbouw</h2>
     <p class="hint">Totalen in de gekozen periode. Schoten per goal: lager is beter.</p>
     <div id="tbl-players"></div>
+  </section>
+
+  <section class="card">
+    <h2>Totalen volgens EA</h2>
+    <p class="hint">Over álle wedstrijden van de club, ook die van vóór de verzamelaar. EA bewaart alleen deze totalen, geen oude wedstrijden; de periode- en typefilters gelden hier dus niet.</p>
+    <div id="tbl-totals"></div>
   </section>
 
   <section class="card">
