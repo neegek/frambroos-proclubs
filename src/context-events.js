@@ -19,7 +19,7 @@ for (const { match_id, raw } of db.prepare('SELECT match_id, raw FROM matches').
     const club = m.clubs[cid];
     for (const p of Object.values(m.players?.[cid] || {})) {
       const ev = fullEventString(p);
-      if (!ev) continue;
+      if (!ev || num(p.secondsPlayed) < 60) continue; // niet gespeeld
       const d = decodeEvents(ev);
       rows.push({
         match_id, cid, own: cid === CLUB, name: p.playername, pos: p.pos, minutes: num(p.secondsPlayed) / 60,
