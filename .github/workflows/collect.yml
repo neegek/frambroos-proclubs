@@ -22,8 +22,10 @@ jobs:
         with:
           node-version: 24
       - name: Verzamel
+        id: collect
         run: node src/collect.js
-      - name: Commit database als er iets veranderd is
+      - name: Commit database als er iets nieuws is
+        if: steps.collect.outputs.changed == 'true'
         run: |
           git config user.name "frambroos-bot"
           git config user.email "frambroos-bot@users.noreply.github.com"

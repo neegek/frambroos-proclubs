@@ -92,16 +92,16 @@ function barChart(container, items, { height = 220, yMin = 0, yMax, fmt = v => v
   });
 }
 
-function scatter(container, points, { height = 240, xLabel, yLabel } = {}) {
+function scatter(container, points, { height = 240, xLabel, yLabel, xPad = 50, xFmt = v => v } = {}) {
   if (!points.length) { container.innerHTML = '<p class="empty">Nog geen tegenstanders met skill rating.</p>'; return; }
   const width = Math.max(320, Math.min(1100, container.clientWidth || 520));
   const { svg, inner } = frame(container, width, height, { l: 40, t: 12, r: 12, b: 36 });
   const xs = points.map(p => p.x), ys = points.map(p => p.y);
-  const xt = niceTicks(Math.min(...xs) - 50, Math.max(...xs) + 50, 5), yt = niceTicks(Math.min(0, ...ys) - 1, Math.max(0, ...ys) + 1, 4);
+  const xt = niceTicks(Math.min(...xs) - xPad, Math.max(...xs) + xPad, 5), yt = niceTicks(Math.min(0, ...ys) - 1, Math.max(0, ...ys) + 1, 4);
   const x0 = xt[0], x1 = xt[xt.length - 1], y0 = yt[0], y1 = yt[yt.length - 1];
   const sx = v => inner.x + (v - x0) / (x1 - x0) * inner.w, sy = v => inner.y + inner.h - (v - y0) / (y1 - y0) * inner.h;
   yAxis(svg, inner, sy, yt);
-  for (const t of xt) text(svg, sx(t), inner.y + inner.h + 18, t, { class: 'tick', 'text-anchor': 'middle' });
+  for (const t of xt) text(svg, sx(t), inner.y + inner.h + 18, xFmt(t), { class: 'tick', 'text-anchor': 'middle' });
   el('line', { x1: inner.x, x2: inner.x + inner.w, y1: sy(0), y2: sy(0), stroke: 'var(--axis)' }, svg);
   if (xLabel) text(svg, inner.x + inner.w, inner.y + inner.h + 32, xLabel, { class: 'tick', 'text-anchor': 'end' });
   if (yLabel) text(svg, inner.x, inner.y - 2, yLabel, { class: 'tick' });
@@ -232,6 +232,37 @@ function render() {
     { label: 'W-G-V', num: true, render: r => `${r.W}-${r.D}-${r.L}` }, { label: 'Voor–tegen', num: true, render: r => `${r.gfAvg} – ${r.gaAvg}` },
   ], lineups, { empty: 'Nog geen opstelling met 2 of meer wedstrijden.' });
 
+  // Betrokkenheid: aandeel van een speler in de balacties van het team
+  const actions = p => (p.passAttempts || 0) + (p.shots || 0) + (p.tackleAttempts || 0);
+  const invRows = ms.map(m => { const total = m.players.reduce((a, p) => a + actions(p), 0); return { m, total, byName: Object.fromEntries(m.players.map(p => [p.name, { acts: actions(p), share: total ? actions(p) / total : null, passes: p.passAttempts || 0 }])) }; });
+  const avg = xs => xs.length ? xs.reduce((x, y) => x + y, 0) / xs.length : null;
+  const invTable = players.map(name => {
+    const rows = invRows.filter(r => r.byName[name]?.share !== null && r.byName[name] !== undefined);
+    if (!rows.length) return null;
+    const shares = rows.map(r => r.byName[name].share).sort((x, y) => x - y);
+    const median = shares[Math.floor(shares.length / 2)];
+    const high = rows.filter(r => r.byName[name].share >= median).map(r => r.m), low = rows.filter(r => r.byName[name].share < median).map(r => r.m);
+    const wins = rows.filter(r => r.m.result === 'W'), rest = rows.filter(r => r.m.result !== 'W');
+    const h = summarize(high), l = summarize(low);
+    return { name, n: rows.length, median: Math.round(median * 100), shareW: avg(wins.map(r => r.byName[name].share)), shareR: avg(rest.map(r => r.byName[name].share)),
+      passW: avg(wins.map(r => r.byName[name].passes)), passR: avg(rest.map(r => r.byName[name].passes)), highPct: h.winPct, nHigh: h.n, lowPct: l.winPct, nLow: l.n, delta: h.winPct !== null && l.winPct !== null ? h.winPct - l.winPct : null };
+  }).filter(Boolean).sort((x, y) => (y.delta ?? -999) - (x.delta ?? -999));
+  const invSel = $('#inv-player');
+  if (!invSel.options.length) { for (const name of players) invSel.add(new Option(name, name)); invSel.value = players.includes('Neegek') ? 'Neegek' : players[0]; }
+  const who = invSel.value;
+  const invPts = invRows.filter(r => r.byName[who]?.share !== null && r.byName[who] !== undefined).map(r => ({ x: Math.round(r.byName[who].share * 1000) / 10, y: r.m.goalDiff, color: resultColor(r.m.result), tip: `<b>${esc(r.m.opponent.name)} ${r.m.goals}–${r.m.goalsAgainst} (${r.m.result})</b>${esc(who)}: ${r.byName[who].acts} balacties van ${r.total} (${Math.round(r.byName[who].share * 100)}%)<br>${fmtDateTime(r.m.ts)}` }));
+  scatter($('#chart-involvement'), invPts, { xLabel: `aandeel balacties ${who}`, yLabel: 'doelsaldo', xPad: 2, xFmt: v => v + '%' });
+  table($('#tbl-involvement'), [
+    { label: 'Speler', key: 'name' }, { label: 'N', num: true, key: 'n' },
+    { label: 'Aandeel bij winst', num: true, render: r => r.shareW === null ? '–' : `${Math.round(r.shareW * 100)}%` },
+    { label: 'Aandeel bij gelijk/verlies', num: true, render: r => r.shareR === null ? '–' : `${Math.round(r.shareR * 100)}%` },
+    { label: 'Passes bij winst', num: true, render: r => r.passW === null ? '–' : Math.round(r.passW) },
+    { label: 'Passes bij gelijk/verlies', num: true, render: r => r.passR === null ? '–' : Math.round(r.passR) },
+    { label: 'Winst bij veel bal', num: true, render: r => `${fmtPct(r.highPct)} <small>(${r.nHigh})</small>` },
+    { label: 'Winst bij weinig bal', num: true, render: r => `${fmtPct(r.lowPct)} <small>(${r.nLow})</small>` },
+    { label: 'Verschil', num: true, render: r => deltaCell(r.delta) },
+  ], invTable, { rowClass: r => r.n < 6 ? 'low' : '' });
+
   // Positie per speler
   const posMap = new Map();
   for (const m of ms) for (const p of m.players) { const k = `${p.name}|${p.pos}`; if (!posMap.has(k)) posMap.set(k, { name: p.name, pos: p.pos, list: [], ratings: [], goals: 0, assists: 0 }); const e = posMap.get(k); e.list.push(m); if (p.rating !== null) e.ratings.push(p.rating); e.goals += p.goals || 0; e.assists += p.assists || 0; }
@@ -306,7 +337,7 @@ async function load() {
   render();
 }
 
-for (const id of ['#range', '#type']) $(id).addEventListener('change', render);
+for (const id of ['#range', '#type', '#inv-player']) $(id).addEventListener('change', render);
 addEventListener('resize', () => DATA && render());
 $('#theme').addEventListener('click', () => {
   const root = document.documentElement;

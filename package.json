@@ -10,7 +10,7 @@
   "scripts": {
     "find-club": "node src/find-club.js",
     "collect": "node src/collect.js",
-    "sync": "git remote get-url origin >/dev/null 2>&1 && git pull --ff-only --quiet || true",
+    "sync": "git remote get-url origin >/dev/null 2>&1 && git checkout -q -- data/proclubs.sqlite && git pull --ff-only --quiet || true",
     "predashboard": "npm run --silent sync",
     "dashboard": "node src/server.js",
     "schedule:install": "bash scripts/install-schedule.sh",

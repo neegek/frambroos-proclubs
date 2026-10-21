@@ -9,6 +9,18 @@ EA geeft per club alleen de **laatste 10 wedstrijden** per type (league / playof
 Alles wat ouder is, is weg. Daarom draait `collect.js` elk kwartier en bewaart het nieuwe
 wedstrijden in `data/proclubs.sqlite`. Hoe langer de verzamelaar draait, hoe rijker het dashboard.
 
+## Waar draait de verzamelaar?
+
+**In GitHub Actions** (`.github/workflows/collect.yml`): elk kwartier, ook als je Mac uit staat.
+Nieuwe wedstrijden worden als commit op `main` gezet in `data/proclubs.sqlite`. Dat is de bron
+van waarheid. `npm run dashboard` haalt eerst de nieuwste database op (`npm run sync`, gooit
+lokale wijzigingen aan de database weg) en start dan het dashboard.
+
+De lokale launchd-planner is er ook nog (`npm run schedule:install`), maar gebruik niet beide
+tegelijk: dan loopt je lokale database uit de pas met de repo en weigert `git pull`.
+Let op: GitHub schakelt cron-workflows uit na 60 dagen zonder commits; de databasecommits
+tellen mee, dus zolang jullie spelen blijft hij lopen.
+
 ## Gebruik
 
 Vereist Node 22.5 of nieuwer (gebruikt de ingebouwde SQLite-module; geen `npm install` nodig).
@@ -16,12 +28,12 @@ Vereist Node 22.5 of nieuwer (gebruikt de ingebouwde SQLite-module; geen `npm in
 ```bash
 npm run collect                 # haalt nieuwe wedstrijden op
 npm run dashboard               # dashboard op http://localhost:3737
-npm run schedule:install        # elk kwartier automatisch verzamelen (launchd)
+npm run schedule:install        # lokaal elk kwartier verzamelen (launchd), alleen zonder cloud
 npm run schedule:uninstall      # planner weer weghalen
 npm run find-club -- "Naam"     # club-ID opzoeken voor config.json
 ```
 
-De planner logt naar `data/collect.log`. Draait alleen als de Mac aan is (slaapstand telt niet).
+De lokale planner logt naar `data/collect.log` en draait alleen als de Mac wakker is.
 
 ## Structuur
 

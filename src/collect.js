@@ -2,6 +2,7 @@
 // nieuwe wedstrijden op. Draai dit elk kwartier om een volledige historie op te bouwen.
 import { ea } from './ea.js';
 import { openDb, config } from './db.js';
+import { appendFileSync } from 'node:fs';
 
 const db = openDb();
 const now = () => Math.floor(Date.now() / 1000);
@@ -88,6 +89,7 @@ async function snapshotMembers(force) {
 const startedAt = now();
 q.insRun.run(startedAt);
 let newMatches = 0;
+let changed = false;
 let error = null;
 try {
   const opponents = new Set();
@@ -98,13 +100,14 @@ try {
       db.exec('BEGIN');
       try { storeMatch(match, matchType).forEach(o => opponents.add(o)); db.exec('COMMIT'); newMatches++; }
       catch (e) { db.exec('ROLLBACK'); throw e; }
+      changed = true;
     }
   }
   // Sterkte van nieuwe tegenstanders vastleggen (hooguit 1x per week per club).
-  for (const o of opponents) await snapshotClub(o, 7 * 24 * 3600);
+  for (const o of opponents) if (await snapshotClub(o, 7 * 24 * 3600)) changed = true;
   // Eigen club: nieuw snapshot bij nieuwe wedstrijden, anders hooguit dagelijks.
-  await snapshotClub(clubId, newMatches > 0 ? 0 : 24 * 3600);
-  await snapshotMembers(newMatches > 0);
+  if (await snapshotClub(clubId, newMatches > 0 ? 0 : 24 * 3600)) changed = true;
+  if (await snapshotMembers(newMatches > 0)) changed = true;
 } catch (e) {
   error = e.message;
 }
@@ -113,4 +116,6 @@ const total = db.prepare('SELECT COUNT(*) AS c FROM matches').get().c;
 console.log(`${new Date().toISOString()} ${config.clubName}: ${newMatches} nieuwe wedstrijd(en), ${total} totaal${error ? ` — FOUT: ${error}` : ''}`);
 db.exec('PRAGMA wal_checkpoint(TRUNCATE)');
 db.close();
+// In GitHub Actions: alleen committen als er echt iets nieuws is.
+if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `changed=${changed}\n`);
 if (error) process.exit(1);
