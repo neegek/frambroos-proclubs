@@ -167,6 +167,8 @@ const lineupOf = m => m.players.map(p => p.name).sort().join(' · ');
 const deltaCell = (d, unit = ' pt', digits = 0) => d === null || d === undefined ? '–' : `<span class="${d > 0.005 ? 'delta-pos' : d < -0.005 ? 'delta-neg' : ''}">${d > 0 ? '+' : ''}${(+d).toFixed(digits)}${unit}</span>`;
 const avg = xs => xs.length ? xs.reduce((x, y) => x + y, 0) / xs.length : null;
 const residCell = v => deltaCell(v, '', 2);
+const f1 = v => v === null || v === undefined ? '–' : (+v).toFixed(1), f2 = v => v === null || v === undefined ? '–' : (+v).toFixed(2);
+const splitCell = (w, r, fmt = v => v) => (w === null || w === undefined) && (r === null || r === undefined) ? '–' : `<span class="split"><span class="res-W">${fmt(w)}</span> <small>/</small> <span class="res-L">${fmt(r)}</span></span>`;
 // Correlatie waarbij positief slecht nieuws is (meer gemiste tackles, meer schoten tegen): rood boven 0,3.
 const corrCell = v => v === null || v === undefined ? '–' : `<span class="${v >= 0.3 ? 'delta-neg' : v <= -0.3 ? 'delta-pos' : ''}">${v.toFixed(2)}</span>`;
 const corr = (xs, ys) => { const n = xs.length; if (n < 3) return null; const mx = xs.reduce((a, b) => a + b, 0) / n, my = ys.reduce((a, b) => a + b, 0) / n; let sxy = 0, sx = 0, sy = 0; for (let i = 0; i < n; i++) { sxy += (xs[i] - mx) * (ys[i] - my); sx += (xs[i] - mx) ** 2; sy += (ys[i] - my) ** 2; } return sx && sy ? +(sxy / Math.sqrt(sx * sy)).toFixed(2) : null; };
@@ -305,7 +307,7 @@ function render() {
   ], lineups, { empty: 'Nog geen opstelling met 2 of meer wedstrijden.' });
 
   // Betrokkenheid: aandeel van een speler in de balacties van het team
-  const actions = p => (p.passAttempts || 0) + (p.shots || 0) + (p.tackleAttempts || 0);
+  const actions = p => p.ev ? p.ev.ball_actions : (p.passAttempts || 0) + (p.shots || 0) + (p.tackleAttempts || 0);
   const invRows = ms.map(m => { const total = m.players.reduce((a, p) => a + actions(p), 0); return { m, total, byName: Object.fromEntries(m.players.map(p => [p.name, { acts: actions(p), share: total ? actions(p) / total : null, passes: p.passAttempts || 0 }])) }; });
   const invTable = players.map(name => {
     const rows = invRows.filter(r => r.byName[name]?.share !== null && r.byName[name] !== undefined);
@@ -328,7 +330,6 @@ function render() {
   legend($('#chart-quality'), [{ label: 'Gewonnen', color: 'var(--pos)' }, { label: 'Gelijk', color: 'var(--neutral)' }, { label: 'Verloren', color: 'var(--neg)' }]);
 
   // Kwaliteit versus kwantiteit per speler, gesplitst op resultaat
-  const splitCell = (w, r, fmt = v => v) => w === null && r === null ? '–' : `<span class="split"><span class="res-W">${fmt(w)}</span> <small>/</small> <span class="res-L">${fmt(r)}</span></span>`;
   const qualRows = players.map(name => {
     const rows = ms.map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p);
     if (!rows.length) return null;
@@ -339,7 +340,6 @@ function render() {
     };
     return { name, n: rows.length, w: side(rows.filter(r => r.m.result === 'W')), r: side(rows.filter(r => r.m.result !== 'W')) };
   }).filter(Boolean).sort((x, y) => (y.w.rating ?? 0) - (x.w.rating ?? 0));
-  const f1 = v => v === null ? '–' : (+v).toFixed(1), f2 = v => v === null ? '–' : (+v).toFixed(2);
   table($('#tbl-quality'), [
     { label: 'Speler', key: 'name' }, { label: 'N (W / GV)', num: true, render: r => `${r.n} <small>(${r.w.n} / ${r.r.n})</small>` },
     { label: 'Passpogingen', num: true, render: r => splitCell(r.w.passes, r.r.passes, f1) },
@@ -360,6 +360,26 @@ function render() {
     { label: 'Winst bij weinig bal', num: true, render: r => `${fmtPct(r.lowPct)} <small>(${r.nLow})</small>` },
     { label: 'Verschil', num: true, render: r => deltaCell(r.delta) },
   ], invTable, { rowClass: r => r.n < 6 ? 'low' : '' });
+
+  // Aan de bal per speler (ontcijferde events), bij winst / bij gelijk of verlies
+  const evAvg = (rows, k) => rows.length && rows.every(r => r.p.ev) ? rows.reduce((a, r) => a + (r.p.ev[k] || 0), 0) / rows.length : null;
+  const ballRows = players.map(name => {
+    const rows = ms.map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p && r.p.ev);
+    if (!rows.length) return null;
+    const W = rows.filter(r => r.m.result === 'W'), R = rows.filter(r => r.m.result !== 'W');
+    const both = k => [evAvg(W, k), evAvg(R, k)];
+    const fwdShare = list => { const c = list.reduce((a, r) => a + r.p.ev.passes_completed, 0); return c ? pct(list.reduce((a, r) => a + r.p.ev.passes_completed_forward, 0), c) : null; };
+    return { name, n: rows.length, nW: W.length, nR: R.length, actions: both('ball_actions'), dribbles: both('dribbles_completed'), beaten: both('players_beaten'), through: both('through_balls'), won: both('possession_won'), lost: both('possession_lost'), lostDef: both('possession_lost_def_third'), fwd: [fwdShare(W), fwdShare(R)], noOption: both('fb_no_good_option') };
+  }).filter(Boolean).sort((x, y) => (y.actions[0] ?? 0) - (x.actions[0] ?? 0));
+  const sp = (pair, fmt = f1) => splitCell(pair[0], pair[1], fmt);
+  table($('#tbl-ball'), [
+    { label: 'Speler', key: 'name' }, { label: 'N (W / GV)', num: true, render: r => `${r.n} <small>(${r.nW} / ${r.nR})</small>` },
+    { label: 'Balacties', num: true, render: r => sp(r.actions) }, { label: 'Dribbels', num: true, render: r => sp(r.dribbles) }, { label: 'Uitgespeeld', num: true, render: r => sp(r.beaten) },
+    { label: 'Steekpasses', num: true, render: r => sp(r.through) }, { label: 'Passes vooruit', num: true, render: r => sp(r.fwd, fmtPct) },
+    { label: 'Balwinst', num: true, render: r => sp(r.won) }, { label: 'Balverlies', num: true, render: r => sp(r.lost) }, { label: 'Balverlies eigen helft', num: true, render: r => sp(r.lostDef) },
+    { label: '"Geen goede optie"', num: true, render: r => sp(r.noOption) },
+  ], ballRows, { empty: 'Nog geen ontcijferde events in deze periode.', rowClass: r => (r.nW < 3 || r.nR < 3) ? 'low' : '' });
+  $('#tbl-ball').insertAdjacentHTML('afterbegin', '<div class="legend"><span style="--c:var(--pos)">bij winst</span><span style="--c:var(--neg)">bij gelijk/verlies</span></div>');
 
   // Positie per speler
   const posMap = new Map();
@@ -384,9 +404,12 @@ function render() {
   barChart(defEl, ms.map((m, i) => ({ label: i === 0 || ms[i - 1].session !== m.session ? fmtDate(m.ts) : '', value: oppShots(m), color: resultColor(m.result), tip: `${matchTip(m)}<br>${oppShots(m)} schoten tegen, ${m.goalsAgainst} goals tegen (${fmtPct(pct(m.goalsAgainst, oppShots(m)))})` })), { height: 200 });
   if (ms.length) legend(defEl, [{ label: 'Gewonnen', color: 'var(--pos)' }, { label: 'Gelijk', color: 'var(--neutral)' }, { label: 'Verloren', color: 'var(--neg)' }]);
   const teamSide = list => { const n = list.length; if (!n) return null; const own = k => list.reduce((a, m) => a + m.players.reduce((x, p) => x + (p[k] || 0), 0), 0); const opp = k => list.reduce((a, m) => a + m.opponentPlayers.reduce((x, p) => x + (p[k] || 0), 0), 0);
-    return { n, shotsAg: (opp('shots') / n).toFixed(1), ga: (list.reduce((a, m) => a + m.goalsAgainst, 0) / n).toFixed(1), convAg: fmtPct(pct(list.reduce((a, m) => a + m.goalsAgainst, 0), opp('shots'))), tackles: `${(own('tacklesMade') / n).toFixed(1)} / ${(own('tackleAttempts') / n).toFixed(1)}`, tacklePct: fmtPct(pct(own('tacklesMade'), own('tackleAttempts'))), shotsFor: (own('shots') / n).toFixed(1) }; };
+    const ownEv = k => list.reduce((a, m) => a + m.players.reduce((x, p) => x + (p.ev?.[k] || 0), 0), 0), hasEv = list.some(m => m.players.some(p => p.ev));
+    const e = k => hasEv ? (ownEv(k) / n).toFixed(1) : '–';
+    return { n, shotsAg: (opp('shots') / n).toFixed(1), ga: (list.reduce((a, m) => a + m.goalsAgainst, 0) / n).toFixed(1), convAg: fmtPct(pct(list.reduce((a, m) => a + m.goalsAgainst, 0), opp('shots'))), tackles: `${(own('tacklesMade') / n).toFixed(1)} / ${(own('tackleAttempts') / n).toFixed(1)}`, tacklePct: fmtPct(pct(own('tacklesMade'), own('tackleAttempts'))), shotsFor: (own('shots') / n).toFixed(1),
+      interceptions: e('interceptions'), blocks: e('blocks'), lostDef: e('possession_lost_def_third'), wonDef: e('possession_won_def_third'), fouls: e('fouls_conceded_total'), yellows: e('yellow_cards_total'), outPos: hasEv ? fmtPct(pct(ownEv('out_of_position'), ownEv('out_of_position') + ownEv('in_position'))) : '–' }; };
   const dW = teamSide(ms.filter(m => m.result === 'W')), dR = teamSide(ms.filter(m => m.result !== 'W'));
-  const defRows = [['Wedstrijden', 'n'], ['Schoten tegen', 'shotsAg'], ['Goals tegen', 'ga'], ['Conversie tegenstander', 'convAg'], ['Tackles geslaagd / pogingen', 'tackles'], ['Tackle-percentage', 'tacklePct'], ['Eigen schoten', 'shotsFor']].map(([label, k]) => ({ label, w: dW?.[k] ?? '–', r: dR?.[k] ?? '–' }));
+  const defRows = [['Wedstrijden', 'n'], ['Schoten tegen', 'shotsAg'], ['Goals tegen', 'ga'], ['Conversie tegenstander', 'convAg'], ['Tackles geslaagd / pogingen', 'tackles'], ['Tackle-percentage', 'tacklePct'], ['Onderscheppingen (team)', 'interceptions'], ['Blocks (team)', 'blocks'], ['Balverlies eigen helft (team)', 'lostDef'], ['Balwinst eigen helft (team)', 'wonDef'], ['Overtredingen', 'fouls'], ['Gele kaarten', 'yellows'], ['Uit positie', 'outPos'], ['Eigen schoten', 'shotsFor']].map(([label, k]) => ({ label, w: dW?.[k] ?? '–', r: dR?.[k] ?? '–' }));
   table($('#tbl-defence-team'), [{ label: '', key: 'label' }, { label: 'Winst', num: true, key: 'w' }, { label: 'Gelijk/verlies', num: true, key: 'r' }], defRows);
   const defPlayers = players.map(name => {
     const withP = ms.filter(m => m.players.some(p => p.name === name)), without = ms.filter(m => !m.players.some(p => p.name === name));
@@ -395,13 +418,19 @@ function render() {
     const att = rows.reduce((a, r) => a + (r.p.tackleAttempts || 0), 0), made = rows.reduce((a, r) => a + (r.p.tacklesMade || 0), 0);
     const missed = rows.map(r => (r.p.tackleAttempts || 0) - (r.p.tacklesMade || 0));
     const defShare = pct(rows.filter(r => r.p.pos === 'defender').length, rows.length);
-    return { name, n: rows.length, attPer: (att / rows.length).toFixed(1), tacklePct: pct(made, att), missedPer: (missed.reduce((a, b) => a + b, 0) / rows.length).toFixed(1), corrShots: corr(missed, rows.map(r => oppShots(r.m))), corrGa: corr(missed, rows.map(r => r.m.goalsAgainst)), shotsAgWith: (withP.reduce((a, m) => a + oppShots(m), 0) / withP.length).toFixed(1), shotsAgWithout: without.length ? (without.reduce((a, m) => a + oppShots(m), 0) / without.length).toFixed(1) : null, defShare };
+    const evRows = rows.filter(r => r.p.ev), per = k => evRows.length ? (evRows.reduce((a, r) => a + (r.p.ev[k] || 0), 0) / evRows.length).toFixed(1) : null;
+    const lostDef = evRows.map(r => r.p.ev.possession_lost_def_third || 0);
+    const outPos = evRows.length ? pct(evRows.reduce((a, r) => a + (r.p.ev.out_of_position || 0), 0), evRows.reduce((a, r) => a + (r.p.ev.out_of_position || 0) + (r.p.ev.in_position || 0), 0)) : null;
+    return { name, n: rows.length, attPer: (att / rows.length).toFixed(1), tacklePct: pct(made, att), missedPer: (missed.reduce((a, b) => a + b, 0) / rows.length).toFixed(1), corrShots: corr(missed, rows.map(r => oppShots(r.m))), corrGa: corr(missed, rows.map(r => r.m.goalsAgainst)), shotsAgWith: (withP.reduce((a, m) => a + oppShots(m), 0) / withP.length).toFixed(1), shotsAgWithout: without.length ? (without.reduce((a, m) => a + oppShots(m), 0) / without.length).toFixed(1) : null, defShare,
+      interceptions: per('interceptions'), blocks: per('blocks'), lostDef: per('possession_lost_def_third'), corrLostDef: corr(lostDef, evRows.map(r => oppShots(r.m))), outPos, fouls: per('fouls_conceded_total'), yellows: per('yellow_cards_total') };
   }).filter(Boolean).sort((x, y) => (y.corrShots ?? -9) - (x.corrShots ?? -9));
   table($('#tbl-defence'), [
     { label: 'Speler', key: 'name' }, { label: 'N', num: true, key: 'n' }, { label: 'Als verdediger', num: true, render: r => fmtPct(r.defShare) },
     { label: 'Tackle-pogingen/wed.', num: true, key: 'attPer' }, { label: 'Geslaagd', num: true, render: r => fmtPct(r.tacklePct) }, { label: 'Gemist/wed.', num: true, key: 'missedPer' },
     { label: 'Corr. gemist ↔ schoten tegen', num: true, render: r => corrCell(r.corrShots) },
-    { label: 'Corr. gemist ↔ goals tegen', num: true, render: r => corrCell(r.corrGa) },
+    { label: 'Onderschep./wed.', num: true, render: r => r.interceptions ?? '–' }, { label: 'Blocks/wed.', num: true, render: r => r.blocks ?? '–' },
+    { label: 'Balverlies eigen helft/wed.', num: true, render: r => r.lostDef ?? '–' }, { label: 'Corr. balverlies eigen helft ↔ schoten tegen', num: true, render: r => corrCell(r.corrLostDef) },
+    { label: 'Uit positie', num: true, render: r => fmtPct(r.outPos) }, { label: 'Overtr./wed.', num: true, render: r => r.fouls ?? '–' }, { label: 'Geel', num: true, render: r => r.yellows ?? '–' },
     { label: 'Schoten tegen met / zonder', num: true, render: r => `${r.shotsAgWith} / ${r.shotsAgWithout ?? '–'}` },
   ], defPlayers, { rowClass: r => r.n < 5 ? 'low' : '' });
 

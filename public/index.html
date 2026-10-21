@@ -74,7 +74,7 @@
 
   <section class="card">
     <h2>Verdedigend lek</h2>
-    <p class="hint">Hoeveel schoten en goals jullie weggeven, en wie daar in de data mee samenhangt. "Gemiste tackles" is pogingen min geslaagd. De correlatie is tussen iemands gemiste tackles en de schoten tegen in diezelfde wedstrijd (−1 tot 1; boven 0,3 is het kijken waard).</p>
+    <p class="hint">Hoeveel schoten en goals jullie weggeven, en wie daar in de data mee samenhangt. Uit de ontcijferde events: onderscheppingen, blocks, balverlies op eigen helft en hoe vaak iemand uit positie stond. De correlaties zijn per wedstrijd met de schoten tegen (−1 tot 1; boven 0,3 is het kijken waard).</p>
     <div class="chart-pair">
       <div>
         <h3>Schoten tegen en goals tegen per wedstrijd</h3>
@@ -98,7 +98,7 @@
     <div class="card-head">
       <div>
         <h2>Betrokkenheid</h2>
-        <p class="hint">Hoeveel een speler aan de bal komt (passpogingen + schoten + tackles) als aandeel van het team, tegenover het resultaat. Balcontacten geeft EA niet; dit is de dichtstbijzijnde maat.</p>
+        <p class="hint">Hoeveel een speler aan de bal komt, geteld uit de ontcijferde events: passpogingen, schoten, geslaagde dribbels en gewonnen ballen. Als aandeel van het team, tegenover het resultaat.</p>
       </div>
       <label class="filter">Speler <select id="inv-player"></select></label>
     </div>
@@ -113,6 +113,8 @@
       </div>
     </div>
     <div id="tbl-involvement"></div>
+    <h3>Aan de bal per speler, bij winst / bij gelijk of verlies</h3>
+    <div id="tbl-ball"></div>
   </section>
 
   <section class="card">

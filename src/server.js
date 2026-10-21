@@ -3,6 +3,7 @@ import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
 import { openDb, config, ROOT } from './db.js';
+import { decodeEvents } from './events.js';
 
 const db = openDb();
 const PUBLIC = join(ROOT, 'public');
@@ -27,6 +28,7 @@ function buildData() {
     name: p.player_name, pos: p.pos, goals: p.goals, assists: p.assists, shots: p.shots,
     passAttempts: p.pass_attempts, passesMade: p.passes_made, tackleAttempts: p.tackle_attempts, tacklesMade: p.tackles_made,
     rating: p.rating, mom: p.mom, redCards: p.red_cards, secondsPlayed: p.seconds_played, archetypeId: p.archetype_id, saves: p.saves,
+    ev: p.event_aggregate ? (({ unknown, ...rest }) => rest)(decodeEvents(p.event_aggregate)) : null,
   });
   const matches = matchRows.map(r => {
     const opp = r.opponent_id ? latestSnapshot.get(r.opponent_id) : null;
