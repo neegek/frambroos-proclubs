@@ -80,3 +80,21 @@ td .bar { display: inline-block; height: 8px; border-radius: 4px; background: va
 .chart-pair h3 { margin: 0 0 4px; font-size: 13px; font-weight: 500; color: var(--ink-2); }
 td.split { white-space: nowrap; }
 td.split small { color: var(--muted); }
+.nav { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 3px; }
+.nav a { padding: 5px 12px; border-radius: 6px; color: var(--ink-2); text-decoration: none; font-size: 14px; }
+.nav a.active { background: var(--seq-4); color: #fff; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { font: inherit; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); cursor: pointer; }
+.chip.active { background: var(--seq-4); color: #fff; border-color: transparent; }
+.profile { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
+.profile h2 { font-size: 22px; margin: 0; }
+.profile .meta { color: var(--ink-2); margin-top: 4px; }
+.insights { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.insight-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.insight-list li { padding: 10px 12px; border-radius: 10px; background: var(--page); border: 1px solid var(--border); }
+.insight-list .claim { font-weight: 600; }
+.insight-list .evidence { color: var(--ink-2); font-size: 13px; margin-top: 2px; }
+.tag { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); margin-left: 6px; vertical-align: 1px; }
+.tag.sterk { color: var(--good-text); border-color: var(--good-text); }
+.tag.redelijk { color: var(--ink-2); }
+.card.good h2 { color: var(--good-text); } .card.bad h2 { color: var(--neg); }

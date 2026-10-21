@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Frambroos Spelers</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1 id="club-name">…</h1>
+    <p class="sub" id="club-sub">Data wordt geladen…</p>
+  </div>
+  <div class="top-right">
+    <nav class="nav"><a href="/">Overzicht</a><a href="/spelers.html" class="active">Spelers</a></nav>
+    <label class="filter">Periode
+      <select id="range">
+        <option value="all">Alles</option>
+        <option value="30">Laatste 30 dagen</option>
+        <option value="7">Laatste 7 dagen</option>
+      </select>
+    </label>
+    <label class="filter">Type
+      <select id="type">
+        <option value="all">League + playoff</option>
+        <option value="leagueMatch">League</option>
+        <option value="playoffMatch">Playoff</option>
+      </select>
+    </label>
+    <button id="theme" type="button" title="Licht/donker">◐</button>
+  </div>
+</header>
+
+<main id="app">
+  <section class="chips" id="chips"></section>
+
+  <section class="card">
+    <div class="profile">
+      <div>
+        <h2 id="p-name">…</h2>
+        <div class="meta" id="p-meta"></div>
+      </div>
+      <div class="tiles" id="p-tiles" style="flex: 1; max-width: 760px"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Profiel tegenover het team</h2>
+    <p class="hint">Afwijking van het teamgemiddelde per maat, zo gedraaid dat rechts altijd goed is. Beweeg over een balk voor de waarden.</p>
+    <div id="chart-profile"></div>
+  </section>
+
+  <div class="insights">
+    <section class="card good">
+      <h2>Sterk in</h2>
+      <p class="hint">Maten waarop deze speler bovenaan staat in het team.</p>
+      <ul class="insight-list" id="list-strengths"></ul>
+    </section>
+    <section class="card bad">
+      <h2>Kan beter</h2>
+      <p class="hint">Maten waarop deze speler onderaan staat of duidelijk onder het team zit.</p>
+      <ul class="insight-list" id="list-weaknesses"></ul>
+    </section>
+    <section class="card good">
+      <h2>Floreert als</h2>
+      <p class="hint">Omstandigheden waarin de rating van deze speler en het teamresultaat duidelijk hoger liggen.</p>
+      <ul class="insight-list" id="list-thrives"></ul>
+    </section>
+    <section class="card bad">
+      <h2>Speelt minder als</h2>
+      <p class="hint">Omstandigheden waarin het duidelijk slechter gaat.</p>
+      <ul class="insight-list" id="list-struggles"></ul>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>Andere inzichten</h2>
+    <p class="hint">Patronen die niet in één maat passen: hoe iemand speelt als het team wint of verliest, constantheid, carrière tegenover nu.</p>
+    <ul class="insight-list" id="list-other"></ul>
+  </section>
+
+  <section class="card">
+    <h2>Wedstrijden van deze speler</h2>
+    <div id="tbl-player-matches"></div>
+  </section>
+</main>
+<div id="tooltip" class="tooltip" hidden></div>
+<script src="common.js"></script>
+<script src="spelers.js"></script>
+</body>
+</html>
