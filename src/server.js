@@ -1,6 +1,6 @@
 // Lokaal dashboard: serveert public/ en levert de data uit SQLite op /api/data.
 import http from 'node:http';
-import { readFile, writeFile, rename, readdir, unlink, mkdir, stat } from 'node:fs/promises';
+import { readFile, writeFile, rename, readdir, stat } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
 import { openDb, config, ROOT } from './db.js';
 import { decodeEvents } from './events.js';
@@ -28,10 +28,8 @@ function cleanBuild(b) {
   return out;
 }
 
-// Foto's per speler voor de spelerskaart. Staan in data/players/<slug>.<ext> en gaan mee in git.
+// Foto's per speler voor de spelerskaart. Staan in data/players/<slug>.<ext> en gaan mee in git (alleen lezen).
 const PHOTO_DIR = join(ROOT, 'data', 'players');
-const PHOTO_TYPES = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
-const slugOf = name => String(name).toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 async function listPhotos() {
   const out = {};
   try {
@@ -142,21 +140,6 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(200, { 'Content-Type': MIME['.' + media[2]], 'Cache-Control': 'no-cache' });
       return res.end(body);
     } catch { res.writeHead(404); return res.end('Niet gevonden'); }
-  }
-  const pm = url.pathname.match(/^\/api\/players\/(.+)\/photo$/);
-  if (pm && (req.method === 'PUT' || req.method === 'DELETE')) {
-    const slug = slugOf(decodeURIComponent(pm[1]).slice(0, 60));
-    if (!slug) { res.writeHead(400); return res.end('Ongeldige naam'); }
-    await mkdir(PHOTO_DIR, { recursive: true });
-    for (const ext of Object.values(PHOTO_TYPES)) { try { await unlink(join(PHOTO_DIR, `${slug}.${ext}`)); } catch {} }
-    if (req.method === 'DELETE') { res.writeHead(204); return res.end(); }
-    const ext = PHOTO_TYPES[(req.headers['content-type'] || '').split(';')[0]];
-    if (!ext) { res.writeHead(415, { 'Content-Type': 'text/plain' }); return res.end('Alleen PNG, JPEG of WebP'); }
-    const chunks = []; let size = 0;
-    for await (const c of req) { size += c.length; if (size > 5 * 1024 * 1024) { res.writeHead(413, { 'Content-Type': 'text/plain' }); return res.end('Maximaal 5 MB'); } chunks.push(c); }
-    await writeFile(join(PHOTO_DIR, `${slug}.${ext}`), Buffer.concat(chunks));
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify((await listPhotos())[slug] || null));
   }
   if (url.pathname === '/api/data') {
     res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });

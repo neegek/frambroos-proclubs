@@ -316,11 +316,10 @@ function renderPlayer() {
   const buildText = Object.entries(buildCount).sort((a, b) => b[1] - a[1]).map(([id, n]) => `${archName(id)} (${n})`).join(', ');
   const ratings = rows.map(r => r.p.rating).filter(v => v !== null);
   const tiles = [
-    ['Rating', ratings.length ? f2(avg(ratings)) : '–', career ? `carrière ${career.ratingAve}` : ''],
-    ['Punten per wedstrijd', s.ppg ?? '–', `${s.W}W ${s.D}G ${s.L}V`],
+    // Rating, goals, assists en carrièrecijfers staan al op de spelerskaart; hier alleen wat daar niet staat.
+    ['Punten per wedstrijd', s.ppg ?? '–', `${s.W}W ${s.D}G ${s.L}V met deze speler`],
     ['Tov verwachting', s.resid === null ? '–' : signed(s.resid, 2), 'team, met deze speler erbij'],
-    ['Goals + assists', `${sum(rows, r => r.p.goals)} + ${sum(rows, r => r.p.assists)}`, career ? `carrière ${career.goals} + ${career.assists}` : ''],
-    ['Minuten per wed.', rows.length ? f0(minutes(rows) / rows.length) : '–', ''],
+    ['Minuten per wedstrijd', rows.length ? f0(minutes(rows) / rows.length) : '–', ''],
   ];
   $('#p-tiles').innerHTML = tiles.map(([l, v, m]) => `<div class="tile"><div class="label">${l}</div><div class="value">${v}</div><div class="meta">${m}</div></div>`).join('');
 

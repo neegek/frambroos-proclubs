@@ -15,8 +15,8 @@ telefoon bovenaan):
 - **Wedstrijden**: de lijst van alle wedstrijden per dag. Een klik opent de wedstrijdpagina (een laag dieper, met
   een terugknop): korte samenvatting, beide opstellingen per linie met build en rating, wij tegen hen, en de spelers
   van beide teams.
-- **Spelers**: direct per naam in het menu. Bovenaan een spelerskaart in FC-stijl (foto uploaden kan op de kaart;
-  bestanden komen in `data/players/`). Daaronder vier tabbladen: Algemeen (sterk in, kan beter,
+- **Spelers**: direct per naam in het menu. Bovenaan een spelerskaart in FC27-stijl (foto's in `data/players/`).
+  Daaronder vier tabbladen: Algemeen (sterk in, kan beter,
   floreert als, speelt minder als), Per sessie, Laatste wedstrijd, en Advies: genuanceerd buildadvies
   op basis van de wedstrijddata, met een formulier voor de eigen build (`data/builds.json`).
 
