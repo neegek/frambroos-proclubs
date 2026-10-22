@@ -228,7 +228,7 @@ function render() {
   const arch = new Map();
   for (const m of ms) for (const id of new Set(m.opponentPlayers.map(p => p.archetypeId).filter(v => v !== null))) { if (!arch.has(id)) arch.set(id, { id, matches: [], count: 0 }); arch.get(id).matches.push(m); }
   for (const m of ms) for (const p of m.opponentPlayers) if (p.archetypeId !== null && arch.has(p.archetypeId)) arch.get(p.archetypeId).count++;
-  const archRows = [...arch.values()].map(a => ({ label: `Archetype ${a.id}`, count: a.count, ...summarize(a.matches) })).sort((x, y) => y.count - x.count);
+  const archRows = [...arch.values()].map(a => ({ label: archName(a.id), count: a.count, ...summarize(a.matches) })).sort((x, y) => y.count - x.count);
   table($('#tbl-opp-archetypes'), [{ label: '', key: 'label' }, { label: 'Spelers gezien', num: true, key: 'count' }, { label: 'Wedstrijden', num: true, key: 'n' }, { label: 'Punten/wed.', num: true, key: 'ppg' }, { label: 'Tov verwachting', num: true, render: r => residCell(r.resid) }, { label: 'Goals tegen', num: true, key: 'gaAvg' }], archRows, { rowClass: r => r.n < 4 ? 'low' : '' });
 
   // Sessie, weekdag, uur

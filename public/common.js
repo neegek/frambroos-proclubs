@@ -16,6 +16,7 @@ const ICONS = {
   team: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>',
   sessions: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
   players: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 14.8c1.6.8 2.7 2.6 3 5.2"/></svg>',
+  matches: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5l3.8 2.8-1.5 4.5h-4.6l-1.5-4.5z"/><path d="M12 3v4.5M15.8 10.3l4.6-1.5M14.3 14.8l2.8 3.9M9.7 14.8l-2.8 3.9M8.2 10.3L3.6 8.8"/></svg>',
   analysis: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
   theme: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 0 0 17z" fill="currentColor" stroke="none"/></svg>',
 };
@@ -23,6 +24,7 @@ const LOGO = '<span class="mark"><img src="/crest.png" alt="" width="44" height=
 const NAV = [
   { href: '/', label: 'Team', icon: 'team' },
   { href: '/sessies.html', label: 'Sessies', icon: 'sessions' },
+  { href: '/wedstrijden.html', label: 'Wedstrijden', icon: 'matches' },
   { href: '/spelers.html', label: 'Spelers', icon: 'players' },
   { href: '/analyse.html', label: 'Analyse', icon: 'analysis' },
 ];
@@ -343,3 +345,16 @@ const TEAM_PHRASE = {
 };
 const joinAnd = xs => xs.length <= 1 ? (xs[0] || '') : `${xs.slice(0, -1).join(', ')} en ${xs[xs.length - 1]}`;
 const capFirst = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+
+// ---------- archetypes (builds) ----------
+// archetypeid → naam uit het spel. Bron: MeelanFC/FC-27-ClubsXI, docs/03-ea-api.md (alle 13 bevestigd in FC27).
+const ARCHETYPES = {
+  1: { name: 'Shot Stopper', line: 'keeper' }, 2: { name: 'Sweeper Keeper', line: 'keeper' },
+  3: { name: 'Progressor', line: 'verdediging' }, 4: { name: 'Boss', line: 'verdediging' }, 5: { name: 'Disruptor', line: 'verdediging of middenveld' },
+  6: { name: 'Marauder', line: 'back of middenveld' }, 7: { name: 'Recycler', line: 'middenveld' }, 8: { name: 'Maestro', line: 'middenveld' },
+  9: { name: 'Creator', line: 'middenveld of aanval' }, 10: { name: 'Spark', line: 'vleugel' }, 11: { name: 'Magician', line: 'aanval' },
+  12: { name: 'Finisher', line: 'spits' }, 13: { name: 'Target', line: 'spits' },
+};
+const archName = id => ARCHETYPES[id]?.name ?? (id ? `Build ${id}` : '–');
+const NUM_WORD = ['geen', 'één', 'twee', 'drie', 'vier', 'vijf', 'zes', 'zeven', 'acht', 'negen', 'tien'];
+const numWord = n => NUM_WORD[n] ?? String(n);

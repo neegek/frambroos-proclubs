@@ -100,7 +100,7 @@ function render() {
   const chartEl = $('#s-chart');
   barChart(chartEl, ms.map(m => ({ label: fmtTime(m.ts), value: m.goalDiff, color: resultColor(m.result), tip: matchTip(m) })), { yMin: -1, zeroLine: true, height: 180 });
   table($('#s-matches'), [
-    { label: 'Tijd', render: r => fmtTime(r.ts) }, { label: 'Tegenstander', render: r => esc(r.opponent.name) },
+    { label: 'Tijd', render: r => fmtTime(r.ts) }, { label: 'Tegenstander', render: r => `<a href="/wedstrijden.html#${r.matchId}">${esc(r.opponent.name)}</a>` },
     { label: 'Rating', num: true, render: r => r.opponent.skillRating ? `${r.opponent.skillRating} <small>${own ? strengthLabel(r.opponent.skillRating - own) : ''}</small>` : '–' },
     { label: 'Mensen', num: true, render: r => r.opponentPlayers.length }, { label: 'Score', num: true, render: r => `${r.goals}–${r.goalsAgainst}${r.winnerByDnf ? ' <small>opgave</small>' : ''}` },
     { label: 'Uitslag', render: r => `<span class="pill ${r.result}">${r.result === 'D' ? 'G' : r.result === 'L' ? 'V' : 'W'}</span>` }, { label: 'Tov verw.', num: true, render: r => residCell(r.resid) },

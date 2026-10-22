@@ -224,7 +224,9 @@ function renderPlayer() {
   const posCount = {}; for (const r of rows) posCount[r.p.pos] = (posCount[r.p.pos] || 0) + 1;
   const posText = Object.entries(posCount).sort((a, b) => b[1] - a[1]).map(([p, n]) => `${POS_NL[p] || p} (${n})`).join(', ');
   $('#p-name').textContent = selected;
-  $('#p-meta').textContent = `${career ? `Pro ${career.proName} · overall ${career.proOverall} · voorkeur ${POS_NL[career.favoritePosition] || career.favoritePosition} · ` : ''}${rows.length} wedstrijden in de gekozen periode${posText ? ` als ${posText}` : ''}`;
+  const buildCount = {}; for (const r of rows) if (r.p.archetypeId) buildCount[r.p.archetypeId] = (buildCount[r.p.archetypeId] || 0) + 1;
+  const buildText = Object.entries(buildCount).sort((a, b) => b[1] - a[1]).map(([id, n]) => `${archName(id)} (${n})`).join(', ');
+  $('#p-meta').textContent = `${career ? `Pro ${career.proName} · overall ${career.proOverall} · ${career.proHeight} cm · voorkeur ${POS_NL[career.favoritePosition] || career.favoritePosition} · ` : ''}${rows.length} wedstrijden in de gekozen periode${posText ? ` als ${posText}` : ''}${buildText ? ` · builds: ${buildText}` : ''}`;
   const ratings = rows.map(r => r.p.rating).filter(v => v !== null);
   const tiles = [
     ['Rating', ratings.length ? f2(avg(ratings)) : '–', career ? `carrière ${career.ratingAve}` : ''],

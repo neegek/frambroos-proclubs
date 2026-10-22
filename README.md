@@ -12,6 +12,8 @@ telefoon bovenaan):
   bepalen, vorm, zo winnen en verliezen we, tegen wie, spelers in één oogopslag, beste combinaties.
 - **Sessies**: per speelavond de uitslagen, tegenstanders, wat beter en slechter ging dan normaal,
   en per speler wat er opviel.
+- **Wedstrijden**: lijst van alle wedstrijden; per wedstrijd een korte samenvatting, beide opstellingen per
+  linie met build en rating, wij tegen hen, en de spelers van beide teams.
 - **Spelers**: per speler sterk in, kan beter, floreert als, speelt minder als, en andere patronen.
 - **Analyse**: alle detailanalyses (verwachtingsmodel, impact, synergie, verdediging, aanval,
   tegenstanders, betrokkenheid).
@@ -70,7 +72,8 @@ De lokale planner logt naar `data/collect.log` en draait alleen als de Mac wakke
 - `src/collect.js` – de verzamelaar.
 - `src/server.js` – serveert `public/` en `/api/data`.
 - `public/common.js` – gedeeld: zijmenu, data laden, verwachtingsmodel, grafieken, tabellen, teammaten.
-- `public/team.js`, `sessies.js`, `spelers.js`, `app.js` – de pagina's Team, Sessies, Spelers en Analyse.
+- `public/team.js`, `sessies.js`, `wedstrijden.js`, `spelers.js`, `app.js` – de pagina's Team, Sessies, Wedstrijden, Spelers en Analyse.
+- Builds (`archetypeid` 1–13) staan in `public/common.js`, met als bron MeelanFC/FC-27-ClubsXI.
 - `src/events.js` en `docs/event-codes.md` – de ontcijferde eventcodes.
 - `src/sessions.js` – schrijft `docs/sessies.md`, dezelfde sessie-indeling als de Sessiepagina.
 
