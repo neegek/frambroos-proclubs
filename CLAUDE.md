@@ -49,6 +49,10 @@ Na een wijziging in `src/server.js` de server herstarten; voor `public/` volstaa
 - Attribuutnamen in het Engels zoals in het spel (Ball Control, Short Passing, ...); de rest van de app in het Nederlands.
 - Stijl: donker thuistenue (standaard) en licht uittenue; tokens staan bovenaan `public/style.css`. Nieuwe kleuren eerst
   op contrast controleren: tekst ≥ 4,5:1, grafische elementen ≥ 3:1. Datakleuren (winst blauw, verlies rood) niet aanpassen.
+- Opbouw: het menu is een zwevende kaart (afgeronde hoeken, eigen schaduw `--float`) los van de paginarand; op
+  telefoon een afgeronde balk bovenaan. Pagina's zijn een strak raster van kaarten met 12 px tussenruimte. Titel en
+  filters staan op één rij (filters rechts). Op Team komen eerst de KPI-tegels, daarna de grafiekkaarten. Een
+  grafiekkaart toont zijn kerncijfers rechts in de kop via `figsHtml(...)` uit `public/common.js`, niet als legenda.
 - Dashboardstijl: rustige kaarten met een dunne rand en geen zware schaduw; kaarttitel ingetogen met een korte uitleg
   eronder; filters als pil-knoppen met icoon (`data-icon` op `.filter`); grote cijfers in `--num-font`.
 - KPI-tegels altijd via `kpiTile(label, waarde, regel, deltaOf(...))` uit `public/common.js`. De badge toont een

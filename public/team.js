@@ -107,7 +107,7 @@ function render() {
 
   const resEl = $('#chart-results');
   barChart(resEl, ms.map((m, i) => ({ label: i === 0 || ms[i - 1].session !== m.session ? fmtDate(m.ts) : '', value: m.goalDiff, color: resultColor(m.result), tip: matchTip(m) })), { yMin: -1, zeroLine: true });
-  if (ms.length) legend(resEl, [{ label: 'Gewonnen', color: 'var(--pos)' }, { label: 'Gelijk', color: 'var(--neutral)' }, { label: 'Verloren', color: 'var(--neg)' }]);
+  $('#fig-results').innerHTML = ms.length ? figsHtml([{ label: 'Gewonnen', color: 'var(--pos)', value: s.W }, { label: 'Gelijk', color: 'var(--neutral)', value: s.D }, { label: 'Verloren', color: 'var(--neg)', value: s.L }]) : '';
 
   const formEl = $('#chart-form');
   const gd = rolling(ms.map(m => m.goalDiff), 5), rs = rolling(ms.map(m => m.resid), 5);
@@ -115,7 +115,12 @@ function render() {
     { name: 'Doelsaldo', color: 'var(--s1)', area: true, values: gd.map((v, i) => ({ i, v })) },
     { name: 'Tov verwachting', color: 'var(--s2)', values: rs.map((v, i) => ({ i, v })) },
   ], ms.map((m, i) => i === 0 || fmtDate(ms[i - 1].ts) !== fmtDate(m.ts) ? fmtDate(m.ts) : ''), { height: 220, tipAt: i => `<b>Na ${esc(ms[i].opponent.name)} (${fmtDate(ms[i].ts)})</b>Doelsaldo, gemiddeld over 5: ${signed(gd[i])}<br>Tov verwachting, gemiddeld over 5: ${signed(rs[i])}` });
-  if (ms.length) legend(formEl, [{ label: 'Doelsaldo', color: 'var(--s1)' }, { label: 'Tov verwachting', color: 'var(--s2)' }], true);
+  // Kerncijfers: de laatste waarde van het gemiddelde, met de verandering tegenover vijf wedstrijden eerder.
+  const li = gd.length - 1, T5 = 'Tegenover het gemiddelde vijf wedstrijden eerder';
+  $('#fig-form').innerHTML = ms.length ? figsHtml([
+    { label: 'Doelsaldo', color: 'var(--s1)', value: signed(gd[li], 1), delta: li >= 5 ? deltaOf(gd[li], gd[li - 5], { digits: 1, title: T5 }) : null },
+    { label: 'Tov verwachting', color: 'var(--s2)', value: signed(rs[li], 1), delta: li >= 5 ? deltaOf(rs[li], rs[li - 5], { digits: 1, title: T5 }) : null },
+  ]) : '';
 
   const W = ms.filter(m => m.result === 'W'), R = ms.filter(m => m.result !== 'W');
   table($('#tbl-profile'), [
