@@ -19,7 +19,7 @@ const ICONS = {
   analysis: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
   theme: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 0 0 17z" fill="currentColor" stroke="none"/></svg>',
 };
-const LOGO = '<span class="mark"><svg viewBox="0 0 24 24"><g fill="#fff"><circle cx="9" cy="10" r="2.6"/><circle cx="15" cy="10" r="2.6"/><circle cx="12" cy="14.2" r="2.6"/><circle cx="8.6" cy="15.6" r="2.2" opacity=".85"/><circle cx="15.4" cy="15.6" r="2.2" opacity=".85"/><circle cx="12" cy="18.6" r="2" opacity=".75"/></g><path d="M12 7.6c-.4-2 .6-3.6 2.6-4.1" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></span>';
+const LOGO = '<span class="mark"><img src="/crest.png" alt="" width="44" height="44"></span>';
 const NAV = [
   { href: '/', label: 'Team', icon: 'team' },
   { href: '/sessies.html', label: 'Sessies', icon: 'sessions' },
@@ -32,7 +32,7 @@ const NAV = [
   side.innerHTML = `<a class="brand" href="/">${LOGO}<span>Frambroos<b>Coach</b></span></a>
     <nav class="side-nav" aria-label="Hoofdmenu">${NAV.map(n => `<a href="${n.href}" class="${n.href === path ? 'active' : ''}"${n.href === path ? ' aria-current="page"' : ''}>${ICONS[n.icon]}<span>${n.label}</span></a>`).join('')}</nav>
     <div class="side-foot"><div class="club" id="club-box"><div class="club-name">Frambroos</div><div class="club-meta">Data laden…</div></div>
-    <button id="theme" class="icon-btn" type="button" title="Licht of donker" aria-label="Wissel licht of donker">${ICONS.theme}</button></div>`;
+    <button id="theme" class="icon-btn" type="button" title="Wissel tussen thuistenue (donker) en uittenue (licht)" aria-label="Wissel tussen thuistenue, donker, en uittenue, licht">${ICONS.theme}</button></div>`;
 })();
 const showError = e => { const b = $('#club-box .club-meta'); if (b) b.textContent = `Kon data niet laden: ${e.message}`; console.error(e); };
 
@@ -277,13 +277,13 @@ async function loadData() {
   return DATA;
 }
 
+// Standaard donker (thuistenue); licht (uittenue) wordt onthouden per browser.
 $('#theme').addEventListener('click', () => {
-  const root = document.documentElement;
-  const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
-  root.dataset.theme = dark ? 'light' : 'dark';
-  try { localStorage.setItem('theme', root.dataset.theme); } catch {}
+  const root = document.documentElement, light = root.dataset.theme === 'light';
+  if (light) delete root.dataset.theme; else root.dataset.theme = 'light';
+  try { localStorage.setItem('theme', light ? 'dark' : 'light'); } catch {}
+  if (DATA && typeof window.rerender === 'function') window.rerender();
 });
-try { const t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch {}
 
 // ---------- teammaten over een lijst wedstrijden ----------
 const teamSum = (ms, f) => ms.reduce((a, m) => a + m.players.reduce((x, p) => x + (f(p) || 0), 0), 0);

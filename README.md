@@ -16,6 +16,11 @@ telefoon bovenaan):
 - **Analyse**: alle detailanalyses (verwachtingsmodel, impact, synergie, verdediging, aanval,
   tegenstanders, betrokkenheid).
 
+Standaard is de app donker, in de kleuren van het thuistenue (zwart, geel, paars). De knop
+onderaan het menu wisselt naar licht, in de kleuren van het uittenue (wit, oranje, donkergroen); die
+keuze wordt per browser onthouden. Alle tekst haalt WCAG AA (4,5:1), grafische elementen 3:1. Het
+logo is het clubwapen uit het spel (`public/crest.png`, van EA's beeldserver).
+
 Alle tekst op de pagina's wordt uit de data berekend en groeit mee met elke speelavond. Een
 label (sterk, redelijk, zwak) zegt op hoeveel wedstrijden een inzicht rust.
 
