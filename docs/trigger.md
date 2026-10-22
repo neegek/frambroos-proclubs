@@ -25,6 +25,9 @@ heeft 2.000 minuten per maand.
 
 ## Instellen (ongeveer 5 minuten)
 
+Ingesteld op 22 oktober 2026; het token `frambroos-trigger` verloopt op **20 januari 2027**. Maak dan een nieuw token
+(zelfde instellingen) en vervang het in de header *Authorization* op cron-job.org.
+
 ### Stap 1: toegangstoken op GitHub
 
 1. Ga naar https://github.com/settings/personal-access-tokens/new (Fine-grained token).
@@ -54,7 +57,11 @@ Dit token kan alleen workflows in deze ene repo starten. Het kan geen code of da
      - `X-GitHub-Api-Version: 2022-11-28`
      - `Content-Type: application/json`
    - **Request body**: `{"ref":"main"}`
-4. Opslaan en *Test run* klikken. Het antwoord moet **204** zijn.
+4. Opslaan en *Test run* klikken. Het antwoord moet **204** zijn. Anders:
+   - **401**: token ontbreekt of klopt niet (let op `Bearer` plus één spatie).
+   - **404**: het token is geldig maar ziet de repo niet. Bij een privérepo zegt GitHub dan "Not Found". Controleer
+     *Repository access* van het token en klik daar op **Save**; ook een GET in plaats van POST geeft 404.
+   - **422**: de body is niet precies `{"ref":"main"}`.
 5. Controleer in https://github.com/N33G3K/frambroos-proclubs/actions dat er een nieuwe run staat met
    als trigger *workflow_dispatch*.
 
