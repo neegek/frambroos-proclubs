@@ -4,6 +4,7 @@ import { readFile, writeFile, rename } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
 import { ROOT, config } from './db.js';
 import { buildData, listPhotos, readBuilds, BUILDS_PATH, PHOTO_DIR } from './data.js';
+import { liveData } from './live.js';
 
 const PUBLIC = join(ROOT, 'public');
 const NUM_FIELDS = new Set(['height', 'weakFoot', 'skillMoves', 'pac', 'sho', 'pas', 'dri', 'def', 'phy',
@@ -63,7 +64,8 @@ const server = http.createServer(async (req, res) => {
   }
   if (url.pathname === '/api/data') {
     res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
-    return res.end(JSON.stringify(buildData()));
+    // Standaard live: nieuwste wedstrijden bij EA erbij (src/live.js). ?live=0 geeft alleen de opgeslagen data.
+    return res.end(JSON.stringify(url.searchParams.get('live') === '0' ? buildData() : await liveData()));
   }
   const file = normalize(url.pathname === '/' ? '/index.html' : url.pathname).replace(/^(\.\.[/\\])+/, '');
   try {

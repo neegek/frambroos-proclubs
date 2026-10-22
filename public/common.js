@@ -341,7 +341,15 @@ async function loadData() {
   DATA.players.forEach((name, i) => playerSlot.set(name, i));
   fillPlayerNav();
   const s = DATA.snapshot, box = $('#club-box');
-  if (box) box.innerHTML = `<div class="club-name">${esc(DATA.club.name)}</div><div class="club-meta">${s ? `${s.wins}W ${s.ties}G ${s.losses}V · rating ${s.skillRating}<br>` : ''}${DATA.matches.length} wedstrijden gevolgd<br>laatste nieuwe data ${DATA.lastRun ? fmtDateTime(DATA.lastRun.started_at) : 'nooit'}${DATA.lastRun?.error ? ` · fout: ${esc(DATA.lastRun.error)}` : ''}</div>`;
+  // Lokale app: de server haalt bij het laden de nieuwste wedstrijden live bij EA op (src/live.js).
+  const L = DATA.live, freshness = L ? (L.error ? `live ophalen lukte niet (${esc(L.error)}); opgeslagen data` : `live bijgewerkt ${new Date(L.at * 1000).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}`)
+    : `laatste nieuwe data ${DATA.lastRun ? fmtDateTime(DATA.lastRun.started_at) : 'nooit'}${DATA.lastRun?.error ? ` · fout: ${esc(DATA.lastRun.error)}` : ''}`;
+  if (box) box.innerHTML = `<div class="club-name">${esc(DATA.club.name)}</div><div class="club-meta">${s ? `${s.wins}W ${s.ties}G ${s.losses}V · rating ${s.skillRating}<br>` : ''}${DATA.matches.length} wedstrijden gevolgd<br>${freshness}</div>`;
+  if (L?.newMatches) {
+    const note = document.createElement('p'); note.className = 'live-note'; note.setAttribute('role', 'status');
+    note.textContent = `${capFirst(numWord(L.newMatches))} ${L.newMatches === 1 ? 'wedstrijd is' : 'wedstrijden zijn'} net live bij EA opgehaald en ${L.newMatches === 1 ? 'telt' : 'tellen'} al mee. Opslaan gebeurt bij de volgende verzamelrun.`;
+    $('.page-head, .back-link, .player-hero')?.insertAdjacentElement('afterend', note);
+  }
   return DATA;
 }
 

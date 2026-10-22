@@ -23,7 +23,7 @@ function render() {
         return `<a class="match-row" href="wedstrijd.html?id=${m.matchId}">
           <span class="mr-time">${fmtTime(m.ts)}</span>
           <span class="pill ${m.result}">${resLetter(m.result)}</span>
-          <span class="mr-opp">${kitShirt(m.opponent.kit, m.opponent.name)}<span><b>${esc(m.opponent.name)}</b><small>${m.matchType === 'playoffMatch' ? 'playoff' : 'league'}${m.opponent.skillRating ? ` · rating ${m.opponent.skillRating}${str ? `, ${str}` : ''}` : ''} · ${m.players.length} tegen ${m.opponentPlayers.length} mensen${m.winnerByDnf ? ' · opgave' : ''}</small></span></span>
+          <span class="mr-opp">${kitShirt(m.opponent.kit, m.opponent.name)}<span><b>${esc(m.opponent.name)}</b><small>${m.matchType === 'playoffMatch' ? 'playoff' : 'league'}${m.opponent.skillRating ? ` · rating ${m.opponent.skillRating}${str ? `, ${str}` : ''}` : ''} · ${m.players.length} tegen ${m.opponentPlayers.length} mensen${m.winnerByDnf ? ' · opgave' : ''}${m.live ? ' · live, nog niet opgeslagen' : ''}</small></span></span>
           <span class="mr-score">${m.goals}–${m.goalsAgainst}</span>
           <span class="mr-chev" aria-hidden="true">›</span></a>`;
       }).join('')}</div></section>`;

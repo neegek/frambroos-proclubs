@@ -1,11 +1,12 @@
 // Data voor het dashboard: wat /api/data, /api/builds en /api/photos leveren. Gedeeld door de server (src/server.js)
 // en de statische export (src/export.js).
+export { realDb };
 import { readFile, readdir, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { openDb, config, ROOT } from './db.js';
 import { decodeEvents } from './events.js';
 
-const db = openDb();
+const realDb = openDb();
 // Eigen builds van de spelers, handmatig ingevuld op de Buildspagina. Staat in git, zodat het bewaard blijft.
 export const BUILDS_PATH = join(ROOT, 'data', 'builds.json');
 export async function readBuilds() { try { return JSON.parse(await readFile(BUILDS_PATH, 'utf8')); } catch { return {}; } }
@@ -23,7 +24,8 @@ export async function listPhotos() {
   return out;
 }
 
-export function buildData() {
+// Zonder argument uit de echte database; src/live.js geeft de tijdelijke kopie met live opgehaalde wedstrijden mee.
+export function buildData(db = realDb) {
   const { clubId } = config;
   const latestSnapshot = db.prepare(`SELECT * FROM club_snapshots WHERE club_id = ? ORDER BY taken_at DESC LIMIT 1`);
   const own = latestSnapshot.get(clubId);
@@ -53,7 +55,7 @@ export function buildData() {
       matchId: r.match_id, ts: r.ts, matchType: r.match_type,
       goals: r.goals, goalsAgainst: r.goals_against, result: r.result, winnerByDnf: r.winner_by_dnf,
       opponent: {
-        id: r.opponent_id, name: r.opponent_name,
+        id: r.opponent_id, name: r.opponent_name || 'Onbekende club', // EA geeft soms geen clubnaam mee
         skillRating: opp?.skill_rating ?? null, gamesPlayed: opp?.games_played ?? null,
         winRate: opp && opp.games_played ? Math.round(100 * opp.wins / opp.games_played) : null,
         bestDivision: opp?.best_division ?? null,

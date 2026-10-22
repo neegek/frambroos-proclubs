@@ -6,8 +6,8 @@ import { readFileSync } from 'node:fs';
 export const ROOT = resolve(import.meta.dirname, '..');
 export const config = JSON.parse(readFileSync(resolve(ROOT, 'config.json'), 'utf8'));
 
-export function openDb() {
-  const path = resolve(ROOT, config.dbPath);
+// Zonder pad: de echte database. Met pad: een andere (bijv. de tijdelijke kopie voor live ophalen, src/live.js).
+export function openDb(path = resolve(ROOT, config.dbPath)) {
   mkdirSync(dirname(path), { recursive: true });
   const db = new DatabaseSync(path);
   db.exec(`

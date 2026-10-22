@@ -459,3 +459,6 @@ a.pchip:hover { border-color: var(--brand); }
 .ctx-tips { margin: 8px 0 0; padding-left: 18px; color: var(--ink-2); }
 .ctx-tips li + li { margin-top: 2px; }
 .ctx-tiles { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+/* ---------- live opgehaald (lokale app) ---------- */
+.live-note { margin: 0; padding: 10px 14px; border-radius: var(--radius-sm); background: var(--brand-soft); color: var(--ink); font-size: 13.5px; border: 1px solid var(--panel-border); }

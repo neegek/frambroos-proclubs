@@ -22,13 +22,21 @@ claude.ai-connectors in deze map uit. Alle stijl, logica en teksten komen uit di
 ## Draaien
 
 ```bash
-npm run dashboard   # haalt eerst de nieuwste database van GitHub, dan http://localhost:3737
+npm run dashboard   # haalt eerst de nieuwste database van GitHub, dan http://localhost:3737 (live)
 npm run collect     # handmatig verzamelen (normaal doet GitHub Actions dit)
 npm run export      # statische, alleen-lezen kopie in dist/ (om te delen)
 ```
 
 Geen `npm install` nodig (Node 22.5+, ingebouwde SQLite). De browserpreview heet `dashboard` in `.claude/launch.json`.
 Na een wijziging in `src/server.js` of `src/data.js` de server herstarten; voor `public/` volstaat herladen.
+
+**Live.** Bij het openen of verversen van de lokale app haalt de server de nieuwste wedstrijden bij EA op
+(`src/live.js`), in een tijdelijke kopie van de database: de echte database verandert nooit. Het resultaat wordt een
+minuut bewaard; lukt het niet binnen 10 seconden, dan toont de app de opgeslagen data en zegt dat in het menu.
+Nog niet opgeslagen wedstrijden krijgen `live: true` en een melding bovenaan. Opslaan blijft het werk van de
+verzamelaar in GitHub Actions; de verzamellogica zelf staat in `src/collector.js` (gedeeld door beide).
+`/api/data?live=0` geeft alleen de opgeslagen data. De gedeelde versie (artifact) kan niet live ophalen: die mag
+geen andere sites aanroepen.
 
 **Delen.** De gedeelde versie is een artifact: https://claude.ai/artifact/Gsz3JZQGKpnKxM96Ht64zo (privé; delen via het
 Share-menu op de pagina). Bijwerken: `npm run export`, daarna `dist/artifact-index.html` opnieuw publiceren met dezelfde
