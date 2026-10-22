@@ -56,7 +56,7 @@ function pitch(players, title, link) {
     return link ? `<a class="pchip" href="/spelers.html#${encodeURIComponent(p.name)}">${inner}</a>` : `<div class="pchip">${inner}</div>`;
   };
   const ai = Math.max(0, 11 - players.length);
-  return `<div class="pitch-wrap"><h3>${esc(title)}</h3><div class="pitch">${LINES.map(([k, label]) => `<div class="line"><span class="line-label">${label}</span><div class="slots">${byLine[k].length ? byLine[k].map(chip).join('') : '<span class="slot-ai">AI</span>'}</div></div>`).join('')}</div><div class="ai-note">${numWord(players.length)} ${players.length === 1 ? 'mens' : 'mensen'}, ${numWord(ai)} AI</div></div>`;
+  return `<div class="pitch-wrap"><h3>${esc(title)}</h3><div class="pitch">${LINES.map(([k, label]) => `<div class="pitch-line"><span class="line-label">${label}</span><div class="slots">${byLine[k].length ? byLine[k].map(chip).join('') : '<span class="slot-ai">AI</span>'}</div></div>`).join('')}</div><div class="ai-note">${numWord(players.length)} ${players.length === 1 ? 'mens' : 'mensen'}, ${numWord(ai)} AI</div></div>`;
 }
 
 function h2h(m) {

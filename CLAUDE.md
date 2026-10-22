@@ -3,6 +3,14 @@
 Tracker en coach-app voor de FC27 Pro Clubs-club Frambroos (PS5, clubId 837250). Eigenaar: Jamal (speler **Neegek**).
 Alle teksten in de app zijn Nederlands.
 
+## Persoonlijk project, los van werk
+
+Dit is een persoonlijk project van Jamal, helemaal van scratch. Het heeft **niets** met Effectory te maken.
+Gebruik hier geen Effectory-skills, -plugins of -connectors (design system, UX-copy, prototype-toolbar, publisher,
+Smartcat, realistic content, manager personas, Piwik, Figma-structuur), geen Effectory-huisstijl, -content of
+-conventies, en geen werkaccounts. `.claude/settings.local.json` zet die skills, de claude.ai-plugins en de
+claude.ai-connectors in deze map uit. Alle stijl, logica en teksten komen uit dit project zelf (zie hieronder).
+
 ## Lees eerst
 
 - **`docs/coach-logica.md`**: hoe de coach denkt. Maatstaven, drempels, afwegingen per thema, labels en schrijfregels.
@@ -41,6 +49,13 @@ Na een wijziging in `src/server.js` de server herstarten; voor `public/` volstaa
 - Attribuutnamen in het Engels zoals in het spel (Ball Control, Short Passing, ...); de rest van de app in het Nederlands.
 - Stijl: donker thuistenue (standaard) en licht uittenue; tokens staan bovenaan `public/style.css`. Nieuwe kleuren eerst
   op contrast controleren: tekst ≥ 4,5:1, grafische elementen ≥ 3:1. Datakleuren (winst blauw, verlies rood) niet aanpassen.
+- Dashboardstijl: rustige kaarten met een dunne rand en geen zware schaduw; kaarttitel ingetogen met een korte uitleg
+  eronder; filters als pil-knoppen met icoon (`data-icon` op `.filter`); grote cijfers in `--num-font`.
+- KPI-tegels altijd via `kpiTile(label, waarde, regel, deltaOf(...))` uit `public/common.js`. De badge toont een
+  verandering: groen beter, rood slechter, grijs gelijk, met een `title` die zegt waartegen. Team: laatste speelavond
+  tegenover de avonden daarvoor. Sessie: deze avond tegenover normaal. Speler: met tegenover zonder deze speler.
+- Lijngrafieken: vloeiend (monotone spline), hoofdlijn met `area: true` voor een zachte vlakvulling, geen vaste
+  stippen (alleen bij hover). Klassenamen in componenten specifiek houden (bijv. `.pitch-line`, niet `.line`).
 - Menu: Team, Sessies, Wedstrijden, Spelers (in- en uitklapbaar, met de namen eronder). Geen aparte analysepagina.
 - Spelerspagina begint met de spelerskaart (`public/playercard.js`): FC27-stijl in thuis- of uitkleuren, met foto of
   silhouet, overall, ingestelde positie, laatst gespeelde build en zes cijfers (seizoen, of face stats uit de ingevulde

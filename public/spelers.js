@@ -315,13 +315,15 @@ function renderPlayer() {
   const buildCount = {}; for (const r of rows) if (r.p.archetypeId) buildCount[r.p.archetypeId] = (buildCount[r.p.archetypeId] || 0) + 1;
   const buildText = Object.entries(buildCount).sort((a, b) => b[1] - a[1]).map(([id, n]) => `${archName(id)} (${n})`).join(', ');
   const ratings = rows.map(r => r.p.rating).filter(v => v !== null);
-  const tiles = [
-    // Rating, goals, assists en carrièrecijfers staan al op de spelerskaart; hier alleen wat daar niet staat.
-    ['Punten per wedstrijd', s.ppg ?? '–', `${s.W}W ${s.D}G ${s.L}V met deze speler`],
-    ['Tov verwachting', s.resid === null ? '–' : signed(s.resid, 2), 'team, met deze speler erbij'],
-    ['Minuten per wedstrijd', rows.length ? f0(minutes(rows) / rows.length) : '–', ''],
-  ];
-  $('#p-tiles').innerHTML = tiles.map(([l, v, m]) => `<div class="tile"><div class="label">${l}</div><div class="value">${v}</div><div class="meta">${m}</div></div>`).join('');
+  // Rating, goals, assists en carrièrecijfers staan al op de spelerskaart; hier alleen wat daar niet staat.
+  // Badges: met deze speler erbij tegenover de wedstrijden zonder.
+  const wo = summarize(ms.filter(m => !m.players.some(p => p.name === selected)));
+  const T = 'Met deze speler erbij tegenover de wedstrijden zonder';
+  $('#p-tiles').innerHTML = [
+    kpiTile('Punten per wedstrijd', s.ppg ?? '–', `${s.W}W ${s.D}G ${s.L}V met deze speler`, wo.n >= 3 ? deltaOf(s.ppg, wo.ppg, { digits: 2, title: T }) : null),
+    kpiTile('Tov verwachting', s.resid === null ? '–' : signed(s.resid, 2), 'team, met deze speler erbij', wo.n >= 3 ? deltaOf(s.resid, wo.resid, { digits: 2, title: T }) : null),
+    kpiTile('Minuten per wedstrijd', rows.length ? f0(minutes(rows) / rows.length) : '–', ''),
+  ].join('');
 
   const table_ = metricTable(ms, players);
   profileChart($('#chart-profile'), selected, table_);

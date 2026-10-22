@@ -83,16 +83,20 @@ function teamSummary(ms) {
 
 function render() {
   const ms = filtered(), s = summarize(ms), snap = DATA.snapshot;
-  $('#page-sub').textContent = `Samenvatting van ${ms.length} gevolgde wedstrijden${ms.length ? `, ${fmtDate(ms[0].ts)} tot ${fmtDate(ms[ms.length - 1].ts)}` : ''}.`;
+  // Badges: laatste speelavond tegenover de avonden daarvoor (binnen de gekozen periode).
+  const sess = sessionsOf(ms), lastS = sess.length >= 2 ? sess[sess.length - 1].matches : null;
+  const sl = lastS ? summarize(lastS) : null, sb = lastS ? summarize(ms.filter(m => !lastS.includes(m))) : null;
+  const T = 'Laatste speelavond tegenover de avonden daarvoor';
+  $('#page-sub').textContent = `Samenvatting van ${ms.length} gevolgde wedstrijden${ms.length ? `, ${fmtDate(ms[0].ts)} tot ${fmtDate(ms[ms.length - 1].ts)}` : ''}.${lastS ? ' De badges vergelijken de laatste speelavond met de avonden daarvoor.' : ''}`;
   const last5 = ms.slice(-5);
   $('#tiles').innerHTML = [
-    ['Wedstrijden', s.n, snap ? `van ${snap.gamesPlayed} volgens EA · rating ${snap.skillRating}` : ''],
-    ['Winst', fmtPct(s.winPct), `${s.W}W ${s.D}G ${s.L}V`],
-    ['Punten per wedstrijd', s.ppg ?? '–', 'bij 3 / 1 / 0'],
-    ['Doelpunten', `${s.gfAvg ?? '–'} – ${s.gaAvg ?? '–'}`, 'voor en tegen per wedstrijd'],
-    ['Tov verwachting', s.resid === null ? '–' : signed(s.resid, 2), 'doelsaldo, gecorrigeerd'],
-    ['Vorm', last5.length ? pills(last5) : '–', 'laatste 5'],
-  ].map(([l, v, m]) => `<div class="tile"><div class="label">${l}</div><div class="value">${v}</div><div class="meta">${m}</div></div>`).join('');
+    kpiTile('Wedstrijden', s.n, snap ? `van ${snap.gamesPlayed} volgens EA · rating ${snap.skillRating}` : ''),
+    kpiTile('Winst', fmtPct(s.winPct), `${s.W}W ${s.D}G ${s.L}V`, sl && deltaOf(sl.winPct, sb.winPct, { digits: 0, unit: ' pt', min: 1, title: T })),
+    kpiTile('Punten per wedstrijd', s.ppg ?? '–', 'bij 3 / 1 / 0', sl && deltaOf(sl.ppg, sb.ppg, { digits: 2, title: T })),
+    kpiTile('Doelpunten', `${s.gfAvg ?? '–'}–${s.gaAvg ?? '–'}`, 'voor en tegen per wedstrijd', sl && deltaOf(sl.gfAvg - sl.gaAvg, sb.gfAvg - sb.gaAvg, { digits: 1, title: `${T} (doelsaldo per wedstrijd)` })),
+    kpiTile('Tov verwachting', s.resid === null ? '–' : signed(s.resid, 2), 'doelsaldo, gecorrigeerd', sl && deltaOf(sl.resid, sb.resid, { digits: 2, title: T })),
+    `<div class="tile"><div class="tile-head"><span class="label">Vorm</span></div><div class="value form">${last5.length ? pills(last5) : '–'}</div><div class="meta">laatste 5</div></div>`,
+  ].join('');
 
   $('#team-summary').innerHTML = teamSummary(ms);
   const k = DATA.club.kits;
@@ -108,7 +112,7 @@ function render() {
   const formEl = $('#chart-form');
   const gd = rolling(ms.map(m => m.goalDiff), 5), rs = rolling(ms.map(m => m.resid), 5);
   lineChart(formEl, [
-    { name: 'Doelsaldo', color: 'var(--s1)', values: gd.map((v, i) => ({ i, v })) },
+    { name: 'Doelsaldo', color: 'var(--s1)', area: true, values: gd.map((v, i) => ({ i, v })) },
     { name: 'Tov verwachting', color: 'var(--s2)', values: rs.map((v, i) => ({ i, v })) },
   ], ms.map((m, i) => i === 0 || fmtDate(ms[i - 1].ts) !== fmtDate(m.ts) ? fmtDate(m.ts) : ''), { height: 220, tipAt: i => `<b>Na ${esc(ms[i].opponent.name)} (${fmtDate(ms[i].ts)})</b>Doelsaldo, gemiddeld over 5: ${signed(gd[i])}<br>Tov verwachting, gemiddeld over 5: ${signed(rs[i])}` });
   if (ms.length) legend(formEl, [{ label: 'Doelsaldo', color: 'var(--s1)' }, { label: 'Tov verwachting', color: 'var(--s2)' }], true);

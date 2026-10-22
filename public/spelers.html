@@ -25,14 +25,14 @@
     <button type="button" role="tab" class="tab" id="tab-btn-build" aria-controls="tab-build" aria-selected="false">Advies</button>
   </div>
   <div class="filters">
-        <label class="filter">Periode
+        <label class="filter" data-icon="calendar">Periode
           <select id="range">
             <option value="all">Alles</option>
             <option value="30">Laatste 30 dagen</option>
             <option value="7">Laatste 7 dagen</option>
           </select>
         </label>
-        <label class="filter">Type
+        <label class="filter" data-icon="trophy">Type
           <select id="type">
             <option value="all">League en playoff</option>
             <option value="leagueMatch">League</option>
@@ -46,7 +46,7 @@
   <section class="card">
     <div class="profile">
       <div>
-        <h2>Samenvatting</h2>
+        <h2 class="card-title">Samenvatting</h2>
         <p class="summary" id="p-summary"></p>
       </div>
       <div class="tiles" id="p-tiles"></div>

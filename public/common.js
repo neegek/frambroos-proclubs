@@ -122,7 +122,7 @@ function barChart(container, items, { height = 220, yMin = 0, yMax, fmt = v => v
   const y0 = Math.min(lo, ticks[0]), y1 = Math.max(hi, ticks[ticks.length - 1]);
   const sy = v => inner.y + inner.h - (v - y0) / (y1 - y0) * inner.h;
   yAxis(svg, inner, sy, ticks, fmt);
-  const band = inner.w / items.length, bw = Math.max(3, Math.min(36, band - 2));
+  const band = inner.w / items.length, bw = Math.max(3, Math.min(26, band * 0.62));
   const baseline = sy(Math.max(0, y0));
   if (zeroLine || y0 < 0) el('line', { class: 'axis', x1: inner.x, x2: inner.x + inner.w, y1: baseline, y2: baseline, stroke: 'var(--axis)' }, svg);
   items.forEach((it, i) => {
@@ -167,6 +167,17 @@ function scatter(container, points, { height = 240, xLabel, yLabel, xPad = 50, x
 }
 
 // Meerdere lijnen op een gedeelde x-as (index). series: {name, color, values: [{i, v}]}
+// Monotone kubische spline (Fritsch–Carlson) als SVG-pad door de punten.
+function smoothPath(pts) {
+  const n = pts.length; if (n < 3) return pts.map((p, i) => `${i ? 'L' : 'M'}${p[0]},${p[1]}`).join(' ');
+  const dx = [], dy = [], m = [];
+  for (let i = 0; i < n - 1; i++) { dx.push(pts[i + 1][0] - pts[i][0]); dy.push((pts[i + 1][1] - pts[i][1]) / dx[i]); }
+  m.push(dy[0]); for (let i = 1; i < n - 1; i++) m.push(dy[i - 1] * dy[i] <= 0 ? 0 : (dy[i - 1] + dy[i]) / 2); m.push(dy[n - 2]);
+  for (let i = 0; i < n - 1; i++) { if (dy[i] === 0) { m[i] = 0; m[i + 1] = 0; continue; } const a = m[i] / dy[i], b = m[i + 1] / dy[i], h = a * a + b * b; if (h > 9) { const t = 3 / Math.sqrt(h); m[i] = t * a * dy[i]; m[i + 1] = t * b * dy[i]; } }
+  let d = `M${pts[0][0]},${pts[0][1]}`;
+  for (let i = 0; i < n - 1; i++) { const h = dx[i] / 3; d += ` C${pts[i][0] + h},${pts[i][1] + m[i] * h} ${pts[i + 1][0] - h},${pts[i + 1][1] - m[i + 1] * h} ${pts[i + 1][0]},${pts[i + 1][1]}`; }
+  return d;
+}
 function lineChart(container, series, xLabels, { height = 260, yMin, yMax, tipAt } = {}) {
   if (!series.length || !xLabels.length) { container.innerHTML = '<p class="empty">Nog geen data.</p>'; return; }
   const width = Math.max(320, Math.min(1100, container.clientWidth || 800));
@@ -179,20 +190,36 @@ function lineChart(container, series, xLabels, { height = 260, yMin, yMax, tipAt
   yAxis(svg, inner, sy, yt);
   let lastX = -Infinity;
   xLabels.forEach((l, i) => { if (l && sx(i) - lastX > 56) { text(svg, sx(i), inner.y + inner.h + 18, l, { class: 'tick', 'text-anchor': 'middle' }); lastX = sx(i); } });
-  for (const s of series) {
-    const d = s.values.map((p, k) => `${k === 0 || s.values[k - 1].i !== p.i - 1 ? 'M' : 'L'}${sx(p.i)},${sy(p.v)}`).join(' ');
-    el('path', { d, fill: 'none', stroke: s.color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, svg);
-    for (const p of s.values) el('circle', { cx: sx(p.i), cy: sy(p.v), r: 3, fill: s.color, stroke: 'var(--surface)', 'stroke-width': 1.5 }, svg);
-  }
+  // Vloeiende lijn (monotone kubische interpolatie: schiet niet over de punten heen) en optioneel een zachte vlakvulling.
+  const gid = `g${Math.random().toString(36).slice(2, 8)}`;
+  const defs = el('defs', {}, svg);
+  series.forEach((s, si) => {
+    const runs = []; for (const p of s.values) { const r = runs[runs.length - 1]; if (r && r[r.length - 1].i === p.i - 1) r.push(p); else runs.push([p]); }
+    for (const run of runs) {
+      const pts = run.map(p => [sx(p.i), sy(p.v)]);
+      const d = smoothPath(pts);
+      if (s.area && pts.length > 1) {
+        if (!defs.querySelector(`#${gid}-${si}`)) {
+          const g = el('linearGradient', { id: `${gid}-${si}`, x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
+          el('stop', { offset: '0%', 'stop-color': s.color, 'stop-opacity': 0.22 }, g); el('stop', { offset: '100%', 'stop-color': s.color, 'stop-opacity': 0 }, g);
+        }
+        const base = inner.y + inner.h;
+        el('path', { d: `${d} L${pts[pts.length - 1][0]},${base} L${pts[0][0]},${base} Z`, fill: `url(#${gid}-${si})`, stroke: 'none' }, svg);
+      }
+      el('path', { d, fill: 'none', stroke: s.color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, svg);
+    }
+  });
+  const dots = series.map(s => el('circle', { r: 4.5, fill: s.color, stroke: 'var(--surface)', 'stroke-width': 2, visibility: 'hidden' }, svg));
   const cross = el('line', { x1: 0, x2: 0, y1: inner.y, y2: inner.y + inner.h, stroke: 'var(--axis)', 'stroke-dasharray': '3 3', visibility: 'hidden' }, svg);
   const hit = el('rect', { class: 'hit', x: inner.x, y: inner.y, width: inner.w, height: inner.h }, svg);
   hit.addEventListener('mousemove', e => {
     const r = svg.getBoundingClientRect(), px = (e.clientX - r.left) * width / r.width;
     const i = Math.max(0, Math.min(n - 1, Math.round((px - inner.x) / inner.w * (n - 1))));
     cross.setAttribute('x1', sx(i)); cross.setAttribute('x2', sx(i)); cross.setAttribute('visibility', 'visible');
+    series.forEach((s, si) => { const p = s.values.find(q => q.i === i); if (p) { dots[si].setAttribute('cx', sx(i)); dots[si].setAttribute('cy', sy(p.v)); dots[si].setAttribute('visibility', 'visible'); } else dots[si].setAttribute('visibility', 'hidden'); });
     if (tipAt) showTip(tipAt(i), e);
   });
-  hit.addEventListener('mouseleave', () => { cross.setAttribute('visibility', 'hidden'); hideTip(); });
+  hit.addEventListener('mouseleave', () => { cross.setAttribute('visibility', 'hidden'); dots.forEach(d => d.setAttribute('visibility', 'hidden')); hideTip(); });
 }
 
 function legend(container, entries, line = false) {
@@ -396,3 +423,17 @@ function kitShirt(c, label) {
 
 // EA-positiecodes (proPos van een pro: de ingestelde hoofdpositie).
 const POS_CODE = ['GK', 'SW', 'RWB', 'RB', 'RCB', 'CB', 'LCB', 'LB', 'LWB', 'RDM', 'CDM', 'LDM', 'RM', 'RCM', 'CM', 'LCM', 'LM', 'RAM', 'CAM', 'LAM', 'RF', 'CF', 'LF', 'RW', 'RS', 'ST', 'LS', 'LW'];
+
+// ---------- KPI-tegels ----------
+// Label met badge (verandering; groen = beter, rood = slechter, grijs = gelijk), groot cijfer, korte regel.
+function kpiTile(label, value, meta, delta, { small = false } = {}) {
+  const badge = delta ? `<span class="kpi-badge ${delta.good === true ? 'up' : delta.good === false ? 'down' : ''}"${delta.title ? ` title="${esc(delta.title)}"` : ''}>${delta.txt}</span>` : '';
+  return `<div class="tile"><div class="tile-head"><span class="label">${label}</span>${badge}</div><div class="value${small ? ' small' : ''}">${value}</div><div class="meta">${meta || ''}</div></div>`;
+}
+// Verschil a − b als badge. hib: hoger is beter. min: kleiner verschil telt als gelijk.
+function deltaOf(a, b, { digits = 1, unit = '', hib = true, min = 0.05, title = '' } = {}) {
+  if (a === null || a === undefined || b === null || b === undefined || Number.isNaN(a) || Number.isNaN(b)) return null;
+  const d = a - b;
+  if (Math.abs(d) < min) return { txt: `±0${unit}`, good: null, title };
+  return { txt: `${d > 0 ? '+' : '−'}${Math.abs(d).toFixed(digits)}${unit}`, good: hib ? d > 0 : d < 0, title };
+}

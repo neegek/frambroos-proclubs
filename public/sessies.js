@@ -88,14 +88,16 @@ function render() {
   const opp = avg(ms.map(m => m.opponent.skillRating).filter(Boolean));
   const moms = ms.flatMap(m => m.players.filter(p => p.mom).map(p => p.name));
   const momCount = Object.entries(moms.reduce((a, n) => (a[n] = (a[n] || 0) + 1, a), {})).sort((a, b) => b[1] - a[1]);
+  // Badges: deze avond tegenover normaal (alle andere wedstrijden).
+  const no = summarize(others), TN = 'Deze avond tegenover normaal (alle andere wedstrijden)';
   $('#s-tiles').innerHTML = [
-    ['Uitslag', `${sm.W}-${sm.D}-${sm.L}`, 'gewonnen, gelijk, verloren'],
-    ['Punten per wedstrijd', sm.ppg, `normaal ${summarize(others).ppg ?? '–'}`],
-    ['Doelpunten', `${sm.gf} – ${sm.ga}`, `${sm.gfAvg} – ${sm.gaAvg} per wedstrijd`],
-    ['Tov verwachting', signed(sm.resid, 2), 'doelsaldo per wedstrijd'],
-    ['Tegenstanders', opp ? Math.round(opp) : '–', opp && own ? `${strengthLabel(opp - own)} dan jullie (${own})` : ''],
-    ['Man of the match', momCount.length ? esc(momCount[0][0]) : '–', momCount.length ? momCount.map(([n, c]) => `${esc(n)} ${c}×`).join(', ') : ''],
-  ].map(([l, v, m]) => `<div class="tile"><div class="label">${l}</div><div class="value" style="font-size:${String(v).length > 10 ? 18 : 28}px">${v}</div><div class="meta">${m}</div></div>`).join('');
+    kpiTile('Uitslag', `${sm.W}-${sm.D}-${sm.L}`, 'gewonnen, gelijk, verloren'),
+    kpiTile('Punten per wedstrijd', sm.ppg, `normaal ${no.ppg ?? '–'}`, others.length >= 3 ? deltaOf(sm.ppg, no.ppg, { digits: 2, title: TN }) : null),
+    kpiTile('Doelpunten', `${sm.gf}–${sm.ga}`, `${sm.gfAvg}–${sm.gaAvg} per wedstrijd`, others.length >= 3 ? deltaOf(sm.gfAvg - sm.gaAvg, no.gfAvg - no.gaAvg, { digits: 1, title: `${TN} (doelsaldo per wedstrijd)` }) : null),
+    kpiTile('Tov verwachting', signed(sm.resid, 2), 'doelsaldo per wedstrijd', others.length >= 3 ? deltaOf(sm.resid, no.resid, { digits: 2, title: TN }) : null),
+    kpiTile('Tegenstanders', opp ? Math.round(opp) : '–', opp && own ? `${strengthLabel(opp - own)} dan jullie (${own})` : ''),
+    kpiTile('Man of the match', momCount.length ? esc(momCount[0][0]) : '–', momCount.length ? momCount.map(([n, c]) => `${esc(n)} ${c}×`).join(', ') : '', null, { small: true }),
+  ].join('');
 
   const chartEl = $('#s-chart');
   barChart(chartEl, ms.map(m => ({ label: fmtTime(m.ts), value: m.goalDiff, color: resultColor(m.result), tip: matchTip(m) })), { yMin: -1, zeroLine: true, height: 180 });
