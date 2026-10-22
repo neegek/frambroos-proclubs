@@ -143,7 +143,7 @@ function render() {
     return { name, n: rows.length, rating: avg(rows.map(r => r.p.rating).filter(v => v !== null)), g, a: as, ga90: mins ? 90 * (g + as) / mins : null, mom: rows.reduce((x, r) => x + (r.p.mom || 0), 0), ppg: a.ppg, resid: a.resid, delta: b.n ? a.resid - b.resid : null, nWithout: b.n };
   }).sort((x, y) => (y.rating ?? 0) - (x.rating ?? 0));
   table($('#tbl-squad'), [
-    { label: 'Speler', render: r => `<a href="/spelers.html#${encodeURIComponent(r.name)}">${esc(r.name)}</a>` }, { label: 'N', num: true, key: 'n' }, { label: 'Rating', num: true, render: r => f2(r.rating) },
+    { label: 'Speler', render: r => `<a href="spelers.html#${encodeURIComponent(r.name)}">${esc(r.name)}</a>` }, { label: 'N', num: true, key: 'n' }, { label: 'Rating', num: true, render: r => f2(r.rating) },
     { label: 'Goals', num: true, key: 'g' }, { label: 'Assists', num: true, key: 'a' }, { label: 'G + A per 90', num: true, render: r => f2(r.ga90) }, { label: 'MOTM', num: true, key: 'mom' },
     { label: 'Punten/wed. met', num: true, key: 'ppg' }, { label: 'Tov verwachting met', num: true, render: r => residCell(r.resid) }, { label: 'Met tegenover zonder', num: true, render: r => r.nWithout >= 3 ? residCell(r.delta) : '–' },
   ], squad);

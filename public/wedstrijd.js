@@ -53,7 +53,7 @@ function pitch(players, title, link) {
   for (const p of players) (byLine[p.pos] || byLine.midfielder).push(p);
   const chip = p => {
     const inner = `<b>${esc(p.name)}</b><small>${esc(archName(p.archetypeId))} · ${p.rating ?? '–'}${p.mom ? ' · ★' : ''}</small>`;
-    return link ? `<a class="pchip" href="/spelers.html#${encodeURIComponent(p.name)}">${inner}</a>` : `<div class="pchip">${inner}</div>`;
+    return link ? `<a class="pchip" href="spelers.html#${encodeURIComponent(p.name)}">${inner}</a>` : `<div class="pchip">${inner}</div>`;
   };
   const ai = Math.max(0, 11 - players.length);
   return `<div class="pitch-wrap"><h3>${esc(title)}</h3><div class="pitch">${LINES.map(([k, label]) => `<div class="pitch-line"><span class="line-label">${label}</span><div class="slots">${byLine[k].length ? byLine[k].map(chip).join('') : '<span class="slot-ai">AI</span>'}</div></div>`).join('')}</div><div class="ai-note">${numWord(players.length)} ${players.length === 1 ? 'mens' : 'mensen'}, ${numWord(ai)} AI</div></div>`;
@@ -91,7 +91,7 @@ function h2h(m) {
 function playerTable(el, players, link) {
   const rows = [...players].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
   table(el, [
-    { label: 'Speler', render: p => link ? `<a href="/spelers.html#${encodeURIComponent(p.name)}">${esc(p.name)}</a>${p.mom ? ' ★' : ''}` : `${esc(p.name)}${p.mom ? ' ★' : ''}` },
+    { label: 'Speler', render: p => link ? `<a href="spelers.html#${encodeURIComponent(p.name)}">${esc(p.name)}</a>${p.mom ? ' ★' : ''}` : `${esc(p.name)}${p.mom ? ' ★' : ''}` },
     { label: 'Positie', render: p => POS_NL[p.pos] || p.pos }, { label: 'Build', render: p => esc(archName(p.archetypeId)) },
     { label: 'Rating', num: true, render: p => p.rating ?? '–' }, { label: 'Goals', num: true, key: 'goals' }, { label: 'Assists', num: true, key: 'assists' },
     { label: 'Schoten', num: true, key: 'shots' }, { label: 'Passes', num: true, render: p => `${p.passesMade}/${p.passAttempts}` },
@@ -115,7 +115,7 @@ function render() {
   $('#page-sub').textContent = `${cap(fmtDayLong(m.ts))}, ${fmtTime(m.ts)} · ${m.matchType === 'playoffMatch' ? 'playoff' : 'league'}`;
   // vorige en volgende wedstrijd, in volgorde van spelen
   const prev = DATA.matches[idx - 1], next = DATA.matches[idx + 1];
-  $('#m-nav').innerHTML = `${prev ? `<a class="more-link" href="/wedstrijd.html?id=${prev.matchId}">← Vorige: ${esc(prev.opponent.name)}</a>` : '<span></span>'}${next ? `<a class="more-link" href="/wedstrijd.html?id=${next.matchId}">Volgende: ${esc(next.opponent.name)} →</a>` : '<span></span>'}`;
+  $('#m-nav').innerHTML = `${prev ? `<a class="more-link" href="wedstrijd.html?id=${prev.matchId}">← Vorige: ${esc(prev.opponent.name)}</a>` : '<span></span>'}${next ? `<a class="more-link" href="wedstrijd.html?id=${next.matchId}">Volgende: ${esc(next.opponent.name)} →</a>` : '<span></span>'}`;
   $('#m-score').innerHTML = `<div class="sl-team">${kitShirt(kits?.home, 'Frambroos')}<span>Frambroos</span></div>
     <div class="sl-score"><span>${m.goals}–${m.goalsAgainst}</span><span class="pill ${m.result}">${m.result === 'W' ? 'Gewonnen' : m.result === 'L' ? 'Verloren' : 'Gelijk'}</span></div>
     <div class="sl-team">${kitShirt(m.opponent.kit, m.opponent.name)}<span>${esc(m.opponent.name)}</span></div>`;
@@ -130,6 +130,6 @@ function render() {
 
 // Terug naar de lijst: gebruik de browsergeschiedenis als we daar vandaan kwamen (filters en scrollpositie blijven), anders een gewone link.
 $('#back-link').addEventListener('click', e => {
-  try { if (document.referrer && new URL(document.referrer).pathname === '/wedstrijden.html' && history.length > 1) { e.preventDefault(); history.back(); } } catch {}
+  try { if (document.referrer && new URL(document.referrer).pathname.endsWith('/wedstrijden.html') && history.length > 1) { e.preventDefault(); history.back(); } } catch {}
 });
 loadData().then(render).catch(showError);

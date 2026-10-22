@@ -4,3 +4,4 @@ data/*.sqlite-shm
 data/collect.log
 .DS_Store
 .claude/settings.local.json
+dist/

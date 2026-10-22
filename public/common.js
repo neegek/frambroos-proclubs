@@ -21,17 +21,22 @@ const ICONS = {
   analysis: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
   theme: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 0 0 17z" fill="currentColor" stroke="none"/></svg>',
 };
-const LOGO = '<span class="mark"><img src="/crest.png" alt="" width="44" height="44"></span>';
+// Paden zijn relatief, zodat de app ook als losse bestanden werkt (statische export, src/export.js).
+// In de export staat window.FRAMBROOS_STATIC: data komt dan uit bestanden naast de pagina en alles is alleen-lezen.
+const STATIC = !!window.FRAMBROOS_STATIC;
+const API = STATIC ? { data: 'data.json', builds: 'builds.json', photos: 'photos.json' } : { data: '/api/data', builds: '/api/builds', photos: '/api/photos' };
+const PAGE = location.pathname.split('/').pop() || 'index.html';
+const LOGO = '<span class="mark"><img src="crest.png" alt="" width="44" height="44"></span>';
 const NAV = [
-  { href: '/', label: 'Team', icon: 'team' },
-  { href: '/sessies.html', label: 'Sessies', icon: 'sessions' },
-  { href: '/wedstrijden.html', label: 'Wedstrijden', icon: 'matches' },
-  { href: '/spelers.html', label: 'Spelers', icon: 'players', group: true },
+  { href: 'index.html', label: 'Team', icon: 'team' },
+  { href: 'sessies.html', label: 'Sessies', icon: 'sessions' },
+  { href: 'wedstrijden.html', label: 'Wedstrijden', icon: 'matches' },
+  { href: 'spelers.html', label: 'Spelers', icon: 'players', group: true },
 ];
 (function mountShell() {
   const side = $('#sidebar'); if (!side) return;
-  const path = location.pathname === '/index.html' ? '/' : location.pathname === '/wedstrijd.html' ? '/wedstrijden.html' : location.pathname;
-  side.innerHTML = `<a class="brand" href="/">${LOGO}<span>Frambroos<b>Coach</b></span></a>
+  const path = PAGE === 'wedstrijd.html' ? 'wedstrijden.html' : PAGE;
+  side.innerHTML = `<a class="brand" href="index.html">${LOGO}<span>Frambroos<b>Coach</b></span></a>
     <nav class="side-nav" aria-label="Hoofdmenu">${NAV.map(n => n.group ? `<div class="nav-group" id="nav-group-players"><a href="${n.href}" class="nav-group-head ${n.href === path ? 'in-group' : ''}" aria-controls="player-nav" aria-expanded="true">${ICONS[n.icon]}<span>${n.label}</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><div class="sub-nav" id="player-nav" aria-label="Spelers"></div></div>` : `<a href="${n.href}" class="${n.href === path ? 'active' : ''}"${n.href === path ? ' aria-current="page"' : ''}>${ICONS[n.icon]}<span>${n.label}</span></a>`).join('')}</nav>
     <div class="side-foot"><div class="club" id="club-box"><div class="club-name">Frambroos</div><div class="club-meta">Data laden…</div></div>
     <button id="theme" class="icon-btn" type="button" title="Wissel tussen thuistenue (donker) en uittenue (licht)" aria-label="Wissel tussen thuistenue, donker, en uittenue, licht">${ICONS.theme}</button></div>`;
@@ -39,9 +44,9 @@ const NAV = [
 // Spelersnamen onder het kopje Spelers in het menu; de actieve speler volgt de hash op de spelerspagina.
 function fillPlayerNav() {
   const nav = $('#player-nav'); if (!nav || !DATA) return;
-  const onPlayers = location.pathname === '/spelers.html';
+  const onPlayers = PAGE === 'spelers.html';
   const current = onPlayers ? decodeURIComponent(location.hash.slice(1)) || (DATA.players.includes('Neegek') ? 'Neegek' : DATA.players[0]) : null;
-  nav.innerHTML = DATA.players.map(n => `<a href="/spelers.html#${encodeURIComponent(n)}" class="${n === current ? 'active' : ''}"${n === current ? ' aria-current="page"' : ''}>${esc(n)}</a>`).join('');
+  nav.innerHTML = DATA.players.map(n => `<a href="spelers.html#${encodeURIComponent(n)}" class="${n === current ? 'active' : ''}"${n === current ? ' aria-current="page"' : ''}>${esc(n)}</a>`).join('');
 }
 addEventListener('hashchange', () => fillPlayerNav());
 
@@ -74,9 +79,15 @@ function showTip(html, ev) {
   let x = ev.clientX + pad, y = ev.clientY + pad;
   if (x + w > innerWidth - 8) x = ev.clientX - w - pad;
   if (y + h > innerHeight - 8) y = ev.clientY - h - pad;
-  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  tip.style.left = Math.max(8, x) + 'px'; tip.style.top = Math.max(8, y) + 'px';
 }
 const hideTip = () => { tip.hidden = true; };
+// Telefoon: een tik op een grafiek toont dezelfde tooltip als bewegen met de muis; een tik ernaast sluit hem.
+document.addEventListener('pointerdown', e => {
+  if (e.pointerType === 'mouse') return;
+  if (e.target.closest?.('svg.chart .hit')) e.target.dispatchEvent(new MouseEvent('mousemove', { clientX: e.clientX, clientY: e.clientY, bubbles: true }));
+  else hideTip();
+});
 
 // ---------- svg helpers ----------
 function el(tag, attrs = {}, parent) {
@@ -125,6 +136,7 @@ function barChart(container, items, { height = 220, yMin = 0, yMax, fmt = v => v
   const band = inner.w / items.length, bw = Math.max(3, Math.min(26, band * 0.62));
   const baseline = sy(Math.max(0, y0));
   if (zeroLine || y0 < 0) el('line', { class: 'axis', x1: inner.x, x2: inner.x + inner.w, y1: baseline, y2: baseline, stroke: 'var(--axis)' }, svg);
+  let lastRight = -Infinity; // rechterrand van het vorige x-label, zodat labels op een smal scherm niet overlappen
   items.forEach((it, i) => {
     const x = inner.x + band * i + (band - bw) / 2;
     if (it.value !== null) {
@@ -139,7 +151,8 @@ function barChart(container, items, { height = 220, yMin = 0, yMax, fmt = v => v
       el('path', { d, fill: it.color || 'var(--s1)' }, svg);
       if (it.direct !== undefined) text(svg, x + bw / 2, (up ? top - 5 : bottom + 13), it.direct, { class: 'label-direct', 'text-anchor': 'middle' });
     }
-    if (it.label && i % labelEvery === 0) text(svg, x + bw / 2, inner.y + inner.h + 18, it.label, { class: 'tick', 'text-anchor': 'middle' });
+    const half = String(it.label || '').length * 3.4 + 4;
+    if (it.label && i % labelEvery === 0 && x + bw / 2 - half > lastRight) { text(svg, x + bw / 2, inner.y + inner.h + 18, it.label, { class: 'tick', 'text-anchor': 'middle' }); lastRight = x + bw / 2 + half; }
     const hit = el('rect', { class: 'hit', x: inner.x + band * i, y: inner.y, width: band, height: inner.h }, svg);
     if (it.tip) { hit.addEventListener('mousemove', e => showTip(it.tip, e)); hit.addEventListener('mouseleave', hideTip); }
   });
@@ -317,7 +330,7 @@ function filtered() {
 
 // ---------- laden ----------
 async function loadData() {
-  const res = await fetch('/api/data');
+  const res = await fetch(API.data);
   DATA = await res.json();
   DATA.matches = enrich(DATA.matches);
   DATA.model = fitModel(DATA.matches, DATA.snapshot?.skillRating);

@@ -20,7 +20,7 @@ function render() {
       <div class="match-rows">${ms.map(m => {
         const diff = m.opponent.skillRating && own ? m.opponent.skillRating - own : null;
         const str = diff === null ? '' : diff >= 250 ? 'veel sterker' : diff >= 100 ? 'sterker' : diff <= -100 ? 'zwakker' : 'gelijkwaardig';
-        return `<a class="match-row" href="/wedstrijd.html?id=${m.matchId}">
+        return `<a class="match-row" href="wedstrijd.html?id=${m.matchId}">
           <span class="mr-time">${fmtTime(m.ts)}</span>
           <span class="pill ${m.result}">${resLetter(m.result)}</span>
           <span class="mr-opp">${kitShirt(m.opponent.kit, m.opponent.name)}<span><b>${esc(m.opponent.name)}</b><small>${m.matchType === 'playoffMatch' ? 'playoff' : 'league'}${m.opponent.skillRating ? ` · rating ${m.opponent.skillRating}${str ? `, ${str}` : ''}` : ''} · ${m.players.length} tegen ${m.opponentPlayers.length} mensen${m.winnerByDnf ? ' · opgave' : ''}</small></span></span>
@@ -33,7 +33,7 @@ function render() {
 // Filters terugzetten als je via "Terug naar wedstrijden" terugkomt.
 try { const f = JSON.parse(sessionStorage.getItem('matchFilters') || 'null'); if (f) { $('#type').value = f.type; $('#result').value = f.res; } } catch {}
 // Oude adressen (/wedstrijden.html#<id>) doorsturen naar de wedstrijdpagina.
-const legacyHash = () => { if (/^#\d+$/.test(location.hash)) location.replace(`/wedstrijd.html?id=${location.hash.slice(1)}`); };
+const legacyHash = () => { if (/^#\d+$/.test(location.hash)) location.replace(`wedstrijd.html?id=${location.hash.slice(1)}`); };
 legacyHash();
 addEventListener('hashchange', legacyHash);
 for (const id of ['#type', '#result']) $(id).addEventListener('change', render);

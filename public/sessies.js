@@ -102,7 +102,7 @@ function render() {
   const chartEl = $('#s-chart');
   barChart(chartEl, ms.map(m => ({ label: fmtTime(m.ts), value: m.goalDiff, color: resultColor(m.result), tip: matchTip(m) })), { yMin: -1, zeroLine: true, height: 180 });
   table($('#s-matches'), [
-    { label: 'Tijd', render: r => fmtTime(r.ts) }, { label: 'Tegenstander', render: r => `<a href="/wedstrijd.html?id=${r.matchId}">${esc(r.opponent.name)}</a>` },
+    { label: 'Tijd', render: r => fmtTime(r.ts) }, { label: 'Tegenstander', render: r => `<a href="wedstrijd.html?id=${r.matchId}">${esc(r.opponent.name)}</a>` },
     { label: 'Rating', num: true, render: r => r.opponent.skillRating ? `${r.opponent.skillRating} <small>${own ? strengthLabel(r.opponent.skillRating - own) : ''}</small>` : '–' },
     { label: 'Mensen', num: true, render: r => r.opponentPlayers.length }, { label: 'Score', num: true, render: r => `${r.goals}–${r.goalsAgainst}${r.winnerByDnf ? ' <small>opgave</small>' : ''}` },
     { label: 'Uitslag', render: r => `<span class="pill ${r.result}">${r.result === 'D' ? 'G' : r.result === 'L' ? 'V' : 'W'}</span>` }, { label: 'Tov verw.', num: true, render: r => residCell(r.resid) },
@@ -142,7 +142,7 @@ function render() {
     return { name, n: here.length, rH, rT, d: rT === null || rH === null ? null : rH - rT, g: pSum(here, p => p.goals), a: pSum(here, p => p.assists), mom: pSum(here, p => p.mom), actions: evH.length ? pSum(evH, p => p.ev.ball_actions) / evH.length : null, notes: there.length < 3 ? '<small>Te weinig andere wedstrijden om mee te vergelijken.</small>' : notes.slice(0, 3).map(x => `<div>${x.html}</div>`).join('') || '<small>Op het eigen normale niveau.</small>' };
   }).sort((x, y) => (y.rH ?? 0) - (x.rH ?? 0));
   $('#s-summary').innerHTML = sessionSummary(ms, others, sm, names, opp, own, cmp, prow);
-  $('#s-players').innerHTML = `<div class="pcards">${prow.map(r => `<a class="pcard" href="/spelers.html#${encodeURIComponent(r.name)}">
+  $('#s-players').innerHTML = `<div class="pcards">${prow.map(r => `<a class="pcard" href="spelers.html#${encodeURIComponent(r.name)}">
     <div class="pcard-head"><span class="pcard-name">${esc(r.name)}</span><span class="pcard-rating">${f2(r.rH)}</span></div>
     <div class="pcard-sub">${r.n} ${r.n === 1 ? 'wedstrijd' : 'wedstrijden'} · normaal ${f2(r.rT)} ${r.d === null ? '' : residCell(r.d)}</div>
     <div class="pcard-stats"><span><b>${r.g}</b> goals</span><span><b>${r.a}</b> assists</span><span><b>${r.mom}</b> MOTM</span><span><b>${f1(r.actions)}</b> balacties</span></div>

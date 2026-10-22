@@ -16,6 +16,7 @@
     "predashboard": "npm run --silent sync",
     "dashboard": "node src/server.js",
     "schedule:install": "bash scripts/install-schedule.sh",
-    "schedule:uninstall": "bash scripts/uninstall-schedule.sh"
+    "schedule:uninstall": "bash scripts/uninstall-schedule.sh",
+    "export": "node src/export.js"
   }
 }

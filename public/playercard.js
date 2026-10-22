@@ -47,7 +47,7 @@ function render(name) {
     <div class="fut" role="img" aria-label="Spelerskaart van ${esc(name)}: overall ${career?.proOverall ?? 'onbekend'}, ${pos ?? ''}, ${info ? info.name : ''}">
       <div class="fut-inner">
         <div class="fut-top">
-          <div class="fut-ovr"><b>${career?.proOverall ?? '–'}</b><span>${pos ?? ''}</span><img src="/crest.png" alt="" width="34" height="34"></div>
+          <div class="fut-ovr"><b>${career?.proOverall ?? '–'}</b><span>${pos ?? ''}</span><img src="crest.png" alt="" width="34" height="34"></div>
           <div class="fut-photo">${photo ? `<img src="${photo}" alt="">` : silhouette(kit)}</div>
         </div>
         <div class="fut-name">${esc(name)}</div>
@@ -66,5 +66,5 @@ function render(name) {
   </div>`;
 }
 
-window.PlayerCard = { load: () => fetch('/api/photos').then(r => r.json()).then(p => { PHOTOS = p || {}; }), render };
+window.PlayerCard = { load: () => fetch(API.photos).then(r => r.json()).then(p => { PHOTOS = p || {}; }), render };
 })();

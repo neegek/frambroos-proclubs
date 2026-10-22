@@ -1,6 +1,26 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "dashboard", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dashboard"], "port": 3737 }
+    {
+      "name": "dashboard",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dashboard"
+      ],
+      "port": 3737
+    },
+    {
+      "name": "export",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "3838",
+        "-d",
+        "dist"
+      ],
+      "port": 3838
+    }
   ]
 }

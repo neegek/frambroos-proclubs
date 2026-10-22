@@ -56,14 +56,17 @@ function profileChart(container, name, table) {
     return { mt, v, rel: Math.max(-1, Math.min(1, rel)) * 100 };
   });
   if (!items.length) { container.innerHTML = '<p class="empty">Nog te weinig wedstrijden voor een profiel.</p>'; return; }
-  const width = Math.max(320, Math.min(1100, container.clientWidth || 800)), rowH = 24, left = 230, height = items.length * rowH + 28;
+  // Breed: label links van de balk. Smal (telefoon): label boven de balk, zodat de balk de volle breedte houdt.
+  const width = Math.max(300, Math.min(1100, container.clientWidth || 800)), narrow = width < 560;
+  const rowH = narrow ? 40 : 24, left = narrow ? 8 : 230, labelH = narrow ? 18 : 0, height = items.length * rowH + 28;
   const svg = el('svg', { class: 'chart', viewBox: `0 0 ${width} ${height}`, role: 'img' }); container.appendChild(svg);
   const x0 = left, w = width - left - 16, sx = v => x0 + w / 2 + (v / 100) * (w / 2);
   const g = el('g', { class: 'grid' }, svg);
-  for (const t of [-100, -50, 0, 50, 100]) { el('line', { x1: sx(t), x2: sx(t), y1: 0, y2: items.length * rowH, stroke: t === 0 ? 'var(--axis)' : undefined }, g); text(svg, sx(t), items.length * rowH + 16, `${t > 0 ? '+' : ''}${t}%`, { class: 'tick', 'text-anchor': 'middle' }); }
+  for (const t of narrow ? [-100, 0, 100] : [-100, -50, 0, 50, 100]) { el('line', { x1: sx(t), x2: sx(t), y1: 0, y2: items.length * rowH, stroke: t === 0 ? 'var(--axis)' : undefined }, g); text(svg, sx(t), items.length * rowH + 16, `${t > 0 ? '+' : ''}${t}%`, { class: 'tick', 'text-anchor': 'middle' }); }
   items.forEach((it, i) => {
-    const y = i * rowH + 4, h = rowH - 8;
-    text(svg, left - 10, y + h - 3, it.mt.label, { 'text-anchor': 'end' });
+    const y = i * rowH + 4 + labelH, h = rowH - 8 - labelH;
+    if (narrow) text(svg, 0, y - 5, it.mt.label, { 'text-anchor': 'start' });
+    else text(svg, left - 10, y + h - 3, it.mt.label, { 'text-anchor': 'end' });
     const a = sx(0), b = sx(it.rel), x = Math.min(a, b), bw = Math.max(2, Math.abs(b - a));
     el('rect', { x, y, width: bw, height: h, rx: 4, fill: it.rel >= 0 ? 'var(--pos)' : 'var(--neg)' }, svg);
     const hit = el('rect', { class: 'hit', x: 0, y: i * rowH, width, height: rowH }, svg);
@@ -265,7 +268,7 @@ function renderSessionsTab(name) {
       <div class="pcard-rating">${f2(i.r)} <small>${i.d === null ? '' : residCell(i.d)}</small></div></div>
     <div class="pcard-stats"><span><b>${i.g}</b> goals</span><span><b>${i.a}</b> assists</span><span><b>${i.mom}</b> MOTM</span><span>${[...new Set(i.s.rows.map(x => archName(x.p.archetypeId)))].join(', ')}</span></div>
     <div class="pcard-notes">${i.notes.length ? i.notes.slice(0, 3).map(n => `<div>${n.html}</div>`).join('') : '<small>Op het eigen normale niveau.</small>'}</div>
-    <a class="more-link" href="/sessies.html#${i.s.id}">Naar deze sessie</a></section>`).join('');
+    <a class="more-link" href="sessies.html#${i.s.id}">Naar deze sessie</a></section>`).join('');
 }
 
 // ---------- tabblad Laatste wedstrijd ----------
@@ -276,7 +279,7 @@ function renderLastTab(name) {
   $('#pl-score').innerHTML = `<div class="sl-team">${kitShirt(DATA.club.kits?.home, 'Frambroos')}<span>Frambroos</span></div>
     <div class="sl-score"><span>${m.goals}–${m.goalsAgainst}</span><span class="pill ${m.result}">${m.result === 'W' ? 'Gewonnen' : m.result === 'L' ? 'Verloren' : 'Gelijk'}</span></div>
     <div class="sl-team">${kitShirt(m.opponent.kit, m.opponent.name)}<span>${esc(m.opponent.name)}</span></div>`;
-  $('#pl-meta').innerHTML = `${pDay(m.ts)}, ${pTime(m.ts)} · ${POS_NL[p.pos] || p.pos} · ${esc(archName(p.archetypeId))} · rating ${p.rating}${p.mom ? ' · man van de wedstrijd' : ''} · <a href="/wedstrijd.html?id=${m.matchId}">hele wedstrijd</a>`;
+  $('#pl-meta').innerHTML = `${pDay(m.ts)}, ${pTime(m.ts)} · ${POS_NL[p.pos] || p.pos} · ${esc(archName(p.archetypeId))} · rating ${p.rating}${p.mom ? ' · man van de wedstrijd' : ''} · <a href="wedstrijd.html?id=${m.matchId}">hele wedstrijd</a>`;
   const normal = avg(others.map(r => r.p.rating).filter(v => v !== null)), d = normal === null ? null : p.rating - normal;
   const notes = others.length >= 3 ? notesFor([last], others) : [];
   const bits = [p.goals ? `${numWord(p.goals)} ${p.goals === 1 ? 'doelpunt' : 'doelpunten'}` : '', p.assists ? `${numWord(p.assists)} ${p.assists === 1 ? 'assist' : 'assists'}` : ''].filter(Boolean);

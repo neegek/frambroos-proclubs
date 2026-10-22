@@ -442,12 +442,14 @@ function renderAdvice() {
   if (strengths.length) parts.push(`Om op te bouwen: ${joinAnd(strengths.slice(0, 2).map(x => x[0].toLowerCase()))}.`);
   if (behaviour.length) parts.push(`Zonder extra punten valt er winst te halen in het positiespel: ${behaviour[0].title.toLowerCase()}.`);
   if (saved && !build) parts.push(`<span class="muted">De ingevulde build is een ${archName(saved.archetype)}; voor deze build telt die niet mee.</span>`);
-  else if (!build || Object.keys(build).length <= 1) parts.push('<span class="muted">Vul de eigen build in, dan zegt het advies ook welke attributen al hoog genoeg zijn.</span>');
+  else if (!STATIC && (!build || Object.keys(build).length <= 1)) parts.push('<span class="muted">Vul de eigen build in, dan zegt het advies ook welke attributen al hoog genoeg zijn.</span>');
   $('#b-title').textContent = `Advies voor ${name}`;
   $('#b-summary').innerHTML = parts.join(' ');
 }
 
 function renderForm() {
+  // Gedeelde (statische) versie: alleen lezen; builds invullen kan in de lokale app.
+  if (STATIC) { $('.build-form-card .hint').textContent = 'Dit is een gedeelde versie om te bekijken. Een eigen build invullen kan in de lokale app.'; $('#build-form').innerHTML = ''; return; }
   const b = BUILDS[selected] || {};
   const num = (k, label, min = 1, max = 99) => `<label class="field"><span>${label}</span><input type="number" inputmode="numeric" name="${k}" min="${min}" max="${max}" value="${b[k] ?? ''}"></label>`;
   const ps = b.playstyles || {};
@@ -502,7 +504,7 @@ function context(name, matchIds) {
 
 $('#build-form').addEventListener('submit', save);
 window.BuildTab = {
-  load: () => fetch('/api/builds').then(r => r.json()).then(x => { BUILDS = x || {}; }),
+  load: () => fetch(API.builds).then(r => r.json()).then(x => { BUILDS = x || {}; }),
   show, context,
   has: name => !!BUILDS[name],
   get: name => BUILDS[name],

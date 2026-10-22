@@ -24,10 +24,17 @@ claude.ai-connectors in deze map uit. Alle stijl, logica en teksten komen uit di
 ```bash
 npm run dashboard   # haalt eerst de nieuwste database van GitHub, dan http://localhost:3737
 npm run collect     # handmatig verzamelen (normaal doet GitHub Actions dit)
+npm run export      # statische, alleen-lezen kopie in dist/ (om te delen)
 ```
 
 Geen `npm install` nodig (Node 22.5+, ingebouwde SQLite). De browserpreview heet `dashboard` in `.claude/launch.json`.
-Na een wijziging in `src/server.js` de server herstarten; voor `public/` volstaat herladen.
+Na een wijziging in `src/server.js` of `src/data.js` de server herstarten; voor `public/` volstaat herladen.
+
+**Delen.** De gedeelde versie is een artifact: https://claude.ai/artifact/Gsz3JZQGKpnKxM96Ht64zo (privé; delen via het
+Share-menu op de pagina). Bijwerken: `npm run export`, daarna `dist/artifact-index.html` opnieuw publiceren met dezelfde
+URL en de overige bestanden uit `dist/` als `files`. In de export staat `window.FRAMBROOS_STATIC`: data uit
+`data.json` naast de pagina en geen buildformulier. Links en paden in `public/` zijn daarom altijd relatief
+(`spelers.html#naam`, nooit `/spelers.html`), en data laden gaat altijd via `API` uit `public/common.js`.
 
 ## Data
 
@@ -53,7 +60,8 @@ Na een wijziging in `src/server.js` de server herstarten; voor `public/` volstaa
 - Stijl: donker thuistenue (standaard) en licht uittenue; tokens staan bovenaan `public/style.css`. Nieuwe kleuren eerst
   op contrast controleren: tekst ≥ 4,5:1, grafische elementen ≥ 3:1. Datakleuren (winst blauw, verlies rood) niet aanpassen.
 - Opbouw: het menu is een zwevende kaart (afgeronde hoeken, eigen schaduw `--float`) los van de paginarand; op
-  telefoon een afgeronde balk bovenaan. Alleen het menu heeft de paarse gloed (`--side-bg`), zonder kleurenbies.
+  telefoon (≤ 600 px) is het één balk onderin met de vier tabbladen met labels en de themaknop; geen tweede balk
+  bovenaan. Tablet: één balk bovenaan. Alleen het menu heeft de paarse gloed (`--side-bg`), zonder kleurenbies.
   Kaarten, tegels en sessie-items zijn effen donkerpaars (`--panel`) met dezelfde rand (`--panel-border`) en
   schaduw als het menu; in het uittenue wit. Pagina's zijn een strak raster van kaarten met 12 px tussenruimte. Titel en
   filters staan op één rij (filters rechts). Op Team komen eerst de KPI-tegels, daarna de grafiekkaarten. Een
@@ -91,7 +99,9 @@ for (const a of document.querySelectorAll('#player-nav a')) {
 out
 ```
 
-Controleer ook: geen fouten in de console, licht en donker, en telefoonbreedte (375 px) zonder horizontaal scrollen.
+Controleer ook: geen fouten in de console, licht en donker, en telefoonbreedte (375, 390 en 430 px, iPhone mini tot
+Pro Max) zonder horizontaal scrollen en zonder overlappende grafieklabels. Tikvlakken op telefoon minstens 40 px;
+grafiektooltips openen ook met een tik.
 
 ## Git
 
