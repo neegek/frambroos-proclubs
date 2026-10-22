@@ -10,6 +10,32 @@ const pct = (num, den) => den ? Math.round(100 * num / den) : null;
 const fmtPct = v => v === null || v === undefined ? '–' : `${v}%`;
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
+
+// ---------- app-shell: zijmenu ----------
+const ICONS = {
+  team: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>',
+  sessions: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+  players: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 14.8c1.6.8 2.7 2.6 3 5.2"/></svg>',
+  analysis: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+  theme: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 0 0 17z" fill="currentColor" stroke="none"/></svg>',
+};
+const LOGO = '<span class="mark"><svg viewBox="0 0 24 24"><g fill="#fff"><circle cx="9" cy="10" r="2.6"/><circle cx="15" cy="10" r="2.6"/><circle cx="12" cy="14.2" r="2.6"/><circle cx="8.6" cy="15.6" r="2.2" opacity=".85"/><circle cx="15.4" cy="15.6" r="2.2" opacity=".85"/><circle cx="12" cy="18.6" r="2" opacity=".75"/></g><path d="M12 7.6c-.4-2 .6-3.6 2.6-4.1" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></span>';
+const NAV = [
+  { href: '/', label: 'Team', icon: 'team' },
+  { href: '/sessies.html', label: 'Sessies', icon: 'sessions' },
+  { href: '/spelers.html', label: 'Spelers', icon: 'players' },
+  { href: '/analyse.html', label: 'Analyse', icon: 'analysis' },
+];
+(function mountShell() {
+  const side = $('#sidebar'); if (!side) return;
+  const path = location.pathname === '/index.html' ? '/' : location.pathname;
+  side.innerHTML = `<a class="brand" href="/">${LOGO}<span>Frambroos<b>Coach</b></span></a>
+    <nav class="side-nav" aria-label="Hoofdmenu">${NAV.map(n => `<a href="${n.href}" class="${n.href === path ? 'active' : ''}"${n.href === path ? ' aria-current="page"' : ''}>${ICONS[n.icon]}<span>${n.label}</span></a>`).join('')}</nav>
+    <div class="side-foot"><div class="club" id="club-box"><div class="club-name">Frambroos</div><div class="club-meta">Data laden…</div></div>
+    <button id="theme" class="icon-btn" type="button" title="Licht of donker" aria-label="Wissel licht of donker">${ICONS.theme}</button></div>`;
+})();
+const showError = e => { const b = $('#club-box .club-meta'); if (b) b.textContent = `Kon data niet laden: ${e.message}`; console.error(e); };
+
 let DATA = null;
 let playerSlot = new Map(); // vaste kleur per speler, onafhankelijk van filters
 
@@ -177,11 +203,13 @@ const hasHumanGk = m => m.opponentPlayers.some(p => p.pos === 'goalkeeper');
 const shapeOf = m => { const c = { defender: 0, midfielder: 0, forward: 0 }; for (const p of m.opponentPlayers) if (c[p.pos] !== undefined) c[p.pos]++; return `${c.defender}-${c.midfielder}-${c.forward}${hasHumanGk(m) ? ' +K' : ''}`; };
 const matchTip = m => `<b>${esc(m.opponent.name || 'Onbekend')} ${m.goals}–${m.goalsAgainst} (${m.result})</b>${fmtDateTime(m.ts)} · ${m.matchType === 'playoffMatch' ? 'playoff' : 'league'}${m.opponent.skillRating ? ` · skill ${m.opponent.skillRating}` : ''} · ${m.opponentPlayers.length} mensen${m.resid !== undefined ? ` · tov verwachting ${m.resid > 0 ? '+' : ''}${m.resid.toFixed(1)}` : ''}<br>${esc(m.players.map(p => p.name).join(', '))}`;
 
+// Nieuwe sessie na 3 uur zonder wedstrijd (zelfde grens als src/sessions.js).
+const SESSION_GAP = 180 * 60;
 function enrich(matches) {
   const sorted = [...matches].sort((a, b) => a.ts - b.ts);
   let session = 0, posInSession = 0, prev = null;
   for (const m of sorted) {
-    if (!prev || m.ts - prev.ts > 90 * 60) { session++; posInSession = 0; }
+    if (!prev || m.ts - prev.ts > SESSION_GAP) { session++; posInSession = 0; }
     posInSession++;
     const d = new Date(m.ts * 1000);
     Object.assign(m, { session, posInSession, weekday: d.getDay(), hour: d.getHours(), goalDiff: m.goals - m.goalsAgainst, lineup: lineupOf(m) });
@@ -227,7 +255,7 @@ function fitModel(matches, ownRating) {
 }
 
 function filtered() {
-  const range = $('#range').value, type = $('#type').value;
+  const range = $('#range')?.value || 'all', type = $('#type')?.value || 'all';
   const since = range === 'all' ? 0 : Date.now() / 1000 - Number(range) * 86400;
   return DATA.matches.filter(m => m.ts >= since && (type === 'all' || m.matchType === type));
 }
@@ -244,9 +272,8 @@ async function loadData() {
   for (const m of DATA.matches) for (const p of m.players) counts.set(p.name, (counts.get(p.name) || 0) + 1);
   DATA.players = [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([name]) => name);
   DATA.players.forEach((name, i) => playerSlot.set(name, i));
-  $('#club-name').textContent = DATA.club.name;
-  const s = DATA.snapshot;
-  $('#club-sub').textContent = `${s ? `${s.wins}W ${s.ties}G ${s.losses}V volgens EA · ` : ''}${DATA.matches.length} wedstrijden in de database · laatst opgehaald ${DATA.lastRun ? fmtDateTime(DATA.lastRun.started_at) : 'nooit'}${DATA.lastRun?.error ? ` (fout: ${DATA.lastRun.error})` : ''}`;
+  const s = DATA.snapshot, box = $('#club-box');
+  if (box) box.innerHTML = `<div class="club-name">${esc(DATA.club.name)}</div><div class="club-meta">${s ? `${s.wins}W ${s.ties}G ${s.losses}V · rating ${s.skillRating}<br>` : ''}${DATA.matches.length} wedstrijden gevolgd<br>laatste nieuwe data ${DATA.lastRun ? fmtDateTime(DATA.lastRun.started_at) : 'nooit'}${DATA.lastRun?.error ? ` · fout: ${esc(DATA.lastRun.error)}` : ''}</div>`;
   return DATA;
 }
 
@@ -257,3 +284,40 @@ $('#theme').addEventListener('click', () => {
   try { localStorage.setItem('theme', root.dataset.theme); } catch {}
 });
 try { const t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch {}
+
+// ---------- teammaten over een lijst wedstrijden ----------
+const teamSum = (ms, f) => ms.reduce((a, m) => a + m.players.reduce((x, p) => x + (f(p) || 0), 0), 0);
+const oppSum = (ms, f) => ms.reduce((a, m) => a + m.opponentPlayers.reduce((x, p) => x + (f(p) || 0), 0), 0);
+const evMs = ms => ms.filter(m => m.players.some(p => p.ev));
+const perMatch = v => ms => ms.length ? v(ms) / ms.length : null;
+const TEAM_METRICS = [
+  { key: 'gf', label: 'Doelpunten voor', hib: true, fmt: f1, calc: perMatch(ms => ms.reduce((a, m) => a + m.goals, 0)) },
+  { key: 'ga', label: 'Doelpunten tegen', hib: false, fmt: f1, calc: perMatch(ms => ms.reduce((a, m) => a + m.goalsAgainst, 0)) },
+  { key: 'shots', label: 'Schoten voor', hib: true, fmt: f1, calc: perMatch(ms => teamSum(ms, p => p.shots)) },
+  { key: 'shotsAg', label: 'Schoten tegen', hib: false, fmt: f1, calc: perMatch(ms => oppSum(ms, p => p.shots)) },
+  { key: 'conv', label: 'Eigen conversie', hib: true, fmt: fmtPct, calc: ms => pct(ms.reduce((a, m) => a + m.goals, 0), teamSum(ms, p => p.shots)) },
+  { key: 'convAg', label: 'Conversie tegenstander', hib: false, fmt: fmtPct, calc: ms => pct(ms.reduce((a, m) => a + m.goalsAgainst, 0), oppSum(ms, p => p.shots)) },
+  { key: 'passAcc', label: 'Passnauwkeurigheid', hib: true, fmt: fmtPct, calc: ms => pct(teamSum(ms, p => p.passesMade), teamSum(ms, p => p.passAttempts)) },
+  { key: 'fwd', label: 'Aandeel passes vooruit', hib: true, fmt: fmtPct, ev: true, calc: ms => { const e = evMs(ms); return pct(teamSum(e, p => p.ev?.passes_completed_forward), teamSum(e, p => p.ev?.passes_completed)); } },
+  { key: 'through', label: 'Steekpasses', hib: true, fmt: f1, ev: true, calc: ms => { const e = evMs(ms); return e.length ? teamSum(e, p => p.ev?.through_balls) / e.length : null; } },
+  { key: 'interceptions', label: 'Onderscheppingen', hib: true, fmt: f1, ev: true, calc: ms => { const e = evMs(ms); return e.length ? teamSum(e, p => p.ev?.interceptions) / e.length : null; } },
+  { key: 'tacklePct', label: 'Tackle-rendement', hib: true, fmt: fmtPct, calc: ms => pct(teamSum(ms, p => p.tacklesMade), teamSum(ms, p => p.tackleAttempts)) },
+  { key: 'outPos', label: 'Uit positie', hib: false, fmt: fmtPct, ev: true, calc: ms => { const e = evMs(ms); const o = teamSum(e, p => p.ev?.out_of_position); return pct(o, o + teamSum(e, p => p.ev?.in_position)); } },
+  { key: 'lostDef', label: 'Balverlies op eigen helft', hib: false, fmt: f1, ev: true, calc: ms => { const e = evMs(ms); return e.length ? teamSum(e, p => p.ev?.possession_lost_def_third) / e.length : null; } },
+  { key: 'fouls', label: 'Overtredingen', hib: false, fmt: f1, ev: true, calc: ms => { const e = evMs(ms); return e.length ? teamSum(e, p => p.ev?.fouls_conceded_total) / e.length : null; } },
+];
+// Vergelijkt twee lijsten wedstrijden op alle teammaten. good = verschil in de goede richting.
+function compareTeam(a, b) {
+  return TEAM_METRICS.map(mt => {
+    const va = mt.calc(a), vb = mt.calc(b);
+    if (va === null || vb === null || va === undefined || vb === undefined) return null;
+    const diff = va - vb, rel = vb ? diff / Math.abs(vb) : (diff ? Math.sign(diff) : 0);
+    return { ...mt, a: va, b: vb, diff, rel, good: mt.hib ? diff > 0 : diff < 0 };
+  }).filter(Boolean);
+}
+const CONF = (nA, nB) => { const n = Math.min(nA, nB); return n >= 8 ? 'sterk' : n >= 5 ? 'redelijk' : 'zwak'; };
+const tagHtml = c => c ? `<span class="tag ${c}">${c}</span>` : '';
+const insightLi = (claim, evidence, conf) => `<li><div class="claim">${claim}${tagHtml(conf)}</div><div class="evidence">${evidence}</div></li>`;
+const signed = (v, d = 1) => v === null || v === undefined ? '–' : `${v > 0 ? '+' : ''}${(+v).toFixed(d)}`;
+const pills = ms => `<span class="pills">${ms.map(m => `<span class="pill ${m.result}" title="${esc(m.opponent.name)} ${m.goals}–${m.goalsAgainst}">${m.result === 'D' ? 'G' : m.result === 'L' ? 'V' : 'W'}</span>`).join('')}</span>`;
+const sessionsOf = ms => { const g = new Map(); for (const m of ms) { if (!g.has(m.session)) g.set(m.session, []); g.get(m.session).push(m); } return [...g].map(([id, list]) => ({ id, matches: list })); };

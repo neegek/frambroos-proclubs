@@ -3,36 +3,36 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Frambroos Spelers</title>
+<title>Spelers · Frambroos Coach</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header class="top">
-  <div>
-    <h1 id="club-name">…</h1>
-    <p class="sub" id="club-sub">Data wordt geladen…</p>
-  </div>
-  <div class="top-right">
-    <nav class="nav"><a href="/">Overzicht</a><a href="/spelers.html" class="active">Spelers</a></nav>
-    <label class="filter">Periode
-      <select id="range">
-        <option value="all">Alles</option>
-        <option value="30">Laatste 30 dagen</option>
-        <option value="7">Laatste 7 dagen</option>
-      </select>
-    </label>
-    <label class="filter">Type
-      <select id="type">
-        <option value="all">League + playoff</option>
-        <option value="leagueMatch">League</option>
-        <option value="playoffMatch">Playoff</option>
-      </select>
-    </label>
-    <button id="theme" type="button" title="Licht/donker">◐</button>
-  </div>
-</header>
+<div class="app">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="content">
+    <header class="page-head">
+      <div>
+        <h1>Spelers</h1>
+        <p class="sub" id="page-sub">Wat elke speler goed doet, wat beter kan en wanneer hij floreert.</p>
+      </div>
+      <div class="filters">
+        <label class="filter">Periode
+          <select id="range">
+            <option value="all">Alles</option>
+            <option value="30">Laatste 30 dagen</option>
+            <option value="7">Laatste 7 dagen</option>
+          </select>
+        </label>
+        <label class="filter">Type
+          <select id="type">
+            <option value="all">League en playoff</option>
+            <option value="leagueMatch">League</option>
+            <option value="playoffMatch">Playoff</option>
+          </select>
+        </label>
+      </div>
+    </header>
 
-<main id="app">
   <section class="chips" id="chips"></section>
 
   <section class="card">
@@ -41,7 +41,7 @@
         <h2 id="p-name">…</h2>
         <div class="meta" id="p-meta"></div>
       </div>
-      <div class="tiles" id="p-tiles" style="flex: 1; max-width: 760px"></div>
+      <div class="tiles" id="p-tiles"></div>
     </div>
   </section>
 
@@ -84,7 +84,9 @@
     <h2>Wedstrijden van deze speler</h2>
     <div id="tbl-player-matches"></div>
   </section>
-</main>
+
+  </main>
+</div>
 <div id="tooltip" class="tooltip" hidden></div>
 <script src="common.js"></script>
 <script src="spelers.js"></script>

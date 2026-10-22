@@ -30,10 +30,8 @@ const METRICS = [
   { key: 'noOption90', label: '"Geen goede optie" per 90', hib: false, fmt: f1, ev: true, calc: evPer90('fb_no_good_option') },
 ];
 
-const CONF = (nA, nB) => { const n = Math.min(nA, nB); return n >= 8 ? 'sterk' : n >= 5 ? 'redelijk' : 'zwak'; };
 const tag = c => `<span class="tag ${c}">${c}</span>`;
 const li = (claim, evidence, conf) => `<li><div class="claim">${claim}${conf ? tag(conf) : ''}</div><div class="evidence">${evidence}</div></li>`;
-const signed = (v, d = 1) => v === null ? '–' : `${v > 0 ? '+' : ''}${(+v).toFixed(d)}`;
 
 let selected = null;
 
@@ -211,5 +209,6 @@ function renderPlayer() {
 
 for (const id of ['#range', '#type']) $(id).addEventListener('change', renderPlayer);
 addEventListener('resize', () => DATA && renderPlayer());
+addEventListener('hashchange', () => { const n = decodeURIComponent(location.hash.slice(1)); if (n && n !== selected) { selected = n; renderPlayer(); } });
 selected = decodeURIComponent(location.hash.slice(1)) || null;
-loadData().then(renderPlayer).catch(e => { $('#club-sub').textContent = `Kon data niet laden: ${e.message}`; });
+loadData().then(renderPlayer).catch(showError);

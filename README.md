@@ -1,7 +1,23 @@
-# Frambroos Pro Clubs tracker
+# Frambroos Coach
 
 Verzamelt de wedstrijd- en spelersdata van Pro Clubs-club **Frambroos** (FC27, PS5) uit de
 onofficiële EA-API en toont een dashboard met correlaties die de bestaande apps niet bieden.
+
+## De app
+
+`npm run dashboard` en open http://localhost:3737. Vier pagina's, via het menu links (op een
+telefoon bovenaan):
+
+- **Team**: samenvatting voor het hele team. Kerncijfers, de patronen die het team het meest
+  bepalen, vorm, zo winnen en verliezen we, tegen wie, spelers in één oogopslag, beste combinaties.
+- **Sessies**: per speelavond de uitslagen, tegenstanders, wat beter en slechter ging dan normaal,
+  en per speler wat er opviel.
+- **Spelers**: per speler sterk in, kan beter, floreert als, speelt minder als, en andere patronen.
+- **Analyse**: alle detailanalyses (verwachtingsmodel, impact, synergie, verdediging, aanval,
+  tegenstanders, betrokkenheid).
+
+Alle tekst op de pagina's wordt uit de data berekend en groeit mee met elke speelavond. Een
+label (sterk, redelijk, zwak) zegt op hoeveel wedstrijden een inzicht rust.
 
 ## Waarom een verzamelaar?
 
@@ -11,7 +27,10 @@ wedstrijden in `data/proclubs.sqlite`. Hoe langer de verzamelaar draait, hoe rij
 
 ## Waar draait de verzamelaar?
 
-**In GitHub Actions** (`.github/workflows/collect.yml`): elk kwartier, ook als je Mac uit staat.
+**In GitHub Actions** (`.github/workflows/collect.yml`), ook als je Mac uit staat. De cron vraagt
+om elk kwartier, maar GitHub voert geplande workflows naar eigen inzicht uit: in de praktijk om de
+2 tot 5 uur. Dat is meestal genoeg (EA bewaart 10 wedstrijden per type), maar bij een lange avond
+kan de oudste wedstrijd wegvallen voordat er een run is.
 Nieuwe wedstrijden worden als commit op `main` gezet in `data/proclubs.sqlite`. Dat is de bron
 van waarheid. `npm run dashboard` haalt eerst de nieuwste database op (`npm run sync`, gooit
 lokale wijzigingen aan de database weg) en start dan het dashboard.
@@ -43,7 +62,10 @@ De lokale planner logt naar `data/collect.log` en draait alleen als de Mac wakke
   `member_snapshots`, `club_snapshots` (ook van tegenstanders, voor skill rating), `collect_runs`.
 - `src/collect.js` – de verzamelaar.
 - `src/server.js` – serveert `public/` en `/api/data`.
-- `public/app.js` – alle correlaties worden in de browser berekend; nieuwe analyses voeg je hier toe.
+- `public/common.js` – gedeeld: zijmenu, data laden, verwachtingsmodel, grafieken, tabellen, teammaten.
+- `public/team.js`, `sessies.js`, `spelers.js`, `app.js` – de pagina's Team, Sessies, Spelers en Analyse.
+- `src/events.js` en `docs/event-codes.md` – de ontcijferde eventcodes.
+- `src/sessions.js` – schrijft `docs/sessies.md`, dezelfde sessie-indeling als de Sessiepagina.
 
 ## Wat de API wél en niet geeft
 

@@ -6,7 +6,7 @@ function render() {
   const players = [...new Set(DATA.matches.flatMap(m => m.players.map(p => p.name)))];
 
   // Tegels
-  const form = ms.slice(-5).map(m => `<span class="res-${m.result}">${m.result}</span>`).join(' ');
+  const form = ms.length ? pills(ms.slice(-5)) : '';
   const snap = DATA.snapshot;
   $('#tiles').innerHTML = [
     ['Wedstrijden gevolgd', all.n, snap ? `van ${snap.gamesPlayed} totaal volgens EA` : ''],
@@ -286,4 +286,4 @@ function render() {
 
 for (const id of ['#range', '#type', '#inv-player']) $(id).addEventListener('change', render);
 addEventListener('resize', () => DATA && render());
-loadData().then(render).catch(e => { $('#club-sub').textContent = `Kon data niet laden: ${e.message}`; });
+loadData().then(render).catch(showError);
