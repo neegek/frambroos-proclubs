@@ -312,10 +312,8 @@ function renderPlayer() {
   const s = summarize(rows.map(r => r.m));
   const posCount = {}; for (const r of rows) posCount[r.p.pos] = (posCount[r.p.pos] || 0) + 1;
   const posText = Object.entries(posCount).sort((a, b) => b[1] - a[1]).map(([p, n]) => `${POS_NL[p] || p} (${n})`).join(', ');
-  $('#p-name').textContent = selected;
   const buildCount = {}; for (const r of rows) if (r.p.archetypeId) buildCount[r.p.archetypeId] = (buildCount[r.p.archetypeId] || 0) + 1;
   const buildText = Object.entries(buildCount).sort((a, b) => b[1] - a[1]).map(([id, n]) => `${archName(id)} (${n})`).join(', ');
-  $('#p-meta').textContent = `${career ? `Pro ${career.proName} · overall ${career.proOverall} · ${career.proHeight} cm · ingestelde positie ${POS_CODE[career.proPos] ?? '–'} · ` : ''}${rows.length} wedstrijden in de gekozen periode${posText ? ` als ${posText}` : ''}${buildText ? ` · builds: ${buildText}` : ''}`;
   const ratings = rows.map(r => r.p.rating).filter(v => v !== null);
   const tiles = [
     ['Rating', ratings.length ? f2(avg(ratings)) : '–', career ? `carrière ${career.ratingAve}` : ''],
@@ -336,6 +334,8 @@ function renderPlayer() {
   fill('#list-struggles', cond.struggles, 'Nog geen omstandigheid met een duidelijk verschil.');
   fill('#list-other', other.html, 'Nog geen patronen gevonden.');
   $('#p-summary').innerHTML = playerSummary(selected, rows, career, sw, cond, other);
+  window.PlayerCard.render(selected);
+  document.title = `${selected} · Frambroos Coach`;
   renderSessionsTab(selected);
   renderLastTab(selected);
   window.BuildTab.show(selected);
@@ -372,4 +372,5 @@ $('#tab-btn-last').addEventListener('click', () => setTab('last'));
 let startTab = 'overview'; try { startTab = sessionStorage.getItem('spelersTab') || 'overview'; } catch {}
 if (new URLSearchParams(location.search).get('tab') === 'build') startTab = 'build';
 setTab(startTab);
-Promise.all([loadData(), window.BuildTab.load()]).then(renderPlayer).catch(showError);
+window.rerender = () => renderPlayer(); // thema wisselen: kaart opnieuw in thuis- of uitkleuren
+Promise.all([loadData(), window.BuildTab.load(), window.PlayerCard.load()]).then(renderPlayer).catch(showError);

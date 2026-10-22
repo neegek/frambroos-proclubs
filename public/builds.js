@@ -422,5 +422,6 @@ window.BuildTab = {
   load: () => fetch('/api/builds').then(r => r.json()).then(x => { BUILDS = x || {}; }),
   show,
   has: name => !!BUILDS[name],
+  get: name => BUILDS[name],
 };
 })();

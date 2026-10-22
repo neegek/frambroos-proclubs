@@ -25,7 +25,9 @@ Na een wijziging in `src/server.js` de server herstarten; voor `public/` volstaa
 
 - De database `data/proclubs.sqlite` wordt beheerd door de cloudverzamelaar (GitHub Actions) en via git gedeeld.
   **Commit nooit een lokaal gewijzigde database**; `npm run sync` gooit lokale wijzigingen weg en haalt de nieuwste op.
-- `data/builds.json` bevat de eigen builds die spelers invullen. Wel committen. Test nooit met nepwaarden in dit bestand;
+- `data/builds.json` bevat de eigen builds die spelers invullen. Wel committen.
+- `data/players/<slug>.<webp|png|jpg>` zijn de foto's op de spelerskaarten (geüpload via de kaart, verkleind tot
+  900 px). Wel committen. Test-uploads altijd weer verwijderen. Test nooit met nepwaarden in dit bestand;
   maak vooraf een kopie en zet die terug.
 - Wat EA niet geeft (formatie, exacte positie, "Any", attribuutpunten, AI-spelers): zie coach-logica §2. Niet verzinnen.
 
@@ -38,6 +40,8 @@ Na een wijziging in `src/server.js` de server herstarten; voor `public/` volstaa
 - Stijl: donker thuistenue (standaard) en licht uittenue; tokens staan bovenaan `public/style.css`. Nieuwe kleuren eerst
   op contrast controleren: tekst ≥ 4,5:1, grafische elementen ≥ 3:1. Datakleuren (winst blauw, verlies rood) niet aanpassen.
 - Menu: Team, Sessies, Wedstrijden, Spelers (in- en uitklapbaar, met de namen eronder). Geen aparte analysepagina.
+- Spelerspagina begint met de spelerskaart (`public/playercard.js`): FC-stijl in thuis- of uitkleuren, met foto of
+  silhouet, overall, ingestelde positie, laatst gespeelde build en seizoenscijfers (of face stats uit de ingevulde build).
 - Wedstrijden is alleen de lijst; een wedstrijd opent op `/wedstrijd.html?id=<matchId>` (een laag dieper) met
   "Terug naar wedstrijden" bovenaan. Link naar wedstrijden altijd via dat adres.
 

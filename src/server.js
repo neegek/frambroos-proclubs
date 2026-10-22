@@ -1,6 +1,6 @@
 // Lokaal dashboard: serveert public/ en levert de data uit SQLite op /api/data.
 import http from 'node:http';
-import { readFile, writeFile, rename } from 'node:fs/promises';
+import { readFile, writeFile, rename, readdir, unlink, mkdir, stat } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
 import { openDb, config, ROOT } from './db.js';
 import { decodeEvents } from './events.js';
@@ -28,7 +28,23 @@ function cleanBuild(b) {
   return out;
 }
 
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png' };
+// Foto's per speler voor de spelerskaart. Staan in data/players/<slug>.<ext> en gaan mee in git.
+const PHOTO_DIR = join(ROOT, 'data', 'players');
+const PHOTO_TYPES = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
+const slugOf = name => String(name).toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+async function listPhotos() {
+  const out = {};
+  try {
+    for (const f of await readdir(PHOTO_DIR)) {
+      const m = f.match(/^(.+)\.(png|jpg|webp)$/); if (!m) continue;
+      const st = await stat(join(PHOTO_DIR, f));
+      out[m[1]] = `/media/players/${f}?v=${Math.floor(st.mtimeMs)}`;
+    }
+  } catch {}
+  return out;
+}
+
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp' };
 
 function buildData() {
   const { clubId } = config;
@@ -114,6 +130,33 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(400, { 'Content-Type': 'text/plain' });
       return res.end(`Ongeldige build: ${e.message}`);
     }
+  }
+  if (url.pathname === '/api/photos' && req.method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+    return res.end(JSON.stringify(await listPhotos()));
+  }
+  const media = url.pathname.match(/^\/media\/players\/([a-z0-9-]+\.(png|jpg|webp))$/);
+  if (media) {
+    try {
+      const body = await readFile(join(PHOTO_DIR, media[1]));
+      res.writeHead(200, { 'Content-Type': MIME['.' + media[2]], 'Cache-Control': 'no-cache' });
+      return res.end(body);
+    } catch { res.writeHead(404); return res.end('Niet gevonden'); }
+  }
+  const pm = url.pathname.match(/^\/api\/players\/(.+)\/photo$/);
+  if (pm && (req.method === 'PUT' || req.method === 'DELETE')) {
+    const slug = slugOf(decodeURIComponent(pm[1]).slice(0, 60));
+    if (!slug) { res.writeHead(400); return res.end('Ongeldige naam'); }
+    await mkdir(PHOTO_DIR, { recursive: true });
+    for (const ext of Object.values(PHOTO_TYPES)) { try { await unlink(join(PHOTO_DIR, `${slug}.${ext}`)); } catch {} }
+    if (req.method === 'DELETE') { res.writeHead(204); return res.end(); }
+    const ext = PHOTO_TYPES[(req.headers['content-type'] || '').split(';')[0]];
+    if (!ext) { res.writeHead(415, { 'Content-Type': 'text/plain' }); return res.end('Alleen PNG, JPEG of WebP'); }
+    const chunks = []; let size = 0;
+    for await (const c of req) { size += c.length; if (size > 5 * 1024 * 1024) { res.writeHead(413, { 'Content-Type': 'text/plain' }); return res.end('Maximaal 5 MB'); } chunks.push(c); }
+    await writeFile(join(PHOTO_DIR, `${slug}.${ext}`), Buffer.concat(chunks));
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify((await listPhotos())[slug] || null));
   }
   if (url.pathname === '/api/data') {
     res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
