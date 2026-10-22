@@ -170,32 +170,45 @@ function otherInsights(name, ms, players) {
 
 function playerSummary(name, rows, career, sw, cond, other) {
   if (!rows.length) return 'Nog geen wedstrijden van deze speler in de gekozen periode.';
-  const posCount = {}; for (const r of rows) posCount[r.p.pos] = (posCount[r.p.pos] || 0) + 1;
-  const pos = Object.entries(posCount).sort((a, b) => b[1] - a[1]);
-  const posText = pos.length > 1 && pos[1][1] >= rows.length / 3 ? `als ${POS_NL[pos[0][0]] || pos[0][0]} en ${POS_NL[pos[1][0]] || pos[1][0]}` : `vooral als ${POS_NL[pos[0][0]] || pos[0][0]}`;
-  const r = avg(rows.map(x => x.p.rating).filter(v => v !== null));
-  const s = summarize(rows.map(x => x.m));
-  const parts = [];
-  let first = `<b>${esc(name)}</b> speelde ${rows.length} ${rows.length === 1 ? 'wedstrijd' : 'wedstrijden'} ${posText}, met een gemiddelde rating van ${f2(r)}`;
-  if (career?.ratingAve) { const d = r - career.ratingAve; first += Math.abs(d) < 0.15 ? `, gelijk aan het carrièregemiddelde` : `, ${d > 0 ? 'boven' : 'onder'} het carrièregemiddelde van ${f2(career.ratingAve)}`; }
-  parts.push(first + `. Met deze speler erbij haalde het team ${s.ppg} punten per wedstrijd${s.resid === null ? '' : `, ${Math.abs(s.resid) < 0.3 ? 'op' : s.resid > 0 ? 'boven' : 'onder'} verwachting`}.`);
-  const list = xs => xs.length === 1 ? xs[0] : `${xs.slice(0, -1).join(', ')} en ${xs[xs.length - 1]}`;
-  // Bij maten waar lager beter is, leest "sterk in balverlies" verkeerd; die krijgen een eigen formulering.
-  const PHRASE = {
-    lost90: ['weinig balverlies', 'balverlies'], lostDef90: ['weinig balverlies op eigen helft', 'balverlies op eigen helft'],
-    outPos: ['zelden uit positie staan', 'uit positie staan'], fouls90: ['weinig overtredingen', 'overtredingen'],
-    noOption90: ['zelden zonder aanspeelpunt', 'vaak zonder aanspeelpunt'],
+  const ROLE = {
+    assists90: 'de aangever', ga90: 'de aangever', conv: 'de afmaker', dribbles90: 'de dribbelaar', beaten90: 'de dribbelaar',
+    through90: 'de spelmaker', fwdShare: 'de spelmaker', won90: 'de ballenafpakker', interceptions90: 'de ballenafpakker', tacklePct: 'de ballenafpakker',
+    passAcc: 'de rustige kracht', lost90: 'de rustige kracht', lostDef90: 'de rustige kracht', outPos: 'de rustige kracht', noOption90: 'de rustige kracht', fouls90: 'de rustige kracht', rating: 'een vaste waarde',
   };
-  const st = sw.sRaw.slice(0, 2).map(x => PHRASE[x.key]?.[0] ?? x.label), wk = sw.wRaw.slice(0, 2).map(x => PHRASE[x.key]?.[1] ?? x.label);
-  if (st.length && wk.length) parts.push(`${st.length > 1 ? 'De sterkste punten binnen het team zijn' : 'Het sterkste punt binnen het team is'} ${list(st)}; ${wk.length > 1 ? 'verbeterpunten zijn' : 'het verbeterpunt is'} ${list(wk)}.`);
-  else if (st.length) parts.push(`${st.length > 1 ? 'De sterkste punten binnen het team zijn' : 'Het sterkste punt binnen het team is'} ${list(st)}.`);
-  else if (wk.length) parts.push(`${wk.length > 1 ? 'Verbeterpunten zijn' : 'Het verbeterpunt is'} ${list(wk)}.`);
+  const GOOD = {
+    assists90: 'geeft de meeste assists', ga90: 'is bij veel goals betrokken', conv: 'maakt de kansen af', dribbles90: 'gaat graag de dribbel aan', beaten90: 'speelt tegenstanders uit',
+    through90: 'geeft veel steekpasses', fwdShare: 'speelt veel vooruit', won90: 'wint veel ballen', interceptions90: 'onderschept veel', tacklePct: 'wint de duels',
+    passAcc: 'passt zuiver', lost90: 'verliest weinig ballen', lostDef90: 'verliest achterin zelden de bal', outPos: 'staat bijna altijd goed', noOption90: 'heeft bijna altijd een aanspeelpunt', fouls90: 'speelt netjes', rating: 'speelt constant op niveau',
+  };
+  const BAD = {
+    assists90: 'geeft weinig assists', ga90: 'is weinig bij goals betrokken', conv: 'mist relatief veel kansen', dribbles90: 'gaat de dribbel weinig aan', beaten90: 'speelt zelden iemand uit',
+    through90: 'geeft weinig steekpasses', fwdShare: 'speelt weinig vooruit', won90: 'wint weinig ballen', interceptions90: 'onderschept weinig', tacklePct: 'verliest veel duels',
+    passAcc: 'passt slordig', lost90: 'verliest relatief veel ballen', lostDef90: 'verliest ballen op eigen helft', outPos: 'staat vaak uit positie', noOption90: 'staat vaak zonder aanspeelpunt', fouls90: 'maakt veel overtredingen', rating: 'haalt het niveau van de rest nog niet',
+  };
+  const s = sw.sRaw.filter(x => GOOD[x.key]), w = sw.wRaw.filter(x => BAD[x.key]);
+  const parts = [];
+  const nm = `<b>${esc(name)}</b>`;
+  // 1. Rol en kenmerk
+  const traits = s.slice(0, 2).map(x => GOOD[x.key]).filter((v, i, a) => a.indexOf(v) === i);
+  const flaws = w.slice(0, 2).map(x => BAD[x.key]).filter((v, i, a) => a.indexOf(v) === i);
+  if (s.length) parts.push(`${nm} is ${ROLE[s[0].key]} van het team: ${joinAnd(traits)}${flaws.length ? `, maar ${joinAnd(flaws)}` : ''}.`);
+  else parts.push(`${nm} doet vooral het werk in de schaduw${flaws.length ? `, maar ${joinAnd(flaws)}` : ''}.`);
+  // 2. Wanneer het wel en niet loopt
   const th = cond.tRaw[0], sg = cond.sRaw[0];
   if (th && sg) parts.push(`Het gaat het best als ${th.text}, en minder als ${sg.text}.`);
   else if (th) parts.push(`Het gaat het best als ${th.text}.`);
   else if (sg) parts.push(`Het gaat minder als ${sg.text}.`);
-  if (other.claims.length) parts.push(`Verder valt op: ${other.claims[0].charAt(0).toLowerCase() + other.claims[0].slice(1)}.`);
-  if (rows.length < 15) parts.push(`<span class="muted">Dit rust op ${rows.length} wedstrijden; het beeld wordt scherper met elke speelavond.</span>`);
+  // 3. Het opvallendste patroon, in gewone taal
+  const STORY = [
+    ['Komt in verloren potten', `In verloren wedstrijden komt ${esc(name)} juist vaker aan de bal, maar dan met minder opties.`],
+    ['Het team wint vaker als het spel via', `Als het spel via ${esc(name)} loopt, wint het team vaker.`],
+    ['Afwerking maakt het verschil', 'Of het lukt, hangt vooral af van de afwerking.'],
+    ['Eigen vorm volgt het resultaat', `Als ${esc(name)} goed speelt, wint het team meestal ook.`],
+    ['Meest constante speler', `Daarbij is ${esc(name)} de constantste speler van het team.`],
+    ['Grilligste speler', 'Het niveau wisselt wel sterk per wedstrijd.'],
+  ];
+  const story = STORY.find(([k]) => other.claims.some(c => c.startsWith(k)));
+  if (story) parts.push(story[1]);
   return parts.join(' ');
 }
 

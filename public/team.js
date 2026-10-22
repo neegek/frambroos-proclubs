@@ -52,19 +52,32 @@ function shirt(c, label) {
 function teamSummary(ms) {
   if (!ms.length) return 'Nog geen wedstrijden in de gekozen periode.';
   const s = summarize(ms), own = DATA.snapshot?.skillRating, parts = [];
-  parts.push(`Frambroos speelde ${s.n} gevolgde ${s.n === 1 ? 'wedstrijd' : 'wedstrijden'} tussen ${fmtDate(ms[0].ts)} en ${fmtDate(ms[ms.length - 1].ts)}: ${s.W} gewonnen, ${s.D} gelijk en ${s.L} verloren, goed voor ${s.ppg} punten per wedstrijd en ${s.gfAvg}–${s.gaAvg} in doelpunten.`);
-  const opp = avg(ms.map(m => m.opponent.skillRating).filter(Boolean));
-  if (opp && own) { const d = opp - own; parts.push(`De tegenstanders waren gemiddeld ${Math.abs(d) < 100 ? 'gelijkwaardig' : d > 0 ? 'sterker' : 'zwakker'} (rating ${Math.round(opp)} tegen ${own}); gecorrigeerd daarvoor presteerde het team ${Math.abs(s.resid) < 0.3 ? 'ongeveer op verwachting' : s.resid > 0 ? 'boven verwachting' : 'onder verwachting'}.`); }
+  // 1. Karakter en verloop van de periode
+  const char = s.ppg >= 2 ? 'sterke' : s.ppg >= 1.5 ? 'goede' : s.ppg >= 1 ? 'wisselende' : 'moeizame';
+  let arc = '';
+  if (ms.length >= 8) {
+    const half = Math.floor(ms.length / 2), a = summarize(ms.slice(0, half)), b = summarize(ms.slice(half)), d = b.ppg - a.ppg;
+    arc = d <= -0.5 ? ': een sterke start, daarna werd het moeizamer' : d >= 0.5 ? ': na een stroeve start gaat het steeds beter' : '';
+  }
+  parts.push(`Een ${char} periode voor Frambroos${arc}.`);
+  // 2. Tegen wie het wel en niet lukt
+  if (own) {
+    const strong = summarize(ms.filter(m => m.opponent.skillRating >= own + 100)), rest = summarize(ms.filter(m => m.opponent.skillRating && m.opponent.skillRating < own + 100));
+    if (strong.n >= 3 && rest.n >= 3) {
+      if (strong.ppg <= rest.ppg - 0.7) parts.push('Tegen gelijkwaardige teams doen jullie goed mee, maar tegen de sterkere clubs is het nog een stap te ver.');
+      else if (strong.ppg >= rest.ppg) parts.push('Ook tegen sterkere clubs houden jullie goed stand.');
+    }
+  }
+  // 3. Waar het om draait
   const W = ms.filter(m => m.result === 'W'), R = ms.filter(m => m.result !== 'W');
   if (W.length >= 3 && R.length >= 3) {
-    const d = compareTeam(W, R).filter(x => !['gf', 'ga'].includes(x.key)).sort((a, b) => Math.abs(b.rel) - Math.abs(a.rel)).slice(0, 2);
-    if (d.length) parts.push(`Het verschil tussen winst en verlies zit vooral in ${d.map(x => `${x.label.toLowerCase()} (${x.fmt(x.a)} bij winst, ${x.fmt(x.b)} anders)`).join(' en ')}.`);
+    const d = compareTeam(W, R).filter(x => x.good && TEAM_PHRASE[x.key] && !['gf', 'ga'].includes(x.key)).sort((a, b) => Math.abs(b.rel) - Math.abs(a.rel)).slice(0, 2);
+    if (d.length) parts.push(`Of jullie winnen, hangt vooral af van ${joinAnd(d.map(x => TEAM_PHRASE[x.key][2]))}.`);
   }
-  if (ms.length >= 10) { const last = summarize(ms.slice(-5)), before = summarize(ms.slice(0, -5)); const d = last.ppg - before.ppg; parts.push(`De laatste vijf wedstrijden leverden ${last.ppg} punten per wedstrijd op, ${Math.abs(d) < 0.3 ? 'vergelijkbaar met' : d > 0 ? 'beter dan' : 'minder dan'} daarvoor (${before.ppg}).`); }
+  // 4. Wie het verschil maakt
   const players = [...new Set(ms.flatMap(m => m.players.map(p => p.name)))];
   const imp = players.map(n => { const a = ms.filter(m => has(m, n)), b = ms.filter(m => !has(m, n)); if (a.length < 3 || b.length < 3) return null; return { n, d: summarize(a).resid - summarize(b).resid }; }).filter(Boolean).sort((x, y) => y.d - x.d)[0];
-  if (imp && imp.d >= 0.5) parts.push(`Het grootste verschil maakt de aanwezigheid van <b>${esc(imp.n)}</b>: met deze speler erbij doet het team het ${imp.d.toFixed(1)} doelpunt per wedstrijd beter tegenover verwachting dan zonder.`);
-  if (s.n < 40) parts.push(`<span class="muted">Met ${s.n} wedstrijden zijn dit eerste indrukken; elk patroon hieronder heeft een label dat zegt hoe stevig het is.</span>`);
+  if (imp && imp.d >= 0.5) parts.push(`Met <b>${esc(imp.n)}</b> erbij gaat het merkbaar beter.`);
   return parts.join(' ');
 }
 

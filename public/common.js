@@ -321,3 +321,25 @@ const insightLi = (claim, evidence, conf) => `<li><div class="claim">${claim}${t
 const signed = (v, d = 1) => v === null || v === undefined ? '–' : `${v > 0 ? '+' : ''}${(+v).toFixed(d)}`;
 const pills = ms => `<span class="pills">${ms.map(m => `<span class="pill ${m.result}" title="${esc(m.opponent.name)} ${m.goals}–${m.goalsAgainst}">${m.result === 'D' ? 'G' : m.result === 'L' ? 'V' : 'W'}</span>`).join('')}</span>`;
 const sessionsOf = ms => { const g = new Map(); for (const m of ms) { if (!g.has(m.session)) g.set(m.session, []); g.get(m.session).push(m); } return [...g].map(([id, list]) => ({ id, matches: list })); };
+
+// ---------- verhaalzinnen voor de samenvattingen ----------
+// Kwalitatieve formuleringen per teammaat, zodat een samenvatting vertelt wat er gebeurde in plaats van cijfers op te lezen.
+const TEAM_PHRASE = {
+  // [als het goed ging, als het slecht ging, wat het is (neutraal)]
+  gf: ['er veel gescoord werd', 'er weinig gescoord werd', 'scoren'],
+  ga: ['er weinig tegengoals vielen', 'er veel tegengoals vielen', 'tegengoals'],
+  shots: ['jullie veel kansen creëerden', 'jullie weinig kansen creëerden', 'het aantal kansen dat jullie creëren'],
+  shotsAg: ['de tegenstander weinig kansen kreeg', 'de tegenstander veel kansen kreeg', 'hoeveel kansen jullie weggeven'],
+  conv: ['de kansen er goed in gingen', 'de afwerking haperde', 'de afwerking'],
+  convAg: ['de tegenstander weinig kansen benutte', 'de tegenstander de kansen goed benutte', 'hoe effectief de tegenstander is'],
+  passAcc: ['de passing goed liep', 'de passing slordig was', 'de passing'],
+  fwd: ['jullie veel vooruit speelden', 'jullie weinig vooruit speelden', 'vooruit durven spelen'],
+  through: ['er veel steekpasses kwamen', 'er weinig steekpasses kwamen', 'steekpasses'],
+  interceptions: ['jullie veel ballen onderschepten', 'jullie weinig ballen onderschepten', 'het onderscheppen van ballen'],
+  tacklePct: ['jullie de duels wonnen', 'jullie veel duels verloren', 'het winnen van duels'],
+  outPos: ['de organisatie goed stond', 'de organisatie vaak zoek was', 'de organisatie'],
+  lostDef: ['er weinig balverlies op eigen helft was', 'er veel balverlies op eigen helft was', 'balverlies op eigen helft'],
+  fouls: ['het netjes bleef', 'er veel overtredingen werden gemaakt', 'discipline'],
+};
+const joinAnd = xs => xs.length <= 1 ? (xs[0] || '') : `${xs.slice(0, -1).join(', ')} en ${xs[xs.length - 1]}`;
+const capFirst = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;

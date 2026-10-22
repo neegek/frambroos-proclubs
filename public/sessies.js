@@ -42,26 +42,34 @@ function renderList() {
 
 function sessionSummary(ms, others, sm, names, opp, own, cmp, prow) {
   const parts = [];
-  const lead = `Op ${longDate(ms[0].ts)} speelden jullie ${sm.n} ${typeLabel(ms) === 'playoff' ? 'playoff' : typeLabel(ms) === 'league' ? 'league' : ''}${sm.n === 1 ? 'wedstrijd' : 'wedstrijden'} met ${names.length} man, van ${fmtTime(ms[0].ts)} tot ${fmtTime(ms[ms.length - 1].ts)}: ${sm.W} gewonnen, ${sm.D} gelijk en ${sm.L} verloren, ${sm.gf}–${sm.ga} in doelpunten.`;
-  parts.push(lead);
-  if (opp && own) {
-    const lbl = strengthLabel(opp - own);
-    const verdict = Math.abs(sm.resid) < 0.3 ? 'speelden jullie ongeveer zoals verwacht' : sm.resid > 0 ? `deden jullie het ${sm.resid >= 1 ? 'duidelijk ' : ''}beter dan verwacht` : `bleven jullie ${sm.resid <= -1 ? 'duidelijk ' : ''}onder verwachting`;
-    parts.push(`De tegenstanders waren gemiddeld ${lbl === 'gelijkwaardig' ? 'gelijkwaardig' : lbl + ' dan jullie'} (rating ${Math.round(opp)}), en gecorrigeerd daarvoor ${verdict}.`);
-  }
-  const notable = cmp.filter(d => Math.abs(d.rel) >= 0.2 && Math.abs(d.diff) > 0.15).sort((a, b) => Math.abs(b.rel) - Math.abs(a.rel));
-  const good = notable.filter(d => d.good).slice(0, 2).map(d => `${d.label.toLowerCase()} (${d.fmt(d.a)} tegen ${d.fmt(d.b)})`);
-  const bad = notable.filter(d => !d.good).slice(0, 2).map(d => `${d.label.toLowerCase()} (${d.fmt(d.a)} tegen ${d.fmt(d.b)})`);
-  if (good.length && bad.length) parts.push(`Beter dan normaal waren ${good.join(' en ')}; minder ging ${bad.join(' en ')}.`);
-  else if (good.length) parts.push(`Beter dan normaal waren ${good.join(' en ')}.`);
-  else if (bad.length) parts.push(`Minder dan normaal ging ${bad.join(' en ')}.`);
-  const best = prow[0];
-  if (best && best.rH !== null) parts.push(`Uitblinker was <b>${esc(best.name)}</b> met een rating van ${f2(best.rH)}${best.g + best.a ? `, ${best.g} goals en ${best.a} assists` : ''}.`);
-  const down = [...prow].filter(r => r.d !== null && r.d <= -0.4).sort((a, b) => a.d - b.d)[0];
-  if (down) parts.push(`${esc(down.name)} zat het verst onder het eigen niveau (${f2(down.rH)} tegen normaal ${f2(down.rT)}).`);
-  const res = ms.map(m => m.result);
-  if (res.length >= 4 && res[0] !== 'W' && res[1] !== 'W' && res.slice(2).some(r => r === 'W')) parts.push('De eerste twee potten leverden niets op; daarna kwam het op gang.');
-  else if (res.length >= 4 && res.slice(-2).every(r => r !== 'W') && res.slice(0, -2).some(r => r === 'W')) parts.push('Aan het eind van de avond ging het minder.');
+  // 1. Karakter van de avond en tegenstand
+  const type = typeLabel(ms) === 'playoff' ? 'playoffavond' : typeLabel(ms) === 'league' ? 'competitieavond' : 'avond';
+  const lbl = opp && own ? strengthLabel(opp - own) : null;
+  const vs = lbl ? ` tegen ${{ gelijkwaardig: 'gelijkwaardige', zwakker: 'zwakkere', sterker: 'sterkere', 'veel sterker': 'veel sterkere' }[lbl]} tegenstanders` : '';
+  const char = sm.L === 0 && sm.D === 0 ? 'Een perfecte' : sm.ppg >= 2 ? 'Een sterke' : sm.ppg >= 1.2 ? 'Een wisselende' : 'Een moeizame';
+  let lead = sm.W + sm.D === 0 ? `Een ${type} om snel te vergeten${vs}` : `${char} ${type}${vs}`;
+  const strongOpp = lbl === 'sterker' || lbl === 'veel sterker';
+  if (sm.resid >= 0.75) lead += strongOpp ? ', en jullie deden het beter dan je mocht verwachten' : ', beter dan de tegenstand deed vermoeden';
+  else if (sm.resid <= -0.75) lead += strongOpp ? ', en zelfs voor die tegenstand viel het tegen' : ', terwijl er meer in had gezeten';
+  parts.push(lead + '.');
+  // 2. Verloop en uitblinker
+  const res = ms.map(m => m.result), best = prow[0];
+  let course = '';
+  if (res.length >= 4 && res[0] !== 'W' && res[1] !== 'W' && res.slice(2).some(r => r === 'W')) course = 'Na een stroeve start kwam het team op gang';
+  else if (res.length >= 4 && res.slice(-2).every(r => r !== 'W') && res.slice(0, -2).some(r => r === 'W')) course = 'Na een goed begin zakte het aan het eind in';
+  else if (res.length >= 3 && res.every(r => r === 'W')) course = 'Het team won alles';
+  else if (res.length >= 3 && res.every(r => r !== 'W')) course = 'Het wilde de hele avond niet lukken';
+  else if (res.length >= 4) course = 'Winst en verlies wisselden elkaar af';
+  const star = best && best.rH !== null ? `<b>${esc(best.name)}</b>` : '';
+  if (course && star) parts.push(sm.W === 0 ? `${course}; ${star} hield nog het best stand.` : `${course}, met ${star} als uitblinker.`);
+  else if (course) parts.push(`${course}.`);
+  else if (star) parts.push(sm.W === 0 ? `${star} hield nog het best stand.` : `${star} was de uitblinker.`);
+  // 3. Wat opviel tegenover normaal
+  const notable = cmp.filter(d => TEAM_PHRASE[d.key] && Math.abs(d.rel) >= 0.2 && Math.abs(d.diff) > 0.15).sort((a, b) => Math.abs(b.rel) - Math.abs(a.rel));
+  const good = notable.find(d => d.good && !['gf', 'ga'].includes(d.key)), bad = notable.find(d => !d.good && !['gf', 'ga'].includes(d.key));
+  if (good && bad) parts.push(`Opvallend was dat ${TEAM_PHRASE[good.key][0]}, maar ${TEAM_PHRASE[bad.key][1]}.`);
+  else if (good) parts.push(`Opvallend was dat ${TEAM_PHRASE[good.key][0]}.`);
+  else if (bad) parts.push(`Wat tegenviel, was dat ${TEAM_PHRASE[bad.key][1]}.`);
   return parts.join(' ');
 }
 
