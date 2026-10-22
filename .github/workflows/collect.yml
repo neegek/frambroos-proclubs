@@ -1,8 +1,16 @@
 name: Verzamel wedstrijden
 
+# Twee triggers:
+# 1. Hoofdtrigger: een externe cron-dienst start deze workflow elk kwartier tussen 19:00 en 02:00
+#    (Europe/Amsterdam) via workflow_dispatch. Zie docs/trigger.md. GitHub's eigen planning is daarvoor
+#    te onbetrouwbaar: in de praktijk draaide */15 maar om de 2 tot 5 uur.
+# 2. Reserve: GitHub's eigen cron, één keer per uur in de avond, op minuut 47 (niet op het hele uur,
+#    dan is het bij GitHub het drukst). Uren in UTC; dit dekt ongeveer 19:47–02:47 in de zomer en
+#    18:47–01:47 in de winter.
+# EA bewaart 10 wedstrijden per type, ruim 3 uur spelen. Eén geslaagde run per 3 uur is dus genoeg.
 on:
   schedule:
-    - cron: "*/15 * * * *"   # elk kwartier (GitHub voert dit bij drukte iets later uit)
+    - cron: "47 0,17-23 * * *"
   workflow_dispatch:
 
 permissions:

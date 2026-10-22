@@ -46,8 +46,19 @@ function buildData() {
       opponentPlayers: r.opponent_id ? playersFor.all(r.match_id, r.opponent_id).map(mapPlayer) : [],
     };
   });
+  // Tenues en clubkleur uit de meest recente wedstrijd (EA geeft kleuren als decimale RGB).
+  const lastRaw = db.prepare('SELECT m.raw FROM matches m JOIN match_clubs mc ON mc.match_id = m.match_id AND mc.club_id = ? ORDER BY m.ts DESC LIMIT 1').get(clubId);
+  let kits = null;
+  if (lastRaw) {
+    const k = JSON.parse(lastRaw.raw).clubs?.[clubId]?.details?.customKit;
+    const hex = n => '#' + Number(n || 0).toString(16).padStart(6, '0');
+    if (k) kits = {
+      stadium: k.stadName, crestColor: hex(k.crestColor),
+      home: [1, 2, 3, 4].map(i => hex(k[`kitColor${i}`])), away: [1, 2, 3, 4].map(i => hex(k[`kitAColor${i}`])), third: [1, 2, 3, 4].map(i => hex(k[`kitThrdColor${i}`])),
+    };
+  }
   return {
-    club: { id: clubId, name: config.clubName, platform: config.platform },
+    club: { id: clubId, name: config.clubName, platform: config.platform, kits },
     snapshot: own ? { skillRating: own.skill_rating, gamesPlayed: own.games_played, wins: own.wins, losses: own.losses, ties: own.ties, goals: own.goals, goalsAgainst: own.goals_against, bestDivision: own.best_division, takenAt: own.taken_at } : null,
     members: members.map(m => ({ name: m.player_name, gamesPlayed: m.games_played, goals: m.goals, assists: m.assists, ratingAve: m.rating_ave, winRate: m.win_rate, mom: m.mom, proOverall: m.pro_overall, proName: m.pro_name, favoritePosition: m.favorite_position, passSuccessRate: m.pass_success_rate, shotSuccessRate: m.shot_success_rate, tackleSuccessRate: m.tackle_success_rate })),
     lastRun,

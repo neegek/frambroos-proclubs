@@ -114,6 +114,14 @@ try {
   const opponents = new Set();
   for (const matchType of ['leagueMatch', 'playoffMatch']) {
     const matches = (await ea.matches(platform, clubId, matchType)) || [];
+    // EA geeft maximaal 10 wedstrijden per type. Zijn ze allemaal nieuw terwijl we dit type al kenden,
+    // dan kan er tussen deze en de vorige run iets tussenuit gevallen zijn.
+    const knownType = db.prepare('SELECT 1 FROM matches WHERE match_type = ? LIMIT 1').get(matchType);
+    const unseen = matches.filter(m => !q.hasMatch.get(String(m.matchId))).length;
+    if (knownType && matches.length >= 10 && unseen === matches.length) {
+      const msg = `Alle ${matches.length} ${matchType}-wedstrijden waren nieuw: mogelijk zijn er oudere gemist sinds de vorige run.`;
+      console.log(process.env.GITHUB_ACTIONS ? `::warning::${msg}` : `WAARSCHUWING: ${msg}`);
+    }
     for (const match of matches) {
       if (q.hasMatch.get(String(match.matchId))) continue;
       db.exec('BEGIN');

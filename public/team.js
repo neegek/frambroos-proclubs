@@ -37,6 +37,37 @@ function teamInsights(ms) {
   return out.sort((a, b) => b.w - a.w).map(o => o.html);
 }
 
+function shirt(c, label) {
+  // Kleurindicatie van een tenue: romp in kleur 1, mouwen en kraag in kleur 2, bies in kleur 3.
+  const [c1, c2, c3] = c;
+  return `<figure class="kit"><svg viewBox="0 0 64 60" role="img" aria-label="${label}: ${c.slice(0, 3).join(', ')}">
+    <path d="M22 4 L10 9 L2 22 L11 27 L14 22 L14 56 L50 56 L50 22 L53 27 L62 22 L54 9 L42 4 Q32 12 22 4 Z" fill="${c1}" stroke="var(--border-strong)" stroke-width="1"/>
+    <path d="M10 9 L2 22 L11 27 L16 18 Z M54 9 L62 22 L53 27 L48 18 Z" fill="${c2}"/>
+    <path d="M22 4 Q32 12 42 4 L39 3 Q32 9 25 3 Z" fill="${c2}"/>
+    <rect x="14" y="50" width="36" height="6" fill="${c3}"/>
+    <path d="M2 22 L11 27" stroke="${c3}" stroke-width="2.5"/><path d="M62 22 L53 27" stroke="${c3}" stroke-width="2.5"/>
+  </svg><figcaption>${label}</figcaption></figure>`;
+}
+
+function teamSummary(ms) {
+  if (!ms.length) return 'Nog geen wedstrijden in de gekozen periode.';
+  const s = summarize(ms), own = DATA.snapshot?.skillRating, parts = [];
+  parts.push(`Frambroos speelde ${s.n} gevolgde ${s.n === 1 ? 'wedstrijd' : 'wedstrijden'} tussen ${fmtDate(ms[0].ts)} en ${fmtDate(ms[ms.length - 1].ts)}: ${s.W} gewonnen, ${s.D} gelijk en ${s.L} verloren, goed voor ${s.ppg} punten per wedstrijd en ${s.gfAvg}–${s.gaAvg} in doelpunten.`);
+  const opp = avg(ms.map(m => m.opponent.skillRating).filter(Boolean));
+  if (opp && own) { const d = opp - own; parts.push(`De tegenstanders waren gemiddeld ${Math.abs(d) < 100 ? 'gelijkwaardig' : d > 0 ? 'sterker' : 'zwakker'} (rating ${Math.round(opp)} tegen ${own}); gecorrigeerd daarvoor presteerde het team ${Math.abs(s.resid) < 0.3 ? 'ongeveer op verwachting' : s.resid > 0 ? 'boven verwachting' : 'onder verwachting'}.`); }
+  const W = ms.filter(m => m.result === 'W'), R = ms.filter(m => m.result !== 'W');
+  if (W.length >= 3 && R.length >= 3) {
+    const d = compareTeam(W, R).filter(x => !['gf', 'ga'].includes(x.key)).sort((a, b) => Math.abs(b.rel) - Math.abs(a.rel)).slice(0, 2);
+    if (d.length) parts.push(`Het verschil tussen winst en verlies zit vooral in ${d.map(x => `${x.label.toLowerCase()} (${x.fmt(x.a)} bij winst, ${x.fmt(x.b)} anders)`).join(' en ')}.`);
+  }
+  if (ms.length >= 10) { const last = summarize(ms.slice(-5)), before = summarize(ms.slice(0, -5)); const d = last.ppg - before.ppg; parts.push(`De laatste vijf wedstrijden leverden ${last.ppg} punten per wedstrijd op, ${Math.abs(d) < 0.3 ? 'vergelijkbaar met' : d > 0 ? 'beter dan' : 'minder dan'} daarvoor (${before.ppg}).`); }
+  const players = [...new Set(ms.flatMap(m => m.players.map(p => p.name)))];
+  const imp = players.map(n => { const a = ms.filter(m => has(m, n)), b = ms.filter(m => !has(m, n)); if (a.length < 3 || b.length < 3) return null; return { n, d: summarize(a).resid - summarize(b).resid }; }).filter(Boolean).sort((x, y) => y.d - x.d)[0];
+  if (imp && imp.d >= 0.5) parts.push(`Het grootste verschil maakt de aanwezigheid van <b>${esc(imp.n)}</b>: met deze speler erbij doet het team het ${imp.d.toFixed(1)} doelpunt per wedstrijd beter tegenover verwachting dan zonder.`);
+  if (s.n < 40) parts.push(`<span class="muted">Met ${s.n} wedstrijden zijn dit eerste indrukken; elk patroon hieronder heeft een label dat zegt hoe stevig het is.</span>`);
+  return parts.join(' ');
+}
+
 function render() {
   const ms = filtered(), s = summarize(ms), snap = DATA.snapshot;
   $('#page-sub').textContent = `Samenvatting van ${ms.length} gevolgde wedstrijden${ms.length ? `, ${fmtDate(ms[0].ts)} tot ${fmtDate(ms[ms.length - 1].ts)}` : ''}.`;
@@ -50,6 +81,10 @@ function render() {
     ['Vorm', last5.length ? pills(last5) : '–', 'laatste 5'],
   ].map(([l, v, m]) => `<div class="tile"><div class="label">${l}</div><div class="value">${v}</div><div class="meta">${m}</div></div>`).join('');
 
+  $('#team-summary').innerHTML = teamSummary(ms);
+  const k = DATA.club.kits;
+  if (k) $('#club-kits').innerHTML = `<div class="kits">${shirt(k.home, 'Thuis')}${shirt(k.away, 'Uit')}${shirt(k.third, 'Derde')}</div>`;
+  if (k) $('#club-stadium').textContent = `${k.stadium} · ${DATA.club.platform === 'common-gen5' ? 'PS5, Xbox Series, PC' : DATA.club.platform}`;
   const ins = teamInsights(ms);
   $('#team-insights').innerHTML = ins.length ? ins.slice(0, 6).join('') + (ins.length > 6 ? `<li class="more"><details><summary>Nog ${ins.length - 6} patronen</summary><ul class="insight-list">${ins.slice(6).join('')}</ul></details></li>` : '') : '<li class="empty">Nog te weinig wedstrijden voor patronen.</li>';
 

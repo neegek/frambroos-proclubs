@@ -80,14 +80,15 @@ function strengthsWeaknesses(name, table) {
     const gap = mt.hib ? (me.v - mt.team) / Math.abs(mt.team) : (mt.team - me.v) / Math.abs(mt.team);
     const conf = me.n >= 10 ? 'sterk' : me.n >= 6 ? 'redelijk' : 'zwak';
     const ev = `${mt.fmt(me.v)} tegenover ${mt.fmt(mt.team)} voor het team · plek ${rank} van ${k} · ${me.n} wedstrijden`;
-    if ((rank === 1 && gap >= 0.1) || (rank === 2 && gap >= 0.3)) strengths.push({ gap, html: li(`${rank === 1 ? 'Beste van het team' : 'Top twee'} in ${mt.label.toLowerCase()}`, ev, conf) });
-    if ((rank === k && gap <= -0.1) || (rank === k - 1 && gap <= -0.3)) weaknesses.push({ gap, html: li(`${rank === k ? 'Laagste van het team' : 'Onderaan'} in ${mt.label.toLowerCase()}`, ev, conf) });
+    if ((rank === 1 && gap >= 0.1) || (rank === 2 && gap >= 0.3)) strengths.push({ gap, key: mt.key, label: mt.label.toLowerCase(), html: li(`${rank === 1 ? 'Beste van het team' : 'Top twee'} in ${mt.label.toLowerCase()}`, ev, conf) });
+    if ((rank === k && gap <= -0.1) || (rank === k - 1 && gap <= -0.3)) weaknesses.push({ gap, key: mt.key, label: mt.label.toLowerCase(), html: li(`${rank === k ? 'Laagste van het team' : 'Onderaan'} in ${mt.label.toLowerCase()}`, ev, conf) });
   }
-  return { strengths: strengths.sort((a, b) => b.gap - a.gap).map(x => x.html), weaknesses: weaknesses.sort((a, b) => a.gap - b.gap).map(x => x.html) };
+  strengths.sort((a, b) => b.gap - a.gap); weaknesses.sort((a, b) => a.gap - b.gap);
+  return { strengths: strengths.map(x => x.html), weaknesses: weaknesses.map(x => x.html), sRaw: strengths, wRaw: weaknesses };
 }
 
 function conditions(name, ms, players) {
-  const rows = rowsFor(ms, name); if (rows.length < 6) return { thrives: [], struggles: [] };
+  const rows = rowsFor(ms, name); if (rows.length < 6) return { thrives: [], struggles: [], tRaw: [], sRaw: [] };
   const share = r => { const t = r.m.players.reduce((a, p) => a + actionsOf(p), 0); return t ? actionsOf(r.p) / t : 0; };
   const med = xs => { const s = [...xs].sort((a, b) => a - b); return s[Math.floor(s.length / 2)]; };
   const shareMed = med(rows.map(share));
@@ -96,8 +97,8 @@ function conditions(name, ms, players) {
   const splits = [];
   for (const t of players) if (t !== name) splits.push({ label: `${t} meespeelt`, neg: `${t} er niet bij is`, test: r => r.m.players.some(p => p.name === t) });
   const positions = [...new Set(rows.map(r => r.p.pos))];
-  if (positions.length > 1) for (const pos of positions) splits.push({ label: `hij als ${POS_NL[pos] || pos} speelt`, neg: `hij niet als ${POS_NL[pos] || pos} speelt`, test: r => r.p.pos === pos });
-  splits.push({ label: 'hij veel aan de bal komt', neg: 'hij weinig aan de bal komt', test: r => share(r) >= shareMed });
+  if (positions.length > 1) for (const pos of positions) splits.push({ label: `de positie ${POS_NL[pos] || pos} is`, neg: `de positie niet ${POS_NL[pos] || pos} is`, test: r => r.p.pos === pos });
+  splits.push({ label: 'er veel balcontact is', neg: 'er weinig balcontact is', test: r => share(r) >= shareMed });
   splits.push({ label: 'het de 1e of 2e pot van de avond is', neg: 'het de 3e pot of later is', test: r => r.m.posInSession <= 2 });
   splits.push({ label: 'de tegenstander skill rating 1700 of hoger heeft', neg: 'de tegenstander zwakker is', test: r => (r.m.opponent.skillRating || 0) >= 1700 });
   splits.push({ label: 'de tegenstander 4 of meer mensen heeft', neg: 'de tegenstander 3 of minder mensen heeft', test: r => r.m.opponentPlayers.length >= 4 });
@@ -114,15 +115,17 @@ function conditions(name, ms, players) {
     if (Math.abs(dR) < 0.4 && Math.abs(dE) < 1) continue;
     const score = dR + dE / 3;
     const pos = score > 0;
-    out.push({ score, pos, html: li(pos ? `Als ${s.label}` : `Als ${s.neg}`, `rating ${f2(pos ? rA : rB)} (${pos ? A.length : B.length} wedstrijden) tegenover ${f2(pos ? rB : rA)} (${pos ? B.length : A.length}) · team ${signed(pos ? eA : eB)} tov verwachting tegenover ${signed(pos ? eB : eA)}`, CONF(A.length, B.length)) });
+    out.push({ score, pos, text: pos ? s.label : s.neg, html: li(pos ? `Als ${s.label}` : `Als ${s.neg}`, `rating ${f2(pos ? rA : rB)} (${pos ? A.length : B.length} wedstrijden) tegenover ${f2(pos ? rB : rA)} (${pos ? B.length : A.length}) · team ${signed(pos ? eA : eB)} tov verwachting tegenover ${signed(pos ? eB : eA)}`, CONF(A.length, B.length)) });
   }
   out.sort((a, b) => Math.abs(b.score) - Math.abs(a.score));
-  return { thrives: out.filter(o => o.pos).slice(0, 5).map(o => o.html), struggles: out.filter(o => !o.pos).slice(0, 5).map(o => o.html) };
+  const th = out.filter(o => o.pos).slice(0, 5), st = out.filter(o => !o.pos).slice(0, 5);
+  return { thrives: th.map(o => o.html), struggles: st.map(o => o.html), tRaw: th, sRaw: st };
 }
 
 function otherInsights(name, ms, players) {
-  const rows = rowsFor(ms, name), out = [];
-  if (!rows.length) return out;
+  const rows = rowsFor(ms, name), out = [], claims = [];
+  const push = (claim, ev, conf) => { out.push(li(claim, ev, conf)); claims.push(claim); };
+  if (!rows.length) return { html: out, claims };
   const W = rows.filter(r => r.m.result === 'W'), R = rows.filter(r => r.m.result !== 'W');
   const n = rows.length, conf = CONF(W.length, R.length);
   if (W.length >= 3 && R.length >= 3) {
@@ -130,39 +133,70 @@ function otherInsights(name, ms, players) {
     const e = evRows(rows);
     const noW = avg(evRows(W).map(r => r.p.ev.fb_no_good_option)), noR = avg(evRows(R).map(r => r.p.ev.fb_no_good_option));
     const lostW = avg(evRows(W).map(r => r.p.ev.possession_lost)), lostR = avg(evRows(R).map(r => r.p.ev.possession_lost));
-    if (aR > aW * 1.15) out.push(li('Komt in verloren potten méér aan de bal, niet minder', `${f0(aR)} balacties per wedstrijd bij gelijk of verlies tegenover ${f0(aW)} bij winst${e.length && noR > noW ? ` · het spel meldt dan vaker "geen goede optie" (${f1(noR)} tegenover ${f1(noW)}): minder aanspeelpunten om hem heen` : ''}${e.length && lostR > lostW ? ` · balverlies ${f1(lostR)} tegenover ${f1(lostW)}` : ''}`, conf));
-    else if (aW > aR * 1.15) out.push(li('Het team wint vaker als het spel via hem loopt', `${f0(aW)} balacties per wedstrijd bij winst tegenover ${f0(aR)} bij gelijk of verlies`, conf));
+    if (aR > aW * 1.15) push('Komt in verloren potten méér aan de bal, niet minder', `${f0(aR)} balacties per wedstrijd bij gelijk of verlies tegenover ${f0(aW)} bij winst${e.length && noR > noW ? ` · het spel meldt dan vaker "geen goede optie" (${f1(noR)} tegenover ${f1(noW)}): minder aanspeelpunten in de buurt` : ''}${e.length && lostR > lostW ? ` · balverlies ${f1(lostR)} tegenover ${f1(lostW)}` : ''}`, conf);
+    else if (aW > aR * 1.15) push('Het team wint vaker als het spel via deze speler loopt', `${f0(aW)} balacties per wedstrijd bij winst tegenover ${f0(aR)} bij gelijk of verlies`, conf);
     const shW = sum(W, r => r.p.shots), gW = sum(W, r => r.p.goals), shR = sum(R, r => r.p.shots), gR = sum(R, r => r.p.goals);
-    if (shW >= 5 && shR >= 5) { const cW = pct(gW, shW), cR = pct(gR, shR); if (cW - cR >= 15) out.push(li('Afwerking maakt het verschil', `conversie ${fmtPct(cW)} bij winst tegenover ${fmtPct(cR)} bij gelijk of verlies, bij een vergelijkbaar aantal schoten (${f1(shW / W.length)} en ${f1(shR / R.length)} per wedstrijd)`, conf)); }
+    if (shW >= 5 && shR >= 5) { const cW = pct(gW, shW), cR = pct(gR, shR); if (cW - cR >= 15) push('Afwerking maakt het verschil', `conversie ${fmtPct(cW)} bij winst tegenover ${fmtPct(cR)} bij gelijk of verlies, bij een vergelijkbaar aantal schoten (${f1(shW / W.length)} en ${f1(shR / R.length)} per wedstrijd)`, conf); }
     const rW = avg(W.map(r => r.p.rating)), rR = avg(R.map(r => r.p.rating));
     const all = players.map(p => { const rr = rowsFor(ms, p); const w = rr.filter(r => r.m.result === 'W'), l = rr.filter(r => r.m.result !== 'W'); return w.length >= 3 && l.length >= 3 ? { p, d: avg(w.map(r => r.p.rating)) - avg(l.map(r => r.p.rating)) } : null; }).filter(Boolean).sort((a, b) => b.d - a.d);
     const mine = all.find(x => x.p === name);
-    if (mine && all[0].p === name && mine.d >= 0.6) out.push(li('Zijn vorm volgt het resultaat het sterkst van iedereen', `rating ${f2(rW)} bij winst tegenover ${f2(rR)} bij gelijk of verlies: een verschil van ${f2(mine.d)}, het grootste in het team. Als hij goed speelt, wint het team; de vraag is wat oorzaak is.`, conf));
+    if (mine && all[0].p === name && mine.d >= 0.6) push('Eigen vorm volgt het resultaat het sterkst van iedereen', `rating ${f2(rW)} bij winst tegenover ${f2(rR)} bij gelijk of verlies: een verschil van ${f2(mine.d)}, het grootste in het team. Goed spelen en winnen gaan hier het sterkst samen; wat oorzaak is, zegt de data niet.`, conf);
   }
   // constantheid
   const ratings = rows.map(r => r.p.rating).filter(v => v !== null);
   if (ratings.length >= 6) {
     const m = avg(ratings), sd = Math.sqrt(avg(ratings.map(v => (v - m) ** 2)));
     const sds = players.map(p => { const v = rowsFor(ms, p).map(r => r.p.rating).filter(x => x !== null); if (v.length < 6) return null; const mm = avg(v); return { p, sd: Math.sqrt(avg(v.map(x => (x - mm) ** 2))) }; }).filter(Boolean).sort((a, b) => a.sd - b.sd);
-    if (sds.length >= 3 && sds[0].p === name) out.push(li('Meest constante speler van het team', `spreiding in rating ${f2(sd)}; laagste van ${sds.length} spelers`, 'redelijk'));
-    if (sds.length >= 3 && sds[sds.length - 1].p === name) out.push(li('Grilligste speler van het team', `spreiding in rating ${f2(sd)}; hoogste van ${sds.length} spelers. Uitschieters naar boven (${f1(Math.max(...ratings))}) en beneden (${f1(Math.min(...ratings))})`, 'redelijk'));
+    if (sds.length >= 3 && sds[0].p === name) push('Meest constante speler van het team', `spreiding in rating ${f2(sd)}; laagste van ${sds.length} spelers`, 'redelijk');
+    if (sds.length >= 3 && sds[sds.length - 1].p === name) push('Grilligste speler van het team', `spreiding in rating ${f2(sd)}; hoogste van ${sds.length} spelers. Uitschieters naar boven (${f1(Math.max(...ratings))}) en beneden (${f1(Math.min(...ratings))})`, 'redelijk');
   }
   // man of the match, kaarten
   const mom = sum(rows, r => r.p.mom), reds = sum(rows, r => r.p.redCards), yellows = sum(evRows(rows), r => r.p.ev.yellow_cards_total);
-  if (mom) out.push(li(`${mom} keer man of the match`, `in ${n} wedstrijden (${fmtPct(pct(mom, n))})`, null));
-  if (reds || yellows) out.push(li('Kaarten', `${yellows} geel en ${reds} rood in ${n} wedstrijden`, null));
+  if (mom) push(`${mom} keer man of the match`, `in ${n} wedstrijden (${fmtPct(pct(mom, n))})`, null);
+  if (reds || yellows) push('Kaarten', `${yellows} geel en ${reds} rood in ${n} wedstrijden`, null);
   // carrière tegenover nu
   const career = DATA.members.find(x => x.name === name);
   if (career) {
     const recent = avg(ratings);
-    if (recent !== null && career.ratingAve) { const d = recent - career.ratingAve; if (Math.abs(d) >= 0.3) out.push(li(d > 0 ? 'In betere vorm dan zijn carrièregemiddelde' : 'Onder zijn carrièregemiddelde', `rating ${f2(recent)} in de gekozen periode tegenover ${f2(career.ratingAve)} over ${career.gamesPlayed} wedstrijden volgens EA`, n >= 10 ? 'redelijk' : 'zwak')); }
+    if (recent !== null && career.ratingAve) { const d = recent - career.ratingAve; if (Math.abs(d) >= 0.3) push(d > 0 ? 'In betere vorm dan het carrièregemiddelde' : 'Onder het carrièregemiddelde', `rating ${f2(recent)} in de gekozen periode tegenover ${f2(career.ratingAve)} over ${career.gamesPlayed} wedstrijden volgens EA`, n >= 10 ? 'redelijk' : 'zwak'); }
     const members = [...DATA.members].sort((a, b) => b.winRate - a.winRate);
-    if (members[0]?.name === name && members.length >= 3) out.push(li('Hoogste winstpercentage van de club over de hele carrière', `${career.winRate}% in ${career.gamesPlayed} wedstrijden volgens EA`, 'sterk'));
+    if (members[0]?.name === name && members.length >= 3) push('Hoogste winstpercentage van de club over de hele carrière', `${career.winRate}% in ${career.gamesPlayed} wedstrijden volgens EA`, 'sterk');
     const gaPer = career.gamesPlayed ? (career.goals + career.assists) / career.gamesPlayed : 0;
     const best = [...DATA.members].sort((a, b) => (b.goals + b.assists) / (b.gamesPlayed || 1) - (a.goals + a.assists) / (a.gamesPlayed || 1))[0];
-    if (best?.name === name && career.gamesPlayed >= 20) out.push(li('Productiefste speler van de club over de hele carrière', `${f2(gaPer)} goals plus assists per wedstrijd (${career.goals} goals, ${career.assists} assists in ${career.gamesPlayed} wedstrijden)`, 'sterk'));
+    if (best?.name === name && career.gamesPlayed >= 20) push('Productiefste speler van de club over de hele carrière', `${f2(gaPer)} goals plus assists per wedstrijd (${career.goals} goals, ${career.assists} assists in ${career.gamesPlayed} wedstrijden)`, 'sterk');
   }
-  return out;
+  return { html: out, claims };
+}
+
+function playerSummary(name, rows, career, sw, cond, other) {
+  if (!rows.length) return 'Nog geen wedstrijden van deze speler in de gekozen periode.';
+  const posCount = {}; for (const r of rows) posCount[r.p.pos] = (posCount[r.p.pos] || 0) + 1;
+  const pos = Object.entries(posCount).sort((a, b) => b[1] - a[1]);
+  const posText = pos.length > 1 && pos[1][1] >= rows.length / 3 ? `als ${POS_NL[pos[0][0]] || pos[0][0]} en ${POS_NL[pos[1][0]] || pos[1][0]}` : `vooral als ${POS_NL[pos[0][0]] || pos[0][0]}`;
+  const r = avg(rows.map(x => x.p.rating).filter(v => v !== null));
+  const s = summarize(rows.map(x => x.m));
+  const parts = [];
+  let first = `<b>${esc(name)}</b> speelde ${rows.length} ${rows.length === 1 ? 'wedstrijd' : 'wedstrijden'} ${posText}, met een gemiddelde rating van ${f2(r)}`;
+  if (career?.ratingAve) { const d = r - career.ratingAve; first += Math.abs(d) < 0.15 ? `, gelijk aan het carrièregemiddelde` : `, ${d > 0 ? 'boven' : 'onder'} het carrièregemiddelde van ${f2(career.ratingAve)}`; }
+  parts.push(first + `. Met deze speler erbij haalde het team ${s.ppg} punten per wedstrijd${s.resid === null ? '' : `, ${Math.abs(s.resid) < 0.3 ? 'op' : s.resid > 0 ? 'boven' : 'onder'} verwachting`}.`);
+  const list = xs => xs.length === 1 ? xs[0] : `${xs.slice(0, -1).join(', ')} en ${xs[xs.length - 1]}`;
+  // Bij maten waar lager beter is, leest "sterk in balverlies" verkeerd; die krijgen een eigen formulering.
+  const PHRASE = {
+    lost90: ['weinig balverlies', 'balverlies'], lostDef90: ['weinig balverlies op eigen helft', 'balverlies op eigen helft'],
+    outPos: ['zelden uit positie staan', 'uit positie staan'], fouls90: ['weinig overtredingen', 'overtredingen'],
+    noOption90: ['zelden zonder aanspeelpunt', 'vaak zonder aanspeelpunt'],
+  };
+  const st = sw.sRaw.slice(0, 2).map(x => PHRASE[x.key]?.[0] ?? x.label), wk = sw.wRaw.slice(0, 2).map(x => PHRASE[x.key]?.[1] ?? x.label);
+  if (st.length && wk.length) parts.push(`${st.length > 1 ? 'De sterkste punten binnen het team zijn' : 'Het sterkste punt binnen het team is'} ${list(st)}; ${wk.length > 1 ? 'verbeterpunten zijn' : 'het verbeterpunt is'} ${list(wk)}.`);
+  else if (st.length) parts.push(`${st.length > 1 ? 'De sterkste punten binnen het team zijn' : 'Het sterkste punt binnen het team is'} ${list(st)}.`);
+  else if (wk.length) parts.push(`${wk.length > 1 ? 'Verbeterpunten zijn' : 'Het verbeterpunt is'} ${list(wk)}.`);
+  const th = cond.tRaw[0], sg = cond.sRaw[0];
+  if (th && sg) parts.push(`Het gaat het best als ${th.text}, en minder als ${sg.text}.`);
+  else if (th) parts.push(`Het gaat het best als ${th.text}.`);
+  else if (sg) parts.push(`Het gaat minder als ${sg.text}.`);
+  if (other.claims.length) parts.push(`Verder valt op: ${other.claims[0].charAt(0).toLowerCase() + other.claims[0].slice(1)}.`);
+  if (rows.length < 15) parts.push(`<span class="muted">Dit rust op ${rows.length} wedstrijden; het beeld wordt scherper met elke speelavond.</span>`);
+  return parts.join(' ');
 }
 
 function renderPlayer() {
@@ -181,8 +215,8 @@ function renderPlayer() {
   const ratings = rows.map(r => r.p.rating).filter(v => v !== null);
   const tiles = [
     ['Rating', ratings.length ? f2(avg(ratings)) : '–', career ? `carrière ${career.ratingAve}` : ''],
-    ['Punten per wed. met hem', s.ppg ?? '–', `${s.W}W ${s.D}G ${s.L}V`],
-    ['Tov verwachting', s.resid === null ? '–' : signed(s.resid, 2), 'team, als hij speelt'],
+    ['Punten per wedstrijd', s.ppg ?? '–', `${s.W}W ${s.D}G ${s.L}V`],
+    ['Tov verwachting', s.resid === null ? '–' : signed(s.resid, 2), 'team, met deze speler erbij'],
     ['Goals + assists', `${sum(rows, r => r.p.goals)} + ${sum(rows, r => r.p.assists)}`, career ? `carrière ${career.goals} + ${career.assists}` : ''],
     ['Minuten per wed.', rows.length ? f0(minutes(rows) / rows.length) : '–', ''],
   ];
@@ -192,11 +226,12 @@ function renderPlayer() {
   profileChart($('#chart-profile'), selected, table_);
   const sw = strengthsWeaknesses(selected, table_), cond = conditions(selected, ms, players), other = otherInsights(selected, ms, players);
   const fill = (id, items, empty) => { $(id).innerHTML = items.length ? items.join('') : `<li class="empty">${empty}</li>`; };
-  fill('#list-strengths', sw.strengths, 'Nog geen maat waarop hij bovenaan staat.');
-  fill('#list-weaknesses', sw.weaknesses, 'Nog geen maat waarop hij duidelijk onderaan staat.');
+  fill('#list-strengths', sw.strengths, 'Nog geen maat waarop deze speler bovenaan staat.');
+  fill('#list-weaknesses', sw.weaknesses, 'Nog geen maat waarop deze speler duidelijk onderaan staat.');
   fill('#list-thrives', cond.thrives, 'Nog geen omstandigheid met een duidelijk verschil (minimaal 3 wedstrijden aan beide kanten).');
   fill('#list-struggles', cond.struggles, 'Nog geen omstandigheid met een duidelijk verschil.');
-  fill('#list-other', other, 'Nog geen patronen gevonden.');
+  fill('#list-other', other.html, 'Nog geen patronen gevonden.');
+  $('#p-summary').innerHTML = playerSummary(selected, rows, career, sw, cond, other);
 
   table($('#tbl-player-matches'), [
     { label: 'Datum', render: r => fmtDateTime(r.m.ts) }, { label: 'Tegenstander', render: r => esc(r.m.opponent.name) }, { label: 'Score', num: true, render: r => `${r.m.goals}–${r.m.goalsAgainst}` },

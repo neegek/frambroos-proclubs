@@ -4,7 +4,7 @@
   --page: #f6f6f3; --surface: #ffffff; --surface-2: #f9f9f7; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
   --grid: #ebeae4; --axis: #c3c2b7; --border: rgba(11,11,11,0.08); --border-strong: rgba(11,11,11,0.14);
   --shadow: 0 1px 2px rgba(11,11,11,0.04), 0 6px 20px rgba(11,11,11,0.04);
-  --brand: #b8235a; --brand-soft: rgba(184,35,90,0.09); --brand-ink: #ffffff;
+  --brand: #cf206a; --brand-soft: rgba(207,32,106,0.09); --brand-ink: #ffffff;
   --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4; --s6: #008300; --s7: #6250d6; --s8: #e34948;
   --pos: #2a78d6; --neg: #e34948; --neutral: #a3a29c;
   --seq-1: #cde2fb; --seq-2: #9ec5f4; --seq-3: #6da7ec; --seq-4: #3987e5; --seq-5: #1c5cab;
@@ -133,6 +133,18 @@ td.split small, .split small { color: var(--muted); }
 .profile h2 { font-size: 22px; margin: 0; letter-spacing: -0.015em; }
 .profile .meta { color: var(--ink-2); margin-top: 4px; }
 .profile .tiles { flex: 1 1 100%; }
+.summary { font-size: 15.5px; line-height: 1.65; margin: 12px 0 0; max-width: 85ch; color: var(--ink); }
+.summary b { font-weight: 620; }
+.summary .muted { color: var(--muted); }
+.card h2 + .summary { margin-top: 6px; }
+.club-card { display: flex; gap: 28px; align-items: center; flex-wrap: wrap; }
+.club-text { flex: 1 1 420px; min-width: 0; }
+.club-side { flex: 0 0 auto; display: grid; gap: 8px; justify-items: center; }
+.kits { display: flex; gap: 14px; }
+.kit { margin: 0; display: grid; justify-items: center; gap: 4px; }
+.kit svg { width: 64px; height: 60px; }
+.kit figcaption { font-size: 12px; color: var(--muted); }
+.club-stadium { font-size: 12px; color: var(--ink-2); text-align: center; }
 .card .tile { box-shadow: none; background: var(--surface-2); }
 .insights { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
 .insight-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }

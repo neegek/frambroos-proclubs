@@ -40,6 +40,31 @@ function renderList() {
   for (const b of $('#session-list').querySelectorAll('.session-item')) b.addEventListener('click', () => { selectedId = Number(b.dataset.id); render(); });
 }
 
+function sessionSummary(ms, others, sm, names, opp, own, cmp, prow) {
+  const parts = [];
+  const lead = `Op ${longDate(ms[0].ts)} speelden jullie ${sm.n} ${typeLabel(ms) === 'playoff' ? 'playoff' : typeLabel(ms) === 'league' ? 'league' : ''}${sm.n === 1 ? 'wedstrijd' : 'wedstrijden'} met ${names.length} man, van ${fmtTime(ms[0].ts)} tot ${fmtTime(ms[ms.length - 1].ts)}: ${sm.W} gewonnen, ${sm.D} gelijk en ${sm.L} verloren, ${sm.gf}–${sm.ga} in doelpunten.`;
+  parts.push(lead);
+  if (opp && own) {
+    const lbl = strengthLabel(opp - own);
+    const verdict = Math.abs(sm.resid) < 0.3 ? 'speelden jullie ongeveer zoals verwacht' : sm.resid > 0 ? `deden jullie het ${sm.resid >= 1 ? 'duidelijk ' : ''}beter dan verwacht` : `bleven jullie ${sm.resid <= -1 ? 'duidelijk ' : ''}onder verwachting`;
+    parts.push(`De tegenstanders waren gemiddeld ${lbl === 'gelijkwaardig' ? 'gelijkwaardig' : lbl + ' dan jullie'} (rating ${Math.round(opp)}), en gecorrigeerd daarvoor ${verdict}.`);
+  }
+  const notable = cmp.filter(d => Math.abs(d.rel) >= 0.2 && Math.abs(d.diff) > 0.15).sort((a, b) => Math.abs(b.rel) - Math.abs(a.rel));
+  const good = notable.filter(d => d.good).slice(0, 2).map(d => `${d.label.toLowerCase()} (${d.fmt(d.a)} tegen ${d.fmt(d.b)})`);
+  const bad = notable.filter(d => !d.good).slice(0, 2).map(d => `${d.label.toLowerCase()} (${d.fmt(d.a)} tegen ${d.fmt(d.b)})`);
+  if (good.length && bad.length) parts.push(`Beter dan normaal waren ${good.join(' en ')}; minder ging ${bad.join(' en ')}.`);
+  else if (good.length) parts.push(`Beter dan normaal waren ${good.join(' en ')}.`);
+  else if (bad.length) parts.push(`Minder dan normaal ging ${bad.join(' en ')}.`);
+  const best = prow[0];
+  if (best && best.rH !== null) parts.push(`Uitblinker was <b>${esc(best.name)}</b> met een rating van ${f2(best.rH)}${best.g + best.a ? `, ${best.g} goals en ${best.a} assists` : ''}.`);
+  const down = [...prow].filter(r => r.d !== null && r.d <= -0.4).sort((a, b) => a.d - b.d)[0];
+  if (down) parts.push(`${esc(down.name)} zat het verst onder het eigen niveau (${f2(down.rH)} tegen normaal ${f2(down.rT)}).`);
+  const res = ms.map(m => m.result);
+  if (res.length >= 4 && res[0] !== 'W' && res[1] !== 'W' && res.slice(2).some(r => r === 'W')) parts.push('De eerste twee potten leverden niets op; daarna kwam het op gang.');
+  else if (res.length >= 4 && res.slice(-2).every(r => r !== 'W') && res.slice(0, -2).some(r => r === 'W')) parts.push('Aan het eind van de avond ging het minder.');
+  return parts.join(' ');
+}
+
 function render() {
   if (!sessions.length) { $('#s-title').textContent = 'Nog geen sessies'; return; }
   if (!sessions.some(s => s.id === selectedId)) selectedId = sessions[sessions.length - 1].id;
@@ -104,8 +129,9 @@ function render() {
     }
     notes.sort((x, y) => y.rel - x.rel);
     const evH = pEv(here);
-    return { name, n: here.length, rH, rT, d: rT === null || rH === null ? null : rH - rT, g: pSum(here, p => p.goals), a: pSum(here, p => p.assists), mom: pSum(here, p => p.mom), actions: evH.length ? pSum(evH, p => p.ev.ball_actions) / evH.length : null, notes: there.length < 3 ? '<small>Te weinig andere wedstrijden om mee te vergelijken.</small>' : notes.slice(0, 3).map(x => `<div>${x.html}</div>`).join('') || '<small>Op zijn normale niveau.</small>' };
+    return { name, n: here.length, rH, rT, d: rT === null || rH === null ? null : rH - rT, g: pSum(here, p => p.goals), a: pSum(here, p => p.assists), mom: pSum(here, p => p.mom), actions: evH.length ? pSum(evH, p => p.ev.ball_actions) / evH.length : null, notes: there.length < 3 ? '<small>Te weinig andere wedstrijden om mee te vergelijken.</small>' : notes.slice(0, 3).map(x => `<div>${x.html}</div>`).join('') || '<small>Op het eigen normale niveau.</small>' };
   }).sort((x, y) => (y.rH ?? 0) - (x.rH ?? 0));
+  $('#s-summary').innerHTML = sessionSummary(ms, others, sm, names, opp, own, cmp, prow);
   $('#s-players').innerHTML = `<div class="pcards">${prow.map(r => `<a class="pcard" href="/spelers.html#${encodeURIComponent(r.name)}">
     <div class="pcard-head"><span class="pcard-name">${esc(r.name)}</span><span class="pcard-rating">${f2(r.rH)}</span></div>
     <div class="pcard-sub">${r.n} ${r.n === 1 ? 'wedstrijd' : 'wedstrijden'} · normaal ${f2(r.rT)} ${r.d === null ? '' : residCell(r.d)}</div>
