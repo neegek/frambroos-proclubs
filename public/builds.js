@@ -58,6 +58,11 @@ const METRICS = {
   assists90: { lower: false, fmt: v => `${v.toFixed(2)} per 90 min`, calc: r => mins(r) >= 180 ? 90 * r.reduce((a, x) => a + (x.p.assists || 0), 0) / mins(r) : null },
   noOption: { lower: true, fmt: v => `${v.toFixed(1)} keer per 90 min`, calc: r => mins(r) >= 180 ? 90 * ev(r, 'fb_no_good_option') / mins(r) : null },
   wonAtt: { lower: false, fmt: v => `${Math.round(v * 100)}%`, calc: r => ratio(ev(r, 'possession_won_att_third'), ev(r, 'possession_won'), 10) },
+  // aan de bal in context (docs/coach-logica.md §4a)
+  act90: { lower: false, fmt: v => `${v.toFixed(0)} per 90 min`, calc: r => mins(r) >= 180 ? 90 * ev(r, 'ball_actions') / mins(r) : null },
+  create90: { lower: false, fmt: v => `${v.toFixed(1)} per 90 min`, calc: r => mins(r) >= 180 ? 90 * (ev(r, 'through_balls') + ev(r, 'second_assists') + r.reduce((a, x) => a + (x.p.assists || 0), 0)) / mins(r) : null },
+  yieldPerLoss: { lower: false, fmt: v => `${v.toFixed(1)} per verloren bal`, calc: r => ratio(ev(r, 'players_beaten') + ev(r, 'through_balls') + ev(r, 'second_assists') + r.reduce((a, x) => a + (x.p.assists || 0), 0), ev(r, 'possession_lost'), 15) },
+  noOptShare: { lower: true, fmt: v => `${Math.round(v * 100)}% van de balmomenten`, calc: r => ratio(ev(r, 'fb_no_good_option'), ev(r, 'feedback_passes_graded'), 40) },
 };
 
 // ---------- vergelijking met dezelfde positie ----------
@@ -127,8 +132,8 @@ function lastArchetype(name) {
 
 // Analyse voor één archetype. Eigen wedstrijden met dat archetype als het er minstens MIN_ARCH_ROWS zijn, anders alle.
 // Vergelijkingsgroep: alle spelers met hetzelfde archetype als die groep groot genoeg is, anders dezelfde positie.
-function analyse(name, arch) {
-  const pool = ROWS(), all = pool.filter(r => r.ours && r.p.name === name);
+function analyse(name, arch, matchIds = null) {
+  const pool = ROWS(), all = pool.filter(r => r.ours && r.p.name === name && (!matchIds || matchIds.has(r.m.matchId)));
   const own = all.filter(r => r.p.archetypeId === arch);
   const rows = own.length >= MIN_ARCH_ROWS ? own : all;
   const archPool = pool.filter(r => r.p.archetypeId === arch);
@@ -153,6 +158,71 @@ const gap = x => x ? x.worse : 0;                    // positief = slechter dan 
 
 const SIZE = s => s >= 0.25 ? 'grote winst' : s >= 0.12 ? 'duidelijke winst' : 'fijnslijpen';
 
+// ---------- aan de bal in context (docs/coach-logica.md §4a) ----------
+// Eén oordeel per speler uit zes vragen: hoe vaak aan de bal, uitspelen, dribbelen, creëren, lastige balmomenten, wat het kost
+// en wat een verloren bal oplevert. De kaart op Algemeen en het adviesthema 'Aan de bal' gebruiken dezelfde uitkomst.
+const lvl = (x, t = 0.15) => !x ? null : rel(x) >= t ? 'hoog' : rel(x) <= -t ? 'laag' : 'normaal';
+const BALL_VERDICT = {
+  prijs: { title: 'De prijs van het spel', good: null,
+    means: 'Je verliest meer ballen dan gemiddeld, maar je {risk} dan gemiddeld en dat levert op: per verloren bal staat er minstens zoveel tegenover als bij anderen. Het verlies hoort bij je spel; de winst zit in de timing, niet in minder proberen.',
+    play: ['Speel sneller af nadat je je man voorbij bent.', 'Ga de tweede dribbel alleen aan als er ruimte voor je ligt.'] },
+  duur: { title: 'Risico dat te weinig oplevert', good: false,
+    means: 'Je {risk} dan gemiddeld, maar per verloren bal levert het minder op dan bij anderen. De actie komt vaak op het verkeerde moment of de verkeerde plek.',
+    play: ['Kijk eerst of er een medespeler vrij staat voordat je de dribbel aangaat.', 'Bewaar de dribbel voor de helft van de tegenstander, met ruimte achter je man.'] },
+  druk: { title: 'Vaak zonder opties', good: false,
+    means: 'Je neemt niet meer risico dan gemiddeld, maar krijgt de bal vaker op momenten zonder aanspeelpunt. Dat ligt deels bij medespelers die zich te weinig aanbieden, deels bij hoe en waar je de bal aanneemt.',
+    play: ['Kijk over je schouder voordat de bal komt, zodat je al weet waar hij heen moet.', 'Laat de bal eerder gaan, voordat de opties verdwijnen.', 'Spreek als team af dat er altijd één korte optie dichtbij is.'] },
+  slordig: { title: 'Balverlies zonder risico', good: false,
+    means: 'Er staat weinig risico tegenover het balverlies en er zijn niet vaker dan gemiddeld momenten zonder opties. Het gaat eerder mis bij het aannemen of bij een eenvoudige pass.',
+    play: ['Neem aan in de looprichting, met je lichaam open naar het veld.', 'Scherm de bal af als er druk in je rug staat, in plaats van weg te draaien.'] },
+  gevaarlijk: { title: 'Gevaarlijk zonder extra verlies', good: true,
+    means: 'Je {risk} dan gemiddeld, zonder dat je vaker de bal verliest. Dat is een sterk punt.',
+    play: ['Zo houden; zoek de actie vooral op de helft van de tegenstander.'] },
+  weinigDreiging: { title: 'Weinig dreiging', good: false,
+    means: 'Je verliest niet meer ballen dan gemiddeld, maar speelt ook minder mensen uit en creëert minder. Voor deze build mag er meer dreiging vanuit gaan.',
+    play: ['Zoek per balbezit één actie vooruit: een dribbel of een pass door de linie.'] },
+  rustig: { title: 'Rustig aan de bal', good: null,
+    means: 'Je speelt minder mensen uit en creëert minder dan gemiddeld, en verliest niet meer ballen dan normaal. Voor deze build past die rust; winst zit eerder in een bal minder verliezen dan in meer risico.',
+    play: ['Speel in één of twee keer raken door; zoek af en toe de pass die een linie overslaat.'] },
+  balans: { title: 'In balans', good: null,
+    means: 'Balverlies, risico en opbrengst liggen rond het gemiddelde. Niets dat eruit springt.',
+    play: [] },
+  balvastGevaarlijk: { title: 'Balvast én gevaarlijk', good: true,
+    means: 'Je {risk} dan gemiddeld, en verliest toch minder ballen. Een zeldzame combinatie.',
+    play: ['Zo houden; zoek de actie vooral op de helft van de tegenstander.'] },
+  rustpunt: { title: 'Rustpunt', good: true,
+    means: 'Je verliest weinig ballen en neemt weinig risico. Voor deze build is dat de taak: jij houdt de bal in de ploeg zodat anderen risico kunnen nemen.',
+    play: ['Blijf het rustpunt; zoek af en toe de pass die een linie overslaat.'] },
+  opZeker: { title: 'Op zeker', good: false,
+    means: 'Je verliest weinig ballen, maar speelt ook weinig mensen uit en creëert weinig. Voor deze build mag je meer risico nemen: verdedigers hoeven je nu weinig te vrezen.',
+    play: ['Ga vaker één-op-één als er ruimte achter je man ligt, vooral op de helft van de tegenstander.', 'Zoek per balbezit één actie vooruit.'] },
+  balvast: { title: 'Balvast', good: true,
+    means: 'Je verliest minder ballen dan gemiddeld, bij een normale hoeveelheid risico.',
+    play: ['Zo houden.'] },
+};
+function ballContext(res, prof) {
+  const lossHigh = gap(res.ballLoss) >= 0.15 || gap(res.lost90) >= 0.15;
+  const lossLow = !lossHigh && gap(res.ballLoss) <= -0.15;
+  const risk = lvl(res.beaten) === 'hoog' || lvl(res.create90) === 'hoog';
+  const quiet = lvl(res.beaten) === 'laag' && lvl(res.create90) === 'laag';
+  const pays = !!res.yieldPerLoss && res.yieldPerLoss.v >= res.yieldPerLoss.b * 0.9;
+  const hard = lvl(res.noOptShare, 0.1) === 'hoog';
+  const front = !!res.lossAtt && res.lossAtt.v >= 0.5;
+  const back = !!res.lossDefShare && res.lossDefShare.v >= 0.2 && res.lossDefShare.v >= res.lossDefShare.b * 1.5;
+  const control = !!prof.safeFits;
+  const key = lossHigh ? (risk ? (pays ? 'prijs' : 'duur') : hard ? 'druk' : 'slordig')
+    : lossLow ? (risk ? 'balvastGevaarlijk' : quiet ? (control ? 'rustpunt' : 'opZeker') : 'balvast')
+    : risk && pays ? 'gevaarlijk' : quiet ? (control ? 'rustig' : 'weinigDreiging') : 'balans';
+  const hi = k => lvl(res[k]) === 'hoog';
+  const riskTxt = hi('beaten') && hi('create90') ? 'speelt meer mensen uit en creëert meer' : hi('beaten') ? 'speelt meer mensen uit' : 'creëert meer';
+  const extra = [];
+  if (hi('act90') && rel(res.lost90) > 0) extra.push('Je bent ook vaker aan de bal dan gemiddeld, dus in aantallen verlies je er meer; per balactie valt het mee.');
+  if (back) extra.push('Een opvallend deel van het balverlies valt op eigen helft; daar levert het direct een kans tegen op.');
+  else if (front && key !== 'balans') extra.push('Het meeste balverlies valt op de helft van de tegenstander, waar het het minst kost.');
+  if (hard && key !== 'druk') extra.push('Je krijgt de bal wel vaker dan gemiddeld op momenten zonder aanspeelpunt.');
+  return { key, ...BALL_VERDICT[key], means: BALL_VERDICT[key].means.replace('{risk}', riskTxt), extra, lossHigh, lossLow, risk, quiet, pays, hard, front, back, control };
+}
+
 function themes(name, res, build, rows, arch) {
   const C = []; // kandidaten
   const forwardish = rows.filter(r => r.p.pos === 'forward').length > rows.length / 2;
@@ -166,37 +236,42 @@ function themes(name, res, build, rows, arch) {
   const teamLoss = avg(ourLoss.map(x => x.v)), teamRank = ourLoss.findIndex(x => x.n === name) + 1;
 
   // 1. Aan de bal: risico tegenover opbrengst, en waar het misgaat
+  const ctx = ballContext(res, prof);
   if (res.ballLoss) {
-    const risk = rel(res.dribbles) >= 0.2 || rel(res.beaten) >= 0.2 || rel(res.dribbleRate) >= 0.2;
-    const pays = res.beatenPerLoss && res.beatenPerLoss.v >= res.beatenPerLoss.b * 0.9;
+    const { risk, pays, hard } = ctx; // §4a
     const defLossReal = res.lossDef && res.lossDef.worse >= 0.3 && res.lossDef.v - res.lossDef.b >= 0.3;
     const teamHigh = res.lost90 && teamLoss && res.lost90.v >= teamLoss * 1.2;
     const lossGap = Math.max(gap(res.ballLoss), gap(res.lost90), defLossReal ? gap(res.lossDef) : 0);
-    const safe = gap(res.ballLoss) <= -0.15 && rel(res.dribbles) <= -0.15;
-    if (lossGap >= 0.05 || teamHigh) {
+    const safe = ctx.key === 'rustpunt' || ctx.key === 'opZeker';
+    const teamOnly = teamHigh && gap(res.ballLoss) < 0.05 && gap(res.lost90) < 0.05; // alleen binnen het team hoog
+    if ((lossGap >= 0.05 || teamHigh) && ctx.good !== true) { // geen kanttekening bij wat §4a een sterk punt noemt
       const says = [];
       if (gap(res.ballLoss) >= 0.05) says.push(`Je verliest de bal bij ${vs('ballLoss')}.`);
       else if (gap(res.lost90) >= 0.05) says.push(`Per balactie verlies je de bal niet vaker dan gemiddeld (${plain('ballLoss', res.ballLoss.v)} tegen ${plain('ballLoss', res.ballLoss.b)}), maar omdat je vaak aan de bal bent, verlies je er in totaal meer: ${vs('lost90')}.`);
       else if (teamHigh) says.push(`Binnen Frambroos verlies je ${teamRank === 1 ? 'de meeste' : 'veel'} ballen: ${res.lost90.fmt(res.lost90.v)}, tegen ${teamLoss.toFixed(1)} gemiddeld in het team. Voor spelers op jouw positie is dat normaal (positiegemiddelde ${plain('lost90', res.lost90.b)}).`);
       else says.push(`Je verliest de bal niet vaker dan spelers op dezelfde positie, maar wel vaker op eigen helft: ${vs('lossDef')}.`);
-      if (risk && res.dribbles && res.beaten) says.push(`Tegelijk ga je vaker de dribbel aan, ${vs('dribbles')}, en speel je meer tegenstanders uit, ${vs('beaten')}.`);
+      if (risk && res.beaten && res.create90) says.push(`Daar staat tegenover: uitgespeelde tegenstanders ${vs('beaten')}, gecreëerd (steekpasses, assists en tweede assists) ${vs('create90')}.`);
+      if (res.yieldPerLoss) says.push(risk ? `Samen is dat ${vs('yieldPerLoss')}.` : `Opbrengst (uitgespeeld plus gecreëerd): ${vs('yieldPerLoss')}.`);
+      if (hard) says.push(`Het spel meldt bij ${vs('noOptShare')} dat er geen goede optie was.`);
       if (res.lossAtt && res.lossDefShare) says.push(`Van je balverlies valt ${pct0(res.lossAtt.v)} op de helft van de tegenstander en ${pct0(res.lossDefShare.v)} op eigen helft (positiegemiddelde ${pct0(res.lossDefShare.b)}).`);
       const means = [];
-      if (risk && pays) means.push(`Je neemt bewust meer risico, en dat betaalt zich grotendeels terug: per verloren bal speel je minstens zoveel tegenstanders uit als gemiddeld.${teamHigh && gap(res.lost90) < 0.05 ? ' Dat je binnen het team de bal vaak kwijt bent, komt vooral doordat je het vaakst iets probeert; de rest speelt behoudender.' : ' Het balverlies is deels de prijs van je spel.'}`);
-      else if (risk) means.push('Je neemt meer risico dan het oplevert: per verloren bal speel je minder tegenstanders uit dan gemiddeld. De dribbel komt vaak op het verkeerde moment.');
+      if (risk && pays) means.push(`Je neemt bewust meer risico, en dat betaalt zich grotendeels terug: per verloren bal speel je minstens zoveel mensen uit en creëer je minstens zoveel als gemiddeld.${teamHigh && gap(res.lost90) < 0.05 ? ' Dat je binnen het team de bal vaak kwijt bent, komt vooral doordat je het vaakst iets probeert; de rest speelt behoudender.' : ' Het balverlies is deels de prijs van je spel.'}`);
+      else if (risk) means.push('Je neemt meer risico dan het oplevert: per verloren bal speel je minder mensen uit en creëer je minder dan gemiddeld. De actie komt vaak op het verkeerde moment.');
+      else if (hard) means.push(BALL_VERDICT.druk.means);
+      else if (teamOnly && pays) means.push('Per verloren bal levert je spel minstens zoveel op als bij anderen met deze build. Het verschil met de rest van het team komt vooral door je rol: wie voorin speelt, verliest de bal vaker.');
       else means.push(role === 'controle' ? `Voor een ${archName(mainBuild)} telt balvastheid extra: jouw taak is ${prof.task}, dus een verloren bal kost direct.` : 'Er staan niet veel dribbels tegenover het balverlies; het gaat eerder mis bij het aannemen of onder druk.');
       if (res.lossAtt && res.lossAtt.v >= 0.5) means.push('Het meeste balverlies valt voorin, waar het het minst kost.');
       if (defLossReal) means.push('Op eigen helft gaat het vaker mis dan gemiddeld; daar levert balverlies direct een kans tegen op.');
-      C.push({ key: 'ball', title: risk ? 'Veel risico aan de bal' : 'Balvastheid', short: risk ? 'kiezen wanneer je de dribbel aangaat' : 'balvastheid onder druk',
-        score: Math.max(lossGap, teamHigh ? 0.12 : 0) * (risk && pays ? 0.6 : 1) * (role === 'controle' && !risk ? 1.2 : 1), says, means,
+      C.push({ key: 'ball', title: risk ? 'Veel risico aan de bal' : hard ? 'Balverlies in lastige momenten' : 'Balvastheid', short: risk ? 'kiezen wanneer je de actie zoekt' : hard ? 'eerder kijken en de bal eerder laten gaan' : 'balvastheid onder druk',
+        score: Math.max(lossGap, teamHigh ? (teamOnly && pays ? 0.06 : 0.12) : 0) * (risk && pays ? 0.6 : 1) * (role === 'controle' && !risk ? 1.2 : 1), says, means,
         play: risk ? ['Speel sneller af nadat je je man voorbij bent; ga de tweede dribbel alleen aan als er ruimte voor je ligt.', 'Scherm de bal af met je lichaam als er druk in je rug staat, in plaats van weg te draaien.', ...(defLossReal ? ['Op eigen helft: één of twee keer raken, geen dribbels.'] : [])]
-          : ['Kijk over je schouder voordat de bal komt, zodat je weet waar de druk vandaan komt.', 'Open je lichaam bij het aannemen en speel in de looprichting door.'],
+          : hard ? BALL_VERDICT.druk.play : BALL_VERDICT.slordig.play,
         train: risk ? ['Oefen dribbeltechnieken en skillmoves in de vaardigheidsspellen of de Arena: wegdraaien, afschermen en versnellen na de actie.'] : ['Oefen de eerste aanname onder druk in de vaardigheidsspellen.'],
         attrs: ['ballControl', 'balance', 'strength', ...(risk ? ['dribbling', 'agility'] : ['composure'])], ps: risk ? ['Technical', 'Press Proven', 'Quick Step'] : ['First Touch', 'Press Proven'] });
     } else if (safe) {
       const fits = role === 'controle';
       C.push({ key: 'ball', title: 'Veilig aan de bal', short: 'vaker het risico nemen', score: fits ? 0.03 : Math.min(-gap(res.ballLoss), -rel(res.dribbles)) * 0.6,
-        says: [`Je verliest de bal weinig: ${vs('ballLoss')}. Je gaat ook minder vaak de dribbel aan: ${res.dribbles ? vs('dribbles') : '–'}.`],
+        says: [`Je verliest de bal weinig: ${vs('ballLoss')}. Je speelt ook minder mensen uit, ${vs('beaten')}, en creëert minder, ${vs('create90')}.`],
         means: [fits ? `Dat past bij een ${archName(mainBuild)}: jouw taak is ${prof.task}, en jij houdt de bal in de ploeg zodat anderen risico kunnen nemen.` : 'Je speelt op zeker. Dat is waardevol, maar voor jouw build mag er meer dreiging vanuit gaan: verdedigers hoeven je nu weinig te vrezen.'],
         play: fits ? ['Blijf het rustpunt; zoek wel af en toe de pass die een linie overslaat.'] : ['Ga vaker één-op-één als er ruimte achter je man ligt, vooral op de helft van de tegenstander.'],
         train: fits ? [] : ['Oefen één simpele skillmove tot hij automatisch gaat, zodat de dribbel een optie wordt.'],
@@ -358,7 +433,8 @@ function renderAdvice() {
 
   // Samenvatting, voor iedereen dezelfde opbouw: build en stijl, grootste winst, sterkste punt, positiespel.
   const parts = [];
-  const riskStyle = rel(res.dribbles) >= 0.2 || rel(res.beaten) >= 0.2 ? 'speelt met veel risico aan de bal' : (gap(res.ballLoss) <= -0.15 && rel(res.dribbles) <= -0.15) ? 'speelt veilig en houdt de bal goed in de ploeg' : rel(res.fwdShare) >= 0.1 ? 'zoekt vaak de pass vooruit' : 'speelt een gebalanceerde rol';
+  const ctx = ballContext(res, prof);
+  const riskStyle = ctx.risk ? 'speelt met veel risico aan de bal' : ctx.key === 'rustpunt' || ctx.key === 'opZeker' ? 'speelt veilig en houdt de bal goed in de ploeg' : rel(res.fwdShare) >= 0.1 ? 'zoekt vaak de pass vooruit' : 'speelt een gebalanceerde rol';
   const isLast = mainBuild === lastArchetype(name);
   parts.push(isLast ? `<b>${esc(name)}</b> speelt nu als ${archName(mainBuild)}, met als taak ${prof.task}.` : `Dit advies bekijkt <b>${esc(name)}</b> als ${archName(mainBuild)}, niet de laatst gespeelde build; de taak is dan ${prof.task}.`);
   parts.push(`${esc(name)} ${riskStyle}.`);
@@ -416,11 +492,18 @@ async function save(e) {
 }
 
 function show(name) { selected = name; renderAdvice(); renderForm(); }
+// Aan de bal in context voor de kaart op Algemeen: zelfde archetype en vergelijkingsgroep als het advies (laatst gespeeld).
+function context(name, matchIds) {
+  const arch = lastArchetype(name); currentArch = arch;
+  const { res, scope, rows } = analyse(name, arch, matchIds);
+  const prof = ARCHETYPE_PROFILE[arch] || ARCHETYPE_PROFILE[8];
+  return { res, scope, rows, arch, ctx: ballContext(res, prof) };
+}
 
 $('#build-form').addEventListener('submit', save);
 window.BuildTab = {
   load: () => fetch('/api/builds').then(r => r.json()).then(x => { BUILDS = x || {}; }),
-  show,
+  show, context,
   has: name => !!BUILDS[name],
   get: name => BUILDS[name],
 };

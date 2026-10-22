@@ -301,6 +301,30 @@ function renderLastTab(name) {
   ], rows);
 }
 
+// ---------- aan de bal in context (docs/coach-logica.md §4a) ----------
+function renderContext(name, ms) {
+  const { res, scope, arch, ctx } = window.BuildTab.context(name, new Set(ms.map(m => m.matchId)));
+  $('#ctx-group').textContent = scope.byArch ? `andere ${archName(arch)}s` : 'spelers op dezelfde positie';
+  const T = scope.byArch ? `Tegenover andere ${archName(arch)}s` : 'Tegenover spelers op dezelfde positie';
+  // Badge: verschil met de vergelijkingsgroep in procenten. good: true/false/null (null = context, geen oordeel).
+  const badge = (x, good) => { if (!x) return null; const r = (x.v - x.b) / Math.abs(x.b); if (Math.abs(r) < 0.05) return { txt: '±0%', good: null, title: T };
+    return { txt: `${r > 0 ? '+' : '−'}${Math.round(Math.abs(r) * 100)}%`, good: good === null ? null : good ? r > 0 : r < 0, title: T }; };
+  const tile = (label, k, val, meta, good) => kpiTile(label, res[k] ? val(res[k].v) : '–', res[k] ? `${meta} · groep ${val(res[k].b)}` : 'nog te weinig minuten', badge(res[k], good));
+  const pc = v => `${Math.round(v * 100)}%`;
+  $('#ctx-tiles').innerHTML = [
+    tile('Aan de bal', 'act90', v => v.toFixed(0), 'balacties per 90', null),
+    tile('Mensen voorbij', 'beaten', v => v.toFixed(1), 'uitgespeeld per 90', true),
+    tile('Dribbels', 'dribbles', v => v.toFixed(1), 'geslaagd per 90', null),
+    tile('Creëren', 'create90', v => v.toFixed(1), 'steekpasses en assists per 90', true),
+    tile('Zonder opties', 'noOptShare', pc, 'van de balmomenten', null),
+    tile('Balverlies', 'ballLoss', pc, res.lossAtt ? `per balactie · ${pc(res.lossAtt.v)} voorin` : 'per balactie', false),
+  ].join('');
+  const y = res.yieldPerLoss;
+  $('#ctx-figs').innerHTML = y ? figsHtml([{ label: 'Opbrengst per verloren bal', color: 'var(--pos)', value: y.v.toFixed(1), delta: badge(y, true) }]) : '';
+  const tone = ctx.good === true ? 'good' : ctx.good === false ? 'bad' : '';
+  $('#ctx-verdict').innerHTML = `<div class="ctx-claim ${tone}">${ctx.title}</div><p>${[ctx.means, ...ctx.extra].join(' ')}</p>${ctx.play.length ? `<ul class="ctx-tips">${ctx.play.map(t => `<li>${t}</li>`).join('')}</ul>` : ''}`;
+}
+
 function renderPlayer() {
   const ms = filtered(), players = DATA.players;
   if (!selected || !players.includes(selected)) selected = players.includes('Neegek') ? 'Neegek' : players[0];
@@ -335,6 +359,7 @@ function renderPlayer() {
   fill('#list-struggles', cond.struggles, 'Nog geen omstandigheid met een duidelijk verschil.');
   fill('#list-other', other.html, 'Nog geen patronen gevonden.');
   $('#p-summary').innerHTML = playerSummary(selected, rows, career, sw, cond, other);
+  renderContext(selected, ms);
   window.PlayerCard.render(selected);
   document.title = `${selected} · Frambroos Coach`;
   renderSessionsTab(selected);

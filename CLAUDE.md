@@ -43,6 +43,9 @@ Na een wijziging in `src/server.js` de server herstarten; voor `public/` volstaa
 
 ## Afspraken
 
+- Balverlies en risico altijd in context: zes vragen en één oordeel per speler (coach-logica §4a), gedeeld door de
+  kaart *Aan de bal in context* en het advies (`ballContext` in `public/builds.js`). Hoe lastig ontvangen passes
+  zijn meet EA niet; "geen goede optie" is de benadering en heet *lastige balmomenten*.
 - Advies en samenvattingen: volg coach-logica §1, §8 en §9. Kort gezegd: verder kijken dan één cijfer, twee richtingen,
   build bepaalt wat goed is, iedereen dezelfde opbouw, samenvattingen kwalitatief in drie of vier zinnen.
 - Over spelers geen *hij* of *zij*.
@@ -50,7 +53,9 @@ Na een wijziging in `src/server.js` de server herstarten; voor `public/` volstaa
 - Stijl: donker thuistenue (standaard) en licht uittenue; tokens staan bovenaan `public/style.css`. Nieuwe kleuren eerst
   op contrast controleren: tekst ≥ 4,5:1, grafische elementen ≥ 3:1. Datakleuren (winst blauw, verlies rood) niet aanpassen.
 - Opbouw: het menu is een zwevende kaart (afgeronde hoeken, eigen schaduw `--float`) los van de paginarand; op
-  telefoon een afgeronde balk bovenaan. Pagina's zijn een strak raster van kaarten met 12 px tussenruimte. Titel en
+  telefoon een afgeronde balk bovenaan. Alleen het menu heeft de paarse gloed (`--side-bg`), zonder kleurenbies.
+  Kaarten, tegels en sessie-items zijn effen donkerpaars (`--panel`) met dezelfde rand (`--panel-border`) en
+  schaduw als het menu; in het uittenue wit. Pagina's zijn een strak raster van kaarten met 12 px tussenruimte. Titel en
   filters staan op één rij (filters rechts). Op Team komen eerst de KPI-tegels, daarna de grafiekkaarten. Een
   grafiekkaart toont zijn kerncijfers rechts in de kop via `figsHtml(...)` uit `public/common.js`, niet als legenda.
 - Dashboardstijl: rustige kaarten met een dunne rand en geen zware schaduw; kaarttitel ingetogen met een korte uitleg

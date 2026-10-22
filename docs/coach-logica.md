@@ -110,15 +110,80 @@ aanvallende archetypes.
 | noOption | "geen goede optie" per 90 min | 180 min | lager beter (ook teampunt) |
 | wrongChoice | "betere pass gemist" per 90 min | 180 min | lager beter |
 
+## 4a. Aan de bal in context
+
+Balverlies zegt pas iets naast wat er tegenover staat. Daarom bekijken we elke speler met dezelfde zes vragen, steeds
+tegenover dezelfde vergelijkingsgroep als het advies (archetype, anders positie; §2a, §3). Ze staan op de spelerspagina
+(Algemeen, kaart *Aan de bal in context*) en het advies (thema *Aan de bal*) gebruikt dezelfde uitkomst.
+
+| Vraag | Maat | Definitie | Minimum |
+|---|---|---|---|
+| Hoe vaak ben je aan de bal? | act90 | balacties per 90 min | 180 min |
+| Speel je mensen voorbij? | beaten | uitgespeelde tegenstanders per 90 min | 180 min |
+| Ga je de dribbel aan? | dribbles | geslaagde dribbels per 90 min | 180 min |
+| Creëer je? | create90 | steekpasses + assists + tweede assists per 90 min | 180 min |
+| Krijg je de bal in lastige momenten? | noOptShare | "geen goede optie" / alle beoordeelde balmomenten (175 + 176 + 177 + 182) | 40 momenten |
+| Wat kost het? | ballLoss, lossAtt, lossDefShare | balverlies per balactie, en waar het valt | 60 / 15 |
+| Wat levert een verloren bal op? | yieldPerLoss | (uitgespeeld + steekpasses + assists + tweede assists) / balverlies | 15 keer balverlies |
+
+**Wat EA niet meet.** Of een pass die je krijgt lastig is (te hard, achter je, met een man in je rug) staat niet in de
+data, en ook niet wie een mislukte pass had moeten ontvangen. *Geen goede optie* is de beste benadering: het spel zegt
+dan dat je de bal had op een moment zonder aanspeelpunt. Dat is deels de positie van medespelers, deels je eigen
+positie bij het aannemen. We noemen het daarom *lastige balmomenten*, nooit *slechte passes van anderen*.
+
+**Niveaus.** Per maat: *hoog* als de speler 15% of meer boven de vergelijkingsgroep zit, *laag* bij 15% of meer
+eronder, anders *normaal*. Voor noOptShare (een aandeel dat weinig schommelt) is de grens 10%.
+- *Risico* = beaten of create90 hoog.
+- *Betaalt zich terug* = yieldPerLoss minstens 90% van de vergelijkingsgroep.
+- *Lastig* = noOptShare hoog.
+- *Plek*: *voorin* als ≥ 50% van het balverlies op de helft van de tegenstander valt; *achterin* als het aandeel op
+  eigen helft ≥ 20% is en 1,5× de vergelijkingsgroep.
+
+**Oordeel** (één per speler, in deze volgorde):
+
+| Balverlies | Voorwaarde | Oordeel | Betekenis |
+|---|---|---|---|
+| hoog | risico, betaalt zich terug | *De prijs van het spel* | Het verlies hoort bij een speelstijl die oplevert; timing aanscherpen, niet minder proberen. |
+| hoog | risico, betaalt zich niet terug | *Risico dat te weinig oplevert* | Te vaak de actie op het verkeerde moment; kiezen wanneer. |
+| hoog | geen risico, lastig | *Vaak zonder opties* | Je krijgt de bal vaak op momenten zonder aanspeelpunt. Deels teampunt (aanbieden), deels eerder kijken. |
+| hoog | geen risico, niet lastig | *Balverlies zonder risico* | Gaat mis bij aannemen of eenvoudig afspelen; techniek en eerste aanraking. |
+| normaal | risico, betaalt zich terug | *Gevaarlijk zonder extra verlies* | Sterk punt: dreiging zonder meer balverlies dan normaal. |
+| normaal | beaten én create90 laag, controlerende build | *Rustig aan de bal* | Past bij de build; winst eerder in minder verlies dan in meer risico. |
+| normaal | beaten én create90 laag, geen controlerende build | *Weinig dreiging* | Veilig zonder dat de rol daarom vraagt. |
+| normaal | anders | *In balans* | Niets opvallends. |
+| laag | risico | *Balvast én gevaarlijk* | Sterk punt. |
+| laag | beaten én create90 laag | *Rustpunt* (controlerende build) of *Op zeker* (anders) | Past bij controle; anders mag er meer dreiging vanuit gaan. |
+| laag | anders | *Balvast* | Sterk punt. |
+
+Hoog balverlies betekent: ballLoss of lost90 is hoog. Plek en lastige momenten komen als toevoeging bij elk oordeel
+("valt vooral voorin, waar het het minst kost"; "op eigen helft, daar kost het direct een kans"). Is act90 hoog en
+lost90 hoger dan de groep, dan staat erbij dat je in aantallen meer verliest omdat je vaker aan de bal bent. De teksten
+noemen precies wat hoog is (*meer mensen uitspelen*, *meer creëren* of beide), nooit "of".
+
+**Tips per oordeel** (zelfde lijst voor iedereen; in de code `BALL_TIPS` in `public/builds.js`):
+- *De prijs van het spel*: na een geslaagde actie sneller afspelen; de tweede dribbel alleen met ruimte voor je.
+- *Risico dat te weinig oplevert*: eerst kijken of er een medespeler vrij staat; de dribbel bewaren voor de helft van
+  de tegenstander met ruimte achter de man.
+- *Vaak zonder opties*: over de schouder kijken voor de bal komt; de bal eerder laten gaan; als team afspreken dat er
+  altijd één korte optie dichtbij is.
+- *Balverlies zonder risico*: aannemen in de looprichting, lichaam open; afschermen bij druk in de rug.
+- *Weinig dreiging* en *Op zeker*: één simpele actie per balbezit vooruit (dribbel of pass door de linie).
+- *Rustpunt*: blijf het rustpunt; af en toe de pass die een linie overslaat.
+- *Rustig aan de bal*: in één of twee keer raken doorspelen; af en toe de pass die een linie overslaat.
+- Sterke oordelen: zo houden; kijk wat medespelers ervan kunnen gebruiken.
+
 ## 5. Thema's: afwegingen per onderwerp
 
 Elk thema levert een **score** (hoeveel winst) en een **variant**. De drie hoogste scores boven 0,02 worden getoond.
 
-**Aan de bal**
+**Aan de bal** (gebruikt het oordeel uit §4a)
 - Doet mee als `ballLoss`, `lost90` of (echt) `lossDef` minstens 0,05 slechter is, of als de speler binnen het team 20%
   boven het teamgemiddelde zit.
-- *Risico* = dribbels, uitgespeelde tegenstanders of dribbelaandeel ≥ 20% boven positie. *Betaalt zich terug* =
-  uitgespeelde tegenstanders per verloren bal ≥ 90% van positie.
+- *Risico* en *betaalt zich terug* komen uit §4a (uitspelen of creëren hoog; opbrengst per verloren bal ≥ 90%).
+- Oordeel *Vaak zonder opties* (§4a): het punt heet *Balverlies in lastige momenten*; de uitleg zegt dat het deels een
+  teampunt is, en de tips gaan over eerder kijken en de bal eerder laten gaan.
+- Hoog alleen binnen het team (niet tegenover de vergelijkingsgroep) en de opbrengst per verloren bal is in orde: score
+  0,06 (*fijnslijpen*), en de uitleg zegt dat het verschil vooral uit de rol komt.
 - Risico dat zich terugbetaalt: score × 0,6 en de uitleg zegt dat balverlies deels de prijs van de speelstijl is.
 - Waar: ≥ 50% voorin = "kost het minst"; eigen helft telt alleen als het ≥ 0,3 per 90 én 30% boven positie is.
 - Controlerende build zonder risico: score × 1,2 (balvast is kernwerk).
