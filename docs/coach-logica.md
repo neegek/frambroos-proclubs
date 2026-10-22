@@ -216,7 +216,7 @@ Daarnaast *Positiespel en keuzes* en *Al sterk*.
 | Onderdeel | Bestand |
 |---|---|
 | Gedeelde helpers, model, teammaten, verhaalzinnen, builds, menu | `public/common.js` |
-| Team, Sessies, Wedstrijden, Spelers | `public/team.js`, `sessies.js`, `wedstrijden.js`, `spelers.js` |
+| Team, Sessies, Wedstrijden (lijst), Wedstrijd (detail), Spelers | `public/team.js`, `sessies.js`, `wedstrijden.js`, `wedstrijd.js`, `spelers.js` |
 | Advies (deze logica) | `public/builds.js` |
 | Archetypes: referentie en coachprofiel | `public/archetypes.js`, `docs/archetypes.md` |
 | Data-API en opslag builds | `src/server.js` |

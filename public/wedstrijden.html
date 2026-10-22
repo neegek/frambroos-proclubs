@@ -16,7 +16,7 @@
     <header class="page-head">
       <div>
         <h1>Wedstrijden</h1>
-        <p class="sub" id="page-sub">Alle gevolgde wedstrijden, met per wedstrijd het verhaal, de opstellingen en de spelers.</p>
+        <p class="sub" id="page-sub">Alle gevolgde wedstrijden.</p>
       </div>
       <div class="filters">
         <label class="filter">Type
@@ -37,36 +37,7 @@
       </div>
     </header>
 
-    <div class="session-layout">
-      <div class="session-list match-list" id="match-list" role="listbox" aria-label="Wedstrijden"></div>
-      <div class="session-detail">
-        <section class="card">
-          <div class="scoreline" id="m-score"></div>
-          <div class="meta match-meta" id="m-meta"></div>
-          <p class="summary" id="m-summary"></p>
-        </section>
-
-        <section class="card">
-          <h2>Opstelling</h2>
-          <p class="hint">Alleen de menselijke spelers per linie, met hun build en rating. EA geeft geen exacte posities en telt AI-spelers niet mee.</p>
-          <div class="pitches" id="m-pitches"></div>
-        </section>
-
-        <section class="card">
-          <h2>Wij tegen hen</h2>
-          <p class="hint">Totalen van de menselijke spelers aan beide kanten.</p>
-          <div id="m-h2h"></div>
-        </section>
-
-        <section class="card">
-          <h2>Spelers</h2>
-          <h3 id="m-ours-title">Frambroos</h3>
-          <div id="m-ours"></div>
-          <h3 id="m-theirs-title">Tegenstander</h3>
-          <div id="m-theirs"></div>
-        </section>
-      </div>
-    </div>
+    <div class="match-list-full" id="match-list"></div>
   </main>
 </div>
 <div id="tooltip" class="tooltip" hidden></div>

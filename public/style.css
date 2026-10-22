@@ -59,6 +59,11 @@ a { color: inherit; }
 .nav-group { display: grid; gap: 2px; }
 .nav-group-head { display: flex; align-items: center; gap: 12px; padding: 9px 12px; border-radius: var(--radius-sm); text-decoration: none; color: var(--ink-2); font-weight: 500; }
 .nav-group-head.in-group { color: var(--ink); }
+.nav-group-head { cursor: pointer; }
+.nav-group-head:hover { background: var(--brand-soft); color: var(--ink); }
+.nav-group-head .chev { width: 16px; height: 16px; margin-left: auto; transition: transform 0.15s ease; }
+.nav-group.collapsed .chev { transform: rotate(-90deg); }
+.nav-group.collapsed .sub-nav { display: none; }
 .sub-nav { display: grid; gap: 1px; margin: 0 0 4px 21px; padding-left: 12px; border-left: 1px solid var(--side-border); }
 .sub-nav a { padding: 6px 10px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--ink-2); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sub-nav a:hover { background: var(--brand-soft); color: var(--ink); }
@@ -252,6 +257,29 @@ code { font-size: 12px; background: var(--surface-2); padding: 1px 5px; border-r
 @media (max-width: 1180px) { .build-layout { grid-template-columns: 1fr; } .build-form-card { position: static; } }
 
 /* ---------- wedstrijden ---------- */
+.match-list-full { display: grid; gap: 16px; }
+.match-day { padding: 16px 12px 8px; }
+.match-day-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 0 8px 8px; }
+.match-day-head h2 { font-size: 15px; }
+.match-rows { display: grid; }
+.match-row { display: grid; grid-template-columns: 48px auto minmax(0, 1fr) auto 16px; align-items: center; gap: 12px; padding: 10px 8px; border-top: 1px solid var(--grid); border-radius: 8px; text-decoration: none; color: inherit; }
+.match-row:first-child { border-top: 0; }
+.match-row:hover { background: var(--brand-soft); }
+.match-row:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
+.mr-time { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.mr-opp { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.mr-opp .shirt { width: 30px; height: 28px; flex: none; }
+.mr-opp > span { display: grid; min-width: 0; }
+.mr-opp b { font-weight: 620; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mr-opp small { font-size: 12px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mr-score { font-weight: 750; font-size: 18px; font-variant-numeric: tabular-nums; }
+.mr-chev { color: var(--muted); font-size: 20px; line-height: 1; }
+.back-link { display: inline-flex; align-items: center; gap: 6px; width: fit-content; padding: 7px 12px 7px 8px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--surface); color: var(--ink); text-decoration: none; font-weight: 560; font-size: 14px; }
+.back-link:hover { border-color: var(--brand); color: var(--brand-text); }
+.back-link svg { width: 18px; height: 18px; }
+.match-detail { display: grid; gap: 20px; }
+.match-nav { display: flex; justify-content: space-between; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--grid); flex-wrap: wrap; }
+@media (max-width: 600px) { .match-row { grid-template-columns: auto minmax(0, 1fr) auto; } .mr-time, .mr-chev { display: none; } }
 .match-list { max-height: calc(100vh - 150px); overflow-y: auto; padding: 2px 4px 2px 2px; gap: 8px; }
 .list-day { font-size: 12px; font-weight: 600; color: var(--muted); margin: 8px 2px 0; }
 .list-day:first-child { margin-top: 0; }
@@ -307,6 +335,7 @@ a.pchip:hover { border-color: var(--brand); }
   .side-nav a span { display: none; }
   .sub-nav { display: none; }
   .nav-group-head { padding: 8px 10px; }
+  .nav-group-head .chev { display: none; }
   .nav-group-head.in-group { background: var(--brand-soft); color: var(--brand-text); box-shadow: inset 0 -3px 0 var(--brand); }
   .chips.mobile-only { display: flex; }
   .side-foot { margin: 0 0 0 auto; border: 0; padding: 0; align-items: center; }

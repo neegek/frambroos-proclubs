@@ -276,7 +276,7 @@ function renderLastTab(name) {
   $('#pl-score').innerHTML = `<div class="sl-team">${kitShirt(DATA.club.kits?.home, 'Frambroos')}<span>Frambroos</span></div>
     <div class="sl-score"><span>${m.goals}–${m.goalsAgainst}</span><span class="pill ${m.result}">${m.result === 'W' ? 'Gewonnen' : m.result === 'L' ? 'Verloren' : 'Gelijk'}</span></div>
     <div class="sl-team">${kitShirt(m.opponent.kit, m.opponent.name)}<span>${esc(m.opponent.name)}</span></div>`;
-  $('#pl-meta').innerHTML = `${pDay(m.ts)}, ${pTime(m.ts)} · ${POS_NL[p.pos] || p.pos} · ${esc(archName(p.archetypeId))} · rating ${p.rating}${p.mom ? ' · man van de wedstrijd' : ''} · <a href="/wedstrijden.html#${m.matchId}">hele wedstrijd</a>`;
+  $('#pl-meta').innerHTML = `${pDay(m.ts)}, ${pTime(m.ts)} · ${POS_NL[p.pos] || p.pos} · ${esc(archName(p.archetypeId))} · rating ${p.rating}${p.mom ? ' · man van de wedstrijd' : ''} · <a href="/wedstrijd.html?id=${m.matchId}">hele wedstrijd</a>`;
   const normal = avg(others.map(r => r.p.rating).filter(v => v !== null)), d = normal === null ? null : p.rating - normal;
   const notes = others.length >= 3 ? notesFor([last], others) : [];
   const bits = [p.goals ? `${numWord(p.goals)} ${p.goals === 1 ? 'doelpunt' : 'doelpunten'}` : '', p.assists ? `${numWord(p.assists)} ${p.assists === 1 ? 'assist' : 'assists'}` : ''].filter(Boolean);

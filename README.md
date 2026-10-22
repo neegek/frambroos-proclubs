@@ -12,8 +12,9 @@ telefoon bovenaan):
   bepalen, vorm, zo winnen en verliezen we, tegen wie, spelers in één oogopslag, beste combinaties.
 - **Sessies**: per speelavond de uitslagen, tegenstanders, wat beter en slechter ging dan normaal,
   en per speler wat er opviel.
-- **Wedstrijden**: lijst van alle wedstrijden; per wedstrijd een korte samenvatting, beide opstellingen per
-  linie met build en rating, wij tegen hen, en de spelers van beide teams.
+- **Wedstrijden**: de lijst van alle wedstrijden per dag. Een klik opent de wedstrijdpagina (een laag dieper, met
+  een terugknop): korte samenvatting, beide opstellingen per linie met build en rating, wij tegen hen, en de spelers
+  van beide teams.
 - **Spelers**: direct per naam in het menu. Per speler vier tabbladen: Algemeen (sterk in, kan beter,
   floreert als, speelt minder als), Per sessie, Laatste wedstrijd, en Advies: genuanceerd buildadvies
   op basis van de wedstrijddata, met een formulier voor de eigen build (`data/builds.json`).
@@ -72,7 +73,8 @@ De lokale planner logt naar `data/collect.log` en draait alleen als de Mac wakke
 - `src/collect.js` – de verzamelaar.
 - `src/server.js` – serveert `public/` en `/api/data`.
 - `public/common.js` – gedeeld: zijmenu, data laden, verwachtingsmodel, grafieken, tabellen, teammaten.
-- `public/team.js`, `sessies.js`, `wedstrijden.js`, `spelers.js` – de pagina's Team, Sessies, Wedstrijden en Spelers.
+- `public/team.js`, `sessies.js`, `wedstrijden.js`, `wedstrijd.js`, `spelers.js` – de pagina's Team, Sessies, Wedstrijden
+  (lijst), Wedstrijd (detail) en Spelers.
 - `public/builds.js` – het tabblad Advies op de spelerspagina; `src/server.js` bewaart de eigen builds in `data/builds.json`.
 - Builds (`archetypeid` 1–13) staan in `public/common.js`, met als bron MeelanFC/FC-27-ClubsXI.
 - `src/events.js` en `docs/event-codes.md` – de ontcijferde eventcodes.

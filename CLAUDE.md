@@ -37,7 +37,9 @@ Na een wijziging in `src/server.js` de server herstarten; voor `public/` volstaa
 - Attribuutnamen in het Engels zoals in het spel (Ball Control, Short Passing, ...); de rest van de app in het Nederlands.
 - Stijl: donker thuistenue (standaard) en licht uittenue; tokens staan bovenaan `public/style.css`. Nieuwe kleuren eerst
   op contrast controleren: tekst ≥ 4,5:1, grafische elementen ≥ 3:1. Datakleuren (winst blauw, verlies rood) niet aanpassen.
-- Menu: Team, Sessies, Wedstrijden, Spelers (met de namen eronder). Geen aparte analysepagina.
+- Menu: Team, Sessies, Wedstrijden, Spelers (in- en uitklapbaar, met de namen eronder). Geen aparte analysepagina.
+- Wedstrijden is alleen de lijst; een wedstrijd opent op `/wedstrijd.html?id=<matchId>` (een laag dieper) met
+  "Terug naar wedstrijden" bovenaan. Link naar wedstrijden altijd via dat adres.
 
 ## Controleren na een wijziging
 

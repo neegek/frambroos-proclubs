@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wedstrijd · Frambroos Coach</title>
+<link rel="icon" href="/crest.png">
+<meta name="theme-color" content="#090b0d">
+<script>try { if (localStorage.getItem('theme') === 'light') document.documentElement.dataset.theme = 'light'; } catch (e) {}</script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="content">
+    <a class="back-link" id="back-link" href="/wedstrijden.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Terug naar wedstrijden</a>
+    <header class="page-head">
+      <div>
+        <h1 id="page-title">Wedstrijd</h1>
+        <p class="sub" id="page-sub"></p>
+      </div>
+    </header>
+
+    <div class="match-detail" id="m-detail">
+      <section class="card">
+        <div class="scoreline" id="m-score"></div>
+        <div class="meta match-meta" id="m-meta"></div>
+        <p class="summary" id="m-summary"></p>
+        <div class="match-nav" id="m-nav"></div>
+      </section>
+
+      <section class="card">
+        <h2>Opstelling</h2>
+        <p class="hint">Alleen de menselijke spelers per linie, met hun build en rating. EA geeft geen exacte posities en telt AI-spelers niet mee.</p>
+        <div class="pitches" id="m-pitches"></div>
+      </section>
+
+      <section class="card">
+        <h2>Wij tegen hen</h2>
+        <p class="hint">Totalen van de menselijke spelers aan beide kanten.</p>
+        <div id="m-h2h"></div>
+      </section>
+
+      <section class="card">
+        <h2>Spelers</h2>
+        <h3 id="m-ours-title">Frambroos</h3>
+        <div id="m-ours"></div>
+        <h3 id="m-theirs-title">Tegenstander</h3>
+        <div id="m-theirs"></div>
+      </section>
+    </div>
+  </main>
+</div>
+<div id="tooltip" class="tooltip" hidden></div>
+<script src="common.js"></script>
+<script src="wedstrijd.js"></script>
+</body>
+</html>

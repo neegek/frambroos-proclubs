@@ -30,9 +30,9 @@ const NAV = [
 ];
 (function mountShell() {
   const side = $('#sidebar'); if (!side) return;
-  const path = location.pathname === '/index.html' ? '/' : location.pathname;
+  const path = location.pathname === '/index.html' ? '/' : location.pathname === '/wedstrijd.html' ? '/wedstrijden.html' : location.pathname;
   side.innerHTML = `<a class="brand" href="/">${LOGO}<span>Frambroos<b>Coach</b></span></a>
-    <nav class="side-nav" aria-label="Hoofdmenu">${NAV.map(n => n.group ? `<div class="nav-group"><a href="${n.href}" class="nav-group-head ${n.href === path ? 'in-group' : ''}">${ICONS[n.icon]}<span>${n.label}</span></a><div class="sub-nav" id="player-nav" aria-label="Spelers"></div></div>` : `<a href="${n.href}" class="${n.href === path ? 'active' : ''}"${n.href === path ? ' aria-current="page"' : ''}>${ICONS[n.icon]}<span>${n.label}</span></a>`).join('')}</nav>
+    <nav class="side-nav" aria-label="Hoofdmenu">${NAV.map(n => n.group ? `<div class="nav-group" id="nav-group-players"><a href="${n.href}" class="nav-group-head ${n.href === path ? 'in-group' : ''}" aria-controls="player-nav" aria-expanded="true">${ICONS[n.icon]}<span>${n.label}</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><div class="sub-nav" id="player-nav" aria-label="Spelers"></div></div>` : `<a href="${n.href}" class="${n.href === path ? 'active' : ''}"${n.href === path ? ' aria-current="page"' : ''}>${ICONS[n.icon]}<span>${n.label}</span></a>`).join('')}</nav>
     <div class="side-foot"><div class="club" id="club-box"><div class="club-name">Frambroos</div><div class="club-meta">Data laden…</div></div>
     <button id="theme" class="icon-btn" type="button" title="Wissel tussen thuistenue (donker) en uittenue (licht)" aria-label="Wissel tussen thuistenue, donker, en uittenue, licht">${ICONS.theme}</button></div>`;
 })();
@@ -44,6 +44,23 @@ function fillPlayerNav() {
   nav.innerHTML = DATA.players.map(n => `<a href="/spelers.html#${encodeURIComponent(n)}" class="${n === current ? 'active' : ''}"${n === current ? ' aria-current="page"' : ''}>${esc(n)}</a>`).join('');
 }
 addEventListener('hashchange', () => fillPlayerNav());
+
+// Spelers in het menu in- en uitklappen. Op een breed scherm klapt een klik de namen in of uit (stand wordt onthouden);
+// op een smal scherm staan de namen niet in het menu en is het kopje gewoon een link naar de spelerspagina.
+(function playersToggle() {
+  const group = $('#nav-group-players'); if (!group) return;
+  const head = group.querySelector('.nav-group-head'), wide = matchMedia('(min-width: 961px)');
+  const set = open => { group.classList.toggle('collapsed', !open); head.setAttribute('aria-expanded', String(open)); };
+  let open = true; try { open = localStorage.getItem('playersOpen') !== '0'; } catch {}
+  set(open);
+  head.addEventListener('click', e => {
+    if (!wide.matches) return;
+    e.preventDefault();
+    open = group.classList.contains('collapsed');
+    set(open);
+    try { localStorage.setItem('playersOpen', open ? '1' : '0'); } catch {}
+  });
+})();
 const showError = e => { const b = $('#club-box .club-meta'); if (b) b.textContent = `Kon data niet laden: ${e.message}`; console.error(e); };
 
 let DATA = null;
