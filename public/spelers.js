@@ -212,6 +212,95 @@ function playerSummary(name, rows, career, sw, cond, other) {
   return parts.join(' ');
 }
 
+// ---------- tabblad Per sessie ----------
+const pTime = ts => new Date(ts * 1000).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+const pDay = ts => { const s = new Date(ts * 1000).toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' }); return s.charAt(0).toUpperCase() + s.slice(1); };
+const PS_METRICS = [
+  { label: 'schoten', per: true, hib: true, f: p => p.shots },
+  { label: 'balacties', per: true, hib: null, f: p => p.ev?.ball_actions },
+  { label: 'dribbels', per: true, hib: true, f: p => p.ev?.dribbles_completed },
+  { label: 'balverlies', per: true, hib: false, f: p => p.ev?.possession_lost },
+  { label: 'onderscheppingen', per: true, hib: true, f: p => p.ev?.interceptions },
+  { label: 'steekpasses', per: true, hib: true, f: p => p.ev?.through_balls },
+  { label: 'passnauwkeurigheid', pct: true, hib: true, n: p => p.passesMade, d: p => p.passAttempts },
+  { label: 'uit positie', pct: true, hib: false, n: p => p.ev?.out_of_position, d: p => (p.ev?.out_of_position || 0) + (p.ev?.in_position || 0) },
+];
+const psValue = (mt, rows) => {
+  if (mt.pct) { const d = sum(rows, r => mt.d(r.p)); return d >= 10 ? 100 * sum(rows, r => mt.n(r.p)) / d : null; }
+  const m = minutes(rows); return m >= 60 ? 90 * sum(rows, r => mt.f(r.p)) / m : null;
+};
+function notesFor(here, there) {
+  const out = [];
+  for (const mt of PS_METRICS) {
+    const a = psValue(mt, here), b = psValue(mt, there); if (a === null || b === null || !b) continue;
+    const rel = (a - b) / Math.abs(b); if (Math.abs(rel) < 0.3) continue;
+    const better = mt.hib === null ? null : mt.hib ? a > b : a < b;
+    out.push({ rel: Math.abs(rel), better, text: `${a > b ? 'meer' : 'minder'} ${mt.label}`, html: `<span class="${better === null ? '' : better ? 'delta-pos' : 'delta-neg'}">${a > b ? 'meer' : 'minder'} ${mt.label}</span> (${mt.pct ? Math.round(a) + '%' : a.toFixed(1)} tegen ${mt.pct ? Math.round(b) + '%' : b.toFixed(1)}${mt.pct ? '' : ' per 90'})` });
+  }
+  return out.sort((x, y) => y.rel - x.rel);
+}
+
+function renderSessionsTab(name) {
+  const all = rowsFor(DATA.matches, name);
+  const avgAll = avg(all.map(r => r.p.rating).filter(v => v !== null));
+  const sess = sessionsOf(DATA.matches).map(s => ({ ...s, rows: s.matches.map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p) })).filter(s => s.rows.length);
+  if (!sess.length) { $('#ps-summary').textContent = 'Nog geen sessies van deze speler.'; $('#ps-chart').innerHTML = ''; $('#ps-cards').innerHTML = ''; return; }
+  const items = sess.map(s => {
+    const others = all.filter(r => r.m.session !== s.id);
+    const r = avg(s.rows.map(x => x.p.rating).filter(v => v !== null)), normal = avg(others.map(x => x.p.rating).filter(v => v !== null));
+    return { s, r, normal, d: normal === null ? null : r - normal, notes: others.length >= 3 ? notesFor(s.rows, others) : [], g: sum(s.rows, x => x.p.goals), a: sum(s.rows, x => x.p.assists), mom: sum(s.rows, x => x.p.mom) };
+  });
+  $('#ps-title').textContent = `${name} per sessie`;
+  const best = [...items].filter(i => i.d !== null).sort((a, b) => b.d - a.d)[0], worst = [...items].filter(i => i.d !== null).sort((a, b) => a.d - b.d)[0];
+  const trend = items.length >= 3 ? items[items.length - 1].r - avg(items.slice(0, -1).map(i => i.r)) : null;
+  const parts = [`<b>${esc(name)}</b> speelde ${numWord(items.length)} ${items.length === 1 ? 'sessie' : 'sessies'} mee.`];
+  if (best && best !== worst && best.d >= 0.3) parts.push(`De beste avond was ${pDay(best.s.matches[0].ts).toLowerCase()}${best.notes.find(n => n.better) ? `, met ${best.notes.find(n => n.better).text} dan normaal` : ''}.`);
+  if (worst && best !== worst && worst.d <= -0.3) parts.push(`De minste was ${pDay(worst.s.matches[0].ts).toLowerCase()}${worst.notes.find(n => n.better === false) ? `, met ${worst.notes.find(n => n.better === false).text} dan normaal` : ''}.`);
+  if (trend !== null) parts.push(Math.abs(trend) < 0.3 ? 'De laatste sessie lag op het normale niveau.' : trend > 0 ? 'De laatste sessie was beter dan de avonden daarvoor.' : 'De laatste sessie was minder dan de avonden daarvoor.');
+  $('#ps-summary').innerHTML = parts.join(' ');
+  barChart($('#ps-chart'), items.map(i => ({ label: pDay(i.s.matches[0].ts).split(' ').slice(1, 3).join(' '), value: i.d === null ? 0 : +i.d.toFixed(2), color: (i.d ?? 0) >= 0 ? 'var(--pos)' : 'var(--neg)',
+    tip: `<b>${pDay(i.s.matches[0].ts)}</b>rating ${f2(i.r)} tegen normaal ${f2(i.normal)}<br>${i.g} goals, ${i.a} assists in ${i.s.rows.length} wedstrijden` })), { yMin: -0.5, zeroLine: true, height: 180, fmt: v => (v > 0 ? '+' : '') + v });
+  $('#ps-cards').innerHTML = [...items].reverse().map(i => `<section class="card ps-card">
+    <div class="ps-card-head"><div><h2>${pDay(i.s.matches[0].ts)}</h2><div class="pcard-sub">${i.s.rows.length} van ${i.s.matches.length} wedstrijden · ${pills(i.s.rows.map(x => x.m))}</div></div>
+      <div class="pcard-rating">${f2(i.r)} <small>${i.d === null ? '' : residCell(i.d)}</small></div></div>
+    <div class="pcard-stats"><span><b>${i.g}</b> goals</span><span><b>${i.a}</b> assists</span><span><b>${i.mom}</b> MOTM</span><span>${[...new Set(i.s.rows.map(x => archName(x.p.archetypeId)))].join(', ')}</span></div>
+    <div class="pcard-notes">${i.notes.length ? i.notes.slice(0, 3).map(n => `<div>${n.html}</div>`).join('') : '<small>Op het eigen normale niveau.</small>'}</div>
+    <a class="more-link" href="/sessies.html#${i.s.id}">Naar deze sessie</a></section>`).join('');
+}
+
+// ---------- tabblad Laatste wedstrijd ----------
+function renderLastTab(name) {
+  const all = rowsFor(DATA.matches, name);
+  if (!all.length) { $('#pl-summary').textContent = 'Nog geen wedstrijden.'; return; }
+  const last = all[all.length - 1], others = all.slice(0, -1), m = last.m, p = last.p;
+  $('#pl-score').innerHTML = `<div class="sl-team">${kitShirt(DATA.club.kits?.home, 'Frambroos')}<span>Frambroos</span></div>
+    <div class="sl-score"><span>${m.goals}–${m.goalsAgainst}</span><span class="pill ${m.result}">${m.result === 'W' ? 'Gewonnen' : m.result === 'L' ? 'Verloren' : 'Gelijk'}</span></div>
+    <div class="sl-team">${kitShirt(m.opponent.kit, m.opponent.name)}<span>${esc(m.opponent.name)}</span></div>`;
+  $('#pl-meta').innerHTML = `${pDay(m.ts)}, ${pTime(m.ts)} · ${POS_NL[p.pos] || p.pos} · ${esc(archName(p.archetypeId))} · rating ${p.rating}${p.mom ? ' · man van de wedstrijd' : ''} · <a href="/wedstrijden.html#${m.matchId}">hele wedstrijd</a>`;
+  const normal = avg(others.map(r => r.p.rating).filter(v => v !== null)), d = normal === null ? null : p.rating - normal;
+  const notes = others.length >= 3 ? notesFor([last], others) : [];
+  const bits = [p.goals ? `${numWord(p.goals)} ${p.goals === 1 ? 'doelpunt' : 'doelpunten'}` : '', p.assists ? `${numWord(p.assists)} ${p.assists === 1 ? 'assist' : 'assists'}` : ''].filter(Boolean);
+  const level = d === null ? '' : d >= 0.5 ? 'een van de betere wedstrijden' : d <= -0.5 ? 'een mindere wedstrijd' : 'een wedstrijd op het normale niveau';
+  const parts = [`In de laatste wedstrijd, tegen ${esc(m.opponent.name)}, speelde <b>${esc(name)}</b> ${level}${bits.length ? `, met ${joinAnd(bits)}` : ''}${p.mom ? ', en was man van de wedstrijd' : ''}.`];
+  const good = notes.filter(n => n.better).slice(0, 2).map(n => n.text), bad = notes.filter(n => n.better === false).slice(0, 2).map(n => n.text);
+  if (good.length && bad.length) parts.push(`Opvallend: ${joinAnd(good)} dan normaal, maar ook ${joinAnd(bad)}.`);
+  else if (good.length) parts.push(`Opvallend: ${joinAnd(good)} dan normaal.`);
+  else if (bad.length) parts.push(`Opvallend: ${joinAnd(bad)} dan normaal.`);
+  $('#pl-summary').innerHTML = parts.join(' ');
+  const rows = [
+    ['Rating', p.rating, normal, true, f2], ['Goals', p.goals, avg(others.map(r => r.p.goals)), true, f1], ['Assists', p.assists, avg(others.map(r => r.p.assists)), true, f1],
+    ['Schoten', p.shots, avg(others.map(r => r.p.shots)), true, f1], ['Passnauwkeurigheid', pct(p.passesMade, p.passAttempts), pct(sum(others, r => r.p.passesMade), sum(others, r => r.p.passAttempts)), true, v => v === null ? '–' : `${v}%`],
+    ['Tackles gewonnen', p.tacklesMade, avg(others.map(r => r.p.tacklesMade)), true, f1],
+    ...(p.ev ? [['Balacties', p.ev.ball_actions, avg(evRows(others).map(r => r.p.ev.ball_actions)), null, f1], ['Dribbels', p.ev.dribbles_completed, avg(evRows(others).map(r => r.p.ev.dribbles_completed)), true, f1],
+      ['Tegenstanders uitgespeeld', p.ev.players_beaten, avg(evRows(others).map(r => r.p.ev.players_beaten)), true, f1], ['Balverlies', p.ev.possession_lost, avg(evRows(others).map(r => r.p.ev.possession_lost)), false, f1],
+      ['Onderscheppingen', p.ev.interceptions, avg(evRows(others).map(r => r.p.ev.interceptions)), true, f1], ['Steekpasses', p.ev.through_balls, avg(evRows(others).map(r => r.p.ev.through_balls)), true, f1]] : []),
+  ];
+  table($('#pl-compare'), [
+    { label: '', key: 0 }, { label: 'Deze wedstrijd', num: true, render: r => r[4](r[1]) }, { label: 'Normaal', num: true, render: r => r[4](r[2]) },
+    { label: 'Verschil', num: true, render: r => { if (r[1] === null || r[2] === null) return '–'; const d = r[1] - r[2], rel = r[2] ? Math.abs(d / r[2]) : 1; const good = r[3] === null ? null : r[3] ? d > 0 : d < 0; return `<span class="${rel < 0.15 || good === null ? '' : good ? 'delta-pos' : 'delta-neg'}">${d > 0 ? '+' : ''}${r[4] === f2 ? d.toFixed(2) : String(r[4]).includes('%') ? Math.round(d) + ' pt' : d.toFixed(1)}</span>`; } },
+  ], rows);
+}
+
 function renderPlayer() {
   const ms = filtered(), players = DATA.players;
   if (!selected || !players.includes(selected)) selected = players.includes('Neegek') ? 'Neegek' : players[0];
@@ -226,7 +315,7 @@ function renderPlayer() {
   $('#p-name').textContent = selected;
   const buildCount = {}; for (const r of rows) if (r.p.archetypeId) buildCount[r.p.archetypeId] = (buildCount[r.p.archetypeId] || 0) + 1;
   const buildText = Object.entries(buildCount).sort((a, b) => b[1] - a[1]).map(([id, n]) => `${archName(id)} (${n})`).join(', ');
-  $('#p-meta').textContent = `${career ? `Pro ${career.proName} · overall ${career.proOverall} · ${career.proHeight} cm · voorkeur ${POS_NL[career.favoritePosition] || career.favoritePosition} · ` : ''}${rows.length} wedstrijden in de gekozen periode${posText ? ` als ${posText}` : ''}${buildText ? ` · builds: ${buildText}` : ''}`;
+  $('#p-meta').textContent = `${career ? `Pro ${career.proName} · overall ${career.proOverall} · ${career.proHeight} cm · ingestelde positie ${POS_CODE[career.proPos] ?? '–'} · ` : ''}${rows.length} wedstrijden in de gekozen periode${posText ? ` als ${posText}` : ''}${buildText ? ` · builds: ${buildText}` : ''}`;
   const ratings = rows.map(r => r.p.rating).filter(v => v !== null);
   const tiles = [
     ['Rating', ratings.length ? f2(avg(ratings)) : '–', career ? `carrière ${career.ratingAve}` : ''],
@@ -247,6 +336,9 @@ function renderPlayer() {
   fill('#list-struggles', cond.struggles, 'Nog geen omstandigheid met een duidelijk verschil.');
   fill('#list-other', other.html, 'Nog geen patronen gevonden.');
   $('#p-summary').innerHTML = playerSummary(selected, rows, career, sw, cond, other);
+  renderSessionsTab(selected);
+  renderLastTab(selected);
+  window.BuildTab.show(selected);
 
   table($('#tbl-player-matches'), [
     { label: 'Datum', render: r => fmtDateTime(r.m.ts) }, { label: 'Tegenstander', render: r => esc(r.m.opponent.name) }, { label: 'Score', num: true, render: r => `${r.m.goals}–${r.m.goalsAgainst}` },
@@ -261,4 +353,23 @@ for (const id of ['#range', '#type']) $(id).addEventListener('change', renderPla
 addEventListener('resize', () => DATA && renderPlayer());
 addEventListener('hashchange', () => { const n = decodeURIComponent(location.hash.slice(1)); if (n && n !== selected) { selected = n; renderPlayer(); } });
 selected = decodeURIComponent(location.hash.slice(1)) || null;
-loadData().then(renderPlayer).catch(showError);
+// Tabbladen: Overzicht en Build en advies. De keuze blijft bewaard tijdens de sessie.
+function setTab(tab) {
+  for (const [id, panel] of [['overview', '#tab-overview'], ['sessions', '#tab-sessions'], ['last', '#tab-last'], ['build', '#tab-build']]) {
+    const on = id === tab;
+    $(panel).hidden = !on;
+    $(`#tab-btn-${id}`).setAttribute('aria-selected', String(on));
+    $(`#tab-btn-${id}`).classList.toggle('active', on);
+  }
+  $('.filters').style.display = tab === 'overview' ? '' : 'none';
+  if (DATA) renderPlayer();
+  try { sessionStorage.setItem('spelersTab', tab); } catch {}
+}
+$('#tab-btn-overview').addEventListener('click', () => setTab('overview'));
+$('#tab-btn-build').addEventListener('click', () => setTab('build'));
+$('#tab-btn-sessions').addEventListener('click', () => setTab('sessions'));
+$('#tab-btn-last').addEventListener('click', () => setTab('last'));
+let startTab = 'overview'; try { startTab = sessionStorage.getItem('spelersTab') || 'overview'; } catch {}
+if (new URLSearchParams(location.search).get('tab') === 'build') startTab = 'build';
+setTab(startTab);
+Promise.all([loadData(), window.BuildTab.load()]).then(renderPlayer).catch(showError);

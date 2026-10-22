@@ -17,6 +17,7 @@ const ICONS = {
   sessions: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
   players: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 14.8c1.6.8 2.7 2.6 3 5.2"/></svg>',
   matches: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5l3.8 2.8-1.5 4.5h-4.6l-1.5-4.5z"/><path d="M12 3v4.5M15.8 10.3l4.6-1.5M14.3 14.8l2.8 3.9M9.7 14.8l-2.8 3.9M8.2 10.3L3.6 8.8"/></svg>',
+  builds: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L3.5 17.3a1.8 1.8 0 0 0 2.5 2.5l5.8-5.8a4 4 0 0 0 5.2-5.4l-2.4 2.4-2.3-.6-.6-2.3z"/></svg>',
   analysis: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
   theme: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 0 0 17z" fill="currentColor" stroke="none"/></svg>',
 };
@@ -25,17 +26,24 @@ const NAV = [
   { href: '/', label: 'Team', icon: 'team' },
   { href: '/sessies.html', label: 'Sessies', icon: 'sessions' },
   { href: '/wedstrijden.html', label: 'Wedstrijden', icon: 'matches' },
-  { href: '/spelers.html', label: 'Spelers', icon: 'players' },
-  { href: '/analyse.html', label: 'Analyse', icon: 'analysis' },
+  { href: '/spelers.html', label: 'Spelers', icon: 'players', group: true },
 ];
 (function mountShell() {
   const side = $('#sidebar'); if (!side) return;
   const path = location.pathname === '/index.html' ? '/' : location.pathname;
   side.innerHTML = `<a class="brand" href="/">${LOGO}<span>Frambroos<b>Coach</b></span></a>
-    <nav class="side-nav" aria-label="Hoofdmenu">${NAV.map(n => `<a href="${n.href}" class="${n.href === path ? 'active' : ''}"${n.href === path ? ' aria-current="page"' : ''}>${ICONS[n.icon]}<span>${n.label}</span></a>`).join('')}</nav>
+    <nav class="side-nav" aria-label="Hoofdmenu">${NAV.map(n => n.group ? `<div class="nav-group"><a href="${n.href}" class="nav-group-head ${n.href === path ? 'in-group' : ''}">${ICONS[n.icon]}<span>${n.label}</span></a><div class="sub-nav" id="player-nav" aria-label="Spelers"></div></div>` : `<a href="${n.href}" class="${n.href === path ? 'active' : ''}"${n.href === path ? ' aria-current="page"' : ''}>${ICONS[n.icon]}<span>${n.label}</span></a>`).join('')}</nav>
     <div class="side-foot"><div class="club" id="club-box"><div class="club-name">Frambroos</div><div class="club-meta">Data laden…</div></div>
     <button id="theme" class="icon-btn" type="button" title="Wissel tussen thuistenue (donker) en uittenue (licht)" aria-label="Wissel tussen thuistenue, donker, en uittenue, licht">${ICONS.theme}</button></div>`;
 })();
+// Spelersnamen onder het kopje Spelers in het menu; de actieve speler volgt de hash op de spelerspagina.
+function fillPlayerNav() {
+  const nav = $('#player-nav'); if (!nav || !DATA) return;
+  const onPlayers = location.pathname === '/spelers.html';
+  const current = onPlayers ? decodeURIComponent(location.hash.slice(1)) || (DATA.players.includes('Neegek') ? 'Neegek' : DATA.players[0]) : null;
+  nav.innerHTML = DATA.players.map(n => `<a href="/spelers.html#${encodeURIComponent(n)}" class="${n === current ? 'active' : ''}"${n === current ? ' aria-current="page"' : ''}>${esc(n)}</a>`).join('');
+}
+addEventListener('hashchange', () => fillPlayerNav());
 const showError = e => { const b = $('#club-box .club-meta'); if (b) b.textContent = `Kon data niet laden: ${e.message}`; console.error(e); };
 
 let DATA = null;
@@ -274,6 +282,7 @@ async function loadData() {
   for (const m of DATA.matches) for (const p of m.players) counts.set(p.name, (counts.get(p.name) || 0) + 1);
   DATA.players = [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([name]) => name);
   DATA.players.forEach((name, i) => playerSlot.set(name, i));
+  fillPlayerNav();
   const s = DATA.snapshot, box = $('#club-box');
   if (box) box.innerHTML = `<div class="club-name">${esc(DATA.club.name)}</div><div class="club-meta">${s ? `${s.wins}W ${s.ties}G ${s.losses}V · rating ${s.skillRating}<br>` : ''}${DATA.matches.length} wedstrijden gevolgd<br>laatste nieuwe data ${DATA.lastRun ? fmtDateTime(DATA.lastRun.started_at) : 'nooit'}${DATA.lastRun?.error ? ` · fout: ${esc(DATA.lastRun.error)}` : ''}</div>`;
   return DATA;
@@ -358,3 +367,15 @@ const ARCHETYPES = {
 const archName = id => ARCHETYPES[id]?.name ?? (id ? `Build ${id}` : '–');
 const NUM_WORD = ['geen', 'één', 'twee', 'drie', 'vier', 'vijf', 'zes', 'zeven', 'acht', 'negen', 'tien'];
 const numWord = n => NUM_WORD[n] ?? String(n);
+
+// Kleurindicatie van een tenue (romp, mouwen en kraag, bies).
+function kitShirt(c, label) {
+  const [c1, c2, c3] = c || ['#888888', '#666666', '#444444'];
+  return `<svg class="shirt" viewBox="0 0 64 60" role="img" aria-label="${esc(label)}">
+    <path d="M22 4 L10 9 L2 22 L11 27 L14 22 L14 56 L50 56 L50 22 L53 27 L62 22 L54 9 L42 4 Q32 12 22 4 Z" fill="${c1}" stroke="var(--border-strong)" stroke-width="1"/>
+    <path d="M10 9 L2 22 L11 27 L16 18 Z M54 9 L62 22 L53 27 L48 18 Z" fill="${c2}"/><path d="M22 4 Q32 12 42 4 L39 3 Q32 9 25 3 Z" fill="${c2}"/>
+    <rect x="14" y="50" width="36" height="6" fill="${c3}"/></svg>`;
+}
+
+// EA-positiecodes (proPos van een pro: de ingestelde hoofdpositie).
+const POS_CODE = ['GK', 'SW', 'RWB', 'RB', 'RCB', 'CB', 'LCB', 'LB', 'LWB', 'RDM', 'CDM', 'LDM', 'RM', 'RCM', 'CM', 'LCM', 'LM', 'RAM', 'CAM', 'LAM', 'RF', 'CF', 'LF', 'RW', 'RS', 'ST', 'LS', 'LW'];

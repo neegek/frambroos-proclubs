@@ -6,13 +6,6 @@ const LINES = [['forward', 'Aanval'], ['midfielder', 'Middenveld'], ['defender',
 const resLetter = r => r === 'D' ? 'G' : r === 'L' ? 'V' : 'W';
 let selectedId = null;
 
-function kitShirt(c, label) {
-  const [c1, c2, c3] = c || ['#888888', '#666666', '#444444'];
-  return `<svg class="shirt" viewBox="0 0 64 60" role="img" aria-label="${esc(label)}">
-    <path d="M22 4 L10 9 L2 22 L11 27 L14 22 L14 56 L50 56 L50 22 L53 27 L62 22 L54 9 L42 4 Q32 12 22 4 Z" fill="${c1}" stroke="var(--border-strong)" stroke-width="1"/>
-    <path d="M10 9 L2 22 L11 27 L16 18 Z M54 9 L62 22 L53 27 L48 18 Z" fill="${c2}"/><path d="M22 4 Q32 12 42 4 L39 3 Q32 9 25 3 Z" fill="${c2}"/>
-    <rect x="14" y="50" width="36" height="6" fill="${c3}"/></svg>`;
-}
 
 const side = (players, k) => players.reduce((a, p) => a + (p[k] || 0), 0);
 const sideEv = (players, k) => players.some(p => p.ev) ? players.reduce((a, p) => a + (p.ev?.[k] || 0), 0) : null;

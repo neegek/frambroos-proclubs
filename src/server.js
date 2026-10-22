@@ -1,12 +1,33 @@
 // Lokaal dashboard: serveert public/ en levert de data uit SQLite op /api/data.
 import http from 'node:http';
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile, rename } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
 import { openDb, config, ROOT } from './db.js';
 import { decodeEvents } from './events.js';
 
 const db = openDb();
 const PUBLIC = join(ROOT, 'public');
+// Eigen builds van de spelers, handmatig ingevuld op de Buildspagina. Staat in git, zodat het bewaard blijft.
+const BUILDS_PATH = join(ROOT, 'data', 'builds.json');
+async function readBuilds() { try { return JSON.parse(await readFile(BUILDS_PATH, 'utf8')); } catch { return {}; } }
+const NUM_FIELDS = new Set(['height', 'weakFoot', 'skillMoves', 'pac', 'sho', 'pas', 'dri', 'def', 'phy',
+  'shortPass', 'longPass', 'vision', 'crossing', 'curve', 'ballControl', 'dribbling', 'agility', 'balance', 'reactions', 'composure',
+  'strength', 'stamina', 'finishing', 'shotPower', 'longShots', 'defAwareness', 'standTackle', 'slideTackle', 'interceptions', 'sprint', 'accel', 'heading', 'jumping']);
+// Alleen bekende velden met geldige waarden bewaren.
+function cleanBuild(b) {
+  const out = {};
+  if (b.archetype !== undefined && b.archetype !== '') { const a = Number(b.archetype); if (Number.isInteger(a) && a >= 1 && a <= 13) out.archetype = a; }
+  if (['links', 'rechts'].includes(b.foot)) out.foot = b.foot;
+  for (const k of NUM_FIELDS) if (b[k] !== undefined && b[k] !== '' && b[k] !== null) { const v = Number(b[k]); if (Number.isFinite(v) && v >= 1 && v <= 250) out[k] = Math.round(v); }
+  if (b.playstyles && typeof b.playstyles === 'object') {
+    out.playstyles = {};
+    for (const [k, v] of Object.entries(b.playstyles)) if (typeof k === 'string' && k.length <= 40 && ['aan', 'plus'].includes(v)) out.playstyles[k] = v;
+  }
+  if (typeof b.note === 'string') out.note = b.note.slice(0, 1000);
+  out.updatedAt = Math.floor(Date.now() / 1000);
+  return out;
+}
+
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png' };
 
 function buildData() {
@@ -64,7 +85,7 @@ function buildData() {
   return {
     club: { id: clubId, name: config.clubName, platform: config.platform, kits },
     snapshot: own ? { skillRating: own.skill_rating, gamesPlayed: own.games_played, wins: own.wins, losses: own.losses, ties: own.ties, goals: own.goals, goalsAgainst: own.goals_against, bestDivision: own.best_division, takenAt: own.taken_at } : null,
-    members: members.map(m => ({ name: m.player_name, gamesPlayed: m.games_played, goals: m.goals, assists: m.assists, ratingAve: m.rating_ave, winRate: m.win_rate, mom: m.mom, proOverall: m.pro_overall, proName: m.pro_name, proHeight: Number(JSON.parse(m.raw).proHeight) || null, favoritePosition: m.favorite_position, passSuccessRate: m.pass_success_rate, shotSuccessRate: m.shot_success_rate, tackleSuccessRate: m.tackle_success_rate })),
+    members: members.map(m => ({ name: m.player_name, gamesPlayed: m.games_played, goals: m.goals, assists: m.assists, ratingAve: m.rating_ave, winRate: m.win_rate, mom: m.mom, proOverall: m.pro_overall, proName: m.pro_name, proHeight: Number(JSON.parse(m.raw).proHeight) || null, proPos: JSON.parse(m.raw).proPos ?? null, favoritePosition: m.favorite_position, passSuccessRate: m.pass_success_rate, shotSuccessRate: m.shot_success_rate, tackleSuccessRate: m.tackle_success_rate })),
     lastRun,
     matches,
     generatedAt: Math.floor(Date.now() / 1000),
@@ -73,6 +94,27 @@ function buildData() {
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost');
+  if (url.pathname === '/api/builds' && req.method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+    return res.end(JSON.stringify(await readBuilds()));
+  }
+  const bm = url.pathname.match(/^\/api\/builds\/(.+)$/);
+  if (bm && req.method === 'PUT') {
+    let body = '';
+    for await (const chunk of req) { body += chunk; if (body.length > 20000) { res.writeHead(413); return res.end('Te groot'); } }
+    try {
+      const name = decodeURIComponent(bm[1]).slice(0, 60);
+      const builds = await readBuilds();
+      builds[name] = cleanBuild(JSON.parse(body));
+      await writeFile(BUILDS_PATH + '.tmp', JSON.stringify(builds, null, 2) + '\n');
+      await rename(BUILDS_PATH + '.tmp', BUILDS_PATH);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify(builds[name]));
+    } catch (e) {
+      res.writeHead(400, { 'Content-Type': 'text/plain' });
+      return res.end(`Ongeldige build: ${e.message}`);
+    }
+  }
   if (url.pathname === '/api/data') {
     res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
     return res.end(JSON.stringify(buildData()));
