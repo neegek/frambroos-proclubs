@@ -127,8 +127,9 @@
 
   <div id="tab-build" role="tabpanel" aria-labelledby="tab-btn-build" class="tabpanel" hidden>
     <section class="card">
-      <h2 id="b-title">Advies</h2>
+      <div class="arch-head"><h2 id="b-title">Advies</h2><div id="arch-picker"></div></div>
       <p class="summary" id="b-summary"></p>
+      <details class="arch-details"><summary>Over deze build</summary><div class="arch-info" id="arch-info"></div></details>
     </section>
 
     <div class="build-layout">
@@ -152,7 +153,7 @@
 
       <section class="card build-form-card">
         <h2>Eigen build</h2>
-        <p class="hint">Alles is optioneel. Hoe meer je invult, hoe preciezer het advies. Wordt opgeslagen in <code>data/builds.json</code>.</p>
+        <p class="hint">Alles is optioneel. Hoe meer je invult, hoe preciezer het advies. Attributen staan in het Engels, zoals in het spel. Wordt opgeslagen in <code>data/builds.json</code>.</p>
         <form id="build-form" autocomplete="off"></form>
       </section>
     </div>
@@ -161,6 +162,7 @@
 </div>
 <div id="tooltip" class="tooltip" hidden></div>
 <script src="common.js"></script>
+<script src="archetypes.js"></script>
 <script src="builds.js"></script>
 <script src="spelers.js"></script>
 </body>

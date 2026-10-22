@@ -32,21 +32,45 @@ code.** De code verwijst hiernaar. Zo blijft het advies consistent en hoeft niet
 
 Builds (`archetypeid`), bron MeelanFC/FC-27-ClubsXI: 1 Shot Stopper, 2 Sweeper Keeper, 3 Progressor, 4 Boss,
 5 Disruptor, 6 Marauder, 7 Recycler, 8 Maestro, 9 Creator, 10 Spark, 11 Magician, 12 Finisher, 13 Target.
+Referentiedata per archetype (signature PlayStyle, masteries, prijsklassen, EA-patch van 22 oktober, AP-budget) staat in
+`public/archetypes.js`; bronnen en actualiteit in **`docs/archetypes.md`**.
 
-Rol per build, voor wat bij iemands taak past:
+### 2a. Advies per archetype
 
-| Rol | Builds | Betekenis voor advies |
-|---|---|---|
-| controle | Progressor, Boss, Disruptor, Recycler, Maestro | Balvast en duels zijn kernwerk; veilig spelen past. |
-| loper | Marauder | Loopwerk en balans tussen aanvallen en verdedigen. |
-| creatief | Creator, Spark, Magician | Risico aan de bal en vooruit spelen horen erbij. |
-| afmaker | Finisher, Target | Afronden en aantal schoten wegen zwaar. |
-| keeper | Shot Stopper, Sweeper Keeper | Eigen maten (nog niet uitgewerkt). |
+- **Standaard het laatst gespeelde archetype.** Dat bepaalt vaak ook de positie. Op het tabblad Advies kun je een ander
+  archetype kiezen; gespeelde archetypes staan bovenaan met het aantal wedstrijden.
+- **Eigen wedstrijden**: alleen die met dat archetype als het er minstens 5 zijn, anders alle wedstrijden (en dat staat
+  erbij).
+- **Vergelijkingsgroep**: alle spelers met hetzelfde archetype (ons en tegenstanders) als dat minstens 20
+  speler-wedstrijden zijn; anders spelers op dezelfde positie (§3). De app zegt welke het is.
+- **Ingevulde build** telt alleen mee als het archetype ervan overeenkomt met het gekozen archetype.
+- **Coachprofiel per archetype** (`ARCHETYPE_PROFILE` in `public/archetypes.js`): een taak in één zin, een weging per
+  adviesthema, of veilig spelen bij de taak past, of aanvallende maten tellen, en de kernattributen van de rol.
+  Kernattributen komen vooraan in het build-advies.
+
+| Archetype | Taak | Weging bal / schieten / passen / verdedigen | Veilig past | Aanvallend |
+|---|---|---|---|---|
+| Progressor | opbouwen vanuit de verdediging | 1,1 / 0,3 / 1,3 / 1,1 | ja | nee |
+| Boss | duels en luchtduels winnen | 0,9 / 0,2 / 0,7 / 1,4 | ja | nee |
+| Disruptor | pressen en onderscheppen | 0,9 / 0,3 / 0,8 / 1,4 | ja | nee |
+| Marauder | met snelheid verdedigen en mee naar voren | 1,0 / 0,5 / 1,0 / 1,1 | nee | nee |
+| Recycler | bal winnen en veilig doorspelen | 1,3 / 0,3 / 1,1 / 1,2 | ja | nee |
+| Maestro | regisseren vanaf diep | 1,2 / 0,4 / 1,4 / 0,9 | ja | nee |
+| Creator | met scherpe passes openbreken | 1,1 / 0,6 / 1,4 / 0,6 | nee | ja |
+| Spark | vleugel openbreken en voorzetten | 1,2 / 0,8 / 0,9 / 0,4 | nee | ja |
+| Magician | techniek en dribbels | 1,2 / 1,0 / 1,1 / 0,4 | nee | ja |
+| Finisher | afmaken, een-op-een | 0,8 / 1,5 / 0,6 / 0,3 | nee | ja |
+| Target | vasthouden, inkoppen, laten aansluiten | 1,3 / 1,3 / 0,9 / 0,3 | nee | ja |
+
+Waar hieronder "controlerende build" staat, gaat het om archetypes waar veilig spelen past; "aanvaller" om de
+aanvallende archetypes.
 
 ## 3. Vergelijkingen
 
+- **Archetypegemiddelde**: de waarde over alle spelers met hetzelfde archetype (ons en tegenstanders), als dat
+  minstens 20 speler-wedstrijden zijn. Heeft voorrang (§2a).
 - **Positiegemiddelde**: per positie de waarde over alle spelers (ons en tegenstanders), gewogen naar hoe vaak de
-  speler op elke positie stond.
+  speler op elke positie stond. Terugval als er te weinig van het archetype is.
 - **Teamgemiddelde**: gemiddelde van onze eigen spelers. Alleen als context ("binnen Frambroos verlies je de meeste
   ballen, maar voor je positie is dat normaal").
 - **Normaal** (sessies, laatste wedstrijd): het gemiddelde van dezelfde speler of het team over *alle andere* wedstrijden.
@@ -100,8 +124,8 @@ Elk thema levert een **score** (hoeveel winst) en een **variant**. De drie hoogs
 - Controlerende build zonder risico: score × 1,2 (balvast is kernwerk).
 - Variant *veilig*: weinig balverlies én weinig dribbels (beide ≥ 15% onder positie). Past bij controle (score 0,03),
   anders advies om vaker het risico te nemen.
-- Acties: sneller afspelen na een geslaagde actie, afschermen, dribbeltechnieken oefenen; attributen balbeheersing,
-  balans, kracht (+ dribbelen, wendbaarheid bij risico, + kalmte zonder); PlayStyles Technical, Press Proven, Quick Step
+- Acties: sneller afspelen na een geslaagde actie, afschermen, dribbeltechnieken oefenen; attributes Ball Control,
+  Balance, Strength (+ Dribbling, Agility bij risico, + Composure zonder); PlayStyles Technical, Press Proven, Quick Step
   of First Touch.
 
 **Afronden**
@@ -121,8 +145,8 @@ Elk thema levert een **score** (hoeveel winst) en een **variant**. De drie hoogs
 - Veel assists (≥ 1,5× positie) zonder ambitie: "niet minder vooruit spelen, maar de verkeerde ballen eruit halen".
 - Korte passes noemen we alleen als ze bij de twee getoonde passtypes horen en ≥ 0,15 slechter zijn.
 - Variant *veilig passen*: aandeel vooruit ≥ 10% onder positie bij goede nauwkeurigheid. Past bij controle (0,04).
-- Attributen per passtype: kort → korte pass; lang → lange pass, effect; vooruit → visie, korte pass; voorzet →
-  voorzetten, effect. PlayStyles: Tiki Taka, Long Ball Pass, Pinged Pass, Incisive Pass, Whipped Pass.
+- Attributes per passtype: kort → Short Passing; lang → Long Passing, Curve; vooruit → Vision, Short Passing; voorzet →
+  Crossing, Curve. PlayStyles: Tiki Taka, Long Ball Pass, Pinged Pass, Incisive Pass, Whipped Pass.
 
 **Verdedigen**
 - Doet mee als `tackleWin` ≥ 0,05 slechter is.
@@ -147,9 +171,14 @@ Elk thema levert een **score** (hoeveel winst) en een **variant**. De drie hoogs
 
 ## 7. Eigen build in het advies
 
+- Attributen staan in het Engels, zoals in het spel (Ball Control, Short Passing, Defensive Awareness, ...); face stats
+  als PAC, SHO, PAS, DRI, DEF, PHY.
 - Attribuut ≥ 82 *hoog* ("ligt eerder aan keuzes en timing"), ≥ 70 *midden* ("verhoog"), anders *laag*
-  ("verhoog eerst"). Ontbreekt het detailattribuut, dan gebruiken we het kerncijfer en zeggen dat erbij.
+  ("verhoog eerst"). Ontbreekt het detailattribuut, dan gebruiken we de face stat en zeggen dat erbij ("via PAS 72").
 - PlayStyles die de speler al heeft, noemen we als "al in bezit" in plaats van als advies.
+- Bij elk geadviseerd attribuut staat de prijsklasse voor het gekozen archetype (goedkoopst, goedkoop, duur, duurst),
+  met de richting van EA's update van 22 oktober erbij als die het attribuut raakte ("was goedkoopst, sinds 22 okt
+  duurder"). Exacte nieuwe klassen zijn niet bekend; zie `docs/archetypes.md`.
 - Opslag: `data/builds.json` via de lokale server (`PUT /api/builds/:naam`). Alleen bekende velden, waarden 1–250.
 
 ## 8. Advies: vaste opbouw
@@ -179,8 +208,8 @@ Daarnaast *Positiespel en keuzes* en *Al sterk*.
 - **Speler, algemeen**: rol en kenmerk, wanneer het het best en minst gaat, opvallendste patroon. De *rol* hier is de
   rol die uit de data blijkt (aangever, afmaker, spelmaker, ballenafpakker, dribbelaar, rustige kracht), op basis van de
   sterkste punten binnen het team. Die kan afwijken van de gekozen build; dat is informatief, geen fout.
-- **Speler, advies**: gekozen build en de rol die daarbij hoort (§2), speelstijl, grootste winst, waar op te bouwen,
-  positiespel.
+- **Speler, advies**: gekozen archetype met zijn taak (§2a), speelstijl, grootste winst, waar op te bouwen,
+  positiespel. Bij een ander archetype dan het laatst gespeelde zegt de eerste zin dat.
 
 ## 10. Waar staat wat
 
@@ -189,6 +218,7 @@ Daarnaast *Positiespel en keuzes* en *Al sterk*.
 | Gedeelde helpers, model, teammaten, verhaalzinnen, builds, menu | `public/common.js` |
 | Team, Sessies, Wedstrijden, Spelers | `public/team.js`, `sessies.js`, `wedstrijden.js`, `spelers.js` |
 | Advies (deze logica) | `public/builds.js` |
+| Archetypes: referentie en coachprofiel | `public/archetypes.js`, `docs/archetypes.md` |
 | Data-API en opslag builds | `src/server.js` |
 | Verzamelaar | `src/collect.js`, `.github/workflows/collect.yml` |
 | Eventcodes | `src/events.js`, `docs/event-codes.md` |

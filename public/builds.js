@@ -3,16 +3,20 @@
 (() => {
 
 // ---------- attributen ----------
-// Detailattributen met het kerncijfer waar ze onder vallen (als terugval als alleen de kerncijfers zijn ingevuld).
+// Attributen (Engelse namen, zoals in het spel) met de face stat waar ze onder vallen, als terugval als alleen de face stats zijn ingevuld.
 const ATTRS = {
-  accel: ['Acceleratie', 'pac'], sprint: ['Sprintsnelheid', 'pac'],
-  finishing: ['Afwerken', 'sho'], shotPower: ['Schotkracht', 'sho'], longShots: ['Afstandsschoten', 'sho'],
-  shortPass: ['Korte pass', 'pas'], longPass: ['Lange pass', 'pas'], vision: ['Visie', 'pas'], crossing: ['Voorzetten', 'pas'], curve: ['Effect', 'pas'],
-  ballControl: ['Balbeheersing', 'dri'], dribbling: ['Dribbelen', 'dri'], agility: ['Wendbaarheid', 'dri'], balance: ['Balans', 'dri'], reactions: ['Reactievermogen', 'dri'], composure: ['Kalmte', 'dri'],
-  defAwareness: ['Verdedigend inzicht', 'def'], standTackle: ['Staande tackle', 'def'], slideTackle: ['Sliding', 'def'], interceptions: ['Onderscheppen', 'def'], heading: ['Koppen', 'def'],
-  strength: ['Kracht', 'phy'], stamina: ['Uithoudingsvermogen', 'phy'], jumping: ['Springen', 'phy'],
-};
-const FACE = [['pac', 'Snelheid'], ['sho', 'Schieten'], ['pas', 'Passen'], ['dri', 'Dribbelen'], ['def', 'Verdedigen'], ['phy', 'Fysiek']];
+  accel: ['Acceleration', 'pac'], sprint: ['Sprint Speed', 'pac'],
+  finishing: ['Finishing', 'sho'], shotPower: ['Shot Power', 'sho'], longShots: ['Long Shots', 'sho'],
+  shortPass: ['Short Passing', 'pas'], longPass: ['Long Passing', 'pas'], vision: ['Vision', 'pas'], crossing: ['Crossing', 'pas'], curve: ['Curve', 'pas'],
+  ballControl: ['Ball Control', 'dri'], dribbling: ['Dribbling', 'dri'], agility: ['Agility', 'dri'], balance: ['Balance', 'dri'], reactions: ['Reactions', 'dri'], composure: ['Composure', 'dri'],
+  defAwareness: ['Defensive Awareness', 'def'], standTackle: ['Standing Tackle', 'def'], slideTackle: ['Sliding Tackle', 'def'], interceptions: ['Interceptions', 'def'], heading: ['Heading Accuracy', 'def'],
+  strength: ['Strength', 'phy'], stamina: ['Stamina', 'phy'], jumping: ['Jumping', 'phy'],
+}
+const FACE = [['pac', 'Pace (PAC)'], ['sho', 'Shooting (SHO)'], ['pas', 'Passing (PAS)'], ['dri', 'Dribbling (DRI)'], ['def', 'Defending (DEF)'], ['phy', 'Physical (PHY)']];
+const FACE_SHORT = { pac: 'PAC', sho: 'SHO', pas: 'PAS', dri: 'DRI', def: 'DEF', phy: 'PHY' };
+// Namen van attributen die niet in het formulier staan maar wel in de archetypedata.
+const EXTRA_ATTR = { attPos: 'Att. Position', volleys: 'Volleys', penalties: 'Penalties', fkAcc: 'FK Accuracy', aggression: 'Aggression', gkDiving: 'GK Diving', gkHandling: 'GK Handling', gkKicking: 'GK Kicking', gkPos: 'GK Positioning', gkReflexes: 'GK Reflexes' };
+const attrName = k => ATTRS[k]?.[0] || EXTRA_ATTR[k] || k;
 const PLAYSTYLES = ['Finesse Shot', 'Power Shot', 'Chip Shot', 'Low Driven Shot', 'Incisive Pass', 'Pinged Pass', 'Long Ball Pass', 'Tiki Taka', 'Whipped Pass',
   'First Touch', 'Press Proven', 'Technical', 'Flair', 'Trickster', 'Rapid', 'Quick Step', 'Relentless',
   'Intercept', 'Anticipate', 'Jockey', 'Block', 'Bruiser', 'Slide Tackle', 'Aerial', 'Power Header'];
@@ -76,18 +80,26 @@ function attrValue(build, key) {
   const face = ATTRS[key]?.[1];
   return face && build[face] ? { v: build[face], exact: false } : null;
 }
+// Prijsklasse voor het gekozen archetype, met de richting van EA's AP-update van 22-10-2026 (docs/archetypes.md).
+function costNote(key) {
+  const c = typeof costInfo === 'function' ? costInfo(currentArch, key) : null; if (!c) return '';
+  const was = c.tierName ? (c.patch ? `was ${c.tierName}` : c.tierName) : '';
+  const p = c.patch === 'up' ? 'sinds 22 okt duurder' : c.patch === 'down' ? 'sinds 22 okt goedkoper' : '';
+  return [was, p].filter(Boolean).join(', ');
+}
 function attrAdvice(build, keys) {
   const parts = keys.map(k => {
-    const a = attrValue(build, k), label = ATTRS[k][0];
-    if (!a) return { label, txt: label, level: null };
-    const shown = `${label} ${a.exact ? a.v : `(kerncijfer ${a.v})`}`;
-    return { label, txt: shown, level: a.v >= 82 ? 'hoog' : a.v >= 70 ? 'midden' : 'laag', exact: a.exact };
+    const a = attrValue(build, k), label = attrName(k), cost = costNote(k);
+    const withCost = t => cost ? `${t} <small>(${cost})</small>` : t;
+    if (!a) return { label, txt: withCost(label), level: null };
+    const shown = `${label} ${a.exact ? a.v : `(via ${FACE_SHORT[ATTRS[k][1]]} ${a.v})`}`;
+    return { label, txt: withCost(shown), level: a.v >= 82 ? 'hoog' : a.v >= 70 ? 'midden' : 'laag', exact: a.exact };
   });
   const low = parts.filter(p => p.level === 'laag'), mid = parts.filter(p => p.level === 'midden'), high = parts.filter(p => p.level === 'hoog'), unknown = parts.filter(p => p.level === null);
   const out = [];
   if (low.length) out.push(`<b>Verhoog eerst:</b> ${low.map(p => p.txt).join(', ')}.`);
   if (mid.length) out.push(`${low.length ? 'Daarna' : '<b>Verhoog:</b>'} ${mid.map(p => p.txt).join(', ')}.`);
-  if (unknown.length) out.push(`${low.length || mid.length ? 'Ook relevant:' : '<b>Attributen:</b>'} ${unknown.map(p => p.label).join(', ')}.`);
+  if (unknown.length) out.push(`${low.length || mid.length ? 'Ook relevant:' : '<b>Attributes:</b>'} ${unknown.map(p => p.txt).join(', ')}.`);
   if (high.length && !low.length && !mid.length && !unknown.length) out.push(`${high.map(p => p.txt).join(', ')} ${high.length > 1 ? 'zijn' : 'is'} al hoog: dit ligt eerder aan keuzes en timing dan aan punten.`);
   else if (high.length) out.push(`Al hoog: ${high.map(p => p.txt).join(', ')}.`);
   return out.join(' ');
@@ -103,19 +115,32 @@ function psAdvice(build, list) {
 }
 
 // ---------- render ----------
-let BUILDS = {}, selected = null;
+let BUILDS = {}, selected = null, currentArch = null, archChoice = {};
 const ROWS = () => allRows();
+const MIN_ARCH_ROWS = 5, MIN_ARCH_POOL = 20; // zie docs/coach-logica.md §3
 
-function analyse(name) {
-  const pool = ROWS(), rows = pool.filter(r => r.ours && r.p.name === name);
+// Laatst gespeelde archetype van een speler: de standaard voor het advies.
+function lastArchetype(name) {
+  const rows = ROWS().filter(r => r.ours && r.p.name === name && r.p.archetypeId).sort((a, b) => a.m.ts - b.m.ts);
+  return rows.length ? rows[rows.length - 1].p.archetypeId : null;
+}
+
+// Analyse voor één archetype. Eigen wedstrijden met dat archetype als het er minstens MIN_ARCH_ROWS zijn, anders alle.
+// Vergelijkingsgroep: alle spelers met hetzelfde archetype als die groep groot genoeg is, anders dezelfde positie.
+function analyse(name, arch) {
+  const pool = ROWS(), all = pool.filter(r => r.ours && r.p.name === name);
+  const own = all.filter(r => r.p.archetypeId === arch);
+  const rows = own.length >= MIN_ARCH_ROWS ? own : all;
+  const archPool = pool.filter(r => r.p.archetypeId === arch);
+  const byArch = archPool.length >= MIN_ARCH_POOL;
   const res = {};
   for (const [k, mt] of Object.entries(METRICS)) {
-    const v = mt.calc(rows), b = benchmark(mt, rows, pool);
-    if (v === null || v === undefined || b === null || !b) continue;
+    const v = mt.calc(rows), b = byArch ? mt.calc(archPool) : benchmark(mt, rows, pool);
+    if (v === null || v === undefined || b === null || b === undefined || !b) continue;
     const worse = mt.lower ? (v - b) / b : (b - v) / b;
     res[k] = { v, b, worse, fmt: mt.fmt };
   }
-  return { rows, res };
+  return { rows, res, scope: { ownArch: own.length, usedArchRows: rows === own, byArch, archPool: archPool.length } };
 }
 
 // ---------- genuanceerd advies ----------
@@ -126,17 +151,15 @@ const pct0 = v => `${Math.round(v * 100)}%`;
 const rel = x => x ? (x.v - x.b) / Math.abs(x.b) : 0; // positief = hoger dan spelers op dezelfde positie
 const gap = x => x ? x.worse : 0;                    // positief = slechter dan spelers op dezelfde positie
 
-// Rol per build (archetypeid): bepaalt wat bij iemands taak past.
-const BUILD_ROLE = { 1: 'keeper', 2: 'keeper', 3: 'controle', 4: 'controle', 5: 'controle', 6: 'loper', 7: 'controle', 8: 'controle', 9: 'creatief', 10: 'creatief', 11: 'creatief', 12: 'afmaker', 13: 'afmaker' };
-const ROLE_TEXT = { controle: 'een controlerende build', loper: 'een loopbuild', creatief: 'een creatieve build', afmaker: 'een afmakersbuild', keeper: 'een keepersbuild' };
 const SIZE = s => s >= 0.25 ? 'grote winst' : s >= 0.12 ? 'duidelijke winst' : 'fijnslijpen';
 
-function themes(name, res, build, rows) {
+function themes(name, res, build, rows, arch) {
   const C = []; // kandidaten
   const forwardish = rows.filter(r => r.p.pos === 'forward').length > rows.length / 2;
   const buildCount = {}; for (const r of rows) if (r.p.archetypeId) buildCount[r.p.archetypeId] = (buildCount[r.p.archetypeId] || 0) + 1;
-  const mainBuild = Number(build?.archetype) || Number(Object.entries(buildCount).sort((a, b) => b[1] - a[1])[0]?.[0]) || null;
-  const role = BUILD_ROLE[mainBuild] || (forwardish ? 'afmaker' : 'controle');
+  const mainBuild = arch || Number(Object.entries(buildCount).sort((a, b) => b[1] - a[1])[0]?.[0]) || null;
+  const prof = ARCHETYPE_PROFILE[mainBuild] || ARCHETYPE_PROFILE[forwardish ? 12 : 8];
+  const role = prof.safeFits ? 'controle' : prof.attacker ? 'aanval' : 'loper';
   const plain = (k, v) => (res[k].fmt(v).match(/^[\d.,]+%?/) || [res[k].fmt(v)])[0];
   const vs = k => `${res[k].fmt(res[k].v)} (positiegemiddelde ${plain(k, res[k].b)})`;
   const ourLoss = DATA.players.map(n => ({ n, v: METRICS.lost90.calc(ROWS().filter(r => r.ours && r.p.name === n)) })).filter(x => x.v !== null).sort((a, b) => b.v - a.v);
@@ -161,7 +184,7 @@ function themes(name, res, build, rows) {
       const means = [];
       if (risk && pays) means.push(`Je neemt bewust meer risico, en dat betaalt zich grotendeels terug: per verloren bal speel je minstens zoveel tegenstanders uit als gemiddeld.${teamHigh && gap(res.lost90) < 0.05 ? ' Dat je binnen het team de bal vaak kwijt bent, komt vooral doordat je het vaakst iets probeert; de rest speelt behoudender.' : ' Het balverlies is deels de prijs van je spel.'}`);
       else if (risk) means.push('Je neemt meer risico dan het oplevert: per verloren bal speel je minder tegenstanders uit dan gemiddeld. De dribbel komt vaak op het verkeerde moment.');
-      else means.push(role === 'controle' ? 'Voor een controlerende build telt balvastheid extra: jij bent het rustpunt, dus een verloren bal kost direct.' : 'Er staan niet veel dribbels tegenover het balverlies; het gaat eerder mis bij het aannemen of onder druk.');
+      else means.push(role === 'controle' ? `Voor een ${archName(mainBuild)} telt balvastheid extra: jouw taak is ${prof.task}, dus een verloren bal kost direct.` : 'Er staan niet veel dribbels tegenover het balverlies; het gaat eerder mis bij het aannemen of onder druk.');
       if (res.lossAtt && res.lossAtt.v >= 0.5) means.push('Het meeste balverlies valt voorin, waar het het minst kost.');
       if (defLossReal) means.push('Op eigen helft gaat het vaker mis dan gemiddeld; daar levert balverlies direct een kans tegen op.');
       C.push({ key: 'ball', title: risk ? 'Veel risico aan de bal' : 'Balvastheid', short: risk ? 'kiezen wanneer je de dribbel aangaat' : 'balvastheid onder druk',
@@ -174,7 +197,7 @@ function themes(name, res, build, rows) {
       const fits = role === 'controle';
       C.push({ key: 'ball', title: 'Veilig aan de bal', short: 'vaker het risico nemen', score: fits ? 0.03 : Math.min(-gap(res.ballLoss), -rel(res.dribbles)) * 0.6,
         says: [`Je verliest de bal weinig: ${vs('ballLoss')}. Je gaat ook minder vaak de dribbel aan: ${res.dribbles ? vs('dribbles') : '–'}.`],
-        means: [fits ? 'Dat past bij een controlerende build: jij houdt de bal in de ploeg zodat anderen risico kunnen nemen.' : 'Je speelt op zeker. Dat is waardevol, maar voor jouw build mag er meer dreiging vanuit gaan: verdedigers hoeven je nu weinig te vrezen.'],
+        means: [fits ? `Dat past bij een ${archName(mainBuild)}: jouw taak is ${prof.task}, en jij houdt de bal in de ploeg zodat anderen risico kunnen nemen.` : 'Je speelt op zeker. Dat is waardevol, maar voor jouw build mag er meer dreiging vanuit gaan: verdedigers hoeven je nu weinig te vrezen.'],
         play: fits ? ['Blijf het rustpunt; zoek wel af en toe de pass die een linie overslaat.'] : ['Ga vaker één-op-één als er ruimte achter je man ligt, vooral op de helft van de tegenstander.'],
         train: fits ? [] : ['Oefen één simpele skillmove tot hij automatisch gaat, zodat de dribbel een optie wordt.'],
         attrs: fits ? [] : ['dribbling', 'agility', 'accel'], ps: fits ? [] : ['Quick Step', 'Technical'] });
@@ -182,7 +205,7 @@ function themes(name, res, build, rows) {
   }
 
   // 2. Afronden: kwaliteit van de kansen, raak schieten en plaatsing; en voor aanvallers ook het aantal schoten
-  const attacker = role === 'afmaker' || role === 'creatief' || forwardish;
+  const attacker = prof.attacker;
   const shootGap = Math.max(gap(res.conv), gap(res.onTarget));
   if (shootGap >= 0.05 && (res.conv || res.onTarget)) {
     const far = res.insideShare && res.insideShare.v < res.insideShare.b * 0.85, saved = gap(res.savedShare) >= 0.15, wide = gap(res.onTarget) >= 0.15;
@@ -202,7 +225,7 @@ function themes(name, res, build, rows) {
   } else if (attacker && gap(res.shots90) >= 0.15) {
     C.push({ key: 'shoot', title: 'Weinig schoten', short: 'vaker zelf de afronding zoeken', score: gap(res.shots90) * 0.8,
       says: [`Je schiet ${vs('shots90')}.${res.conv ? ` Als je schiet, scoor je uit ${vs('conv')}.` : ''}`],
-      means: [`Voor ${ROLE_TEXT[role]} kom je weinig tot schieten. ${gap(res.conv) <= 0 ? 'Je afronding is prima, dus meer schoten levert waarschijnlijk meer goals op.' : 'Meer schoten betekent ook meer kans op goals.'}`],
+      means: [`Voor een ${archName(mainBuild)} kom je weinig tot schieten. ${gap(res.conv) <= 0 ? 'Je afronding is prima, dus meer schoten levert waarschijnlijk meer goals op.' : 'Meer schoten betekent ook meer kans op goals.'}`],
       play: ['Loop vaker in de diepte of naar de tweede paal als de bal op de vleugel is.', 'Schiet als je de keeper ziet staan, in plaats van nog een pass te zoeken.'],
       train: ['Oefen de loopactie in de rug van de verdediger en afronden in één keer.'], attrs: ['finishing', 'accel', 'reactions'], ps: ['Finesse Shot', 'Rapid'] });
   }
@@ -234,7 +257,7 @@ function themes(name, res, build, rows) {
     const fits = role === 'controle';
     C.push({ key: 'pass', title: 'Veilig passen', short: 'vaker vooruit spelen', score: fits ? 0.04 : -rel(res.fwdShare) * 0.8,
       says: [`Je passing is zuiver: ${vs('passAcc')}. Maar ${pct0(res.fwdShare.v)} van je passes gaat vooruit (positiegemiddelde ${pct0(res.fwdShare.b)}).`],
-      means: [fits ? 'Voor een controlerende build is dat logisch: de bal rond laten gaan is je taak. Er ligt wel ruimte om af en toe een linie over te slaan.' : 'Je speelt vaak breed of terug. Dat is veilig, maar zo kom je minder vaak tot kansen.'],
+      means: [fits ? `Voor een ${archName(mainBuild)} is dat logisch: de bal rond laten gaan hoort bij je taak. Er ligt wel ruimte om af en toe een linie over te slaan.` : 'Je speelt vaak breed of terug. Dat is veilig, maar zo kom je minder vaak tot kansen.'],
       play: ['Kijk eerst vooruit voordat je breed speelt; speel de vrije man tussen de linies aan als die er is.'], train: ['Oefen de pass door de linies en de steekpass in de vaardigheidsspellen.'],
       attrs: ['vision', 'shortPass'], ps: ['Incisive Pass'] });
   }
@@ -246,7 +269,7 @@ function themes(name, res, build, rows) {
     if (res.wonAtt) says.push(`${pct0(res.wonAtt.v)} van je balwinst is op de helft van de tegenstander (positiegemiddelde ${pct0(res.wonAtt.b)}).`);
     if (gap(res.fouls) >= 0.2) says.push(`Overtredingen: ${vs('fouls')}.`);
     C.push({ key: 'defend', title: press ? 'Drukzetten' : 'Duels', short: press ? 'slimmer drukzetten' : 'de duels', score: gap(res.tackleWin) * (press ? 0.6 : 1) * (role === 'controle' ? 1.2 : 1), says,
-      means: [press ? 'Veel van je duels zijn drukzetten voorin; een verloren duel daar kost weinig, en jagen dwingt de tegenstander tot snelle keuzes. Wel loont het om slimmer te jagen.' : role === 'controle' ? 'Voor een controlerende build is het winnen van duels kernwerk; verloren duels op eigen helft geven direct ruimte.' : 'Verloren duels op eigen helft geven de tegenstander direct ruimte.'],
+      means: [press ? 'Veel van je duels zijn drukzetten voorin; een verloren duel daar kost weinig, en jagen dwingt de tegenstander tot snelle keuzes. Wel loont het om slimmer te jagen.' : role === 'controle' ? `Voor een ${archName(mainBuild)} is het winnen van duels kernwerk; verloren duels op eigen helft geven direct ruimte.` : 'Verloren duels op eigen helft geven de tegenstander direct ruimte.'],
       play: [press ? 'Jaag in de passlijn in plaats van direct op de man; wacht tot de aanname slecht is en stap dan pas in.' : 'Stap niet in bij een tegenstander die de bal onder controle heeft; jockey en wacht op een slechte aanname.'],
       train: ['Oefen jockeyen en de staande tackle op het juiste moment.'], attrs: ['defAwareness', 'standTackle', 'strength', 'reactions'], ps: press ? ['Anticipate', 'Relentless'] : ['Anticipate', 'Jockey'] });
   } else if (!attacker && res.interceptions && gap(res.interceptions) >= 0.15) {
@@ -278,14 +301,51 @@ function themes(name, res, build, rows) {
   if (res.ballLoss) up('ballLoss', 'Balvast', `Je verliest de bal bij ${vs('ballLoss')}.`);
   if (res.outPos) up('outPos', 'Positiespel', `Je staat ${pct0(res.outPos.v)} van de momenten uit positie (positiegemiddelde ${pct0(res.outPos.b)}).`);
 
+  // Weging per archetype (ARCHETYPE_PROFILE.weight) en kernattributen van de rol vooraan in het build-advies.
+  for (const c of C) {
+    c.score *= prof.weight[c.key] ?? 1;
+    c.attrs = [...new Set([...c.attrs.filter(a => prof.core.includes(a)), ...c.attrs.filter(a => !prof.core.includes(a))])];
+  }
   const ranked = C.filter(c => c.score > 0.02).sort((a, b) => b.score - a.score).slice(0, 3).map(c => ({ ...c, size: SIZE(c.score) }));
-  return { themes: ranked, behaviour: behaviour.sort((a, b) => b.score - a.score), strengths: S.sort((a, b) => b.g - a.g).map(x => [x.t, x.e]), role, mainBuild };
+  return { themes: ranked, behaviour: behaviour.sort((a, b) => b.score - a.score), strengths: S.sort((a, b) => b.g - a.g).map(x => [x.t, x.e]), role, mainBuild, prof };
+}
+
+function renderArchPicker(name) {
+  const used = {}; for (const r of ROWS().filter(r => r.ours && r.p.name === name && r.p.archetypeId)) used[r.p.archetypeId] = (used[r.p.archetypeId] || 0) + 1;
+  const last = lastArchetype(name);
+  const opt = id => `<option value="${id}" ${Number(id) === currentArch ? 'selected' : ''}>${archName(id)}${Number(id) === last ? ' · laatst gespeeld' : ''}${used[id] ? ` · ${used[id]} wedstrijden` : ''}</option>`;
+  const usedIds = Object.keys(used).map(Number).sort((a, b) => used[b] - used[a]);
+  const otherIds = Object.keys(ARCHETYPE_INFO).map(Number).filter(id => !used[id]);
+  $('#arch-picker').innerHTML = `<label class="field arch-field"><span>Advies voor build</span><select id="arch-select">
+    <optgroup label="Gespeeld">${usedIds.map(opt).join('')}</optgroup><optgroup label="Andere builds">${otherIds.map(opt).join('')}</optgroup></select></label>`;
+  $('#arch-select').addEventListener('change', e => { archChoice[name] = Number(e.target.value); renderAdvice(); });
+}
+
+function renderArchInfo(arch, scope) {
+  const a = ARCHETYPE_INFO[arch], prof = ARCHETYPE_PROFILE[arch]; if (!a) { $('#arch-info').innerHTML = ''; return; }
+  const names = ks => joinAnd(ks.map(attrName));
+  const cheapest = a.tiers[0];
+  const lines = [
+    `<b>${a.name}</b> · ${a.line}. Taak: ${prof.task}.`,
+    `Signature PlayStyle: ${a.signature}. Masteries: +1 ${names(a.mastery[0])} op level 10, nog +1 ${attrName(a.mastery[1])} op level 30 (voor al je builds).`,
+    `Kernattributen voor deze rol: ${prof.core.map(k => { const c = costNote(k); return c ? `${attrName(k)} <small>(${c})</small>` : attrName(k); }).join(', ')}.`,
+    `Goedkoopst voor deze build volgens de tabel van vóór 22 okt: ${names(cheapest)}.${a.patch.up.length ? ` Sinds 22 okt duurder: ${names(a.patch.up)}.` : ''}${a.patch.down.length ? ` Goedkoper: ${names(a.patch.down)}.` : ''}`,
+    `AP-budget op level ${LEVELS.cap}: ${LEVELS.apAt[LEVELS.cap]}. PlayStyle-slots op level ${joinAnd(LEVELS.playstyleSlots.map(String))}.`,
+    `<span class="muted">Vergeleken met ${scope.byArch ? `alle ${a.name}s die we tegenkwamen (${scope.archPool} speler-wedstrijden)` : `spelers op dezelfde positie, omdat er nog te weinig ${a.name}s in de data zitten (${scope.archPool})`}. ${scope.usedArchRows ? `Gebaseerd op ${scope.ownArch} eigen wedstrijden als ${a.name}.` : scope.ownArch ? `Je speelde maar ${scope.ownArch} keer als ${a.name}; het advies gebruikt al je wedstrijden.` : `Je speelde nog niet als ${a.name}; het advies gebruikt al je wedstrijden.`} Bronnen: docs/archetypes.md.</span>`,
+  ];
+  $('#arch-info').innerHTML = lines.map(l => `<p>${l}</p>`).join('');
 }
 
 function renderAdvice() {
-  const name = selected, build = BUILDS[name], { rows, res } = analyse(name);
+  const name = selected;
+  currentArch = archChoice[name] || lastArchetype(name);
+  const saved = BUILDS[name];
+  // Ingevulde build alleen gebruiken als die bij het gekozen archetype hoort (of geen archetype heeft).
+  const build = saved && (!saved.archetype || Number(saved.archetype) === currentArch) ? saved : null;
+  const { rows, res, scope } = analyse(name, currentArch);
+  renderArchPicker(name); renderArchInfo(currentArch, scope);
   const conf = rows.length >= 15 ? 'sterk' : rows.length >= 8 ? 'redelijk' : 'zwak';
-  const { themes: T, behaviour, strengths, role, mainBuild } = themes(name, res, build, rows);
+  const { themes: T, behaviour, strengths, role, mainBuild, prof } = themes(name, res, build, rows, currentArch);
   const block = (label, items) => items && items.length ? `<div class="adv-block"><span class="adv-label">${label}</span>${items.map(x => `<p>${x}</p>`).join('')}</div>` : '';
   const buildLine = t => { const a = attrAdvice(build, t.attrs), p = psAdvice(build, t.ps); return a || p ? [`${a} ${p}`.trim()] : []; };
   $('#b-problems').innerHTML = T.length ? T.map(t => `<li class="adv-item"><div class="claim">${t.title}<span class="tag size">${t.size}</span>${tagHtml(conf)}</div>
@@ -299,11 +359,14 @@ function renderAdvice() {
   // Samenvatting, voor iedereen dezelfde opbouw: build en stijl, grootste winst, sterkste punt, positiespel.
   const parts = [];
   const riskStyle = rel(res.dribbles) >= 0.2 || rel(res.beaten) >= 0.2 ? 'speelt met veel risico aan de bal' : (gap(res.ballLoss) <= -0.15 && rel(res.dribbles) <= -0.15) ? 'speelt veilig en houdt de bal goed in de ploeg' : rel(res.fwdShare) >= 0.1 ? 'zoekt vaak de pass vooruit' : 'speelt een gebalanceerde rol';
-  parts.push(`<b>${esc(name)}</b> speelt meestal als ${mainBuild ? archName(mainBuild) : 'onbekende build'}, ${ROLE_TEXT[role] || 'een build'}, en ${riskStyle}.`);
+  const isLast = mainBuild === lastArchetype(name);
+  parts.push(isLast ? `<b>${esc(name)}</b> speelt nu als ${archName(mainBuild)}, met als taak ${prof.task}.` : `Dit advies bekijkt <b>${esc(name)}</b> als ${archName(mainBuild)}, niet de laatst gespeelde build; de taak is dan ${prof.task}.`);
+  parts.push(`${esc(name)} ${riskStyle}.`);
   if (T.length) parts.push(`De grootste winst zit in ${joinAnd(T.slice(0, 2).map(t => t.short))}${T[0].means[0].includes('betaalt zich') || T[0].means[0].includes('afweging') ? ', al is een deel daarvan de prijs van een bewuste speelstijl' : ''}.`);
   if (strengths.length) parts.push(`Om op te bouwen: ${joinAnd(strengths.slice(0, 2).map(x => x[0].toLowerCase()))}.`);
   if (behaviour.length) parts.push(`Zonder extra punten valt er winst te halen in het positiespel: ${behaviour[0].title.toLowerCase()}.`);
-  if (!build || Object.keys(build).length <= 1) parts.push('<span class="muted">Vul de eigen build in, dan zegt het advies ook welke attributen al hoog genoeg zijn.</span>');
+  if (saved && !build) parts.push(`<span class="muted">De ingevulde build is een ${archName(saved.archetype)}; voor deze build telt die niet mee.</span>`);
+  else if (!build || Object.keys(build).length <= 1) parts.push('<span class="muted">Vul de eigen build in, dan zegt het advies ook welke attributen al hoog genoeg zijn.</span>');
   $('#b-title').textContent = `Advies voor ${name}`;
   $('#b-summary').innerHTML = parts.join(' ');
 }
@@ -314,14 +377,14 @@ function renderForm() {
   const ps = b.playstyles || {};
   $('#build-form').innerHTML = `
     <div class="form-grid">
-      <label class="field wide"><span>Build</span><select name="archetype"><option value="">Kies…</option>${Object.entries(ARCHETYPES).map(([id, a]) => `<option value="${id}" ${Number(b.archetype) === Number(id) ? 'selected' : ''}>${a.name} · ${a.line}</option>`).join('')}</select></label>
+      <label class="field wide"><span>Build (archetype)</span><select name="archetype"><option value="">Kies…</option>${Object.entries(ARCHETYPES).map(([id, a]) => `<option value="${id}" ${Number(b.archetype || currentArch) === Number(id) ? 'selected' : ''}>${a.name} · ${a.line}</option>`).join('')}</select></label>
       ${num('height', 'Lengte (cm)', 150, 210)}
       <label class="field"><span>Voorkeursvoet</span><select name="foot"><option value="">–</option><option value="rechts" ${b.foot === 'rechts' ? 'selected' : ''}>Rechts</option><option value="links" ${b.foot === 'links' ? 'selected' : ''}>Links</option></select></label>
       ${num('weakFoot', 'Zwakke voet (1–5)', 1, 5)}${num('skillMoves', 'Skillmoves (1–5)', 1, 5)}
     </div>
-    <h3>Kerncijfers</h3>
+    <h3>Face stats</h3>
     <div class="form-grid six">${FACE.map(([k, l]) => num(k, l)).join('')}</div>
-    <details class="form-details" ${Object.keys(ATTRS).some(k => b[k]) ? 'open' : ''}><summary>Attributen in detail</summary>
+    <details class="form-details" ${Object.keys(ATTRS).some(k => b[k]) ? 'open' : ''}><summary>Attributes in detail</summary>
       ${FACE.map(([f, fl]) => `<div class="attr-group"><span class="attr-group-label">${fl}</span><div class="form-grid">${Object.entries(ATTRS).filter(([, [, face]]) => face === f).map(([k, [l]]) => num(k, l)).join('')}</div></div>`).join('')}
     </details>
     <h3>PlayStyles</h3>

@@ -210,6 +210,14 @@ td.split small, .split small { color: var(--muted); }
 .more-link:hover { text-decoration: underline; }
 
 /* ---------- builds ---------- */
+.arch-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+.arch-field { min-width: 240px; }
+.arch-field select { width: 100%; }
+.arch-details { margin-top: 12px; }
+.arch-details summary { cursor: pointer; color: var(--brand-text); font-weight: 560; font-size: 14px; }
+.arch-info { display: grid; gap: 6px; margin-top: 8px; font-size: 13.5px; line-height: 1.55; }
+.arch-info p { margin: 0; }
+.arch-info .muted, .advice small, .adv-block small { color: var(--muted); }
 .adv-item { display: grid; gap: 8px; }
 .adv-block { display: grid; grid-template-columns: 130px 1fr; gap: 10px; font-size: 13.5px; line-height: 1.55; }
 .adv-block p { margin: 0; grid-column: 2; }

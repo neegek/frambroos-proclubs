@@ -7,6 +7,8 @@ Alle teksten in de app zijn Nederlands.
 
 - **`docs/coach-logica.md`**: hoe de coach denkt. Maatstaven, drempels, afwegingen per thema, labels en schrijfregels.
   Elke wijziging aan analyse, advies of samenvattingen begint daar: eerst het document, dan de code.
+- `docs/archetypes.md`: wat we over FC27-archetypes weten (AP-kosten, masteries, signature PlayStyles, EA-patch),
+  met bron en datum per gegeven. Bij een nieuwe EA-update eerst daar bijwerken, dan `public/archetypes.js`.
 - `docs/event-codes.md`: betekenis van de EA-eventcodes. `docs/trigger.md`: hoe en wanneer de verzamelaar draait.
 
 ## Draaien
@@ -32,6 +34,7 @@ Na een wijziging in `src/server.js` de server herstarten; voor `public/` volstaa
 - Advies en samenvattingen: volg coach-logica §1, §8 en §9. Kort gezegd: verder kijken dan één cijfer, twee richtingen,
   build bepaalt wat goed is, iedereen dezelfde opbouw, samenvattingen kwalitatief in drie of vier zinnen.
 - Over spelers geen *hij* of *zij*.
+- Attribuutnamen in het Engels zoals in het spel (Ball Control, Short Passing, ...); de rest van de app in het Nederlands.
 - Stijl: donker thuistenue (standaard) en licht uittenue; tokens staan bovenaan `public/style.css`. Nieuwe kleuren eerst
   op contrast controleren: tekst ≥ 4,5:1, grafische elementen ≥ 3:1. Datakleuren (winst blauw, verlies rood) niet aanpassen.
 - Menu: Team, Sessies, Wedstrijden, Spelers (met de namen eronder). Geen aparte analysepagina.
