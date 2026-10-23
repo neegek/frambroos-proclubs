@@ -269,7 +269,7 @@ function renderLastTab(name) {
   else if (bad.length) parts.push(`Opvallend: ${joinAnd(bad)} dan normaal.`);
   $('#pl-summary').innerHTML = parts.join(' ');
   const rows = [
-    ['Rating', p.rating, normal, true, f2], ['Goals', p.goals, avg(others.map(r => r.p.goals)), true, f1], ['Assists', p.assists, avg(others.map(r => r.p.assists)), true, f1], ...(p.ev ? [['Tweede assists', p.ev.second_assists || 0, avg(evRows(others).map(r => r.p.ev.second_assists || 0)), true, f1]] : []),
+    ['Rating', p.rating, normal, true, f2], ...(p.fi !== null ? [['Frambroos-index', Math.round(p.fi), avg(others.map(r => r.p.fi).filter(x => x !== null)), true, f0]] : []), ['Goals', p.goals, avg(others.map(r => r.p.goals)), true, f1], ['Assists', p.assists, avg(others.map(r => r.p.assists)), true, f1], ...(p.ev ? [['Tweede assists', p.ev.second_assists || 0, avg(evRows(others).map(r => r.p.ev.second_assists || 0)), true, f1]] : []),
     ['Schoten', p.shots, avg(others.map(r => r.p.shots)), true, f1], ['Passnauwkeurigheid', pct(p.passesMade, p.passAttempts), pct(sum(others, r => r.p.passesMade), sum(others, r => r.p.passAttempts)), true, v => v === null ? '–' : `${v}%`],
     ['Tackles gewonnen', p.tacklesMade, avg(others.map(r => r.p.tacklesMade)), true, f1],
     ...(p.ev ? [['Balacties', p.ev.ball_actions, avg(evRows(others).map(r => r.p.ev.ball_actions)), null, f1], ['Dribbels', p.ev.dribbles_completed, avg(evRows(others).map(r => r.p.ev.dribbles_completed)), true, f1],
@@ -324,7 +324,9 @@ function renderPlayer() {
   // Badges: met deze speler erbij tegenover de wedstrijden zonder.
   const wo = summarize(ms.filter(m => !m.players.some(p => p.name === selected)));
   const T = 'Met deze speler erbij tegenover de wedstrijden zonder';
+  const fi = fiForRows(rows.map(r => r.p).filter(p => p.fi !== null));
   $('#p-tiles').innerHTML = [
+    kpiTile('Frambroos-index', fiFmt(fi.score), fi.score === null ? 'minstens 3 wedstrijden nodig' : `${fiLabel(fi.score)} · afronden ${fiFmt(fi.parts.shoot)}, creëren ${fiFmt(fi.parts.pass)}, aan de bal ${fiFmt(fi.parts.ball)}, verdedigen ${fiFmt(fi.parts.defend)}`),
     kpiTile('Punten per wedstrijd', s.ppg ?? '–', `${s.W}W ${s.D}G ${s.L}V met deze speler`, wo.n >= 3 ? deltaOf(s.ppg, wo.ppg, { digits: 2, title: T }) : null),
     kpiTile('Tov verwachting', s.resid === null ? '–' : signed(s.resid, 2), 'team, met deze speler erbij', wo.n >= 3 ? deltaOf(s.resid, wo.resid, { digits: 2, title: T }) : null),
     kpiTile('Minuten per wedstrijd', rows.length ? f0(minutes(rows) / rows.length) : '–', ''),
@@ -351,7 +353,7 @@ function renderPlayer() {
   table($('#tbl-player-matches'), [
     { label: 'Datum', render: r => fmtDateTime(r.m.ts) }, { label: 'Tegenstander', render: r => `<a href="wedstrijd.html?id=${r.m.matchId}">${esc(r.m.opponent.name)}</a>` },
     { label: 'Score', num: true, render: r => `${r.m.goals}–${r.m.goalsAgainst}` }, { label: 'Uitslag', render: r => `<span class="pill ${r.m.result}">${r.m.result === 'D' ? 'G' : r.m.result === 'L' ? 'V' : 'W'}</span>` },
-    { label: 'Rating', num: true, render: r => r.p.rating }, { label: 'G + A', num: true, render: r => `${r.p.goals} + ${r.p.assists}` },
+    { label: 'Rating', num: true, render: r => r.p.rating }, { label: 'Index', num: true, render: r => fiFmt(r.p.fi) }, { label: 'G + A', num: true, render: r => `${r.p.goals} + ${r.p.assists}` },
   ], [...rows].reverse());
 }
 

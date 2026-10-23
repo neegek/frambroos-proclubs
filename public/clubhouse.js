@@ -100,6 +100,8 @@ const per = (x, n) => n ? (x / n).toFixed(2) : '–';
 // Tellende stats: groot het aantal per wedstrijd (daarop wordt gesorteerd), klein het totaal.
 const count = (key, label, total, games, extra = () => '') => ({ key, label, v: t => games(t) ? total(t) / games(t) : null, main: t => per(total(t), games(t)), sub: t => `${total(t)} in ${games(t)} wedstrijden${extra(t)}` });
 const RANKS = [
+  { key: 'index', label: 'Frambroos-index', v: t => DATA.fi[t.name]?.score ?? null, main: t => fiFmt(DATA.fi[t.name].score),
+    sub: t => { const f = DATA.fi[t.name]; return `${fiLabel(f.score)} · afronden ${fiFmt(f.parts.shoot)}, creëren ${fiFmt(f.parts.pass)}, aan de bal ${fiFmt(f.parts.ball)}, verdedigen ${fiFmt(f.parts.defend)}`; } },
   count('involved', 'Betrokken bij goals', t => t.involved, t => t.n, t => ` · ${t.g} G, ${t.a} A, ${t.sa} tweede`),
   count('goals', 'Goals', t => t.g, t => t.n),
   count('assists', 'Assists', t => t.a, t => t.n),
@@ -113,7 +115,7 @@ const RANKS = [
   count('won', 'Balwinst', t => t.won, t => t.nEv),
   { key: 'duels', label: 'Duels gewonnen', v: t => t.ta >= 15 ? t.tm / t.ta : null, main: t => `${Math.round(100 * t.tm / t.ta)}%`, sub: t => `${t.tm} van ${t.ta} tackles` },
 ];
-let rankKey = 'involved'; try { rankKey = sessionStorage.getItem('rankKey') || rankKey; } catch {}
+let rankKey = 'index'; try { rankKey = sessionStorage.getItem('rankKey') || rankKey; } catch {}
 
 function renderRanking(totals) {
   $('#rank-stats').innerHTML = RANKS.map(r => `<button type="button" role="tab" class="chip ${r.key === rankKey ? 'active' : ''}" aria-selected="${r.key === rankKey}" data-k="${r.key}">${r.label}</button>`).join('');

@@ -109,7 +109,8 @@ function playerTable(el, players, link) {
   if (!rows.length) { el.innerHTML = '<p class="empty">Geen menselijke spelers.</p>'; return; }
   const name = { label: 'Speler', render: p => link ? `<a href="spelers.html#${encodeURIComponent(p.name)}">${esc(p.name)}</a>${p.mom ? ' ★' : ''}` : `${esc(p.name)}${p.mom ? ' ★' : ''}` };
   const compact = [name,
-    { label: 'Rating', num: true, render: p => p.rating ?? '–' }, { label: 'Goals', num: true, key: 'goals' }, { label: 'Assists', num: true, key: 'assists' },
+    { label: 'Rating', num: true, render: p => p.rating ?? '–' }, { label: 'Index', num: true, render: p => p.fi === null ? '–' : `<span title="Frambroos-index: 50 is gemiddeld voor de rol${fiMatchLabel(p.fi) ? ` · ${fiMatchLabel(p.fi)}` : ''}">${fiFmt(p.fi)}</span>` },
+    { label: 'Goals', num: true, key: 'goals' }, { label: 'Assists', num: true, key: 'assists' },
     { label: '2e assist', num: true, render: p => p.ev ? (p.ev.second_assists || 0) : '–' }, { label: 'Schoten', num: true, key: 'shots' },
     { label: 'Pass %', num: true, render: p => p.passAttempts ? `${Math.round(100 * p.passesMade / p.passAttempts)}%` : '–' },
     { label: 'Balverlies', num: true, render: p => p.ev ? p.ev.possession_lost : '–' }];

@@ -340,6 +340,7 @@ async function loadData() {
   for (const m of DATA.matches) for (const p of m.players) counts.set(p.name, (counts.get(p.name) || 0) + 1);
   DATA.players = [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([name]) => name);
   DATA.players.forEach((name, i) => playerSlot.set(name, i));
+  if (typeof computeFrambroosIndex === 'function') computeFrambroosIndex(); // frambroos-index.js, waar geladen
   fillPlayerNav();
   const s = DATA.snapshot, box = $('#club-box');
   // Lokale app: de server haalt bij het laden de nieuwste wedstrijden live bij EA op (src/live.js).

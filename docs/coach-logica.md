@@ -299,6 +299,40 @@ de keten te reconstrueren: wie scoorde, wie de assist gaf en wie de tweede assis
 als *Zo viel de goal*. Ontbreekt een schakel, dan zeggen we dat (geen assist, of een AI-speler gaf hem: AI-spelers
 staan niet in de data). Bij meer goals verbinden we niets.
 
+## 9b. Frambroos-index
+
+Eén getal per speler (en per speler per wedstrijd) voor wat iemand zelf bijdraagt, **los van de uitslag**. 50 is
+gemiddeld voor de rol; hoger is beter. De EA-overall op de spelerskaart blijft apart staan.
+
+**Per wedstrijd** (alleen rijen met minstens 45 minuten en ontcijferde events), vier onderdelen:
+
+| Onderdeel | Gewicht uit `ARCHETYPE_PROFILE` | Cijfers (gelijk gewogen) |
+|---|---|---|
+| Afronden | `shoot` | goals; schoten op doel (13 + 18) |
+| Creëren | `pass` | assists; tweede assists (115); steekpasses (152) |
+| Aan de bal | `ball` | uitgespeeld (112); passnauwkeurigheid; balverlies per balactie (lager is beter) |
+| Verdedigen | `defend` | onderscheppingen (6); balwinst (108–110); gewonnen tackles |
+
+1. Elk cijfer wordt een percentiel (0–100, gelijke waarden krijgen het midden) binnen **dezelfde positie**, over alle
+   menselijke spelers die we tegenkwamen, tegenstanders inbegrepen. Zo wordt een aanvaller alleen met aanvallers
+   vergeleken en telt scoren bij hem niet als vanzelfsprekende bonus.
+2. Een onderdeel is het gemiddelde percentiel van zijn cijfers.
+3. De wedstrijdscore is het gewogen gemiddelde van de vier onderdelen, met de gewichten van het archetype dat in die
+   wedstrijd gespeeld werd (§2a). Zonder bekend archetype: Finisher voor aanvallers, Maestro voor de rest.
+
+**Per speler**: het gemiddelde van de wedstrijdscores, naar 50 getrokken bij weinig wedstrijden:
+`(som + 5 × 50) / (n + 5)`. Ook per onderdeel. Minimaal 3 wedstrijden om te tonen.
+
+**Labels**: ≥ 58 *uitblinker*, ≥ 53 *boven gemiddeld*, > 47 *gemiddeld*, > 42 *onder gemiddeld*, anders *ver onder*.
+Per wedstrijd: ≥ 70 *topwedstrijd*, ≤ 30 *mindere wedstrijd*.
+
+**Toets** (23 okt 2026, 222 speler-wedstrijden): samenhang met de EA-matchrating 0,68; met het doelsaldo van het eigen
+team 0,46 (EA-rating 0,51). Bewust lager dan de EA-rating, die ook door winst omhoog gaat. Tegenstanders komen
+gemiddeld op 49,9 uit.
+
+**Later te verfijnen**: vergelijken per archetype zodra die groep groot genoeg is (≥ 20 speler-wedstrijden), corrigeren
+voor de sterkte van de tegenstander, eigen vergelijking voor verdedigers en keepers (nu te weinig in de data).
+
 ## 10. Waar staat wat
 
 | Onderdeel | Bestand |
@@ -307,6 +341,7 @@ staan niet in de data). Bij meer goals verbinden we niets.
 | Team, Sessies, Wedstrijden (lijst), Wedstrijd (detail), Spelers | `public/team.js`, `sessies.js`, `wedstrijden.js`, `wedstrijd.js`, `spelers.js` |
 | Spelerskaart | `public/playercard.js`; foto's in `data/players/` (aangeleverd via de chat) |
 | Advies (deze logica) | `public/builds.js` |
+| Frambroos-index (§9b) | `public/frambroos-index.js` |
 | Archetypes: referentie en coachprofiel | `public/archetypes.js`, `docs/archetypes.md` |
 | Data-API en opslag builds | `src/server.js` |
 | Verzamelaar | `src/collect.js`, `.github/workflows/collect.yml` |
