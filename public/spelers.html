@@ -20,8 +20,7 @@
   <div class="tabs-row">
   <div class="tabs" role="tablist" aria-label="Weergave">
     <button type="button" role="tab" class="tab" id="tab-btn-overview" aria-controls="tab-overview" aria-selected="true">Algemeen</button>
-    <button type="button" role="tab" class="tab" id="tab-btn-sessions" aria-controls="tab-sessions" aria-selected="false">Per sessie</button>
-    <button type="button" role="tab" class="tab" id="tab-btn-last" aria-controls="tab-last" aria-selected="false">Laatste wedstrijd</button>
+    <button type="button" role="tab" class="tab" id="tab-btn-sessions" aria-controls="tab-sessions" aria-selected="false">Vorm</button>
     <button type="button" role="tab" class="tab" id="tab-btn-build" aria-controls="tab-build" aria-selected="false">Advies</button>
   </div>
   <div class="filters">
@@ -66,48 +65,45 @@
   </section>
 
   <section class="card">
-    <h2>Profiel tegenover het team</h2>
-    <p class="hint">Afwijking van het teamgemiddelde per maat, zo gedraaid dat rechts altijd goed is. Beweeg over of tik op een balk voor de waarden.</p>
-    <div id="chart-profile"></div>
+    <h2>Sterk en zwak</h2>
+    <p class="hint">Waar deze speler bovenaan of onderaan staat in het team. Hooguit drie per kant.</p>
+    <div class="split">
+      <div><h3 class="good-text">Sterk in</h3><ul class="insight-list" id="list-strengths"></ul></div>
+      <div><h3 class="bad-text">Kan beter</h3><ul class="insight-list" id="list-weaknesses"></ul></div>
+    </div>
   </section>
 
-  <div class="insights">
-    <section class="card good">
-      <h2>Sterk in</h2>
-      <p class="hint">Maten waarop deze speler bovenaan staat in het team.</p>
-      <ul class="insight-list" id="list-strengths"></ul>
-    </section>
-    <section class="card bad">
-      <h2>Kan beter</h2>
-      <p class="hint">Maten waarop deze speler onderaan staat of duidelijk onder het team zit.</p>
-      <ul class="insight-list" id="list-weaknesses"></ul>
-    </section>
-    <section class="card good">
-      <h2>Floreert als</h2>
-      <p class="hint">Omstandigheden waarin de rating van deze speler en het teamresultaat duidelijk hoger liggen.</p>
-      <ul class="insight-list" id="list-thrives"></ul>
-    </section>
-    <section class="card bad">
-      <h2>Speelt minder als</h2>
-      <p class="hint">Omstandigheden waarin het duidelijk slechter gaat.</p>
-      <ul class="insight-list" id="list-struggles"></ul>
-    </section>
-  </div>
-
   <section class="card">
-    <h2>Andere inzichten</h2>
-    <p class="hint">Patronen die niet in één maat passen: hoe iemand speelt als het team wint of verliest, constantheid, carrière tegenover nu.</p>
+    <h2>Wanneer het loopt</h2>
+    <p class="hint">Omstandigheden waarin de rating en het teamresultaat duidelijk hoger of lager liggen, en patronen die opvallen.</p>
+    <div class="split">
+      <div><h3 class="good-text">Beter als</h3><ul class="insight-list" id="list-thrives"></ul></div>
+      <div><h3 class="bad-text">Minder als</h3><ul class="insight-list" id="list-struggles"></ul></div>
+    </div>
+    <h3>Patronen</h3>
     <ul class="insight-list" id="list-other"></ul>
   </section>
 
   <section class="card">
     <h2>Wedstrijden van deze speler</h2>
+    <p class="hint">Klik op een wedstrijd voor alle cijfers.</p>
     <div id="tbl-player-matches"></div>
   </section>
 
     </div>
 
   <div id="tab-sessions" role="tabpanel" aria-labelledby="tab-btn-sessions" class="tabpanel" hidden>
+    <section class="card">
+      <h2>Laatste wedstrijd</h2>
+      <div class="scoreline" id="pl-score"></div>
+      <div class="meta match-meta" id="pl-meta"></div>
+      <p class="summary" id="pl-summary"></p>
+    </section>
+    <section class="card">
+      <h2>Deze wedstrijd tegenover normaal</h2>
+      <p class="hint">"Normaal" is het eigen gemiddelde over alle andere wedstrijden.</p>
+      <div id="pl-compare"></div>
+    </section>
     <section class="card">
       <h2 id="ps-title">Per sessie</h2>
       <p class="summary" id="ps-summary"></p>
@@ -118,19 +114,6 @@
       <div id="ps-chart"></div>
     </section>
     <div class="ps-cards" id="ps-cards"></div>
-  </div>
-
-  <div id="tab-last" role="tabpanel" aria-labelledby="tab-btn-last" class="tabpanel" hidden>
-    <section class="card">
-      <div class="scoreline" id="pl-score"></div>
-      <div class="meta match-meta" id="pl-meta"></div>
-      <p class="summary" id="pl-summary"></p>
-    </section>
-    <section class="card">
-      <h2>Deze wedstrijd tegenover normaal</h2>
-      <p class="hint">"Normaal" is het eigen gemiddelde over alle andere wedstrijden.</p>
-      <div id="pl-compare"></div>
-    </section>
   </div>
 
   <div id="tab-build" role="tabpanel" aria-labelledby="tab-btn-build" class="tabpanel" hidden>
@@ -148,22 +131,19 @@
           <ul class="insight-list" id="b-problems"></ul>
         </section>
         <section class="card">
-          <h2>Positiespel en keuzes</h2>
-          <p class="hint">Dingen die geen build oplost, maar keuzes en positiespel.</p>
-          <ul class="insight-list" id="b-behaviour"></ul>
-        </section>
-        <section class="card good">
-          <h2>Al sterk</h2>
-          <p class="hint">Hier hoeven geen extra punten heen.</p>
-          <ul class="insight-list" id="b-strengths"></ul>
+          <h2>Positiespel en wat al sterk is</h2>
+          <div class="split">
+            <div><h3>Positiespel en keuzes</h3><p class="hint">Wat geen build oplost, maar keuzes en positie.</p><ul class="insight-list" id="b-behaviour"></ul></div>
+            <div><h3 class="good-text">Al sterk</h3><p class="hint">Hier hoeven geen extra punten heen.</p><ul class="insight-list" id="b-strengths"></ul></div>
+          </div>
         </section>
       </div>
 
-      <section class="card build-form-card">
-        <h2>Eigen build</h2>
+      <details class="card build-form-card">
+        <summary><h2>Build invullen</h2><span class="hint">Je eigen attributen en PlayStyles, voor preciezer advies.</span></summary>
         <p class="hint">Alles is optioneel. Hoe meer je invult, hoe preciezer het advies. Attributen staan in het Engels, zoals in het spel. Wordt opgeslagen in <code>data/builds.json</code>.</p>
         <form id="build-form" autocomplete="off"></form>
-      </section>
+      </details>
     </div>
   </div>
 </main>

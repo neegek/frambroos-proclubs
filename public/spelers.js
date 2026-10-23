@@ -50,33 +50,6 @@ function metricTable(ms, players) {
   }).filter(mt => mt.team !== null && mt.team !== undefined);
 }
 
-function profileChart(container, name, table) {
-  container.innerHTML = '';
-  const items = table.filter(mt => mt.values.some(x => x.name === name) && mt.team).map(mt => {
-    const v = mt.values.find(x => x.name === name).v;
-    const rel = mt.hib ? (v - mt.team) / Math.abs(mt.team) : (mt.team - v) / Math.abs(mt.team);
-    return { mt, v, rel: Math.max(-1, Math.min(1, rel)) * 100 };
-  });
-  if (!items.length) { container.innerHTML = '<p class="empty">Nog te weinig wedstrijden voor een profiel.</p>'; return; }
-  // Breed: label links van de balk. Smal (telefoon): label boven de balk, zodat de balk de volle breedte houdt.
-  const width = Math.max(300, Math.min(1100, container.clientWidth || 800)), narrow = width < 560;
-  const rowH = narrow ? 40 : 24, left = narrow ? 8 : 230, labelH = narrow ? 18 : 0, height = items.length * rowH + 28;
-  const svg = el('svg', { class: 'chart', viewBox: `0 0 ${width} ${height}`, role: 'img' }); container.appendChild(svg);
-  const x0 = left, w = width - left - 16, sx = v => x0 + w / 2 + (v / 100) * (w / 2);
-  const g = el('g', { class: 'grid' }, svg);
-  for (const t of narrow ? [-100, 0, 100] : [-100, -50, 0, 50, 100]) { el('line', { x1: sx(t), x2: sx(t), y1: 0, y2: items.length * rowH, stroke: t === 0 ? 'var(--axis)' : undefined }, g); text(svg, sx(t), items.length * rowH + 16, `${t > 0 ? '+' : ''}${t}%`, { class: 'tick', 'text-anchor': 'middle' }); }
-  items.forEach((it, i) => {
-    const y = i * rowH + 4 + labelH, h = rowH - 8 - labelH;
-    if (narrow) text(svg, 0, y - 5, it.mt.label, { 'text-anchor': 'start' });
-    else text(svg, left - 10, y + h - 3, it.mt.label, { 'text-anchor': 'end' });
-    const a = sx(0), b = sx(it.rel), x = Math.min(a, b), bw = Math.max(2, Math.abs(b - a));
-    el('rect', { x, y, width: bw, height: h, rx: 4, fill: it.rel >= 0 ? 'var(--pos)' : 'var(--neg)' }, svg);
-    const hit = el('rect', { class: 'hit', x: 0, y: i * rowH, width, height: rowH }, svg);
-    hit.addEventListener('mousemove', e => showTip(`<b>${esc(it.mt.label)}</b>${esc(name)}: ${it.mt.fmt(it.v)} · team: ${it.mt.fmt(it.mt.team)}<br>${it.mt.hib ? 'hoger is beter' : 'lager is beter'} · plek ${it.mt.rank[name]} van ${it.mt.values.length}`, e));
-    hit.addEventListener('mouseleave', hideTip);
-  });
-}
-
 function strengthsWeaknesses(name, table) {
   const strengths = [], weaknesses = [];
   for (const mt of table) {
@@ -358,14 +331,15 @@ function renderPlayer() {
   ].join('');
 
   const table_ = metricTable(ms, players);
-  profileChart($('#chart-profile'), selected, table_);
   const sw = strengthsWeaknesses(selected, table_), cond = conditions(selected, ms, players), other = otherInsights(selected, ms, players);
   const fill = (id, items, empty) => { $(id).innerHTML = items.length ? items.join('') : `<li class="empty">${empty}</li>`; };
-  fill('#list-strengths', sw.strengths, 'Nog geen maat waarop deze speler bovenaan staat.');
-  fill('#list-weaknesses', sw.weaknesses, 'Nog geen maat waarop deze speler duidelijk onderaan staat.');
-  fill('#list-thrives', cond.thrives, 'Nog geen omstandigheid met een duidelijk verschil (minimaal 3 wedstrijden aan beide kanten).');
-  fill('#list-struggles', cond.struggles, 'Nog geen omstandigheid met een duidelijk verschil.');
-  fill('#list-other', other.html, 'Nog geen patronen gevonden.');
+  fill('#list-strengths', sw.strengths.slice(0, 3), 'Nog geen maat waarop deze speler bovenaan staat.');
+  fill('#list-weaknesses', sw.weaknesses.slice(0, 3), 'Nog geen maat waarop deze speler duidelijk onderaan staat.');
+  fill('#list-thrives', cond.thrives.slice(0, 3), 'Nog geen omstandigheid met een duidelijk verschil (minimaal 3 wedstrijden aan beide kanten).');
+  fill('#list-struggles', cond.struggles.slice(0, 3), 'Nog geen omstandigheid met een duidelijk verschil.');
+  // Patronen: man of the match, kaarten en carrière staan al op de spelerskaart; die laten we hier weg.
+  const SKIP = /man of the match|^Kaarten|carrière|Hoogste winstpercentage|Productiefste speler/;
+  fill('#list-other', other.html.filter((_, i) => !SKIP.test(other.claims[i])).slice(0, 3), 'Nog geen patronen gevonden.');
   $('#p-summary').innerHTML = playerSummary(selected, rows, career, sw, cond, other);
   renderContext(selected, ms);
   window.PlayerCard.render(selected);
@@ -375,11 +349,9 @@ function renderPlayer() {
   window.BuildTab.show(selected);
 
   table($('#tbl-player-matches'), [
-    { label: 'Datum', render: r => fmtDateTime(r.m.ts) }, { label: 'Tegenstander', render: r => esc(r.m.opponent.name) }, { label: 'Score', num: true, render: r => `${r.m.goals}–${r.m.goalsAgainst}` },
-    { label: 'Uitslag', render: r => `<span class="res-${r.m.result}">${r.m.result}</span>` }, { label: 'Tov verw.', num: true, render: r => residCell(r.m.resid) },
-    { label: 'Positie', render: r => POS_NL[r.p.pos] || r.p.pos }, { label: 'Rating', num: true, render: r => r.p.rating }, { label: 'G + A', num: true, render: r => `${r.p.goals} + ${r.p.assists}` },
-    { label: 'Schoten', num: true, render: r => r.p.shots }, { label: 'Pass %', num: true, render: r => fmtPct(pct(r.p.passesMade, r.p.passAttempts)) }, { label: 'Balacties', num: true, render: r => actionsOf(r.p) },
-    { label: 'Dribbels', num: true, render: r => r.p.ev ? r.p.ev.dribbles_completed : '–' }, { label: 'Balverlies', num: true, render: r => r.p.ev ? r.p.ev.possession_lost : '–' }, { label: 'Uit positie', num: true, render: r => r.p.ev ? fmtPct(pct(r.p.ev.out_of_position, r.p.ev.out_of_position + r.p.ev.in_position)) : '–' },
+    { label: 'Datum', render: r => fmtDateTime(r.m.ts) }, { label: 'Tegenstander', render: r => `<a href="wedstrijd.html?id=${r.m.matchId}">${esc(r.m.opponent.name)}</a>` },
+    { label: 'Score', num: true, render: r => `${r.m.goals}–${r.m.goalsAgainst}` }, { label: 'Uitslag', render: r => `<span class="pill ${r.m.result}">${r.m.result === 'D' ? 'G' : r.m.result === 'L' ? 'V' : 'W'}</span>` },
+    { label: 'Rating', num: true, render: r => r.p.rating }, { label: 'G + A', num: true, render: r => `${r.p.goals} + ${r.p.assists}` },
   ], [...rows].reverse());
 }
 
@@ -389,7 +361,7 @@ addEventListener('hashchange', () => { const n = decodeURIComponent(location.has
 selected = decodeURIComponent(location.hash.slice(1)) || null;
 // Tabbladen: Overzicht en Build en advies. De keuze blijft bewaard tijdens de sessie.
 function setTab(tab) {
-  for (const [id, panel] of [['overview', '#tab-overview'], ['sessions', '#tab-sessions'], ['last', '#tab-last'], ['build', '#tab-build']]) {
+  for (const [id, panel] of [['overview', '#tab-overview'], ['sessions', '#tab-sessions'], ['build', '#tab-build']]) {
     const on = id === tab;
     $(panel).hidden = !on;
     $(`#tab-btn-${id}`).setAttribute('aria-selected', String(on));
@@ -402,8 +374,8 @@ function setTab(tab) {
 $('#tab-btn-overview').addEventListener('click', () => setTab('overview'));
 $('#tab-btn-build').addEventListener('click', () => setTab('build'));
 $('#tab-btn-sessions').addEventListener('click', () => setTab('sessions'));
-$('#tab-btn-last').addEventListener('click', () => setTab('last'));
 let startTab = 'overview'; try { startTab = sessionStorage.getItem('spelersTab') || 'overview'; } catch {}
+if (startTab === 'last') startTab = 'sessions'; // Laatste wedstrijd zit nu in Vorm
 if (new URLSearchParams(location.search).get('tab') === 'build') startTab = 'build';
 setTab(startTab);
 window.rerender = () => renderPlayer(); // thema wisselen: kaart opnieuw in thuis- of uitkleuren

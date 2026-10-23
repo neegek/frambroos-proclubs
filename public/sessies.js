@@ -91,23 +91,12 @@ function render() {
   // Badges: deze avond tegenover normaal (alle andere wedstrijden).
   const no = summarize(others), TN = 'Deze avond tegenover normaal (alle andere wedstrijden)';
   $('#s-tiles').innerHTML = [
-    kpiTile('Uitslag', `${sm.W}-${sm.D}-${sm.L}`, 'gewonnen, gelijk, verloren'),
+    kpiTile('Uitslag', `${sm.W}-${sm.D}-${sm.L}`, `${sm.gf}–${sm.ga} in doelpunten`, others.length >= 3 ? deltaOf(sm.gfAvg - sm.gaAvg, no.gfAvg - no.gaAvg, { digits: 1, title: `${TN} (doelsaldo per wedstrijd)` }) : null),
     kpiTile('Punten per wedstrijd', sm.ppg, `normaal ${no.ppg ?? '–'}`, others.length >= 3 ? deltaOf(sm.ppg, no.ppg, { digits: 2, title: TN }) : null),
-    kpiTile('Doelpunten', `${sm.gf}–${sm.ga}`, `${sm.gfAvg}–${sm.gaAvg} per wedstrijd`, others.length >= 3 ? deltaOf(sm.gfAvg - sm.gaAvg, no.gfAvg - no.gaAvg, { digits: 1, title: `${TN} (doelsaldo per wedstrijd)` }) : null),
     kpiTile('Tov verwachting', signed(sm.resid, 2), 'doelsaldo per wedstrijd', others.length >= 3 ? deltaOf(sm.resid, no.resid, { digits: 2, title: TN }) : null),
-    kpiTile('Tegenstanders', opp ? Math.round(opp) : '–', opp && own ? `${strengthLabel(opp - own)} dan jullie (${own})` : ''),
-    kpiTile('Man of the match', momCount.length ? esc(momCount[0][0]) : '–', momCount.length ? momCount.map(([n, c]) => `${esc(n)} ${c}×`).join(', ') : '', null, { small: true }),
+    kpiTile('Man of the match', momCount.length ? esc(momCount[0][0]) : '–', momCount.length ? `${momCount[0][1]}×${momCount.length > 1 ? ` · ook ${momCount.slice(1).map(([n, c]) => `${esc(n)} ${c}×`).join(', ')}` : ''}` : '', null, { small: true }),
   ].join('');
-
-  const chartEl = $('#s-chart');
-  barChart(chartEl, ms.map(m => ({ label: fmtTime(m.ts), value: m.goalDiff, color: resultColor(m.result), tip: matchTip(m) })), { yMin: -1, zeroLine: true, height: 180 });
-  table($('#s-matches'), [
-    { label: 'Tijd', render: r => fmtTime(r.ts) }, { label: 'Tegenstander', render: r => `<a href="wedstrijd.html?id=${r.matchId}">${esc(r.opponent.name)}</a>` },
-    { label: 'Rating', num: true, render: r => r.opponent.skillRating ? `${r.opponent.skillRating} <small>${own ? strengthLabel(r.opponent.skillRating - own) : ''}</small>` : '–' },
-    { label: 'Mensen', num: true, render: r => r.opponentPlayers.length }, { label: 'Score', num: true, render: r => `${r.goals}–${r.goalsAgainst}${r.winnerByDnf ? ' <small>opgave</small>' : ''}` },
-    { label: 'Uitslag', render: r => `<span class="pill ${r.result}">${r.result === 'D' ? 'G' : r.result === 'L' ? 'V' : 'W'}</span>` }, { label: 'Tov verw.', num: true, render: r => residCell(r.resid) },
-    { label: 'Beste speler', render: r => { const b = [...r.players].sort((x, y) => (y.rating ?? 0) - (x.rating ?? 0))[0]; return b ? `${esc(b.name)} <small>${b.rating}</small>` : '–'; } },
-  ], ms);
+  $('#s-matches').innerHTML = ms.map(m => matchRow(m, own)).join('');
 
   // Team tegenover normaal
   const cmp = others.length >= 3 ? compareTeam(ms, others) : [];
@@ -117,13 +106,8 @@ function render() {
   const good = notable.filter(d => d.good).map(item), bad = notable.filter(d => !d.good).map(item);
   if (sm.resid >= 0.75) good.unshift(insightLi('Beter dan je mocht verwachten', `Gemiddeld ${signed(sm.resid, 2)} doelsaldo per wedstrijd boven wat de sterkte en het aantal mensen van de tegenstander voorspelden.`, null));
   if (sm.resid <= -0.75) bad.unshift(insightLi('Slechter dan je mocht verwachten', `Gemiddeld ${signed(sm.resid, 2)} doelsaldo per wedstrijd onder wat de sterkte en het aantal mensen van de tegenstander voorspelden.`, null));
-  $('#s-good').innerHTML = good.length ? good.slice(0, 5).join('') : `<li class="empty">${others.length < 3 ? 'Te weinig andere wedstrijden om mee te vergelijken.' : 'Niets dat duidelijk beter ging dan normaal.'}</li>`;
-  $('#s-bad').innerHTML = bad.length ? bad.slice(0, 5).join('') : `<li class="empty">${others.length < 3 ? 'Te weinig andere wedstrijden om mee te vergelijken.' : 'Niets dat duidelijk slechter ging dan normaal.'}</li>`;
-  table($('#s-compare'), [
-    { label: '', key: 'label' }, { label: 'Deze sessie', num: true, render: r => r.fmt(r.a) }, { label: 'Normaal', num: true, render: r => r.fmt(r.b) },
-    { label: 'Verschil', num: true, render: r => `<span class="${Math.abs(r.rel) < 0.1 ? '' : r.good ? 'delta-pos' : 'delta-neg'}">${r.diff > 0 ? '+' : ''}${r.fmt === fmtPct ? `${Math.round(r.diff)} pt` : f1(r.diff)}</span>` },
-  ], cmp, { empty: 'Te weinig andere wedstrijden om mee te vergelijken.' });
-
+  $('#s-good').innerHTML = good.length ? good.slice(0, 3).join('') : `<li class="empty">${others.length < 3 ? 'Te weinig andere wedstrijden om mee te vergelijken.' : 'Niets dat duidelijk beter ging dan normaal.'}</li>`;
+  $('#s-bad').innerHTML = bad.length ? bad.slice(0, 3).join('') : `<li class="empty">${others.length < 3 ? 'Te weinig andere wedstrijden om mee te vergelijken.' : 'Niets dat duidelijk slechter ging dan normaal.'}</li>`;
   // Spelers
   const prow = names.map(name => {
     const here = ms.map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p);

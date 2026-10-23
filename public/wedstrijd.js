@@ -103,9 +103,19 @@ function goalChain(m) {
   return `<span class="goal-chain"><span class="adv-label">Zo viel de goal</span>${steps.length ? `${steps.join(', ')}, en ` : ''}${goal}${tail}.</span>`;
 }
 
+// Spelerstabel: compact de kerncijfers; de rest achter "Alle cijfers".
 function playerTable(el, players, link) {
   const rows = [...players].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
-  table(el, [
+  if (!rows.length) { el.innerHTML = '<p class="empty">Geen menselijke spelers.</p>'; return; }
+  const name = { label: 'Speler', render: p => link ? `<a href="spelers.html#${encodeURIComponent(p.name)}">${esc(p.name)}</a>${p.mom ? ' ★' : ''}` : `${esc(p.name)}${p.mom ? ' ★' : ''}` };
+  const compact = [name,
+    { label: 'Rating', num: true, render: p => p.rating ?? '–' }, { label: 'Goals', num: true, key: 'goals' }, { label: 'Assists', num: true, key: 'assists' },
+    { label: '2e assist', num: true, render: p => p.ev ? (p.ev.second_assists || 0) : '–' }, { label: 'Schoten', num: true, key: 'shots' },
+    { label: 'Pass %', num: true, render: p => p.passAttempts ? `${Math.round(100 * p.passesMade / p.passAttempts)}%` : '–' },
+    { label: 'Balverlies', num: true, render: p => p.ev ? p.ev.possession_lost : '–' }];
+  el.innerHTML = '<div class="pt-compact"></div><details class="all-stats"><summary>Alle cijfers</summary><div class="pt-full"></div></details>';
+  table(el.querySelector('.pt-compact'), compact, rows);
+  table(el.querySelector('.pt-full'), [
     { label: 'Speler', render: p => link ? `<a href="spelers.html#${encodeURIComponent(p.name)}">${esc(p.name)}</a>${p.mom ? ' ★' : ''}` : `${esc(p.name)}${p.mom ? ' ★' : ''}` },
     { label: 'Positie', render: p => POS_NL[p.pos] || p.pos }, { label: 'Build', render: p => esc(archName(p.archetypeId)) },
     { label: 'Rating', num: true, render: p => p.rating ?? '–' }, { label: 'Goals', num: true, key: 'goals' }, { label: 'Assists', num: true, key: 'assists' }, { label: '2e assist', num: true, render: p => p.ev ? (p.ev.second_assists || 0) : '–' },
@@ -113,7 +123,7 @@ function playerTable(el, players, link) {
     { label: 'Tackles', num: true, render: p => `${p.tacklesMade}/${p.tackleAttempts}` },
     { label: 'Balacties', num: true, render: p => p.ev ? p.ev.ball_actions : '–' }, { label: 'Dribbels', num: true, render: p => p.ev ? p.ev.dribbles_completed : '–' },
     { label: 'Balverlies', num: true, render: p => p.ev ? p.ev.possession_lost : '–' }, { label: 'Min.', num: true, render: p => Math.round((p.secondsPlayed || 0) / 60) },
-  ], rows, { empty: 'Geen menselijke spelers.' });
+  ], rows);
 }
 
 

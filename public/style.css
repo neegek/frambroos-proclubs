@@ -518,3 +518,21 @@ a.pchip:hover { border-color: var(--brand); }
 }
 .goal-chain { display: block; margin: 10px 0 0; font-size: 14px; color: var(--ink); }
 .goal-chain .adv-label { display: block; margin-bottom: 2px; }
+
+/* ---------- twee kolommen in één kaart (goed / beter) ---------- */
+.split { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px 20px; }
+.split h3 { margin: 4px 0 8px; font-size: 13px; }
+.good-text { color: var(--good-text); } .bad-text { color: var(--neg-text); }
+.all-stats { margin-top: 4px; }
+.all-stats summary { cursor: pointer; color: var(--brand-text); font-size: 13px; font-weight: 560; min-height: 40px; display: flex; align-items: center; }
+
+/* ---------- Spelers: build invullen ingeklapt ---------- */
+.build-layout { grid-template-columns: minmax(0, 1fr); }
+details.build-form-card > summary { list-style: none; cursor: pointer; display: grid; gap: 2px; min-height: 40px; }
+details.build-form-card > summary::-webkit-details-marker { display: none; }
+details.build-form-card > summary h2 { display: flex; align-items: center; gap: 8px; margin: 0; color: var(--brand-text); }
+details.build-form-card > summary h2::before { content: "▸"; font-size: 12px; transition: transform 0.15s ease; }
+details.build-form-card[open] > summary h2::before { transform: rotate(90deg); }
+details.build-form-card > summary .hint { margin: 0; }
+details.build-form-card[open] > summary { margin-bottom: 12px; }
+.build-form-card { position: static; }

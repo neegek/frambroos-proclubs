@@ -446,6 +446,21 @@ function kitShirt(c, label) {
 // EA-positiecodes (proPos van een pro: de ingestelde hoofdpositie).
 const POS_CODE = ['GK', 'SW', 'RWB', 'RB', 'RCB', 'CB', 'LCB', 'LB', 'LWB', 'RDM', 'CDM', 'LDM', 'RM', 'RCM', 'CM', 'LCM', 'LM', 'RAM', 'CAM', 'LAM', 'RF', 'CF', 'LF', 'RW', 'RS', 'ST', 'LS', 'LW'];
 
+// ---------- wedstrijdrij ----------
+// Eén regel per wedstrijd met tijd, uitslag, tegenstander en score; klik opent de wedstrijdpagina.
+// Gedeeld door Wedstrijden en Sessies, zodat een wedstrijd er overal hetzelfde uitziet.
+function matchRow(m, own) {
+  const t = new Date(m.ts * 1000).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+  const diff = m.opponent.skillRating && own ? m.opponent.skillRating - own : null;
+  const str = diff === null ? '' : diff >= 250 ? 'veel sterker' : diff >= 100 ? 'sterker' : diff <= -100 ? 'zwakker' : 'gelijkwaardig';
+  return `<a class="match-row" href="wedstrijd.html?id=${m.matchId}">
+    <span class="mr-time">${t}</span>
+    <span class="pill ${m.result}">${m.result === 'D' ? 'G' : m.result === 'L' ? 'V' : 'W'}</span>
+    <span class="mr-opp">${kitShirt(m.opponent.kit, m.opponent.name)}<span><b>${esc(m.opponent.name)}</b><small>${m.matchType === 'playoffMatch' ? 'playoff' : 'league'}${m.opponent.skillRating ? ` · rating ${m.opponent.skillRating}${str ? `, ${str}` : ''}` : ''} · ${m.players.length} tegen ${m.opponentPlayers.length} mensen${m.winnerByDnf ? ' · opgave' : ''}${m.live ? ' · live, nog niet opgeslagen' : ''}</small></span></span>
+    <span class="mr-score">${m.goals}–${m.goalsAgainst}</span>
+    <span class="mr-chev" aria-hidden="true">›</span></a>`;
+}
+
 // ---------- KPI-tegels ----------
 // Label met badge (verandering; groen = beter, rood = slechter, grijs = gelijk), groot cijfer, korte regel.
 function kpiTile(label, value, meta, delta, { small = false } = {}) {

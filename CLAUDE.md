@@ -83,6 +83,8 @@ URL en de overige bestanden uit `dist/` als `files`. In de export staat `window.
   stippen (alleen bij hover). Klassenamen in componenten specifiek houden (bijv. `.pitch-line`, niet `.line`).
 - Menu: Clubhouse (startpagina, coach-logica §9a), Sessies, Wedstrijden, Spelers (in- en uitklapbaar, met de namen
   eronder). Geen aparte analysepagina. De app is bewust eenvoudig: liever één duidelijke kaart dan drie tabellen.
+- Spelerspagina: drie tabbladen (Algemeen, Vorm, Advies). Samengevoegde kaarten tonen hooguit drie punten per kant;
+  spelerstabellen zijn compact, met *Alle cijfers* achter een knop.
 - Spelerspagina begint met de spelerskaart (`public/playercard.js`): FC27-stijl in thuis- of uitkleuren, met foto of
   silhouet, overall, ingestelde positie, laatst gespeelde build en zes cijfers (seizoen, of face stats uit de ingevulde
   build). Ernaast alleen wat níét op de kaart staat (pro, taak, builds, signature, vorm, carrière). Geen dubbele info:

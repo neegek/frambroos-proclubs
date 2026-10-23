@@ -8,17 +8,16 @@ onofficiële EA-API en toont een dashboard met correlaties die de bestaande apps
 `npm run dashboard` en open http://localhost:3737. Vier pagina's, via het menu links (op een
 telefoon bovenaan):
 
-- **Team**: samenvatting voor het hele team. Kerncijfers, de patronen die het team het meest
-  bepalen, vorm, zo winnen en verliezen we, tegen wie, spelers in één oogopslag, beste combinaties.
-- **Sessies**: per speelavond de uitslagen, tegenstanders, wat beter en slechter ging dan normaal,
-  en per speler wat er opviel.
+- **Clubhouse** (startpagina): wie we zijn (logo, stadion, huidige en beste divisie, tenues), clubcijfers van EA,
+  vorm, de gevaarlijkste spelers, een ranglijst per stat, de leden, wat opvalt en de beste tweetallen.
+- **Sessies**: per speelavond de uitslag, de wedstrijden, wat opviel tegenover normaal en per speler wat er opviel.
 - **Wedstrijden**: de lijst van alle wedstrijden per dag. Een klik opent de wedstrijdpagina (een laag dieper, met
-  een terugknop): korte samenvatting, beide opstellingen per linie met build en rating, wij tegen hen, en de spelers
-  van beide teams.
+  een terugknop): samenvatting, bij één doelpunt hoe de goal viel, beide opstellingen, wij tegen hen, en compacte
+  spelerstabellen met *Alle cijfers* achter een knop.
 - **Spelers**: direct per naam in het menu. Bovenaan een spelerskaart in FC27-stijl (foto's in `data/players/`).
-  Daaronder vier tabbladen: Algemeen (sterk in, kan beter,
-  floreert als, speelt minder als), Per sessie, Laatste wedstrijd, en Advies: genuanceerd buildadvies
-  op basis van de wedstrijddata, met een formulier voor de eigen build (`data/builds.json`).
+  Daaronder drie tabbladen: Algemeen (samenvatting, aan de bal in context, sterk en zwak, wanneer het loopt),
+  Vorm (laatste wedstrijd en per sessie) en Advies: genuanceerd buildadvies op basis van de wedstrijddata, met een
+  ingeklapt formulier voor de eigen build (`data/builds.json`).
 
 Standaard is de app donker, in de kleuren van het thuistenue (zwart, geel, paars). De knop
 onderaan het menu wisselt naar licht, in de kleuren van het uittenue (wit, oranje, donkergroen); die

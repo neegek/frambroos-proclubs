@@ -36,26 +36,16 @@
         <section class="tiles" id="s-tiles"></section>
         <section class="card">
           <h2>Wedstrijden</h2>
-          <p class="hint">Op volgorde van spelen. "Tov verwachting" corrigeert voor sterkte en aantal mensen van de tegenstander.</p>
-          <div id="s-chart"></div>
-          <div id="s-matches"></div>
+          <p class="hint">Op volgorde van spelen. Klik op een wedstrijd voor het verhaal en de spelers.</p>
+          <div class="match-rows" id="s-matches"></div>
         </section>
-        <div class="insights">
-          <section class="card good">
-            <h2>Ging goed</h2>
-            <p class="hint">Waar het team deze sessie duidelijk beter deed dan normaal.</p>
-            <ul class="insight-list" id="s-good"></ul>
-          </section>
-          <section class="card bad">
-            <h2>Kan beter</h2>
-            <p class="hint">Waar het team deze sessie duidelijk slechter deed dan normaal.</p>
-            <ul class="insight-list" id="s-bad"></ul>
-          </section>
-        </div>
         <section class="card">
-          <h2>Team tegenover normaal</h2>
-          <p class="hint">"Normaal" is het gemiddelde over alle andere wedstrijden in de database.</p>
-          <div id="s-compare"></div>
+          <h2>Opvallend</h2>
+          <p class="hint">Waar het team deze avond duidelijk beter of slechter deed dan normaal (alle andere wedstrijden).</p>
+          <div class="split">
+            <div><h3 class="good-text">Ging goed</h3><ul class="insight-list" id="s-good"></ul></div>
+            <div><h3 class="bad-text">Kan beter</h3><ul class="insight-list" id="s-bad"></ul></div>
+          </div>
         </section>
         <section class="card">
           <h2>Spelers deze sessie</h2>
