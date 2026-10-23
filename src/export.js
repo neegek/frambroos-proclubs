@@ -38,7 +38,7 @@ const index = await readFile(join(OUT, 'index.html'), 'utf8');
 await writeFile(join(OUT, 'artifact-index.html'), index
   .replace(/<!doctype html>\s*<html[^>]*>\s*<head>\s*/i, '')
   .replace(/<meta charset="utf-8">\s*<meta name="viewport"[^>]*>\s*/, '')
-  .replace('<title>Team · Frambroos Coach</title>', '<title>Frambroos Coach</title>')
+  .replace('<title>Clubhouse · Frambroos Coach</title>', '<title>Frambroos Coach</title>')
   .replace(/<\/head>\s*<body>\s*/, '')
   .replace(/\s*<\/body>\s*<\/html>\s*$/, '\n'));
 

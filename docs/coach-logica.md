@@ -264,8 +264,8 @@ Daarnaast *Positiespel en keuzes* en *Al sterk*.
 
 ### Samenvattingen per pagina
 
-- **Team**: karakter van de periode en verloop; tegen wie het lukt; waar winst van afhangt (alleen factoren die bij
-  winst echt beter zijn); wie het verschil maakt.
+- **Clubhouse** (de startpagina, vroeger Team): karakter van de periode en verloop; tegen wie het lukt; waar winst van
+  afhangt (alleen factoren die bij winst echt beter zijn); wie het verschil maakt.
 - **Sessie**: soort avond en tegenstand (met verwachting); verloop en uitblinker ("hield nog het best stand" bij nul
   punten); het opvallendste verschil met normaal.
 - **Wedstrijd**: uitslag, sterkte en mensen van de tegenstander; verloop op basis van kansen; beste speler; opvallendste
@@ -275,6 +275,29 @@ Daarnaast *Positiespel en keuzes* en *Al sterk*.
   sterkste punten binnen het team. Die kan afwijken van de gekozen build; dat is informatief, geen fout.
 - **Speler, advies**: gekozen archetype met zijn taak (§2a), speelstijl, grootste winst, waar op te bouwen,
   positiespel. Bij een ander archetype dan het laatst gespeelde zegt de eerste zin dat.
+
+## 9a. Clubhouse en tweede assists
+
+**Clubhouse** is de startpagina over de club als geheel, zonder filters. Van boven naar beneden: wie we zijn (logo,
+naam, stadion, platform, huidige en beste divisie, skill rating, reputatie, tenues); clubcijfers van EA over alle
+wedstrijden (winstpercentage, reeks, wedstrijden, doelsaldo, clean sheets, promoties); vorm en samenvatting; de
+gevaarlijkste spelers; de ranglijst per stat; de leden; wat opvalt en de beste tweetallen. EA geeft geen aantal fans;
+dat tonen we niet.
+
+- **Clubcijfers** komen uit EA (`overallStats` en `allTimeLeaderboard/search`, samen in het clubsnapshot). Alles over
+  spelers en vorm komt uit onze eigen gevolgde wedstrijden, met het aantal erbij.
+- **Gevaarlijkst** = betrokken bij goals per wedstrijd: goals + assists + tweede assists, minimaal 3 wedstrijden.
+  De top drie, met de verdeling erbij.
+- **Ranglijst**: per stat alle spelers met minimaal 3 wedstrijden, totaal en per wedstrijd. Voor percentages
+  (passnauwkeurigheid, duels) de minimale aantallen uit §4.
+- **Leden**: de carrièrecijfers van EA per lid (wedstrijden, winstpercentage, goals, assists, man of the match,
+  gemiddelde rating), met overall en ingestelde positie.
+
+**Tweede assist** (EA-code 115, `second_assists`, zekerheid *waarschijnlijk*): de pass vóór de assist. EA geeft alleen
+het aantal per speler per wedstrijd, niet bij welke goal. Alleen als we in een wedstrijd precies één keer scoren, is
+de keten te reconstrueren: wie scoorde, wie de assist gaf en wie de tweede assist. Dat tonen we op de wedstrijdpagina
+als *Zo viel de goal*. Ontbreekt een schakel, dan zeggen we dat (geen assist, of een AI-speler gaf hem: AI-spelers
+staan niet in de data). Bij meer goals verbinden we niets.
 
 ## 10. Waar staat wat
 

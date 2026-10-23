@@ -88,12 +88,27 @@ function h2h(m) {
     }).join('')}</div>`;
 }
 
+// Zo viel de goal: alleen bij precies één eigen doelpunt is de keten scorer, assist en tweede assist te
+// reconstrueren (docs/coach-logica.md §9a). EA geeft per speler alleen aantallen, niet bij welke goal.
+function goalChain(m) {
+  if (m.goals !== 1) return '';
+  const who = f => m.players.filter(f).map(p => `<b>${esc(p.name)}</b>`);
+  const scorer = who(p => p.goals > 0), assist = who(p => p.assists > 0), second = who(p => p.ev?.second_assists > 0);
+  if (scorer.length > 1 || assist.length > 1 || second.length > 1) return '';
+  const steps = [];
+  if (second.length) steps.push(`${second[0]} gaf de pass vóór de assist`);
+  if (assist.length) steps.push(`${assist[0]} gaf de assist`);
+  const goal = scorer.length ? `${scorer[0]} scoorde` : assist.length ? 'een AI-speler scoorde' : 'een AI-speler scoorde, of het was een eigen doelpunt';
+  const tail = assist.length ? '' : ', zonder geregistreerde assist van een van jullie';
+  return `<span class="goal-chain"><span class="adv-label">Zo viel de goal</span>${steps.length ? `${steps.join(', ')}, en ` : ''}${goal}${tail}.</span>`;
+}
+
 function playerTable(el, players, link) {
   const rows = [...players].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
   table(el, [
     { label: 'Speler', render: p => link ? `<a href="spelers.html#${encodeURIComponent(p.name)}">${esc(p.name)}</a>${p.mom ? ' ★' : ''}` : `${esc(p.name)}${p.mom ? ' ★' : ''}` },
     { label: 'Positie', render: p => POS_NL[p.pos] || p.pos }, { label: 'Build', render: p => esc(archName(p.archetypeId)) },
-    { label: 'Rating', num: true, render: p => p.rating ?? '–' }, { label: 'Goals', num: true, key: 'goals' }, { label: 'Assists', num: true, key: 'assists' },
+    { label: 'Rating', num: true, render: p => p.rating ?? '–' }, { label: 'Goals', num: true, key: 'goals' }, { label: 'Assists', num: true, key: 'assists' }, { label: '2e assist', num: true, render: p => p.ev ? (p.ev.second_assists || 0) : '–' },
     { label: 'Schoten', num: true, key: 'shots' }, { label: 'Passes', num: true, render: p => `${p.passesMade}/${p.passAttempts}` },
     { label: 'Tackles', num: true, render: p => `${p.tacklesMade}/${p.tackleAttempts}` },
     { label: 'Balacties', num: true, render: p => p.ev ? p.ev.ball_actions : '–' }, { label: 'Dribbels', num: true, render: p => p.ev ? p.ev.dribbles_completed : '–' },
@@ -120,7 +135,7 @@ function render() {
     <div class="sl-score"><span>${m.goals}–${m.goalsAgainst}</span><span class="pill ${m.result}">${m.result === 'W' ? 'Gewonnen' : m.result === 'L' ? 'Verloren' : 'Gelijk'}</span></div>
     <div class="sl-team">${kitShirt(m.opponent.kit, m.opponent.name)}<span>${esc(m.opponent.name)}</span></div>`;
   $('#m-meta').textContent = `Tegenstander rating ${m.opponent.skillRating ?? 'onbekend'}${m.opponent.skillRating && own ? ` (jullie ${own})` : ''} · mensen: jullie ${m.players.length}, zij ${m.opponentPlayers.length} · tov verwachting ${signed(m.resid, 1)}${m.winnerByDnf ? ' · tegenstander gaf op' : ''}`;
-  $('#m-summary').innerHTML = matchSummary(m, others);
+  $('#m-summary').innerHTML = matchSummary(m, others) + goalChain(m);
   $('#m-pitches').innerHTML = pitch(m.players, 'Frambroos', true) + pitch(m.opponentPlayers, m.opponent.name, false);
   $('#m-h2h').innerHTML = h2h(m);
   $('#m-theirs-title').textContent = m.opponent.name;

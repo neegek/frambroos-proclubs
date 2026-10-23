@@ -15,6 +15,8 @@ const METRICS = [
   { key: 'ga90', label: 'Goals + assists per 90', hib: true, fmt: f2, calc: rows => per90(rows, r => (r.p.goals || 0) + (r.p.assists || 0)) },
   { key: 'conv', label: 'Conversie (goals per schot)', hib: true, fmt: fmtPct, min: r => sum(r, x => x.p.shots) >= 5, calc: rows => pct(sum(rows, r => r.p.goals), sum(rows, r => r.p.shots)) },
   { key: 'assists90', label: 'Assists per 90', hib: true, fmt: f2, calc: rows => per90(rows, r => r.p.assists) },
+  { key: 'sa90', label: 'Tweede assists per 90', hib: true, fmt: f2, ev: true, calc: evPer90('second_assists') },
+  { key: 'inv90', label: 'Betrokken bij goals per 90', hib: true, fmt: f2, ev: true, calc: rows => { const e = evRows(rows); return e.length ? per90(e, r => (r.p.goals || 0) + (r.p.assists || 0) + (r.p.ev.second_assists || 0)) : null; } },
   { key: 'passAcc', label: 'Passnauwkeurigheid', hib: true, fmt: fmtPct, calc: rows => pct(sum(rows, r => r.p.passesMade), sum(rows, r => r.p.passAttempts)) },
   { key: 'fwdShare', label: 'Aandeel passes vooruit', hib: true, fmt: fmtPct, ev: true, calc: rows => { const e = evRows(rows); return pct(sum(e, r => r.p.ev.passes_completed_forward), sum(e, r => r.p.ev.passes_completed)); } },
   { key: 'through90', label: 'Steekpasses per 90', hib: true, fmt: f2, ev: true, calc: evPer90('through_balls') },
@@ -174,16 +176,19 @@ function otherInsights(name, ms, players) {
 function playerSummary(name, rows, career, sw, cond, other) {
   if (!rows.length) return 'Nog geen wedstrijden van deze speler in de gekozen periode.';
   const ROLE = {
+    sa90: 'de verbinder', inv90: 'de aangever',
     assists90: 'de aangever', ga90: 'de aangever', conv: 'de afmaker', dribbles90: 'de dribbelaar', beaten90: 'de dribbelaar',
     through90: 'de spelmaker', fwdShare: 'de spelmaker', won90: 'de ballenafpakker', interceptions90: 'de ballenafpakker', tacklePct: 'de ballenafpakker',
     passAcc: 'de rustige kracht', lost90: 'de rustige kracht', lostDef90: 'de rustige kracht', outPos: 'de rustige kracht', noOption90: 'de rustige kracht', fouls90: 'de rustige kracht', rating: 'een vaste waarde',
   };
   const GOOD = {
+    sa90: 'geeft vaak de pass vóór de assist', inv90: 'is bij veel goals betrokken',
     assists90: 'geeft de meeste assists', ga90: 'is bij veel goals betrokken', conv: 'maakt de kansen af', dribbles90: 'gaat graag de dribbel aan', beaten90: 'speelt tegenstanders uit',
     through90: 'geeft veel steekpasses', fwdShare: 'speelt veel vooruit', won90: 'wint veel ballen', interceptions90: 'onderschept veel', tacklePct: 'wint de duels',
     passAcc: 'passt zuiver', lost90: 'verliest weinig ballen', lostDef90: 'verliest achterin zelden de bal', outPos: 'staat bijna altijd goed', noOption90: 'heeft bijna altijd een aanspeelpunt', fouls90: 'speelt netjes', rating: 'speelt constant op niveau',
   };
   const BAD = {
+    inv90: 'is weinig bij goals betrokken', // weinig tweede assists is geen zwak punt: een spits geeft ze zelden
     assists90: 'geeft weinig assists', ga90: 'is weinig bij goals betrokken', conv: 'mist relatief veel kansen', dribbles90: 'gaat de dribbel weinig aan', beaten90: 'speelt zelden iemand uit',
     through90: 'geeft weinig steekpasses', fwdShare: 'speelt weinig vooruit', won90: 'wint weinig ballen', interceptions90: 'onderschept weinig', tacklePct: 'verliest veel duels',
     passAcc: 'passt slordig', lost90: 'verliest relatief veel ballen', lostDef90: 'verliest ballen op eigen helft', outPos: 'staat vaak uit positie', noOption90: 'staat vaak zonder aanspeelpunt', fouls90: 'maakt veel overtredingen', rating: 'haalt het niveau van de rest nog niet',
@@ -291,7 +296,7 @@ function renderLastTab(name) {
   else if (bad.length) parts.push(`Opvallend: ${joinAnd(bad)} dan normaal.`);
   $('#pl-summary').innerHTML = parts.join(' ');
   const rows = [
-    ['Rating', p.rating, normal, true, f2], ['Goals', p.goals, avg(others.map(r => r.p.goals)), true, f1], ['Assists', p.assists, avg(others.map(r => r.p.assists)), true, f1],
+    ['Rating', p.rating, normal, true, f2], ['Goals', p.goals, avg(others.map(r => r.p.goals)), true, f1], ['Assists', p.assists, avg(others.map(r => r.p.assists)), true, f1], ...(p.ev ? [['Tweede assists', p.ev.second_assists || 0, avg(evRows(others).map(r => r.p.ev.second_assists || 0)), true, f1]] : []),
     ['Schoten', p.shots, avg(others.map(r => r.p.shots)), true, f1], ['Passnauwkeurigheid', pct(p.passesMade, p.passAttempts), pct(sum(others, r => r.p.passesMade), sum(others, r => r.p.passAttempts)), true, v => v === null ? '–' : `${v}%`],
     ['Tackles gewonnen', p.tacklesMade, avg(others.map(r => r.p.tacklesMade)), true, f1],
     ...(p.ev ? [['Balacties', p.ev.ball_actions, avg(evRows(others).map(r => r.p.ev.ball_actions)), null, f1], ['Dribbels', p.ev.dribbles_completed, avg(evRows(others).map(r => r.p.ev.dribbles_completed)), true, f1],

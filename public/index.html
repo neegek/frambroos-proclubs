@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Team · Frambroos Coach</title>
+<title>Clubhouse · Frambroos Coach</title>
 <link rel="icon" href="crest.png">
 <meta name="theme-color" content="#090b0d">
 <script>try { if (localStorage.getItem('theme') === 'light') document.documentElement.dataset.theme = 'light'; } catch (e) {}</script>
@@ -15,96 +15,59 @@
   <main class="content">
     <header class="page-head">
       <div>
-        <h1>Team</h1>
-        <p class="sub" id="page-sub">Samenvatting van alle gevolgde wedstrijden.</p>
-      </div>
-      <div class="filters">
-        <label class="filter" data-icon="calendar">Periode
-          <select id="range">
-            <option value="all">Alles</option>
-            <option value="30">Laatste 30 dagen</option>
-            <option value="7">Laatste 7 dagen</option>
-          </select>
-        </label>
-        <label class="filter" data-icon="trophy">Type
-          <select id="type">
-            <option value="all">League en playoff</option>
-            <option value="leagueMatch">League</option>
-            <option value="playoffMatch">Playoff</option>
-          </select>
-        </label>
+        <h1>Clubhouse</h1>
+        <p class="sub" id="page-sub">Alles over Frambroos als club.</p>
       </div>
     </header>
 
-    <section class="tiles" id="tiles"></section>
+    <section class="card club-hero" id="club-hero" aria-label="De club"></section>
+
+    <section class="tiles" id="tiles" aria-label="Clubcijfers"></section>
 
     <div class="grid-2">
       <section class="card">
         <div class="card-head">
-          <div><h2>Resultaten</h2><p class="hint">Doelsaldo per wedstrijd. Beweeg over of tik op een balk voor de details.</p></div>
-          <div class="card-figs" id="fig-results"></div>
-        </div>
-        <div id="chart-results"></div>
-      </section>
-      <section class="card">
-        <div class="card-head">
-          <div><h2>Vorm van het team</h2><p class="hint">Gemiddelde over de laatste 5 wedstrijden, ook gecorrigeerd voor de tegenstander.</p></div>
+          <div><h2>Vorm</h2><p class="hint">De laatste tien wedstrijden en het gemiddelde over vijf, ook gecorrigeerd voor de tegenstander.</p></div>
           <div class="card-figs" id="fig-form"></div>
         </div>
+        <div class="form-pills" id="form-pills"></div>
         <div id="chart-form"></div>
       </section>
-    </div>
-
-    <section class="card club-card">
-      <div class="club-text">
+      <section class="card">
         <h2>Samenvatting</h2>
         <p class="summary" id="team-summary"></p>
-      </div>
-      <div class="club-side">
-        <div id="club-kits"></div>
-        <div class="club-stadium" id="club-stadium"></div>
-      </div>
-    </section>
-
-
-    <section class="card">
-      <h2>Wat opvalt</h2>
-      <p class="hint">De patronen die het team het meest bepalen, berekend uit alle wedstrijden in de gekozen periode. Het label zegt hoeveel wedstrijden het draagt.</p>
-      <ul class="insight-list" id="team-insights"></ul>
-    </section>
-
-
-    <div class="grid-2">
-      <section class="card">
-        <h2>Zo winnen en verliezen we</h2>
-        <p class="hint">Teamgemiddelden per wedstrijd, bij winst tegenover gelijk of verlies.</p>
-        <div id="tbl-profile"></div>
-      </section>
-      <section class="card">
-        <h2>Tegen wie</h2>
-        <p class="hint">Resultaat naar sterkte en aantal mensen van de tegenstander.</p>
-        <div id="tbl-strength"></div>
-        <h3>Aantal mensen bij de tegenstander</h3>
-        <div id="tbl-humans"></div>
       </section>
     </div>
 
     <section class="card">
-      <h2>Spelers in één oogopslag</h2>
-      <p class="hint">Klik op een naam voor het volledige spelersprofiel.</p>
-      <div id="tbl-squad"></div>
+      <h2>Gevaarlijkst</h2>
+      <p class="hint">Betrokken bij goals per wedstrijd: goals, assists en tweede assists (de pass vóór de assist), in de gevolgde wedstrijden.</p>
+      <div class="danger" id="danger"></div>
+    </section>
+
+    <section class="card">
+      <h2>Ranglijst</h2>
+      <p class="hint">Kies een stat. Groot het aantal per wedstrijd, klein het totaal. Gevolgde wedstrijden, spelers met minstens drie.</p>
+      <div class="rank-stats" id="rank-stats" role="tablist" aria-label="Stat"></div>
+      <ol class="rank-list" id="rank-list"></ol>
+    </section>
+
+    <section class="card">
+      <h2>Leden</h2>
+      <p class="hint">Carrièrecijfers volgens EA, over alle wedstrijden voor Frambroos. Klik op een lid voor het spelersprofiel.</p>
+      <div class="members" id="members"></div>
     </section>
 
     <div class="grid-2">
       <section class="card">
-        <h2>Beste combinaties</h2>
-        <p class="hint">Tweetallen die samen beter presteren dan apart, gemeten tegenover verwachting.</p>
-        <div id="tbl-pairs"></div>
+        <h2>Wat opvalt</h2>
+        <p class="hint">De drie patronen die het team het meest bepalen.</p>
+        <ul class="insight-list" id="team-insights"></ul>
       </section>
       <section class="card">
-        <h2>Opstellingen</h2>
-        <p class="hint">Vaste vijf- of zesmanschappen met minstens twee wedstrijden.</p>
-        <div id="tbl-lineups"></div>
+        <h2>Beste tweetallen</h2>
+        <p class="hint">Samen tegenover apart, gemeten tegenover verwachting.</p>
+        <div id="tbl-pairs"></div>
       </section>
     </div>
 
@@ -112,6 +75,6 @@
 </div>
 <div id="tooltip" class="tooltip" hidden></div>
 <script src="common.js"></script>
-<script src="team.js"></script>
+<script src="clubhouse.js"></script>
 </body>
 </html>

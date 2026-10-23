@@ -13,6 +13,7 @@ const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '
 
 // ---------- app-shell: zijmenu ----------
 const ICONS = {
+  club: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-5h4v5"/></svg>',
   team: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>',
   sessions: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
   players: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 14.8c1.6.8 2.7 2.6 3 5.2"/></svg>',
@@ -28,7 +29,7 @@ const API = STATIC ? { data: 'data.json', builds: 'builds.json', photos: 'photos
 const PAGE = location.pathname.split('/').pop() || 'index.html';
 const LOGO = '<span class="mark"><img src="crest.png" alt="" width="44" height="44"></span>';
 const NAV = [
-  { href: 'index.html', label: 'Team', icon: 'team' },
+  { href: 'index.html', label: 'Clubhouse', icon: 'club' },
   { href: 'sessies.html', label: 'Sessies', icon: 'sessions' },
   { href: 'wedstrijden.html', label: 'Wedstrijden', icon: 'matches' },
   { href: 'spelers.html', label: 'Spelers', icon: 'players', group: true },

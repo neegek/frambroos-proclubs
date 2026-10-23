@@ -20,6 +20,7 @@ function queries(db) {
   upsertClub: db.prepare(`INSERT INTO clubs (club_id, name, platform, region_id, first_seen, last_seen) VALUES (?,?,?,?,?,?)
       ON CONFLICT(club_id) DO UPDATE SET name = excluded.name, region_id = excluded.region_id, last_seen = MAX(last_seen, excluded.last_seen)`),
   lastClubSnapshot: db.prepare('SELECT MAX(taken_at) AS t FROM club_snapshots WHERE club_id = ?'),
+  lastClubRaw: db.prepare('SELECT raw FROM club_snapshots WHERE club_id = ? AND taken_at = ?'),
   insClubSnapshot: db.prepare(`INSERT OR REPLACE INTO club_snapshots (taken_at, club_id, skill_rating, games_played, wins, losses, ties, goals, goals_against, best_division, promotions, relegations, raw)
       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`),
   lastMemberSnapshot: db.prepare('SELECT MAX(taken_at) AS t FROM member_snapshots WHERE club_id = ?'),
@@ -79,9 +80,15 @@ function storeMatch(q, match, matchType) {
 
 async function snapshotClub(q, cid, maxAgeSeconds) {
   const last = q.lastClubSnapshot.get(cid)?.t ?? 0;
-  if (now() - last < maxAgeSeconds) return false;
+  // Eigen club: ook de velden uit de ranglijst (huidige divisie, clean sheets). Oudere snapshots missen die nog.
+  const own = cid === clubId, stale = own && last && !q.lastClubRaw.get(cid, last)?.raw.includes('currentDivision');
+  if (now() - last < maxAgeSeconds && !stale) return false;
   const stats = (await ea.overallStats(platform, cid))?.[0];
   if (!stats) return false;
+  if (own) {
+    const entry = ((await ea.searchClubs(platform, config.clubName)) || []).find(c => String(c.clubId) === String(cid));
+    if (entry) for (const k of ['currentDivision', 'cleanSheets', 'points']) if (entry[k] !== undefined) stats[k] = entry[k];
+  }
   q.insClubSnapshot.run(now(), cid, num(stats.skillRating), num(stats.gamesPlayed), num(stats.wins), num(stats.losses), num(stats.ties),
     num(stats.goals), num(stats.goalsAgainst), num(stats.bestDivision), num(stats.promotions), num(stats.relegations), JSON.stringify(stats));
   return true;

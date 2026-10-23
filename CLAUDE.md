@@ -72,16 +72,17 @@ URL en de overige bestanden uit `dist/` als `files`. In de export staat `window.
   bovenaan. Tablet: één balk bovenaan. Alleen het menu heeft de paarse gloed (`--side-bg`), zonder kleurenbies.
   Kaarten, tegels en sessie-items zijn effen donkerpaars (`--panel`) met dezelfde rand (`--panel-border`) en
   schaduw als het menu; in het uittenue wit. Pagina's zijn een strak raster van kaarten met 12 px tussenruimte. Titel en
-  filters staan op één rij (filters rechts). Op Team komen eerst de KPI-tegels, daarna de grafiekkaarten. Een
+  filters staan op één rij (filters rechts). Op het Clubhouse komt eerst wie we zijn, dan de KPI-tegels. Een
   grafiekkaart toont zijn kerncijfers rechts in de kop via `figsHtml(...)` uit `public/common.js`, niet als legenda.
 - Dashboardstijl: rustige kaarten met een dunne rand en geen zware schaduw; kaarttitel ingetogen met een korte uitleg
   eronder; filters als pil-knoppen met icoon (`data-icon` op `.filter`); grote cijfers in `--num-font`.
 - KPI-tegels altijd via `kpiTile(label, waarde, regel, deltaOf(...))` uit `public/common.js`. De badge toont een
-  verandering: groen beter, rood slechter, grijs gelijk, met een `title` die zegt waartegen. Team: laatste speelavond
+  verandering: groen beter, rood slechter, grijs gelijk, met een `title` die zegt waartegen. Clubhouse: laatste speelavond
   tegenover de avonden daarvoor. Sessie: deze avond tegenover normaal. Speler: met tegenover zonder deze speler.
 - Lijngrafieken: vloeiend (monotone spline), hoofdlijn met `area: true` voor een zachte vlakvulling, geen vaste
   stippen (alleen bij hover). Klassenamen in componenten specifiek houden (bijv. `.pitch-line`, niet `.line`).
-- Menu: Team, Sessies, Wedstrijden, Spelers (in- en uitklapbaar, met de namen eronder). Geen aparte analysepagina.
+- Menu: Clubhouse (startpagina, coach-logica §9a), Sessies, Wedstrijden, Spelers (in- en uitklapbaar, met de namen
+  eronder). Geen aparte analysepagina. De app is bewust eenvoudig: liever één duidelijke kaart dan drie tabellen.
 - Spelerspagina begint met de spelerskaart (`public/playercard.js`): FC27-stijl in thuis- of uitkleuren, met foto of
   silhouet, overall, ingestelde positie, laatst gespeelde build en zes cijfers (seizoen, of face stats uit de ingevulde
   build). Ernaast alleen wat níét op de kaart staat (pro, taak, builds, signature, vorm, carrière). Geen dubbele info:

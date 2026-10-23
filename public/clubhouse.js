@@ -1,4 +1,5 @@
-// Teampagina: samenvatting voor het hele team. Alles wordt berekend uit DATA (zie common.js).
+// Clubhouse: de startpagina over de club als geheel (docs/coach-logica.md §9a). Clubcijfers komen van EA,
+// alles over spelers en vorm uit de gevolgde wedstrijden in DATA (zie common.js).
 
 const has = (m, n) => m.players.some(p => p.name === n);
 const rolling = (xs, k) => xs.map((_, i) => { const w = xs.slice(Math.max(0, i - k + 1), i + 1); return w.reduce((a, b) => a + b, 0) / w.length; });
@@ -81,89 +82,128 @@ function teamSummary(ms) {
   return parts.join(' ');
 }
 
+// ---------- per speler: totalen uit de gevolgde wedstrijden ----------
+function playerTotals(ms) {
+  const out = new Map();
+  for (const m of ms) for (const p of m.players) {
+    const t = out.get(p.name) || { name: p.name, n: 0, nEv: 0, g: 0, a: 0, sa: 0, mom: 0, ratings: [], pm: 0, pa: 0, tm: 0, ta: 0, through: 0, beaten: 0, inter: 0, won: 0 };
+    t.n++; t.g += p.goals || 0; t.a += p.assists || 0; t.mom += p.mom || 0; if (p.rating !== null) t.ratings.push(p.rating);
+    t.pm += p.passesMade || 0; t.pa += p.passAttempts || 0; t.tm += p.tacklesMade || 0; t.ta += p.tackleAttempts || 0;
+    if (p.ev) { t.nEv++; t.sa += p.ev.second_assists || 0; t.through += p.ev.through_balls || 0; t.beaten += p.ev.players_beaten || 0; t.inter += p.ev.interceptions || 0; t.won += p.ev.possession_won || 0; }
+    out.set(p.name, t);
+  }
+  return [...out.values()].map(t => ({ ...t, involved: t.g + t.a + t.sa, rating: avg(t.ratings) }));
+}
+
+// Ranglijst: per stat een waarde om op te sorteren, de hoofdwaarde en een regel eronder. null = niet genoeg data.
+const per = (x, n) => n ? (x / n).toFixed(2) : '–';
+// Tellende stats: groot het aantal per wedstrijd (daarop wordt gesorteerd), klein het totaal.
+const count = (key, label, total, games, extra = () => '') => ({ key, label, v: t => games(t) ? total(t) / games(t) : null, main: t => per(total(t), games(t)), sub: t => `${total(t)} in ${games(t)} wedstrijden${extra(t)}` });
+const RANKS = [
+  count('involved', 'Betrokken bij goals', t => t.involved, t => t.n, t => ` · ${t.g} G, ${t.a} A, ${t.sa} tweede`),
+  count('goals', 'Goals', t => t.g, t => t.n),
+  count('assists', 'Assists', t => t.a, t => t.n),
+  count('second', 'Tweede assists', t => t.sa, t => t.nEv, () => ' · de pass vóór de assist'),
+  { key: 'rating', label: 'Rating', v: t => t.rating, main: t => f2(t.rating), sub: t => `gemiddeld over ${t.n} wedstrijden` },
+  count('mom', 'Man of the match', t => t.mom, t => t.n),
+  { key: 'pass', label: 'Passnauwkeurigheid', v: t => t.pa >= 40 ? t.pm / t.pa : null, main: t => `${Math.round(100 * t.pm / t.pa)}%`, sub: t => `${t.pm} van ${t.pa} passes` },
+  count('through', 'Steekpasses', t => t.through, t => t.nEv),
+  count('beaten', 'Mensen uitgespeeld', t => t.beaten, t => t.nEv),
+  count('inter', 'Onderscheppingen', t => t.inter, t => t.nEv),
+  count('won', 'Balwinst', t => t.won, t => t.nEv),
+  { key: 'duels', label: 'Duels gewonnen', v: t => t.ta >= 15 ? t.tm / t.ta : null, main: t => `${Math.round(100 * t.tm / t.ta)}%`, sub: t => `${t.tm} van ${t.ta} tackles` },
+];
+let rankKey = 'involved'; try { rankKey = sessionStorage.getItem('rankKey') || rankKey; } catch {}
+
+function renderRanking(totals) {
+  $('#rank-stats').innerHTML = RANKS.map(r => `<button type="button" role="tab" class="chip ${r.key === rankKey ? 'active' : ''}" aria-selected="${r.key === rankKey}" data-k="${r.key}">${r.label}</button>`).join('');
+  for (const b of $('#rank-stats').querySelectorAll('button')) b.addEventListener('click', () => { rankKey = b.dataset.k; try { sessionStorage.setItem('rankKey', rankKey); } catch {} renderRanking(totals); });
+  const R = RANKS.find(r => r.key === rankKey) || RANKS[0];
+  const rows = totals.filter(t => t.n >= 3).map(t => ({ t, v: R.v(t) })).filter(x => x.v !== null && x.v !== undefined).sort((a, b) => b.v - a.v);
+  const max = Math.max(...rows.map(x => x.v), 0) || 1;
+  $('#rank-list').innerHTML = rows.length ? rows.map((x, i) => `<li><span class="rank-pos">${i + 1}</span>
+    <span class="rank-name"><a href="spelers.html#${encodeURIComponent(x.t.name)}">${esc(x.t.name)}</a><small>${R.sub(x.t)}</small></span>
+    <span class="rank-bar" aria-hidden="true"><span style="width:${Math.max(3, 100 * x.v / max)}%"></span></span>
+    <span class="rank-val">${R.main(x.t)}</span></li>`).join('') : '<li class="empty">Nog niemand met genoeg wedstrijden voor deze stat.</li>';
+}
+
+function clubHero() {
+  const c = DATA.club, s = DATA.snapshot, k = c.kits;
+  const facts = [
+    s?.currentDivision ? `<span class="hero-fact"><b>Divisie ${s.currentDivision}</b>nu</span>` : '',
+    s?.bestDivision ? `<span class="hero-fact"><b>Divisie ${s.bestDivision}</b>hoogst bereikt</span>` : '',
+    s?.skillRating ? `<span class="hero-fact"><b>${s.skillRating}</b>skill rating</span>` : '',
+    s?.gamesPlayed ? `<span class="hero-fact"><b>${s.gamesPlayed}</b>wedstrijden</span>` : '',
+  ].join('');
+  $('#club-hero').innerHTML = `<div class="hero-id"><img src="crest.png" alt="Clublogo van ${esc(c.name)}" width="96" height="96">
+      <div><h2 class="hero-name">${esc(c.name)}</h2><p class="hero-meta">${k?.stadium ? `${esc(k.stadium)} · ` : ''}${c.platform === 'common-gen5' ? 'PS5, Xbox Series, PC' : esc(c.platform)}</p>
+      <div class="hero-facts">${facts}</div></div></div>
+    ${k ? `<div class="kits" aria-label="Tenues">${shirt(k.home, 'Thuis')}${shirt(k.away, 'Uit')}${shirt(k.third, 'Derde')}</div>` : ''}`;
+}
+
 function render() {
-  const ms = filtered(), s = summarize(ms), snap = DATA.snapshot;
-  // Badges: laatste speelavond tegenover de avonden daarvoor (binnen de gekozen periode).
+  const ms = DATA.matches, s = summarize(ms), snap = DATA.snapshot;
+  // Badges: laatste speelavond tegenover de avonden daarvoor (gevolgde wedstrijden).
   const sess = sessionsOf(ms), lastS = sess.length >= 2 ? sess[sess.length - 1].matches : null;
   const sl = lastS ? summarize(lastS) : null, sb = lastS ? summarize(ms.filter(m => !lastS.includes(m))) : null;
-  const T = 'Laatste speelavond tegenover de avonden daarvoor';
-  $('#page-sub').textContent = `Samenvatting van ${ms.length} gevolgde wedstrijden${ms.length ? `, ${fmtDate(ms[0].ts)} tot ${fmtDate(ms[ms.length - 1].ts)}` : ''}.${lastS ? ' De badges vergelijken de laatste speelavond met de avonden daarvoor.' : ''}`;
-  const last5 = ms.slice(-5);
+  const T = 'Laatste speelavond tegenover de avonden daarvoor (gevolgde wedstrijden)';
+  $('#page-sub').textContent = `Clubcijfers van EA over alle wedstrijden; spelers en vorm uit de ${ms.length} gevolgde wedstrijden sinds ${ms.length ? fmtDate(ms[0].ts) : '–'}.`;
+  clubHero();
+
+  const g = snap?.gamesPlayed, win = g ? Math.round(100 * snap.wins / g) : null;
+  const streak = snap?.winStreak ? `${snap.winStreak} gewonnen` : snap?.unbeatenStreak ? `${snap.unbeatenStreak} ongeslagen` : (() => { const r = ms.slice().reverse(); let n = 0; while (n < r.length && r[n].result === r[0]?.result) n++; return n ? `${n} ${r[0].result === 'L' ? 'verloren' : r[0].result === 'D' ? 'gelijk' : 'gewonnen'}` : '–'; })();
   $('#tiles').innerHTML = [
-    kpiTile('Wedstrijden', s.n, snap ? `van ${snap.gamesPlayed} volgens EA · rating ${snap.skillRating}` : ''),
-    kpiTile('Winst', fmtPct(s.winPct), `${s.W}W ${s.D}G ${s.L}V`, sl && deltaOf(sl.winPct, sb.winPct, { digits: 0, unit: ' pt', min: 1, title: T })),
-    kpiTile('Punten per wedstrijd', s.ppg ?? '–', 'bij 3 / 1 / 0', sl && deltaOf(sl.ppg, sb.ppg, { digits: 2, title: T })),
-    kpiTile('Doelpunten', `${s.gfAvg ?? '–'}–${s.gaAvg ?? '–'}`, 'voor en tegen per wedstrijd', sl && deltaOf(sl.gfAvg - sl.gaAvg, sb.gfAvg - sb.gaAvg, { digits: 1, title: `${T} (doelsaldo per wedstrijd)` })),
-    kpiTile('Tov verwachting', s.resid === null ? '–' : signed(s.resid, 2), 'doelsaldo, gecorrigeerd', sl && deltaOf(sl.resid, sb.resid, { digits: 2, title: T })),
-    `<div class="tile"><div class="tile-head"><span class="label">Vorm</span></div><div class="value form">${last5.length ? pills(last5) : '–'}</div><div class="meta">laatste 5</div></div>`,
+    kpiTile('Winstpercentage', win === null ? '–' : `${win}%`, snap ? `${snap.wins}W ${snap.ties}G ${snap.losses}V` : '', sl && deltaOf(sl.winPct, sb.winPct, { digits: 0, unit: ' pt', min: 1, title: T })),
+    kpiTile('Reeks', streak, snap?.unbeatenStreak && snap.unbeatenStreak !== snap.winStreak ? `${snap.unbeatenStreak} ongeslagen op rij` : 'op rij, volgens EA', null, { small: true }),
+    kpiTile('Doelpunten', snap ? `${snap.goals}–${snap.goalsAgainst}` : '–', snap ? `doelsaldo ${signed(snap.goals - snap.goalsAgainst, 0)}` : '', sl && deltaOf(sl.gfAvg - sl.gaAvg, sb.gfAvg - sb.gaAvg, { digits: 1, title: `${T} (doelsaldo per wedstrijd)` })),
+    kpiTile('Clean sheets', snap?.cleanSheets ?? '–', 'wedstrijden zonder tegengoal'),
+    kpiTile('Promoties', snap?.promotions ?? '–', snap?.relegations !== null && snap?.relegations !== undefined ? `${numWord(snap.relegations)} ${snap.relegations === 1 ? 'degradatie' : 'degradaties'}` : ''),
+    kpiTile('Gevolgd', ms.length, `wedstrijden in deze app${snap?.gamesPlayedPlayoff ? ` · EA telt ${snap.gamesPlayedPlayoff} playoff` : ''}`),
   ].join('');
 
-  $('#team-summary').innerHTML = teamSummary(ms);
-  const k = DATA.club.kits;
-  if (k) $('#club-kits').innerHTML = `<div class="kits">${shirt(k.home, 'Thuis')}${shirt(k.away, 'Uit')}${shirt(k.third, 'Derde')}</div>`;
-  if (k) $('#club-stadium').textContent = `${k.stadium} · ${DATA.club.platform === 'common-gen5' ? 'PS5, Xbox Series, PC' : DATA.club.platform}`;
-  const ins = teamInsights(ms);
-  $('#team-insights').innerHTML = ins.length ? ins.slice(0, 6).join('') + (ins.length > 6 ? `<li class="more"><details><summary>Nog ${ins.length - 6} patronen</summary><ul class="insight-list">${ins.slice(6).join('')}</ul></details></li>` : '') : '<li class="empty">Nog te weinig wedstrijden voor patronen.</li>';
-
-  const resEl = $('#chart-results');
-  barChart(resEl, ms.map((m, i) => ({ label: i === 0 || ms[i - 1].session !== m.session ? fmtDate(m.ts) : '', value: m.goalDiff, color: resultColor(m.result), tip: matchTip(m) })), { yMin: -1, zeroLine: true });
-  $('#fig-results').innerHTML = ms.length ? figsHtml([{ label: 'Gewonnen', color: 'var(--pos)', value: s.W }, { label: 'Gelijk', color: 'var(--neutral)', value: s.D }, { label: 'Verloren', color: 'var(--neg)', value: s.L }]) : '';
-
-  const formEl = $('#chart-form');
+  // Vorm: laatste tien als pillen, en het voortschrijdende gemiddelde.
+  $('#form-pills').innerHTML = ms.length ? pills(ms.slice(-10)) : '';
   const gd = rolling(ms.map(m => m.goalDiff), 5), rs = rolling(ms.map(m => m.resid), 5);
-  lineChart(formEl, [
+  lineChart($('#chart-form'), [
     { name: 'Doelsaldo', color: 'var(--s1)', area: true, values: gd.map((v, i) => ({ i, v })) },
     { name: 'Tov verwachting', color: 'var(--s2)', values: rs.map((v, i) => ({ i, v })) },
-  ], ms.map((m, i) => i === 0 || fmtDate(ms[i - 1].ts) !== fmtDate(m.ts) ? fmtDate(m.ts) : ''), { height: 220, tipAt: i => `<b>Na ${esc(ms[i].opponent.name)} (${fmtDate(ms[i].ts)})</b>Doelsaldo, gemiddeld over 5: ${signed(gd[i])}<br>Tov verwachting, gemiddeld over 5: ${signed(rs[i])}` });
-  // Kerncijfers: de laatste waarde van het gemiddelde, met de verandering tegenover vijf wedstrijden eerder.
+  ], ms.map((m, i) => i === 0 || fmtDate(ms[i - 1].ts) !== fmtDate(m.ts) ? fmtDate(m.ts) : ''), { height: 200, tipAt: i => `<b>Na ${esc(ms[i].opponent.name)} (${fmtDate(ms[i].ts)})</b>Doelsaldo, gemiddeld over 5: ${signed(gd[i])}<br>Tov verwachting, gemiddeld over 5: ${signed(rs[i])}` });
   const li = gd.length - 1, T5 = 'Tegenover het gemiddelde vijf wedstrijden eerder';
   $('#fig-form').innerHTML = ms.length ? figsHtml([
     { label: 'Doelsaldo', color: 'var(--s1)', value: signed(gd[li], 1), delta: li >= 5 ? deltaOf(gd[li], gd[li - 5], { digits: 1, title: T5 }) : null },
     { label: 'Tov verwachting', color: 'var(--s2)', value: signed(rs[li], 1), delta: li >= 5 ? deltaOf(rs[li], rs[li - 5], { digits: 1, title: T5 }) : null },
   ]) : '';
+  $('#team-summary').innerHTML = teamSummary(ms);
 
-  const W = ms.filter(m => m.result === 'W'), R = ms.filter(m => m.result !== 'W');
-  table($('#tbl-profile'), [
-    { label: '', key: 'label' }, { label: `Winst (${W.length})`, num: true, render: r => `<span class="res-W">${r.fmt(r.a)}</span>` }, { label: `Gelijk/verlies (${R.length})`, num: true, render: r => `<span class="res-L">${r.fmt(r.b)}</span>` },
-  ], W.length && R.length ? compareTeam(W, R) : [], { empty: 'Nog geen winst en verlies om te vergelijken.' });
+  // Gevaarlijkst: betrokken bij goals per wedstrijd, top drie.
+  const totals = playerTotals(ms);
+  const danger = totals.filter(t => t.n >= 3).sort((a, b) => b.involved / b.n - a.involved / a.n).slice(0, 3);
+  $('#danger').innerHTML = danger.length ? danger.map((t, i) => `<a class="danger-card" href="spelers.html#${encodeURIComponent(t.name)}">
+      <span class="danger-rank">${i + 1}</span><span class="danger-name">${esc(t.name)}</span>
+      <span class="danger-value">${per(t.involved, t.n)}<small>per wedstrijd</small></span>
+      <span class="danger-split">${t.g} goals · ${t.a} assists · ${t.sa} tweede assists · ${t.n} wedstrijden</span></a>`).join('') : '<p class="empty">Nog te weinig wedstrijden.</p>';
+  renderRanking(totals);
 
-  const own = snap?.skillRating;
-  const buckets = own ? [['Zwakker (100+ lager)', -1e9, -100], ['Gelijkwaardig (binnen 100)', -100, 100], ['Sterker (100–250 hoger)', 100, 250], ['Veel sterker (250+ hoger)', 250, 1e9]] : [];
-  const groupCols = [{ label: '', key: 'label' }, { label: 'N', num: true, key: 'n' }, { label: 'W-G-V', num: true, render: r => `${r.W}-${r.D}-${r.L}` }, { label: 'Punten/wed.', num: true, key: 'ppg' }, { label: 'Tov verwachting', num: true, render: r => residCell(r.resid) }, { label: 'Voor–tegen', num: true, render: r => `${r.gfAvg} – ${r.gaAvg}` }];
-  table($('#tbl-strength'), groupCols, buckets.map(([label, lo, hi]) => ({ label, ...summarize(ms.filter(m => m.opponent.skillRating && m.opponent.skillRating - own >= lo && m.opponent.skillRating - own < hi)) })).filter(b => b.n), { rowClass: r => r.n < 4 ? 'low' : '' });
-  const hum = [['1–2 mensen', 1, 2], ['3 mensen', 3, 3], ['4 mensen', 4, 4], ['5 of meer', 5, 99]];
-  table($('#tbl-humans'), groupCols, hum.map(([label, lo, hi]) => ({ label, ...summarize(ms.filter(m => m.opponentPlayers.length >= lo && m.opponentPlayers.length <= hi)) })).filter(b => b.n), { rowClass: r => r.n < 4 ? 'low' : '' });
+  // Leden: carrièrecijfers van EA.
+  const members = [...DATA.members].sort((a, b) => (b.gamesPlayed || 0) - (a.gamesPlayed || 0));
+  $('#members').innerHTML = members.map(m => `<a class="member" href="spelers.html#${encodeURIComponent(m.name)}">
+      <span class="member-head"><span class="member-ovr">${m.proOverall ?? '–'}</span><span><b>${esc(m.name)}</b><small>${esc(m.proName || '')}${m.proPos !== null && POS_CODE[m.proPos] ? ` · ${POS_CODE[m.proPos]}` : ''}</small></span></span>
+      <span class="member-stats"><span><b>${m.gamesPlayed}</b>wed.</span><span><b>${m.winRate}%</b>winst</span><span><b>${m.goals}</b>goals</span><span><b>${m.assists}</b>assists</span><span><b>${m.mom}</b>MOTM</span><span><b>${f1(m.ratingAve)}</b>rating</span></span></a>`).join('');
 
-  const players = [...new Set(ms.flatMap(m => m.players.map(p => p.name)))];
-  const squad = players.map(name => {
-    const rows = ms.map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p);
-    const a = summarize(rows.map(r => r.m)), b = summarize(ms.filter(m => !has(m, name)));
-    const mins = rows.reduce((x, r) => x + (r.p.secondsPlayed || 0), 0) / 60;
-    const g = rows.reduce((x, r) => x + (r.p.goals || 0), 0), as = rows.reduce((x, r) => x + (r.p.assists || 0), 0);
-    return { name, n: rows.length, rating: avg(rows.map(r => r.p.rating).filter(v => v !== null)), g, a: as, ga90: mins ? 90 * (g + as) / mins : null, mom: rows.reduce((x, r) => x + (r.p.mom || 0), 0), ppg: a.ppg, resid: a.resid, delta: b.n ? a.resid - b.resid : null, nWithout: b.n };
-  }).sort((x, y) => (y.rating ?? 0) - (x.rating ?? 0));
-  table($('#tbl-squad'), [
-    { label: 'Speler', render: r => `<a href="spelers.html#${encodeURIComponent(r.name)}">${esc(r.name)}</a>` }, { label: 'N', num: true, key: 'n' }, { label: 'Rating', num: true, render: r => f2(r.rating) },
-    { label: 'Goals', num: true, key: 'g' }, { label: 'Assists', num: true, key: 'a' }, { label: 'G + A per 90', num: true, render: r => f2(r.ga90) }, { label: 'MOTM', num: true, key: 'mom' },
-    { label: 'Punten/wed. met', num: true, key: 'ppg' }, { label: 'Tov verwachting met', num: true, render: r => residCell(r.resid) }, { label: 'Met tegenover zonder', num: true, render: r => r.nWithout >= 3 ? residCell(r.delta) : '–' },
-  ], squad);
+  const ins = teamInsights(ms);
+  $('#team-insights').innerHTML = ins.length ? ins.slice(0, 3).join('') : '<li class="empty">Nog te weinig wedstrijden voor patronen.</li>';
 
-  const pairs = [];
+  const players = [...new Set(ms.flatMap(m => m.players.map(p => p.name)))], pairs = [];
   for (let i = 0; i < players.length; i++) for (let j = i + 1; j < players.length; j++) {
     const A = players[i], B = players[j], both = ms.filter(m => has(m, A) && has(m, B)), one = ms.filter(m => has(m, A) !== has(m, B));
     if (both.length < 3 || one.length < 3) continue;
-    const sb = summarize(both), so = summarize(one);
-    pairs.push({ pair: `${A} + ${B}`, nBoth: sb.n, ppg: sb.ppg, rb: sb.resid, nOne: so.n, ro: so.resid, syn: sb.resid - so.resid });
+    const sb2 = summarize(both), so = summarize(one);
+    pairs.push({ pair: `${A} + ${B}`, nBoth: sb2.n, rb: sb2.resid, nOne: so.n, ro: so.resid, syn: sb2.resid - so.resid });
   }
   pairs.sort((x, y) => y.syn - x.syn);
-  table($('#tbl-pairs'), [{ label: 'Tweetal', key: 'pair' }, { label: 'Samen', num: true, render: r => `${r.ppg} pt <small>(${r.nBoth})</small>` }, { label: 'Tov verw. samen', num: true, render: r => residCell(r.rb) }, { label: 'Apart', num: true, render: r => `${residCell(r.ro)} <small>(${r.nOne})</small>` }, { label: 'Synergie', num: true, render: r => residCell(r.syn) }], pairs.slice(0, 6), { empty: 'Nog geen tweetal dat zowel samen als apart minstens drie keer speelde.', rowClass: r => (r.nBoth < 5 || r.nOne < 5) ? 'low' : '' });
-
-  const groups = new Map();
-  for (const m of ms) { if (!groups.has(m.lineup)) groups.set(m.lineup, []); groups.get(m.lineup).push(m); }
-  const lineups = [...groups].map(([lineup, list]) => ({ lineup, ...summarize(list) })).filter(l => l.n >= 2).sort((a, b) => b.resid - a.resid);
-  table($('#tbl-lineups'), [{ label: 'Opstelling', wrap: true, render: r => esc(r.lineup) }, { label: 'N', num: true, key: 'n' }, { label: 'W-G-V', num: true, render: r => `${r.W}-${r.D}-${r.L}` }, { label: 'Punten/wed.', num: true, key: 'ppg' }, { label: 'Tov verwachting', num: true, render: r => residCell(r.resid) }], lineups, { empty: 'Nog geen opstelling met twee of meer wedstrijden.' });
+  table($('#tbl-pairs'), [{ label: 'Tweetal', key: 'pair' }, { label: 'Samen', num: true, render: r => `${residCell(r.rb)} <small>(${r.nBoth})</small>` }, { label: 'Apart', num: true, render: r => `${residCell(r.ro)} <small>(${r.nOne})</small>` }, { label: 'Verschil', num: true, render: r => residCell(r.syn) }], pairs.slice(0, 5), { empty: 'Nog geen tweetal dat zowel samen als apart minstens drie keer speelde.', rowClass: r => (r.nBoth < 5 || r.nOne < 5) ? 'low' : '' });
 }
 
-for (const id of ['#range', '#type']) $(id).addEventListener('change', render);
 addEventListener('resize', () => DATA && render());
+window.rerender = () => render();
 loadData().then(render).catch(showError);

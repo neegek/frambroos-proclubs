@@ -24,6 +24,13 @@ export async function listPhotos() {
   return out;
 }
 
+// Extra clubcijfers uit het ruwe EA-snapshot (overallStats plus de ranglijst); ontbreekt iets, dan null.
+function clubExtras(raw) {
+  let s = {}; try { s = JSON.parse(raw); } catch {}
+  const n = k => s[k] === undefined || s[k] === '' ? null : Number(s[k]);
+  return { currentDivision: n('currentDivision'), cleanSheets: n('cleanSheets'), winStreak: n('wstreak'), unbeatenStreak: n('unbeatenstreak'),
+    promotions: n('promotions'), relegations: n('relegations'), gamesPlayedPlayoff: n('gamesPlayedPlayoff'), reputationTier: n('reputationtier') };
+}
 // Zonder argument uit de echte database; src/live.js geeft de tijdelijke kopie met live opgehaalde wedstrijden mee.
 export function buildData(db = realDb) {
   const { clubId } = config;
@@ -79,7 +86,7 @@ export function buildData(db = realDb) {
   }
   return {
     club: { id: clubId, name: config.clubName, platform: config.platform, kits },
-    snapshot: own ? { skillRating: own.skill_rating, gamesPlayed: own.games_played, wins: own.wins, losses: own.losses, ties: own.ties, goals: own.goals, goalsAgainst: own.goals_against, bestDivision: own.best_division, takenAt: own.taken_at } : null,
+    snapshot: own ? { skillRating: own.skill_rating, gamesPlayed: own.games_played, wins: own.wins, losses: own.losses, ties: own.ties, goals: own.goals, goalsAgainst: own.goals_against, bestDivision: own.best_division, takenAt: own.taken_at, ...clubExtras(own.raw) } : null,
     members: members.map(m => ({ name: m.player_name, gamesPlayed: m.games_played, goals: m.goals, assists: m.assists, ratingAve: m.rating_ave, winRate: m.win_rate, mom: m.mom, proOverall: m.pro_overall, proName: m.pro_name, proHeight: Number(JSON.parse(m.raw).proHeight) || null, proPos: JSON.parse(m.raw).proPos ?? null, favoritePosition: m.favorite_position, passSuccessRate: m.pass_success_rate, shotSuccessRate: m.shot_success_rate, tackleSuccessRate: m.tackle_success_rate })),
     lastRun,
     matches,
