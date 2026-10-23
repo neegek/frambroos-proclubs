@@ -23,6 +23,14 @@ Controleer bij een nieuwe EA-update eerst de officiële patch notes en werk dan 
   daarom de oude klasse met de richting van de patch erbij ("was goedkoop, sinds 22 okt duurder").
 - AP per afzonderlijk level: alleen tussenstanden (100 op level 1, 224 op 10, 397 op 20, 674 op 30, 962 op 40).
 
+## Tegenstrijdig, nog niet bevestigd
+
+- [eafcclubs.com](https://eafcclubs.com/) meldt in zijn changelog (v2.1.0, gezien 23 okt 2026) dat levels in FC 27 tot
+  **55** gaan, met een tweede signature PlayStyle, een vierde PlayStyle-slot en nieuwe masteries op level 55. Andere
+  bronnen noemen op dat moment nog level 40. Niet overgenomen tot EA of een tweede bron het bevestigt.
+- Zo'n builder bouwt zijn data met de hand op (startwaarden, maxima en prijsklassen per archetype, eisen voor
+  PlayStyles) uit het spel zelf, EA's nieuwsberichten en eigen tests; er is geen EA-API voor builds of AP-kosten.
+
 ## Kernregels
 
 - 13 archetypes, allemaal vanaf het begin beschikbaar; elk levelt apart met AXP tot level 40 (962 AP).
