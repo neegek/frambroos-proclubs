@@ -343,17 +343,19 @@ voor de sterkte van de tegenstander, eigen vergelijking voor verdedigers en keep
 ## 9c. Spelerskaart: tiers
 
 De kaart op de spelerspagina heeft de vorm van een FC-kaart (één pad in `playercard.js`: gebogen schouders naar een vlakke
-bovenkant, punt met inkeping, dubbele gouden rand) en een tier die met de vorm meebeweegt. Zonder foto staat er een icoon. Bovenste helft: overall, positie, logo en foto;
-onderste helft: de achternaam van de pro (uit `proName`, alles na de voornaam; één woord blijft heel) en zes cijfers
-in twee kolommen. Vorm = het
+bovenkant, punt met inkeping, dubbele gouden rand) en een tier die met de vorm meebeweegt. Zonder foto staat er een icoon. Bovenste helft: overall, archetype-icoon
+(`ARCHETYPE_ICON` in `public/archetypes.js`, eigen lijniconen), logo en foto; de foto vult de hele bovenste helft.
+Onderste helft: een vlak in een eigen tint (`--t-panel`) met de achternaam van de pro (uit `proName`, alles na de
+voornaam; één woord blijft heel) en zes cijfers in twee kolommen (WED, RAT, GLS | ASS, MOTM, WIN, of de face stats).
+Geen scheidingslijnen; de tier zie je aan de kaart zelf, zonder label. Vorm = het
 gemiddelde van de EA-rating over de **laatste 5 wedstrijden** tegenover het eigen gemiddelde over **alle andere**
 wedstrijden. De tier kijkt dus naar hoe iemand nu speelt tegenover eigen normaal, niet naar de rol.
 
 | Tier | Voorwaarde | Uiterlijk |
 |---|---|---|
 | **Goud** | standaard | goud met lichte strepen, donkere tekst |
-| **Zwart-goud** (in vorm) | minstens 8 wedstrijden en laatste 5 ≥ eigen gemiddelde + 0,3 | zwart met gouden rand en gouden cijfers, label *In vorm* |
-| **Topvorm** | minstens 5 wedstrijden en laatste 5 ≥ 8,0 | diepblauw met gouden stippen en gouden accenten, een zachte glans, label *Topvorm* |
+| **Zwart-goud** (in vorm) | minstens 8 wedstrijden en laatste 5 ≥ eigen gemiddelde + 0,3 | zwart met gouden rand en gouden cijfers |
+| **Topvorm** | minstens 5 wedstrijden en laatste 5 ≥ 8,0 | diepblauw met gouden stippen en gouden accenten, een zachte glans |
 
 De tier staat ook als `title` op de kaart. Voorbeeld (25 okt 2026): Konijnenlover22 en GoodTimes 023 in vorm; niemand
 in topvorm (KFH Guip 023 haalde eerder 8,58 over vijf wedstrijden).

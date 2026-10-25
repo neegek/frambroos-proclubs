@@ -224,12 +224,13 @@ td.split small, .split small { color: var(--muted); }
 /* FC-vorm: de rand en de achtergrond tekent playercard.js als svg (één pad, 300×430); de inhoud ligt erbovenop. */
 .fut { position: relative; width: 300px; height: 430px; filter: drop-shadow(0 14px 30px rgba(0,0,0,0.45)); }
 .fut-frame { position: absolute; inset: 0; width: 100%; height: 100%; }
-.fut-inner { position: relative; height: 100%; display: grid; grid-template-rows: minmax(0, 1fr) auto; padding: 46px 34px 60px; color: var(--t-ink); }
-.fut-icon { width: 120px; height: 120px; color: var(--t-accent); opacity: 0.55; margin-bottom: 6px; }
+.fut-inner { position: relative; height: 100%; display: grid; grid-template-rows: 194px auto; align-content: start; padding: 46px 34px 0; color: var(--t-ink); }
+.fut-bottom { display: grid; }
+.fut-icon { width: 120px; height: 120px; color: var(--t-accent); opacity: 0.55; margin-bottom: 10px; }
 /* Tiers (coach-logica §9c). Kleuren los van het thema. Contrast nagerekend op de lichtste en donkerste vlakken. */
-.fut[data-tier="goud"] { --t-ink: #2a1d05; --t-muted: #3d2d08; --t-accent: #2a1d05; --t-bg1: #f2dc92; --t-bg2: #d9b24a; --t-bg3: #c2932a; --t-glow: rgba(255,250,220,0.7); --t-lines: rgba(255,255,255,0.22); --t-dots: transparent; }
-.fut[data-tier="zwart"] { --t-ink: #f6e6b8; --t-muted: #cbb98a; --t-accent: #e9c767; --t-bg1: #241c0e; --t-bg2: #0e0c09; --t-bg3: #050403; --t-glow: rgba(233,199,103,0.26); --t-lines: rgba(233,199,103,0.09); --t-dots: transparent; }
-.fut[data-tier="top"] { --t-ink: #ffffff; --t-muted: #d6dcff; --t-accent: #ffd98a; --t-bg1: #1b2e9a; --t-bg2: #0b1a5c; --t-bg3: #05092b; --t-glow: rgba(255,217,138,0.35); --t-lines: rgba(255,255,255,0.06); --t-dots: rgba(255,217,138,0.45); }
+.fut[data-tier="goud"] { --t-ink: #2a1d05; --t-muted: #3d2d08; --t-accent: #2a1d05; --t-panel: #cfa239; --t-bg1: #f2dc92; --t-bg2: #d9b24a; --t-bg3: #c2932a; --t-glow: rgba(255,250,220,0.7); --t-lines: rgba(255,255,255,0.22); --t-dots: transparent; }
+.fut[data-tier="zwart"] { --t-ink: #f6e6b8; --t-muted: #cbb98a; --t-accent: #e9c767; --t-panel: #1c160b; --t-bg1: #241c0e; --t-bg2: #0e0c09; --t-bg3: #050403; --t-glow: rgba(233,199,103,0.26); --t-lines: rgba(233,199,103,0.09); --t-dots: transparent; }
+.fut[data-tier="top"] { --t-ink: #ffffff; --t-muted: #d6dcff; --t-accent: #ffd98a; --t-panel: #0a1550; --t-bg1: #1b2e9a; --t-bg2: #0b1a5c; --t-bg3: #05092b; --t-glow: rgba(255,217,138,0.35); --t-lines: rgba(255,255,255,0.06); --t-dots: rgba(255,217,138,0.45); }
 .fut[data-tier="top"] .fut-inner::before { content: ""; position: absolute; inset: 8px 8px 10px; background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,0.12) 50%, transparent 65%); background-size: 260% 100%; animation: fut-shine 4.5s ease-in-out infinite; pointer-events: none; clip-path: path('M18 74C18 46 52 30 102 28L198 28C248 30 282 46 282 74L282 352C282 380 262 400 230 408C200 414 172 424 160 428L150 423L140 428C128 424 100 414 70 408C38 400 18 380 18 352Z'); }
 .fut-inner > * { position: relative; }
 @keyframes fut-shine { 0%, 60% { background-position: 120% 0; } 100% { background-position: -40% 0; } }
@@ -239,19 +240,18 @@ td.split small, .split small { color: var(--muted); }
 .fut-top { display: grid; grid-template-columns: 64px 1fr; min-height: 0; }
 .fut-ovr { display: grid; justify-items: center; align-content: start; gap: 2px; padding-top: 6px; }
 .fut-ovr b { font-size: 46px; font-weight: 800; line-height: 1; letter-spacing: -0.04em; }
-.fut-ovr span { font-size: 17px; font-weight: 800; color: var(--t-accent); letter-spacing: 0.04em; }
-.fut-ovr img { margin-top: 10px; }
+.fut-archicon { display: grid; place-items: center; width: 30px; height: 30px; color: var(--t-accent); margin-top: 2px; }
+.fut-archicon .arch-icon { width: 26px; height: 26px; }
+.fut-ovr img { margin-top: 8px; }
 .fut-photo { position: relative; display: grid; place-items: end center; min-height: 0; overflow: hidden; color: var(--t-ink); margin-right: -8px; border-radius: 12px; }
 .fut-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
-.fut-icon { width: 120px; height: 120px; color: var(--t-accent); opacity: 0.55; margin-bottom: 6px; }
-.fut-name { text-align: center; font-weight: 800; font-size: 26px; letter-spacing: 0.02em; text-transform: uppercase; padding-top: 10px; margin-top: 4px; border-top: 1px solid color-mix(in srgb, var(--t-ink) 35%, transparent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.fut-arch { display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 11px; font-weight: 800; color: var(--t-accent); text-transform: uppercase; letter-spacing: 0.2em; margin: 2px 0 8px; }
-.fut-tier { font-size: 9px; letter-spacing: 0.18em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--t-accent); color: var(--t-accent); }
-.fut-stats { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid color-mix(in srgb, var(--t-ink) 25%, transparent); padding-top: 8px; }
-.fut-col { display: grid; gap: 2px; padding: 0 6px; }
-.fut-col + .fut-col { border-left: 1px solid color-mix(in srgb, var(--t-ink) 25%, transparent); }
-.fut-col div { display: grid; grid-template-columns: 44px 1fr; align-items: baseline; gap: 6px; }
-.fut-col b { font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; text-align: right; }
+.fut-icon { width: 120px; height: 120px; color: var(--t-accent); opacity: 0.55; margin-bottom: 10px; }
+.fut-name { text-align: center; font-weight: 800; font-size: 24px; line-height: 1.1; letter-spacing: 0.02em; text-transform: uppercase; padding-top: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fut-arch { text-align: center; font-size: 11px; font-weight: 800; color: var(--t-accent); text-transform: uppercase; letter-spacing: 0.2em; margin: 3px 0 8px; }
+.fut-stats { display: grid; grid-template-columns: 1fr 1fr; }
+.fut-col { display: grid; gap: 0; padding: 0 6px; }
+.fut-col div { display: grid; grid-template-columns: 48px 1fr; align-items: baseline; gap: 6px; line-height: 1.25; }
+.fut-col b { font-size: 19px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; text-align: right; }
 .fut-col span { font-size: 12px; font-weight: 700; color: var(--t-muted); letter-spacing: 0.08em; }
 .pc-details { margin: 0; display: grid; gap: 0; max-width: 560px; }
 .pc-row { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px; padding: 10px 0; border-bottom: 1px solid color-mix(in srgb, var(--c-ink) 12%, transparent); align-items: baseline; }

@@ -14,7 +14,7 @@ function personIcon() {
 // De kaartvorm (300×430): gebogen schouders naar een vlakke bovenkant, punt met inkeping onderaan. Eén pad voor de rand,
 // de donkere lijn, de binnenrand en de achtergrond; kleuren komen uit de tier-tokens in style.css.
 const FUT_SHAPE = 'M18 74C18 46 52 30 102 28L198 28C248 30 282 46 282 74L282 352C282 380 262 400 230 408C200 414 172 424 160 428L150 423L140 428C128 424 100 414 70 408C38 400 18 380 18 352Z';
-function futFrame() {
+function futFrame(photo) {
   const inset = (sx, sy) => `transform="translate(150 215) scale(${sx} ${sy}) translate(-150 -215)"`;
   return `<svg class="fut-frame" viewBox="0 0 300 430" aria-hidden="true">
     <defs>
@@ -23,12 +23,17 @@ function futFrame() {
       <radialGradient id="fut-glow" cx=".72" cy=".2" r=".6"><stop offset="0" style="stop-color:var(--t-glow)"/><stop offset="1" stop-color="transparent"/></radialGradient>
       <pattern id="fut-lines" patternUnits="userSpaceOnUse" width="34" height="34" patternTransform="rotate(28)"><rect width="3" height="34" style="fill:var(--t-lines)"/></pattern>
       <pattern id="fut-dots" patternUnits="userSpaceOnUse" width="9" height="9"><circle cx="4" cy="4" r="1" style="fill:var(--t-dots)"/></pattern>
+      <linearGradient id="fut-fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--t-panel)" stop-opacity="0"/><stop offset="1" style="stop-color:var(--t-panel)"/></linearGradient>
       <clipPath id="fut-clip"><path d="${FUT_SHAPE}" ${inset(0.952, 0.966)}/></clipPath>
     </defs>
     <path d="${FUT_SHAPE}" fill="url(#fut-gold)"/>
     <path d="${FUT_SHAPE}" fill="#1a1408" ${inset(0.975, 0.982)}/>
     <path d="${FUT_SHAPE}" fill="url(#fut-bg)" stroke="url(#fut-gold)" stroke-width="2.2" ${inset(0.952, 0.966)}/>
-    <g clip-path="url(#fut-clip)"><rect width="300" height="430" fill="url(#fut-lines)"/><rect width="300" height="430" fill="url(#fut-dots)"/><rect width="300" height="430" fill="url(#fut-glow)"/></g>
+    <g clip-path="url(#fut-clip)">
+      <rect width="300" height="430" fill="url(#fut-lines)"/><rect width="300" height="430" fill="url(#fut-dots)"/><rect width="300" height="430" fill="url(#fut-glow)"/>
+      ${photo ? `<image href="${photo}" x="0" y="28" width="300" height="212" preserveAspectRatio="xMidYMid slice"/><rect x="0" y="190" width="300" height="50" fill="url(#fut-fade)"/>` : ''}
+      <rect x="0" y="240" width="300" height="190" style="fill:var(--t-panel)"/>
+    </g>
   </svg>`;
 }
 
@@ -68,7 +73,7 @@ function render(name) {
   // Op de kaart: face stats van de ingevulde build (als die bij het laatste archetype hoort), anders seizoenscijfers.
   const faces = build && (!build.archetype || Number(build.archetype) === arch) && ['pac', 'sho', 'pas', 'dri', 'def', 'phy'].every(k => build[k]);
   const stats = faces ? [['PAC', build.pac], ['SHO', build.sho], ['PAS', build.pas], ['DRI', build.dri], ['DEF', build.def], ['PHY', build.phy]]
-    : [['WED', rows.length], ['RAT', rating === null ? '–' : rating.toFixed(1)], ['G', g], ['A', a], ['MOTM', mom], ['WIN', `${s.winPct ?? '–'}%`]];
+    : [['WED', rows.length], ['RAT', rating === null ? '–' : rating.toFixed(1)], ['GLS', g], ['ASS', a], ['MOTM', mom], ['WIN', `${s.winPct ?? '–'}%`]];
 
   // Builds die gespeeld zijn, laatst gespeelde voorop.
   const used = {}; for (const r of rows) if (r.p.archetypeId) used[r.p.archetypeId] = (used[r.p.archetypeId] || 0) + 1;
@@ -79,16 +84,18 @@ function render(name) {
   const tier = tierOf(ratings);
   const tierNames = { goud: 'goud', zwart: 'zwart-goud, in vorm', top: 'topvorm' };
   el.innerHTML = `<div class="pc-wrap">
-    <div class="fut" data-tier="${tier.tier}" role="img" title="Kaart: ${tierNames[tier.tier]}${tier.why ? ` (${tier.why})` : ''}" aria-label="Spelerskaart van ${esc(name)}: overall ${career?.proOverall ?? 'onbekend'}, ${pos ?? ''}, ${info ? info.name : ''}, ${tierNames[tier.tier]}">
-      ${futFrame()}
+    <div class="fut" data-tier="${tier.tier}" role="img" title="Kaart: ${tierNames[tier.tier]}${tier.why ? ` (${tier.why})` : ''}" aria-label="Spelerskaart van ${esc(name)}: overall ${career?.proOverall ?? 'onbekend'}, ${info ? info.name : ''}, ${tierNames[tier.tier]}">
+      ${futFrame(photo)}
       <div class="fut-inner">
         <div class="fut-top">
-          <div class="fut-ovr"><b>${career?.proOverall ?? '–'}</b><span>${pos ?? ''}</span><img src="crest.png" alt="" width="34" height="34"></div>
-          <div class="fut-photo">${photo ? `<img src="${photo}" alt="">` : personIcon()}</div>
+          <div class="fut-ovr"><b>${career?.proOverall ?? '–'}</b>${arch ? `<span class="fut-archicon" title="${esc(archName(arch))}">${archIcon(arch)}</span>` : ''}<img src="crest.png" alt="" width="34" height="34"></div>
+          <div class="fut-photo">${photo ? '' : personIcon()}</div>
         </div>
+        <div class="fut-bottom">
         <div class="fut-name" title="${esc(name)}">${esc(cardName(career, name))}</div>
-        <div class="fut-arch">${info ? info.name : ''}${tier.label ? ` <span class="fut-tier">${tier.label}</span>` : ''}</div>
+        <div class="fut-arch">${info ? info.name : ''}</div>
         <div class="fut-stats"><div class="fut-col">${stats.slice(0, 3).map(([l, v]) => `<div><b>${v}</b><span>${l}</span></div>`).join('')}</div><div class="fut-col">${stats.slice(3).map(([l, v]) => `<div><b>${v}</b><span>${l}</span></div>`).join('')}</div></div>
+        </div>
       </div>
     </div>
     <dl class="pc-details">

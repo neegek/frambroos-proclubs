@@ -87,3 +87,21 @@ function costInfo(archetypeId, attrKey) {
   const patch = a.patch.up.includes(attrKey) ? 'up' : a.patch.down.includes(attrKey) ? 'down' : null;
   return tier < 0 && !patch ? null : { tier, tierName: tier >= 0 ? AP_COST.tierNames[tier] : null, patch };
 }
+
+// Eigen lijnicoon per archetype (24×24, stroke = currentColor). Gebruikt op de spelerskaart; later ook bruikbaar op de opstelling.
+const ARCHETYPE_ICON = {
+  1: '<rect x="3" y="7" width="18" height="12" rx="1"/><path d="M3 11h18M3 15h18M9 7v12M15 7v12"/>',                       // Shot Stopper: het doel
+  2: '<rect x="3" y="9" width="18" height="10" rx="1"/><path d="M3 14h18M9 9v10M15 9v10M12 2v5M9.5 4.5L12 2l2.5 2.5"/>',    // Sweeper Keeper: doel, eruit komen
+  3: '<path d="M5 19L19 5M10 5h9v9"/>',                                                                                    // Progressor: vooruit
+  4: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',                                                             // Boss: schild
+  5: '<circle cx="12" cy="12" r="9"/><path d="M8 8l8 8M16 8l-8 8"/>',                                                      // Disruptor: onderbreken
+  6: '<circle cx="15" cy="4.5" r="1.8"/><path d="M13 8l-4 3 2 4-4 5M13 8l3 3 4-1M11 15l4 2 1 4"/>',                       // Marauder: rennen
+  7: '<path d="M4 12a8 8 0 0 1 14-5l2 2M20 12a8 8 0 0 1-14 5l-2-2M18 3v4h-4M6 21v-4h4"/>',                                 // Recycler: rondspelen
+  8: '<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',                           // Maestro: dirigeren
+  9: '<path d="M4 17c4 0 6-6 10-6h6M17 8l3 3-3 3"/><circle cx="5" cy="17" r="2"/>',                                         // Creator: de pass
+  10: '<path d="M13 2L5 13h6l-1 9 8-12h-6z"/>',                                                                            // Spark: bliksem
+  11: '<path d="M12 3l1.8 4.7 4.7 1.8-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2 2.2.8-2.2.8L19 21l-.8-2.2-2.2-.8 2.2-.8z"/>', // Magician
+  12: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>',                   // Finisher: roos
+  13: '<circle cx="12" cy="5" r="2.5"/><path d="M12 7.5V21M5 13a7 7 0 0 0 14 0M7 13H3M21 13h-4"/>',                        // Target: anker, vasthouden
+};
+const archIcon = (id, cls = '') => `<svg class="arch-icon ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ARCHETYPE_ICON[id] || '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-5 4-7 8-7s7 2 8 7"/>'}</svg>`;
