@@ -38,14 +38,19 @@ function futFrame(photo) {
   </svg>`;
 }
 
-// Tier van de kaart (coach-logica §9c): vorm over de laatste 5 wedstrijden tegenover eigen normaal.
-function tierOf(ratings) {
-  const last5 = ratings.slice(-5), rest = ratings.slice(0, -5);
-  if (last5.length < 5) return { tier: 'goud', label: '' };
-  const l5 = avg(last5), base = rest.length >= 3 ? avg(rest) : null;
-  if (l5 >= 8) return { tier: 'top', label: 'Topvorm', why: `laatste 5: ${l5.toFixed(2)}` };
-  if (base !== null && l5 >= base + 0.3) return { tier: 'zwart', label: 'In vorm', why: `laatste 5: ${l5.toFixed(2)}, normaal ${base.toFixed(2)}` };
-  return { tier: 'goud', label: '', why: base !== null ? `laatste 5: ${l5.toFixed(2)}, normaal ${base.toFixed(2)}` : '' };
+// Tier van de kaart (coach-logica §9c): twee wegen naar "in vorm", niveau of groei (rating plus winst).
+const PTS = { W: 3, D: 1, L: 0 };
+function tierOf(rows) {
+  const r = rows.filter(x => x.p.rating !== null), last5 = r.slice(-5), rest = r.slice(0, -5);
+  if (last5.length < 5) return { tier: 'goud', why: '' };
+  const level = avg(last5.map(x => x.p.rating)), wins = last5.filter(x => x.m.result === 'W').length;
+  const growth = rest.length >= 3
+    ? (level - avg(rest.map(x => x.p.rating))) + 0.25 * (avg(last5.map(x => PTS[x.m.result])) - avg(rest.map(x => PTS[x.m.result])))
+    : null;
+  const why = `laatste 5: rating ${level.toFixed(2)}, ${wins}× gewonnen${growth !== null ? `, groei ${growth >= 0 ? '+' : ''}${growth.toFixed(2)}` : ''}`;
+  if (level >= 8 && wins >= 3) return { tier: 'top', why };
+  if (level >= 7.5 || (growth !== null && r.length >= 8 && growth >= 0.3)) return { tier: 'zwart', why };
+  return { tier: 'goud', why };
 }
 
 // Naam op de kaart: voorletter en achternaam van de pro (P. Selie), anders de accountnaam. Eén woord blijft heel.
@@ -83,7 +88,7 @@ function render(name) {
   const last5 = rows.slice(-5).map(r => r.m);
 
   const detail = (label, value) => value ? `<div class="pc-row"><dt>${label}</dt><dd>${value}</dd></div>` : '';
-  const tier = tierOf(ratings);
+  const tier = tierOf(rows);
   const tierNames = { goud: 'goud', zwart: 'zwart-goud, in vorm', top: 'topvorm' };
   el.innerHTML = `<div class="pc-wrap">
     <div class="fut${photo ? ' has-photo' : ''}" data-tier="${tier.tier}" role="img" title="Kaart: ${tierNames[tier.tier]}${tier.why ? ` (${tier.why})` : ''}" aria-label="Spelerskaart van ${esc(name)}: overall ${career?.proOverall ?? 'onbekend'}, ${info ? info.name : ''}, ${tierNames[tier.tier]}">

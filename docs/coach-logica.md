@@ -347,22 +347,28 @@ bovenkant, punt met inkeping, dubbele gouden rand) en een tier die met de vorm m
 (`ARCHETYPE_ICON` in `public/archetypes.js`, eigen lijniconen), logo en foto; de foto vult de hele bovenste helft.
 Eén verloop over de hele kaart; alleen een foto krijgt een eigen vlak (`--t-photo`) dat zacht overloopt in het
 verloop, met een gloed achter de overall. Zonder foto een gevuld, licht transparant silhouet in de tekstkleur (donker op
-goud, licht op zwart en blauw). Onderste helft: de achternaam van de pro (uit `proName`, alles na de
-voornaam; één woord blijft heel) en zes cijfers in twee kolommen: de carrièretotalen volgens EA (WED, RAT, GLS | ASS, MOTM, WIN), of de
+goud, licht op zwart en blauw). Onderste helft: voorletter en achternaam van de pro (uit `proName`,
+bijvoorbeeld P. Selie; één woord blijft heel) en zes cijfers in twee kolommen: de carrièretotalen volgens EA (WED, RAT, GLS | ASS, MOTM, WIN), of de
 face stats van de ingevulde build. Ernaast staan de cijfers uit de gevolgde wedstrijden (*Gevolgd*). Geen archetype-
 tekst op de kaart: het icoon zegt het.
-Geen scheidingslijnen; de tier zie je aan de kaart zelf, zonder label. Vorm = het
-gemiddelde van de EA-rating over de **laatste 5 wedstrijden** tegenover het eigen gemiddelde over **alle andere**
-wedstrijden. De tier kijkt dus naar hoe iemand nu speelt tegenover eigen normaal, niet naar de rol.
+Geen scheidingslijnen; de tier zie je aan de kaart zelf, zonder label.
+
+Vorm kijkt naar de **laatste 5 wedstrijden**, en er zijn twee wegen naar *in vorm*: een hoog niveau, of groei.
+Een vaste goede speler wordt zo niet gestraft omdat het eigen normaal al hoog ligt.
+
+- **Niveau**: de gemiddelde EA-rating over de laatste 5.
+- **Groei** (vormscore): (rating laatste 5 − eigen normaal) + ¼ × (punten per wedstrijd laatste 5 − eigen normaal).
+  Eigen normaal = alle andere wedstrijden van die speler. Punten: winst 3, gelijk 1, verlies 0. Eén extra overwinning op
+  vijf wedstrijden telt ongeveer even zwaar als 0,15 ratingpunt.
 
 | Tier | Voorwaarde | Uiterlijk |
 |---|---|---|
 | **Goud** | standaard | goud met lichte strepen, donkere tekst |
-| **Zwart-goud** (in vorm) | minstens 8 wedstrijden en laatste 5 ≥ eigen gemiddelde + 0,3 | zwart met gouden rand en gouden cijfers |
-| **Topvorm** | minstens 5 wedstrijden en laatste 5 ≥ 8,0 | diepblauw met gouden stippen en gouden accenten, een zachte glans |
+| **Zwart-goud** (in vorm) | minstens 5 wedstrijden, en niveau ≥ 7,5 **of** (minstens 8 wedstrijden en groei ≥ 0,3) | zwart met gouden rand en gouden cijfers |
+| **Topvorm** | niveau ≥ 8,0 **en** minstens 3 van de laatste 5 gewonnen | diepblauw met gouden stippen en gouden accenten, een zachte glans |
 
-De tier staat ook als `title` op de kaart. Voorbeeld (25 okt 2026): Konijnenlover22 en GoodTimes 023 in vorm; niemand
-in topvorm (KFH Guip 023 haalde eerder 8,58 over vijf wedstrijden).
+De tier staat ook als `title` op de kaart. Voorbeeld (25 okt 2026): GoodTimes 023 in vorm door groei (+0,47), Neegek door niveau (7,62) en groei (+0,32);
+niemand in topvorm.
 
 ## 10. Waar staat wat
 
