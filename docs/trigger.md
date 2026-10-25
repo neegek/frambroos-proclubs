@@ -25,14 +25,16 @@ heeft 2.000 minuten per maand.
 
 ## Instellen (ongeveer 5 minuten)
 
-Ingesteld op 22 oktober 2026; het token `frambroos-trigger` verloopt op **20 januari 2027**. Maak dan een nieuw token
+Ingesteld op 22 oktober 2026. Sinds 25 oktober 2026 staat de repo op het persoonlijke account **neegek** (werkaccount
+N33G3K is collaborator). Het token moet daarom van **neegek** zijn: een fine-grained token kan alleen repo's van zijn
+eigen account aansturen. Het oude token van N33G3K (`frambroos-trigger`, verloopt 20 januari 2027) werkt niet meer. Maak dan een nieuw token
 (zelfde instellingen) en vervang het in de header *Authorization* op cron-job.org.
 
 ### Stap 1: toegangstoken op GitHub
 
 1. Ga naar https://github.com/settings/personal-access-tokens/new (Fine-grained token).
 2. Naam: `frambroos-trigger`. Vervaldatum: bijvoorbeeld 1 jaar.
-3. **Repository access**: *Only select repositories* → `N33G3K/frambroos-proclubs`.
+3. **Repository access**: *Only select repositories* → `neegek/frambroos-proclubs`.
 4. **Permissions** → *Repository permissions* → **Actions: Read and write**. Verder niets.
 5. Klik *Generate token* en kopieer het token. Je ziet het maar één keer.
 
@@ -43,7 +45,7 @@ Dit token kan alleen workflows in deze ene repo starten. Het kan geen code of da
 1. Maak een gratis account op https://cron-job.org.
 2. *Create cronjob*:
    - **Title**: `Frambroos verzamelen`
-   - **URL**: `https://api.github.com/repos/N33G3K/frambroos-proclubs/actions/workflows/collect.yml/dispatches`
+   - **URL**: `https://api.github.com/repos/neegek/frambroos-proclubs/actions/workflows/collect.yml/dispatches`
    - **Execution schedule** → *Custom*:
      - Minutes: `0, 15, 30, 45`
      - Hours: `19, 20, 21, 22, 23, 0, 1`
@@ -62,7 +64,7 @@ Dit token kan alleen workflows in deze ene repo starten. Het kan geen code of da
    - **404**: het token is geldig maar ziet de repo niet. Bij een privérepo zegt GitHub dan "Not Found". Controleer
      *Repository access* van het token en klik daar op **Save**; ook een GET in plaats van POST geeft 404.
    - **422**: de body is niet precies `{"ref":"main"}`.
-5. Controleer in https://github.com/N33G3K/frambroos-proclubs/actions dat er een nieuwe run staat met
+5. Controleer in https://github.com/neegek/frambroos-proclubs/actions dat er een nieuwe run staat met
    als trigger *workflow_dispatch*.
 
 ### Controleren of het blijft werken

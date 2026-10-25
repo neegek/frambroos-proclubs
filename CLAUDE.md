@@ -116,4 +116,6 @@ grafiektooltips openen ook met een tik.
 
 ## Git
 
-Commitberichten in het Nederlands. Na controle committen en pushen naar `main` op github.com/N33G3K/frambroos-proclubs.
+Commitberichten in het Nederlands. Na controle committen en pushen naar `main` op github.com/neegek/frambroos-proclubs.
+De repo is van het persoonlijke account **neegek**; het werkaccount N33G3K (waarmee `gh` hier is ingelogd) is collaborator
+met schrijfrechten. Persoonlijk werk hoort op neegek, niet op N33G3K.
