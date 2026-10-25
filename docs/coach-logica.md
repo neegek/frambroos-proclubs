@@ -345,7 +345,9 @@ voor de sterkte van de tegenstander, eigen vergelijking voor verdedigers en keep
 De kaart op de spelerspagina heeft de vorm van een FC-kaart (één pad in `playercard.js`: gebogen schouders naar een vlakke
 bovenkant, punt met inkeping, dubbele gouden rand) en een tier die met de vorm meebeweegt. Zonder foto staat er een icoon. Bovenste helft: overall, archetype-icoon
 (`ARCHETYPE_ICON` in `public/archetypes.js`, eigen lijniconen), logo en foto; de foto vult de hele bovenste helft.
-Onderste helft: een vlak in een eigen tint (`--t-panel`) met de achternaam van de pro (uit `proName`, alles na de
+Eén verloop over de hele kaart; alleen een foto krijgt een eigen vlak (`--t-photo`) dat zacht overloopt in het
+verloop, met een gloed achter de overall. Zonder foto een gevuld, licht transparant silhouet in de tekstkleur (donker op
+goud, licht op zwart en blauw). Onderste helft: de achternaam van de pro (uit `proName`, alles na de
 voornaam; één woord blijft heel) en zes cijfers in twee kolommen: de carrièretotalen volgens EA (WED, RAT, GLS | ASS, MOTM, WIN), of de
 face stats van de ingevulde build. Ernaast staan de cijfers uit de gevolgde wedstrijden (*Gevolgd*). Geen archetype-
 tekst op de kaart: het icoon zegt het.

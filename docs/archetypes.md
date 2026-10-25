@@ -44,7 +44,21 @@ Controleer bij een nieuwe EA-update eerst de officiële patch notes en werk dan 
 
 ## Iconen
 
-`ARCHETYPE_ICON` in `public/archetypes.js` is een eigen set lijniconen, nagetekend naar de iconen in het spel (gezien
-25 oktober 2026): keeper slot en bezem; verdediging kronkelende pijl, vuist en schild met bliksem; middenveld slagen
-met vonken, recyclepijlen, smoking met strik en lamp met vonk; aanval bliksem, hoge hoed met toverstaf, finishvlaggen
-en doelwit. In die volgorde horen ze bij archetype 1 t/m 13.
+`ARCHETYPE_ICON` in `public/archetypes.js` is een eigen set lijniconen in een cirkel, nagetekend naar de iconen in het
+spel en de uitleg van Jamal (25 oktober 2026):
+
+| Archetype | Icoon |
+|---|---|
+| Shot Stopper | doelpalen met een slot in het midden |
+| Sweeper Keeper | bezem |
+| Progressor | kronkelende pijl |
+| Boss | vuist |
+| Disruptor | ketting |
+| Marauder | schild, de ene helft transparant, de andere vol |
+| Recycler | recyclepijlen |
+| Maestro | pak met vlinderdas |
+| Creator | lamp |
+| Spark | bliksem |
+| Magician | omgekeerde hoed waar sterretjes uitkomen |
+| Finisher | twee finishvlaggen |
+| Target | cirkel met een vlag waarvan de paal in het midden begint |

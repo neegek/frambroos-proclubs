@@ -226,11 +226,11 @@ td.split small, .split small { color: var(--muted); }
 .fut-frame { position: absolute; inset: 0; width: 100%; height: 100%; }
 .fut-inner { position: relative; height: 100%; display: grid; grid-template-rows: 194px auto; align-content: start; padding: 46px 34px 0; color: var(--t-ink); }
 .fut-bottom { display: grid; }
-.fut-icon { width: 120px; height: 120px; color: var(--t-accent); opacity: 0.55; margin-bottom: 10px; }
+.fut-icon { width: 128px; height: 128px; color: var(--t-ink); opacity: 0.28; align-self: end; }
 /* Tiers (coach-logica §9c). Kleuren los van het thema. Contrast nagerekend op de lichtste en donkerste vlakken. */
-.fut[data-tier="goud"] { --t-ink: #2a1d05; --t-muted: #3d2d08; --t-accent: #2a1d05; --t-panel: #cfa239; --t-bg1: #f2dc92; --t-bg2: #d9b24a; --t-bg3: #c2932a; --t-glow: rgba(255,250,220,0.7); --t-lines: rgba(255,255,255,0.22); --t-dots: transparent; }
-.fut[data-tier="zwart"] { --t-ink: #f6e6b8; --t-muted: #cbb98a; --t-accent: #e9c767; --t-panel: #1c160b; --t-bg1: #241c0e; --t-bg2: #0e0c09; --t-bg3: #050403; --t-glow: rgba(233,199,103,0.26); --t-lines: rgba(233,199,103,0.09); --t-dots: transparent; }
-.fut[data-tier="top"] { --t-ink: #ffffff; --t-muted: #d6dcff; --t-accent: #ffd98a; --t-panel: #0a1550; --t-bg1: #1b2e9a; --t-bg2: #0b1a5c; --t-bg3: #05092b; --t-glow: rgba(255,217,138,0.35); --t-lines: rgba(255,255,255,0.06); --t-dots: rgba(255,217,138,0.45); }
+.fut[data-tier="goud"] { --t-ink: #2a1d05; --t-muted: #3d2d08; --t-accent: #2a1d05; --t-photo: #b98c2a; --t-halo: rgba(255,244,210,0.9); --t-bg1: #f2dc92; --t-bg2: #d9b24a; --t-bg3: #c2932a; --t-glow: rgba(255,250,220,0.7); --t-lines: rgba(255,255,255,0.22); --t-dots: transparent; }
+.fut[data-tier="zwart"] { --t-ink: #f6e6b8; --t-muted: #cbb98a; --t-accent: #e9c767; --t-photo: #2a2214; --t-halo: rgba(0,0,0,0.85); --t-bg1: #241c0e; --t-bg2: #0e0c09; --t-bg3: #050403; --t-glow: rgba(233,199,103,0.26); --t-lines: rgba(233,199,103,0.09); --t-dots: transparent; }
+.fut[data-tier="top"] { --t-ink: #ffffff; --t-muted: #d6dcff; --t-accent: #ffd98a; --t-photo: #14237a; --t-halo: rgba(3,6,30,0.85); --t-bg1: #1b2e9a; --t-bg2: #0b1a5c; --t-bg3: #05092b; --t-glow: rgba(255,217,138,0.35); --t-lines: rgba(255,255,255,0.06); --t-dots: rgba(255,217,138,0.45); }
 .fut[data-tier="top"] .fut-inner::before { content: ""; position: absolute; inset: 8px 8px 10px; background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,0.12) 50%, transparent 65%); background-size: 260% 100%; animation: fut-shine 4.5s ease-in-out infinite; pointer-events: none; clip-path: path('M18 74C18 46 52 30 102 28L198 28C248 30 282 46 282 74L282 352C282 380 262 400 230 408C200 414 172 424 160 428L150 423L140 428C128 424 100 414 70 408C38 400 18 380 18 352Z'); }
 .fut-inner > * { position: relative; }
 @keyframes fut-shine { 0%, 60% { background-position: 120% 0; } 100% { background-position: -40% 0; } }
@@ -242,10 +242,13 @@ td.split small, .split small { color: var(--muted); }
 .fut-ovr b { font-size: 40px; font-weight: 800; line-height: 1; letter-spacing: -0.04em; }
 .fut-archicon { display: grid; place-items: center; width: 34px; height: 34px; color: var(--t-accent); margin-top: 4px; }
 .fut-archicon .arch-icon { width: 32px; height: 32px; }
+/* Met foto: een zachte gloed achter overall en icoon, zodat ze op elke foto leesbaar blijven. */
+.fut.has-photo .fut-ovr b { text-shadow: 0 0 10px var(--t-halo), 0 1px 2px var(--t-halo); }
+.fut.has-photo .fut-archicon, .fut.has-photo .fut-ovr img { filter: drop-shadow(0 0 4px var(--t-halo)); }
 .fut-ovr img { margin-top: 8px; }
-.fut-photo { position: relative; display: grid; place-items: end center; min-height: 0; overflow: hidden; color: var(--t-ink); margin-right: -8px; border-radius: 12px; }
+.fut-photo { position: relative; display: grid; place-items: end center; min-height: 0; overflow: hidden; color: var(--t-ink); margin-right: -8px; }
 .fut-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
-.fut-icon { width: 120px; height: 120px; color: var(--t-accent); opacity: 0.55; margin-bottom: 10px; }
+.fut-icon { width: 128px; height: 128px; color: var(--t-ink); opacity: 0.28; align-self: end; }
 .fut-name { text-align: center; font-weight: 800; font-size: 24px; line-height: 1.1; letter-spacing: 0.02em; text-transform: uppercase; padding: 14px 0 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fut-stats { display: grid; grid-template-columns: 1fr 1fr; }
 .fut-col { display: grid; gap: 0; padding: 0 6px; }
