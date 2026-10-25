@@ -43,20 +43,16 @@
 
   <div id="tab-overview" role="tabpanel" aria-labelledby="tab-btn-overview" class="tabpanel">
   <section class="card">
-    <div class="profile">
-      <div>
-        <h2 class="card-title">Samenvatting</h2>
-        <p class="summary" id="p-summary"></p>
-      </div>
-      <div class="tiles" id="p-tiles"></div>
-    </div>
+    <h2 class="card-title">Samenvatting</h2>
+    <p class="summary" id="p-summary"></p>
   </section>
+  <div class="pcards4" id="p-cards"></div>
 
   <section class="card">
     <div class="card-head">
       <div>
         <h2>Aan de bal in context</h2>
-        <p class="hint">Balverlies naast wat er tegenover staat, vergeleken met <span id="ctx-group">dezelfde build</span>. EA meet niet hoe lastig de passes zijn die je krijgt; momenten zonder aanspeelpunt zijn de beste benadering.</p>
+        <p class="hint">Balverlies naast wat er tegenover staat, vergeleken met <span id="ctx-group">dezelfde build</span>. Hoe lastig ontvangen passes zijn, meet EA niet; momenten zonder aanspeelpunt zijn de benadering.</p>
       </div>
       <div class="card-figs" id="ctx-figs"></div>
     </div>
@@ -100,9 +96,10 @@
       <p class="summary" id="pl-summary"></p>
     </section>
     <section class="card">
-      <h2>Deze wedstrijd tegenover normaal</h2>
-      <p class="hint">"Normaal" is het eigen gemiddelde over alle andere wedstrijden.</p>
-      <div id="pl-compare"></div>
+      <h2>Laatste wedstrijden</h2>
+      <p class="hint">Eigen rating, goals en assists per wedstrijd; de badge is het teamresultaat tegenover verwachting.</p>
+      <div class="match-cards" id="pv-cards"></div>
+      <details class="all-stats"><summary>Laatste wedstrijd tegenover normaal</summary><div id="pl-compare"></div></details>
     </section>
     <section class="card">
       <h2 id="ps-title">Per sessie</h2>
@@ -127,7 +124,7 @@
       <div class="build-advice">
         <section class="card bad">
           <h2>Waar de meeste winst zit</h2>
-          <p class="hint">De drie grootste kansen, van groot naar klein, voor iedereen op dezelfde manier bepaald. Elk punt weegt af wat iets kost tegen wat het oplevert en houdt rekening met de build. Vergeleken met alle spelers op dezelfde positie die we tegenkwamen, tegenstanders inbegrepen, over alle wedstrijden.</p>
+          <p class="hint">De drie grootste kansen, voor iedereen op dezelfde manier bepaald: wat iets kost tegenover wat het oplevert, gewogen naar de build en vergeleken met dezelfde build of positie.</p>
           <ul class="insight-list" id="b-problems"></ul>
         </section>
         <section class="card">
@@ -141,7 +138,7 @@
 
       <details class="card build-form-card">
         <summary><h2>Build invullen</h2><span class="hint">Je eigen attributen en PlayStyles, voor preciezer advies.</span></summary>
-        <p class="hint">Alles is optioneel. Hoe meer je invult, hoe preciezer het advies. Attributen staan in het Engels, zoals in het spel. Wordt opgeslagen in <code>data/builds.json</code>.</p>
+        <p class="hint">Alles is optioneel; attributen in het Engels, zoals in het spel.</p>
         <form id="build-form" autocomplete="off"></form>
       </details>
     </div>

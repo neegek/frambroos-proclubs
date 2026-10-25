@@ -24,20 +24,18 @@
     <div class="session-layout">
       <div class="session-list" id="session-list" role="listbox" aria-label="Speelsessies"></div>
       <div class="session-detail">
-        <section class="card">
-          <div class="profile">
-            <div>
-              <h2 id="s-title">…</h2>
-              <div class="meta" id="s-meta"></div>
-              <p class="summary" id="s-summary"></p>
-            </div>
+        <section class="card sess-head">
+          <div class="sess-top">
+            <div><h2 id="s-title">…</h2><div class="meta" id="s-meta"></div></div>
+            <button type="button" class="btn-ghost" id="s-share" title="Deel deze avond als afbeelding">Delen</button>
           </div>
+          <p class="summary" id="s-summary"></p>
+          <div class="sess-figs" id="s-figs"></div>
         </section>
-        <section class="tiles" id="s-tiles"></section>
         <section class="card">
           <h2>Wedstrijden</h2>
           <p class="hint">Op volgorde van spelen. Klik op een wedstrijd voor het verhaal en de spelers.</p>
-          <div class="match-rows" id="s-matches"></div>
+          <div class="match-cards" id="s-matches"></div>
         </section>
         <section class="card">
           <h2>Opvallend</h2>
@@ -49,7 +47,7 @@
         </section>
         <section class="card">
           <h2>Spelers deze sessie</h2>
-          <p class="hint">Rating tegenover het eigen gemiddelde in andere wedstrijden, en wat er bij iemand opviel.</p>
+          <p class="hint">Rating tegenover het eigen gemiddelde in andere wedstrijden, en wat er bij iemand opviel. De kroon is man of the match.</p>
           <div id="s-players"></div>
         </section>
       </div>

@@ -8,6 +8,7 @@ const evRows = rows => rows.filter(r => r.p.ev);
 const evPer90 = key => rows => { const e = evRows(rows); return e.length ? per90(e, r => r.p.ev[key]) : null; };
 const actionsOf = p => p.ev ? p.ev.ball_actions : (p.passAttempts || 0) + (p.shots || 0) + (p.tackleAttempts || 0);
 const f0 = v => v === null || v === undefined ? '–' : String(Math.round(v));
+const badgeHtml = d => d ? `<span class="kpi-badge ${d.good === true ? 'up' : d.good === false ? 'down' : ''}" title="${esc(d.title || '')}">${d.txt}</span>` : '';
 
 // Maten: hib = hoger is beter. calc krijgt rijen {m, p}.
 const METRICS = [
@@ -268,6 +269,7 @@ function renderLastTab(name) {
   else if (good.length) parts.push(`Opvallend: ${joinAnd(good)} dan normaal.`);
   else if (bad.length) parts.push(`Opvallend: ${joinAnd(bad)} dan normaal.`);
   $('#pl-summary').innerHTML = parts.join(' ');
+  $('#pv-cards').innerHTML = all.slice(-8).reverse().map(r => matchCard(r.m, { own: DATA.snapshot?.skillRating, player: name })).join('');
   const rows = [
     ['Rating', p.rating, normal, true, f2], ...(p.fi !== null ? [['Frambroos-index', Math.round(p.fi), avg(others.map(r => r.p.fi).filter(x => x !== null)), true, f0]] : []), ['Goals', p.goals, avg(others.map(r => r.p.goals)), true, f1], ['Assists', p.assists, avg(others.map(r => r.p.assists)), true, f1], ...(p.ev ? [['Tweede assists', p.ev.second_assists || 0, avg(evRows(others).map(r => r.p.ev.second_assists || 0)), true, f1]] : []),
     ['Schoten', p.shots, avg(others.map(r => r.p.shots)), true, f1], ['Passnauwkeurigheid', pct(p.passesMade, p.passAttempts), pct(sum(others, r => r.p.passesMade), sum(others, r => r.p.passAttempts)), true, v => v === null ? '–' : `${v}%`],
@@ -325,11 +327,17 @@ function renderPlayer() {
   const wo = summarize(ms.filter(m => !m.players.some(p => p.name === selected)));
   const T = 'Met deze speler erbij tegenover de wedstrijden zonder';
   const fi = fiForRows(rows.map(r => r.p).filter(p => p.fi !== null));
-  $('#p-tiles').innerHTML = [
-    kpiTile('Frambroos-index', fiFmt(fi.score), fi.score === null ? 'minstens 3 wedstrijden nodig' : `${fiLabel(fi.score)} · afronden ${fiFmt(fi.parts.shoot)}, creëren ${fiFmt(fi.parts.pass)}, aan de bal ${fiFmt(fi.parts.ball)}, verdedigen ${fiFmt(fi.parts.defend)}`),
-    kpiTile('Punten per wedstrijd', s.ppg ?? '–', `${s.W}W ${s.D}G ${s.L}V met deze speler`, wo.n >= 3 ? deltaOf(s.ppg, wo.ppg, { digits: 2, title: T }) : null),
-    kpiTile('Tov verwachting', s.resid === null ? '–' : signed(s.resid, 2), 'team, met deze speler erbij', wo.n >= 3 ? deltaOf(s.resid, wo.resid, { digits: 2, title: T }) : null),
-    kpiTile('Minuten per wedstrijd', rows.length ? f0(minutes(rows) / rows.length) : '–', ''),
+  // Vier kaartjes naast de samenvatting: highlights, precisie, Frambroos-index en impact op het team.
+  const n = rows.length || 1, g = sum(rows, r => r.p.goals), as = sum(rows, r => r.p.assists), sa = sum(evRows(rows), r => r.p.ev.second_assists);
+  const sh = sum(rows, r => r.p.shots), pm = sum(rows, r => r.p.passesMade), pa = sum(rows, r => r.p.passAttempts), tm = sum(rows, r => r.p.tacklesMade), ta = sum(rows, r => r.p.tackleAttempts);
+  const hl = (label, v) => `<div class="hl-row"><span>${label}</span><b>${v}</b></div>`;
+  const prec = (label, num, den) => `<div><span class="prec-label">${label}</span><span class="prec-value">${den ? fmtPct(pct(num, den)) : '–'}</span><span class="prec-frac">${num}/${den}</span></div>`;
+  const bar = (label, v) => `<div class="fi-bar"><span>${label}</span><i style="--w:${Math.max(2, Math.min(100, v ?? 0))}%"></i><b>${fiFmt(v)}</b></div>`;
+  $('#p-cards').innerHTML = [
+    `<section class="card"><h2>Highlights</h2>${hl('Goals per wedstrijd', f2(g / n))}${hl('Assists per wedstrijd', f2(as / n))}${hl('Betrokken bij goals', f2((g + as + sa) / n))}</section>`,
+    `<section class="card"><h2>Precisie</h2><div class="prec">${prec('Conversie', g, sh)}${prec('Pass', pm, pa)}${prec('Duels', tm, ta)}</div></section>`,
+    `<section class="card"><h2>Frambroos-index</h2><div class="fi-card"><span class="fi-num">${fiFmt(fi.score)}</span><span class="fi-label">${fi.score === null ? 'minstens 3 wedstrijden' : fiLabel(fi.score)}</span><div class="fi-bars">${bar('Afronden', fi.parts.shoot)}${bar('Creëren', fi.parts.pass)}${bar('Aan de bal', fi.parts.ball)}${bar('Verdedigen', fi.parts.defend)}</div></div></section>`,
+    `<section class="card"><h2>Impact</h2>${hl(`Punten per wedstrijd ${wo.n >= 3 ? badgeHtml(deltaOf(s.ppg, wo.ppg, { digits: 2, title: T })) : ''}`, s.ppg ?? '–')}${hl(`Tov verwachting ${wo.n >= 3 ? badgeHtml(deltaOf(s.resid, wo.resid, { digits: 2, title: T })) : ''}`, s.resid === null ? '–' : signed(s.resid, 2))}${hl('Minuten per wedstrijd', rows.length ? f0(minutes(rows) / rows.length) : '–')}</section>`,
   ].join('');
 
   const table_ = metricTable(ms, players);

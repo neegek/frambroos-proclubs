@@ -449,6 +449,24 @@ function kitShirt(c, label) {
 // EA-positiecodes (proPos van een pro: de ingestelde hoofdpositie).
 const POS_CODE = ['GK', 'SW', 'RWB', 'RB', 'RCB', 'CB', 'LCB', 'LB', 'LWB', 'RDM', 'CDM', 'LDM', 'RM', 'RCM', 'CM', 'LCM', 'LM', 'RAM', 'CAM', 'LAM', 'RF', 'CF', 'LF', 'RW', 'RS', 'ST', 'LS', 'LW'];
 
+// ---------- wedstrijdkaart ----------
+// Eén kaartje per wedstrijd: uitslag, tegenstander, score, beste speler (of de eigen cijfers van één speler) en de
+// badge "tov verwachting". Gedeeld door Wedstrijden, Sessies en de Vorm van een speler. Container: .match-cards.
+function matchCard(m, { own = null, player = null } = {}) {
+  const t = new Date(m.ts * 1000).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+  const diff = m.opponent.skillRating && own ? m.opponent.skillRating - own : null;
+  const str = diff === null ? '' : diff >= 250 ? 'veel sterker' : diff >= 100 ? 'sterker' : diff <= -100 ? 'zwakker' : '';
+  const p = player ? m.players.find(x => x.name === player) : [...m.players].sort((x, y) => (y.rating ?? 0) - (x.rating ?? 0))[0];
+  const foot = !p ? '' : player ? `<b>${p.rating ?? '–'}</b> ${p.goals} G, ${p.assists} A${p.mom ? ' · ★' : ''}`
+    : `<b>${p.rating ?? '–'}</b> ${esc(p.name)}`;
+  const r = m.resid, badge = r === null || r === undefined ? '' : `<span class="kpi-badge ${r >= 0.5 ? 'up' : r <= -0.5 ? 'down' : ''}" title="Tov verwachting: doelsaldo tegenover wat de tegenstander deed verwachten">${signed(r, 1)}</span>`;
+  return `<a class="mcard" href="wedstrijd.html?id=${m.matchId}">
+    <span class="mcard-top"><span class="pill ${m.result}">${m.result === 'D' ? 'G' : m.result === 'L' ? 'V' : 'W'}</span><span class="mcard-type">${m.matchType === 'playoffMatch' ? 'playoff' : 'league'} · ${t}${m.winnerByDnf ? ' · opgave' : ''}${m.live ? ' · live' : ''}</span></span>
+    <span class="mcard-opp">${kitShirt(m.opponent.kit, m.opponent.name)}<span><b>${esc(m.opponent.name)}</b><small>${m.opponent.skillRating ? `rating ${m.opponent.skillRating}${str ? `, ${str}` : ''}` : ''}${m.players.length !== m.opponentPlayers.length ? ` · ${m.players.length} tegen ${m.opponentPlayers.length}` : ''}</small></span></span>
+    <span class="mcard-score">${m.goals}–${m.goalsAgainst}</span>
+    <span class="mcard-foot"><span class="mcard-best">${foot}</span>${badge}</span></a>`;
+}
+
 // ---------- wedstrijdrij ----------
 // Eén regel per wedstrijd met tijd, uitslag, tegenstander en score; klik opent de wedstrijdpagina.
 // Gedeeld door Wedstrijden en Sessies, zodat een wedstrijd er overal hetzelfde uitziet.
@@ -481,3 +499,18 @@ function deltaOf(a, b, { digits = 1, unit = '', hib = true, min = 0.05, title = 
   if (Math.abs(d) < min) return { txt: `±0${unit}`, good: null, title };
   return { txt: `${d > 0 ? '+' : '−'}${Math.abs(d).toFixed(digits)}${unit}`, good: hib ? d > 0 : d < 0, title };
 }
+
+// ---------- uitleg achter een i-knop ----------
+// Elke uitlegregel (p.hint) direct onder een kaarttitel is standaard verborgen; de i-knop in de titel klapt hem uit.
+// Zo blijft een pagina rustig en blijft de uitleg wel bereikbaar. Kaarten met data-keep-hint houden de uitleg zichtbaar.
+(function hintToggles() {
+  for (const hint of document.querySelectorAll('.card p.hint')) {
+    const head = hint.previousElementSibling;
+    if (!head || !/^H[23]$/.test(head.tagName) || hint.closest('[data-keep-hint]')) continue;
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'info'; btn.textContent = 'i';
+    btn.setAttribute('aria-label', 'Uitleg'); btn.setAttribute('aria-expanded', 'false');
+    head.appendChild(btn); hint.hidden = true;
+    btn.addEventListener('click', () => { hint.hidden = !hint.hidden; btn.setAttribute('aria-expanded', String(!hint.hidden)); });
+  }
+})();

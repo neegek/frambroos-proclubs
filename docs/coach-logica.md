@@ -293,6 +293,13 @@ dat tonen we niet.
 - **Leden**: de carrièrecijfers van EA per lid (wedstrijden, winstpercentage, goals, assists, man of the match,
   gemiddelde rating), met overall en ingestelde positie.
 
+**Sessiekop**: elke speelavond toont dezelfde zes cijfers, zodat avonden op dezelfde manier te vergelijken zijn:
+wedstrijden (met W-G-V en de badge punten per wedstrijd tegenover normaal), duur (eerste tot laatste wedstrijd plus een
+kwartier), doelsaldo (met de badge tov verwachting), passnauwkeurigheid, conversie en clean sheets, elk met "normaal"
+eronder (alle andere wedstrijden). Man of the match staat als kroon bij de speler. De deelkaart (afbeelding van
+1080×1080 in thuiskleuren) toont W-G-V, punten per wedstrijd, winstpercentage, doelsaldo, uitblinker, meeste goals
+plus assists en de eerste twee zinnen van de samenvatting.
+
 **Tweede assist** (EA-code 115, `second_assists`, zekerheid *waarschijnlijk*): de pass vóór de assist. EA geeft alleen
 het aantal per speler per wedstrijd, niet bij welke goal. Alleen als we in een wedstrijd precies één keer scoren, is
 de keten te reconstrueren: wie scoorde, wie de assist gaf en wie de tweede assist. Dat tonen we op de wedstrijdpagina

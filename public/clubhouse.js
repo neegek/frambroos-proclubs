@@ -115,18 +115,24 @@ const RANKS = [
   count('won', 'Balwinst', t => t.won, t => t.nEv),
   { key: 'duels', label: 'Duels gewonnen', v: t => t.ta >= 15 ? t.tm / t.ta : null, main: t => `${Math.round(100 * t.tm / t.ta)}%`, sub: t => `${t.tm} van ${t.ta} tackles` },
 ];
-let rankKey = 'index'; try { rankKey = sessionStorage.getItem('rankKey') || rankKey; } catch {}
+let rankKey = null; try { rankKey = sessionStorage.getItem('rankKey') || null; } catch {}
 
+// Ranglijst als swipebare kaartjes: per stat de top vier; een tik opent de hele lijst eronder.
 function renderRanking(totals) {
-  $('#rank-stats').innerHTML = RANKS.map(r => `<button type="button" role="tab" class="chip ${r.key === rankKey ? 'active' : ''}" aria-selected="${r.key === rankKey}" data-k="${r.key}">${r.label}</button>`).join('');
-  for (const b of $('#rank-stats').querySelectorAll('button')) b.addEventListener('click', () => { rankKey = b.dataset.k; try { sessionStorage.setItem('rankKey', rankKey); } catch {} renderRanking(totals); });
-  const R = RANKS.find(r => r.key === rankKey) || RANKS[0];
-  const rows = totals.filter(t => t.n >= 3).map(t => ({ t, v: R.v(t) })).filter(x => x.v !== null && x.v !== undefined).sort((a, b) => b.v - a.v);
-  const max = Math.max(...rows.map(x => x.v), 0) || 1;
-  $('#rank-list').innerHTML = rows.length ? rows.map((x, i) => `<li><span class="rank-pos">${i + 1}</span>
+  const rowsFor = R => totals.filter(t => t.n >= 3).map(t => ({ t, v: R.v(t) })).filter(x => x.v !== null && x.v !== undefined).sort((a, b) => b.v - a.v);
+  $('#rank-cards').innerHTML = RANKS.map(R => { const rows = rowsFor(R); return `<button type="button" class="rank-card ${R.key === rankKey ? 'active' : ''}" data-k="${R.key}" aria-expanded="${R.key === rankKey}">
+      <span class="rank-card-label">${R.label}${R.key === 'index' ? '<span title="Wat iemand zelf bijdraagt, los van de uitslag">♛</span>' : ''}</span>
+      <ol>${rows.slice(0, 4).map((x, i) => `<li><span>${i + 1}</span><span>${esc(x.t.name)}</span><b>${R.main(x.t)}</b></li>`).join('') || '<li class="empty">Nog te weinig wedstrijden.</li>'}</ol>
+      ${rows.length > 4 ? `<span class="rank-card-more">nog ${rows.length - 4}</span>` : ''}</button>`; }).join('');
+  for (const b of $('#rank-cards').querySelectorAll('.rank-card')) b.addEventListener('click', () => { rankKey = rankKey === b.dataset.k ? null : b.dataset.k; try { rankKey ? sessionStorage.setItem('rankKey', rankKey) : sessionStorage.removeItem('rankKey'); } catch {} renderRanking(totals); });
+  const R = RANKS.find(r => r.key === rankKey);
+  $('#rank-list').hidden = !R;
+  if (!R) return;
+  const rows = rowsFor(R), max = Math.max(...rows.map(x => x.v), 0) || 1;
+  $('#rank-list').innerHTML = rows.map((x, i) => `<li><span class="rank-pos">${i + 1}</span>
     <span class="rank-name"><a href="spelers.html#${encodeURIComponent(x.t.name)}">${esc(x.t.name)}</a><small>${R.sub(x.t)}</small></span>
     <span class="rank-bar" aria-hidden="true"><span style="width:${Math.max(3, 100 * x.v / max)}%"></span></span>
-    <span class="rank-val">${R.main(x.t)}</span></li>`).join('') : '<li class="empty">Nog niemand met genoeg wedstrijden voor deze stat.</li>';
+    <span class="rank-val">${R.main(x.t)}</span></li>`).join('');
 }
 
 function clubHero() {

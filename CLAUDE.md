@@ -75,8 +75,16 @@ zijn daarom altijd relatief (`spelers.html#naam`, nooit `/spelers.html`), en dat
   schaduw als het menu; in het uittenue wit. Pagina's zijn een strak raster van kaarten met 12 px tussenruimte. Titel en
   filters staan op één rij (filters rechts). Op het Clubhouse komt eerst wie we zijn, dan de KPI-tegels. Een
   grafiekkaart toont zijn kerncijfers rechts in de kop via `figsHtml(...)` uit `public/common.js`, niet als legenda.
+- Kaartjes (geïnspireerd op FC Clubs, in eigen stijl): één wedstrijd is één `matchCard(m, {own, player})` uit
+  `public/common.js` in een `.match-cards`-raster (op telefoon horizontaal swipebaar); een sessie begint met één kop
+  met zes vaste cijfers (`.sess-figs`, coach-logica §9a) en een deelknop; de spelerspagina heeft vier kaartjes
+  (Highlights, Precisie, Frambroos-index met balkjes, Impact); de ranglijst op het Clubhouse is een rij
+  `.rank-card`-kaartjes met de top vier, een tik opent de hele lijst. Geen tabellen waar een kaartje volstaat.
+- Weinig tekst op het eerste gezicht: een uitlegregel (`p.hint` direct onder een kaarttitel) is standaard verborgen
+  achter de i-knop in de titel (`hintToggles` in `public/common.js`). Houd zo'n regel op één zin. Samenvattingen
+  blijven zichtbaar; die zijn de kern.
 - Dashboardstijl: rustige kaarten met een dunne rand en geen zware schaduw; kaarttitel ingetogen met een korte uitleg
-  eronder; filters als pil-knoppen met icoon (`data-icon` op `.filter`); grote cijfers in `--num-font`.
+  achter de i-knop; filters als pil-knoppen met icoon (`data-icon` op `.filter`); grote cijfers in `--num-font`.
 - KPI-tegels altijd via `kpiTile(label, waarde, regel, deltaOf(...))` uit `public/common.js`. De badge toont een
   verandering: groen beter, rood slechter, grijs gelijk, met een `title` die zegt waartegen. Clubhouse: laatste speelavond
   tegenover de avonden daarvoor. Sessie: deze avond tegenover normaal. Speler: met tegenover zonder deze speler.

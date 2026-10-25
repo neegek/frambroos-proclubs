@@ -90,13 +90,25 @@ function render() {
   const momCount = Object.entries(moms.reduce((a, n) => (a[n] = (a[n] || 0) + 1, a), {})).sort((a, b) => b[1] - a[1]);
   // Badges: deze avond tegenover normaal (alle andere wedstrijden).
   const no = summarize(others), TN = 'Deze avond tegenover normaal (alle andere wedstrijden)';
-  $('#s-tiles').innerHTML = [
-    kpiTile('Uitslag', `${sm.W}-${sm.D}-${sm.L}`, `${sm.gf}–${sm.ga} in doelpunten`, others.length >= 3 ? deltaOf(sm.gfAvg - sm.gaAvg, no.gfAvg - no.gaAvg, { digits: 1, title: `${TN} (doelsaldo per wedstrijd)` }) : null),
-    kpiTile('Punten per wedstrijd', sm.ppg, `normaal ${no.ppg ?? '–'}`, others.length >= 3 ? deltaOf(sm.ppg, no.ppg, { digits: 2, title: TN }) : null),
-    kpiTile('Tov verwachting', signed(sm.resid, 2), 'doelsaldo per wedstrijd', others.length >= 3 ? deltaOf(sm.resid, no.resid, { digits: 2, title: TN }) : null),
-    kpiTile('Man of the match', momCount.length ? esc(momCount[0][0]) : '–', momCount.length ? `${momCount[0][1]}×${momCount.length > 1 ? ` · ook ${momCount.slice(1).map(([n, c]) => `${esc(n)} ${c}×`).join(', ')}` : ''}` : '', null, { small: true }),
+  // Zes vaste cijfers per avond (coach-logica §9a), met "normaal" eronder waar dat iets zegt.
+  const ourP = list => list.flatMap(m => m.players);
+  const passPct = list => pct(pSum(ourP(list).map(p => ({ p })), p => p.passesMade), pSum(ourP(list).map(p => ({ p })), p => p.passAttempts));
+  const convPct = list => pct(pSum(ourP(list).map(p => ({ p })), p => p.goals), pSum(ourP(list).map(p => ({ p })), p => p.shots));
+  const cleanSheets = list => list.filter(m => m.goalsAgainst === 0).length;
+  const dur = ms[ms.length - 1].ts - ms[0].ts + 15 * 60, durTxt = `${Math.floor(dur / 3600)}u ${String(Math.round(dur % 3600 / 60)).padStart(2, '0')}m`;
+  const fig = (label, value, sub, badge) => `<div class="sfig"><span class="sfig-label">${label}</span><span class="sfig-value">${value}${badge ? `<span class="kpi-badge ${badge.good === true ? 'up' : badge.good === false ? 'down' : ''}" title="${esc(badge.title || '')}">${badge.txt}</span>` : ''}</span><span class="sfig-sub">${sub}</span></div>`;
+  const cmpOk = others.length >= 3;
+  $('#s-figs').innerHTML = [
+    fig('Wedstrijden', sm.n, `${sm.W}-${sm.D}-${sm.L}`, cmpOk ? deltaOf(sm.ppg, no.ppg, { digits: 2, title: `${TN}: punten per wedstrijd` }) : null),
+    fig('Duur', durTxt, `${fmtTime(ms[0].ts)} tot ${fmtTime(ms[ms.length - 1].ts)}`),
+    fig('Doelsaldo', signed(sm.gf - sm.ga, 0), `${sm.gf} voor · ${sm.ga} tegen`, cmpOk ? deltaOf(sm.resid, no.resid, { digits: 2, title: `${TN}: doelsaldo tov verwachting` }) : null),
+    fig('Pass', fmtPct(passPct(ms)), cmpOk ? `normaal ${fmtPct(passPct(others))}` : ''),
+    fig('Conversie', fmtPct(convPct(ms)), cmpOk ? `normaal ${fmtPct(convPct(others))}` : ''),
+    fig('Clean sheets', cleanSheets(ms), cmpOk ? `normaal ${fmtPct(pct(cleanSheets(others), others.length))} van de potten` : `van ${sm.n}`),
   ].join('');
-  $('#s-matches').innerHTML = ms.map(m => matchRow(m, own)).join('');
+  $('#s-matches').innerHTML = ms.map(m => matchCard(m, { own })).join('');
+  $('#s-share').onclick = () => shareSession(ms, sm, prow, $('#s-summary').innerText);
+
 
   // Team tegenover normaal
   const cmp = others.length >= 3 ? compareTeam(ms, others) : [];
@@ -127,7 +139,7 @@ function render() {
   }).sort((x, y) => (y.rH ?? 0) - (x.rH ?? 0));
   $('#s-summary').innerHTML = sessionSummary(ms, others, sm, names, opp, own, cmp, prow);
   $('#s-players').innerHTML = `<div class="pcards">${prow.map(r => `<a class="pcard" href="spelers.html#${encodeURIComponent(r.name)}">
-    <div class="pcard-head"><span class="pcard-name">${esc(r.name)}</span><span class="pcard-rating">${f2(r.rH)}</span></div>
+    <div class="pcard-head"><span class="pcard-name">${esc(r.name)}${r.mom ? ' <span class="crown" title="Man of the match">♛</span>' : ''}</span><span class="pcard-rating">${f2(r.rH)}</span></div>
     <div class="pcard-sub">${r.n} ${r.n === 1 ? 'wedstrijd' : 'wedstrijden'} · normaal ${f2(r.rT)} ${r.d === null ? '' : residCell(r.d)}</div>
     <div class="pcard-stats"><span><b>${r.g}</b> goals</span><span><b>${r.a}</b> assists</span><span><b>${r.mom}</b> MOTM</span><span><b>${f1(r.actions)}</b> balacties</span></div>
     <div class="pcard-notes">${r.notes}</div></a>`).join('')}</div>`;
@@ -137,3 +149,42 @@ addEventListener('resize', () => DATA && render());
 addEventListener('hashchange', () => { const id = Number(location.hash.slice(1)); if (id && id !== selectedId) { selectedId = id; render(); } });
 selectedId = Number(location.hash.slice(1)) || null;
 loadData().then(() => { sessions = sessionsOf(DATA.matches); render(); }).catch(showError);
+
+// ---------- deelkaart ----------
+// Een avond als afbeelding (1080×1080) voor de groepsapp: uitslag, kerncijfers, uitblinker, de eerste zin van de
+// samenvatting. Kleuren van het thuistenue. Deelt via het deelmenu van de telefoon, anders als download.
+async function shareSession(ms, sm, prow, summaryText) {
+  const k = DATA.club.kits?.home || ['#090b0d', '#ffd200', '#582063', '#ffd200'];
+  const [ink, accent, purple] = ['#f2f2f2', k[1], k[2]];
+  const c = document.createElement('canvas'); c.width = 1080; c.height = 1080; const g = c.getContext('2d');
+  const grad = g.createLinearGradient(0, 0, 1080, 1080); grad.addColorStop(0, purple); grad.addColorStop(1, '#17141b');
+  g.fillStyle = grad; g.fillRect(0, 0, 1080, 1080);
+  const font = (size, weight = 500, family = 'system-ui, -apple-system, "Segoe UI", sans-serif') => { g.font = `${weight} ${size}px ${family}`; };
+  const mono = (size, weight = 500) => font(size, weight, 'ui-monospace, "SF Mono", Menlo, monospace');
+  const wrap = (text, x, y, maxW, lh) => { const words = text.split(' '); let line = '', yy = y; for (const w of words) { const test = line ? `${line} ${w}` : w; if (g.measureText(test).width > maxW && line) { g.fillText(line, x, yy); line = w; yy += lh; } else line = test; } if (line) g.fillText(line, x, yy); return yy + lh; };
+  const crest = await new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = 'crest.png'; });
+  if (crest) g.drawImage(crest, 72, 64, 120, 120);
+  g.fillStyle = ink; font(54, 700); g.fillText('Frambroos', 216, 118);
+  g.fillStyle = '#cfc3d4'; font(30); g.fillText(cap(longDate(ms[0].ts)), 216, 164);
+  // uitslag
+  g.fillStyle = 'rgba(255,255,255,0.06)'; g.beginPath(); g.roundRect(72, 230, 936, 250, 28); g.fill();
+  mono(132, 600); let x = 108; const y = 365;
+  for (const [n, col] of [[sm.W, '#5b9cf0'], [sm.D, '#9a9da3'], [sm.L, '#f07c7c']]) { g.fillStyle = col; g.fillText(String(n), x, y); x += g.measureText(String(n)).width; g.fillStyle = '#6f6e68'; if (col !== '#f07c7c') { g.fillText('-', x, y); x += g.measureText('-').width; } }
+  g.fillStyle = '#cfc3d4'; font(26); g.fillText('W – G – V', 112, 430);
+  let px = 560; for (const txt of [`${sm.ppg} ppw`, `winst ${fmtPct(sm.winPct)}`, `${signed(sm.gf - sm.ga, 0)} doelsaldo`]) { font(26, 600); const wdt = g.measureText(txt).width + 40; g.fillStyle = 'rgba(255,210,0,0.14)'; g.beginPath(); g.roundRect(px, 300, wdt, 52, 26); g.fill(); g.fillStyle = accent; g.fillText(txt, px + 20, 336); px += wdt + 14; }
+  mono(64, 500); g.fillStyle = ink; g.textAlign = 'right'; g.fillText(`${sm.gf}–${sm.ga}`, 976, 440); g.textAlign = 'left';
+  // uitblinker en betrokken bij goals
+  const best = prow[0], inv = [...prow].sort((a, b) => (b.g + b.a) - (a.g + a.a))[0];
+  const box = (bx, label, name, val) => { g.fillStyle = 'rgba(255,255,255,0.06)'; g.beginPath(); g.roundRect(bx, 512, 452, 200, 28); g.fill(); g.fillStyle = accent; font(24, 600); g.fillText(label.toUpperCase(), bx + 32, 562); g.fillStyle = ink; font(40, 700); g.fillText(name, bx + 32, 622); mono(56, 500); g.textAlign = 'right'; g.fillText(val, bx + 420, 688); g.textAlign = 'left'; };
+  if (best) box(72, 'Uitblinker', best.name, f2(best.rH));
+  if (inv) box(556, 'Goals + assists', inv.name, String(inv.g + inv.a));
+  // samenvatting (eerste twee zinnen)
+  g.fillStyle = ink; font(32, 400);
+  const sentences = summaryText.replace(/\s+/g, ' ').match(/[^.!?]+[.!?]/g) || [summaryText];
+  wrap(sentences.slice(0, 2).join(' ').trim(), 72, 790, 936, 46);
+  g.fillStyle = '#cfc3d4'; font(24); g.fillText('Frambroos Coach · neegek.github.io/frambroos-proclubs', 72, 1016);
+  const blob = await new Promise(r => c.toBlob(r, 'image/png'));
+  const file = new File([blob], `frambroos-${new Date(ms[0].ts * 1000).toISOString().slice(0, 10)}.png`, { type: 'image/png' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'Frambroos' }); return; } catch { /* geannuleerd: dan downloaden */ } }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = file.name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}

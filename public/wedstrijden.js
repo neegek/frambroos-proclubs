@@ -16,7 +16,7 @@ function render() {
   $('#match-list').innerHTML = [...byDay].map(([day, ms]) => {
     const s = summarize(ms);
     return `<section class="card match-day"><div class="match-day-head"><h2>${cap(day)}</h2><span class="s-meta">${s.W}W ${s.D}G ${s.L}V · ${s.gf}–${s.ga}</span></div>
-      <div class="match-rows">${ms.map(m => matchRow(m, own)).join('')}</div></section>`;
+      <div class="match-cards">${ms.map(m => matchCard(m, { own })).join('')}</div></section>`;
   }).join('');
 }
 
