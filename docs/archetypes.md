@@ -41,3 +41,10 @@ Controleer bij een nieuwe EA-update eerst de officiële patch notes en werk dan 
 - PlayStyle-slots op level 5, 15 en 40, plus de signature PlayStyle (goud op level 20).
 - Masteries: +1 op twee attributen op level 10, nog +1 op één daarvan op level 30. Permanent en voor alle archetypes.
 - Op 22 oktober 2026 zijn alle AP van archetypes teruggezet om opnieuw te verdelen; levels en totale AP bleven gelijk.
+
+## Iconen
+
+`ARCHETYPE_ICON` in `public/archetypes.js` is een eigen set lijniconen, nagetekend naar de iconen in het spel (gezien
+25 oktober 2026): keeper slot en bezem; verdediging kronkelende pijl, vuist en schild met bliksem; middenveld slagen
+met vonken, recyclepijlen, smoking met strik en lamp met vonk; aanval bliksem, hoge hoed met toverstaf, finishvlaggen
+en doelwit. In die volgorde horen ze bij archetype 1 t/m 13.

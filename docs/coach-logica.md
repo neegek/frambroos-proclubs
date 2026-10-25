@@ -346,7 +346,9 @@ De kaart op de spelerspagina heeft de vorm van een FC-kaart (één pad in `playe
 bovenkant, punt met inkeping, dubbele gouden rand) en een tier die met de vorm meebeweegt. Zonder foto staat er een icoon. Bovenste helft: overall, archetype-icoon
 (`ARCHETYPE_ICON` in `public/archetypes.js`, eigen lijniconen), logo en foto; de foto vult de hele bovenste helft.
 Onderste helft: een vlak in een eigen tint (`--t-panel`) met de achternaam van de pro (uit `proName`, alles na de
-voornaam; één woord blijft heel) en zes cijfers in twee kolommen (WED, RAT, GLS | ASS, MOTM, WIN, of de face stats).
+voornaam; één woord blijft heel) en zes cijfers in twee kolommen: de carrièretotalen volgens EA (WED, RAT, GLS | ASS, MOTM, WIN), of de
+face stats van de ingevulde build. Ernaast staan de cijfers uit de gevolgde wedstrijden (*Gevolgd*). Geen archetype-
+tekst op de kaart: het icoon zegt het.
 Geen scheidingslijnen; de tier zie je aan de kaart zelf, zonder label. Vorm = het
 gemiddelde van de EA-rating over de **laatste 5 wedstrijden** tegenover het eigen gemiddelde over **alle andere**
 wedstrijden. De tier kijkt dus naar hoe iemand nu speelt tegenover eigen normaal, niet naar de rol.

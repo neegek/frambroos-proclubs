@@ -88,20 +88,22 @@ function costInfo(archetypeId, attrKey) {
   return tier < 0 && !patch ? null : { tier, tierName: tier >= 0 ? AP_COST.tierNames[tier] : null, patch };
 }
 
-// Eigen lijnicoon per archetype (24×24, stroke = currentColor). Gebruikt op de spelerskaart; later ook bruikbaar op de opstelling.
+// Icoon per archetype, nagetekend naar de iconen in het spel (FC27, in de volgorde keeper, verdediging, middenveld,
+// aanval): rond met een lijnglyph, 24×24, stroke = currentColor. Welk icoon bij welk archetype hoort staat in
+// docs/archetypes.md. Gebruikt op de spelerskaart; later ook bruikbaar op de opstelling.
 const ARCHETYPE_ICON = {
-  1: '<rect x="3" y="7" width="18" height="12" rx="1"/><path d="M3 11h18M3 15h18M9 7v12M15 7v12"/>',                       // Shot Stopper: het doel
-  2: '<rect x="3" y="9" width="18" height="10" rx="1"/><path d="M3 14h18M9 9v10M15 9v10M12 2v5M9.5 4.5L12 2l2.5 2.5"/>',    // Sweeper Keeper: doel, eruit komen
-  3: '<path d="M5 19L19 5M10 5h9v9"/>',                                                                                    // Progressor: vooruit
-  4: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',                                                             // Boss: schild
-  5: '<circle cx="12" cy="12" r="9"/><path d="M8 8l8 8M16 8l-8 8"/>',                                                      // Disruptor: onderbreken
-  6: '<circle cx="15" cy="4.5" r="1.8"/><path d="M13 8l-4 3 2 4-4 5M13 8l3 3 4-1M11 15l4 2 1 4"/>',                       // Marauder: rennen
-  7: '<path d="M4 12a8 8 0 0 1 14-5l2 2M20 12a8 8 0 0 1-14 5l-2-2M18 3v4h-4M6 21v-4h4"/>',                                 // Recycler: rondspelen
-  8: '<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',                           // Maestro: dirigeren
-  9: '<path d="M4 17c4 0 6-6 10-6h6M17 8l3 3-3 3"/><circle cx="5" cy="17" r="2"/>',                                         // Creator: de pass
-  10: '<path d="M13 2L5 13h6l-1 9 8-12h-6z"/>',                                                                            // Spark: bliksem
-  11: '<path d="M12 3l1.8 4.7 4.7 1.8-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2 2.2.8-2.2.8L19 21l-.8-2.2-2.2-.8 2.2-.8z"/>', // Magician
-  12: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>',                   // Finisher: roos
-  13: '<circle cx="12" cy="5" r="2.5"/><path d="M12 7.5V21M5 13a7 7 0 0 0 14 0M7 13H3M21 13h-4"/>',                        // Target: anker, vasthouden
+  1: '<rect x="7" y="11" width="10" height="7" rx="1.5"/><path d="M9.5 11V9a2.5 2.5 0 0 1 5 0v2M12 14v1.5"/>',                               // Shot Stopper: slot (dicht houden)
+  2: '<path d="M14 5l-4.5 6.5M9.5 11.5l-3 2.5 4 4 2.5-3M7 14l4 4M11 7l-1.5-1"/>',                                                             // Sweeper Keeper: bezem (opruimen)
+  3: '<path d="M8 17c-2 0-2-3 0-3h8c2 0 2-3 0-3H8c-2 0-2-3 0-3h7M13 5l2.5 3L13 11"/>',                                                         // Progressor: kronkelende pijl omhoog
+  4: '<path d="M8 12V9.5a1 1 0 0 1 2 0V12M10 11V8.5a1 1 0 0 1 2 0V11M12 11V8.5a1 1 0 0 1 2 0V11M14 11.5V9.5a1 1 0 0 1 2 0V13c0 3-2 5-5 5s-5-2-5-5v-1.5"/>', // Boss: vuist
+  5: '<path d="M12 5l6 2v5c0 4-3 6-6 7-3-1-6-3-6-7V7z"/><path d="M12.5 8l-2 4h3l-2 4"/>',                                                    // Disruptor: schild met bliksem
+  6: '<path d="M7 17l10-10M9 19l10-10"/><path d="M6 8l.5 1.2L7.7 9.7l-1.2.5L6 11.4l-.5-1.2-1.2-.5 1.2-.5zM17 14l.5 1.2 1.2.5-1.2.5-.5 1.2-.5-1.2-1.2-.5 1.2-.5z"/>', // Marauder: slagen met vonken
+  7: '<path d="M8.2 15.2a5 5 0 0 1 1.1-7M13.4 7.1a5 5 0 0 1 3.6 6.2M13.2 17.3a5 5 0 0 1-5.4-.6"/><path d="M9.6 5.9l-.3 2.6-2.6-.3M18.1 11.8l-1.4 2.2-2.2-1.4M13.9 19.4l-.8-2.5-2.5.8"/>',  // Recycler: drie pijlen rond
+  8: '<path d="M12 7l-2.5 2.5L12 18l2.5-8.5zM12 7l-4 1v10h8V8z"/><path d="M10 7h4l-2 1.5z"/>',                                                // Maestro: smoking met strik
+  9: '<path d="M12 5a4 4 0 0 0-2.5 7.1c.5.4.8.9.8 1.4h3.4c0-.5.3-1 .8-1.4A4 4 0 0 0 12 5zM10.5 16h3M11 18h2"/><path d="M18 6l.4 1 1 .4-1 .4-.4 1-.4-1-1-.4 1-.4z"/>', // Creator: lamp met vonk
+  10: '<path d="M13 5l-6 8h5l-1 6 6-8h-5z"/>',                                                                                                 // Spark: bliksem
+  11: '<path d="M8 15h8M9 15V9h6v6M7 9h10"/><path d="M15 5l2.5 2.5M18.5 4l.3.8.8.3-.8.3-.3.8-.3-.8-.8-.3.8-.3z"/>',                            // Magician: hoge hoed met toverstaf
+  12: '<path d="M7 7l10 10M17 7L7 17"/><path d="M7 7h5v4H7zM12 7h5v4h-5z" fill="currentColor" fill-opacity=".35"/>',                           // Finisher: finishvlaggen
+  13: '<circle cx="12" cy="13" r="5"/><circle cx="12" cy="13" r="1.5"/><path d="M12 5v3M9.5 6h5"/>',                                           // Target: doelwit
 };
-const archIcon = (id, cls = '') => `<svg class="arch-icon ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ARCHETYPE_ICON[id] || '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-5 4-7 8-7s7 2 8 7"/>'}</svg>`;
+const archIcon = (id, cls = '') => `<svg class="arch-icon ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="11"/>${ARCHETYPE_ICON[id] || '<circle cx="12" cy="9" r="3"/><path d="M7 18c.5-3 2.5-4.5 5-4.5s4.5 1.5 5 4.5"/>'}</svg>`;

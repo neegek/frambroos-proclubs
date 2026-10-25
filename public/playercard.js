@@ -1,5 +1,5 @@
-// Spelerskaart bovenaan de spelerspagina: een kaart in FC27-stijl met foto, overall, positie, build en zes cijfers,
-// met ernaast alleen wat niet op de kaart staat. Donker thema: thuistenue; licht thema: uittenue.
+// Spelerskaart bovenaan de spelerspagina: een kaart in FC-stijl met foto, overall, archetype-icoon en zes carrièrecijfers
+// volgens EA, met ernaast alleen wat niet op de kaart staat. Donker thema: thuistenue; licht thema: uittenue.
 // Foto's: data/players/<slug>.<webp|png|jpg> (max 900 px), aangeleverd via de chat; de server toont ze op /media/players/.
 (() => {
 let PHOTOS = {};
@@ -73,6 +73,7 @@ function render(name) {
   // Op de kaart: face stats van de ingevulde build (als die bij het laatste archetype hoort), anders seizoenscijfers.
   const faces = build && (!build.archetype || Number(build.archetype) === arch) && ['pac', 'sho', 'pas', 'dri', 'def', 'phy'].every(k => build[k]);
   const stats = faces ? [['PAC', build.pac], ['SHO', build.sho], ['PAS', build.pas], ['DRI', build.dri], ['DEF', build.def], ['PHY', build.phy]]
+    : career ? [['WED', career.gamesPlayed], ['RAT', career.ratingAve ?? '–'], ['GLS', career.goals], ['ASS', career.assists], ['MOTM', career.mom], ['WIN', `${career.winRate ?? '–'}%`]] // totalen volgens EA
     : [['WED', rows.length], ['RAT', rating === null ? '–' : rating.toFixed(1)], ['GLS', g], ['ASS', a], ['MOTM', mom], ['WIN', `${s.winPct ?? '–'}%`]];
 
   // Builds die gespeeld zijn, laatst gespeelde voorop.
@@ -93,7 +94,6 @@ function render(name) {
         </div>
         <div class="fut-bottom">
         <div class="fut-name" title="${esc(name)}">${esc(cardName(career, name))}</div>
-        <div class="fut-arch">${info ? info.name : ''}</div>
         <div class="fut-stats"><div class="fut-col">${stats.slice(0, 3).map(([l, v]) => `<div><b>${v}</b><span>${l}</span></div>`).join('')}</div><div class="fut-col">${stats.slice(3).map(([l, v]) => `<div><b>${v}</b><span>${l}</span></div>`).join('')}</div></div>
         </div>
       </div>
@@ -104,7 +104,7 @@ function render(name) {
       ${detail('Builds', builds.map(([id, n]) => `<span class="pc-badge ${Number(id) === arch ? 'on' : ''}">${archName(id)} <small>${Number(id) === arch ? 'laatst · ' : ''}${n}×</small></span>`).join(' '))}
       ${detail('Signature', info ? info.signature : '')}
       ${detail('Vorm', last5.length ? pills(last5) : '')}
-      ${detail('Carrière', career ? `${career.gamesPlayed} wedstrijden · ${career.goals} goals · ${career.assists} assists · rating ${career.ratingAve} <small>volgens EA</small>` : '')}
+      ${detail('Gevolgd', rows.length ? `${rows.length} wedstrijden · ${g} goals · ${a} assists · rating ${rating === null ? '–' : rating.toFixed(2)} <small>in deze app</small>` : '')}
     </dl>
   </div>`;
 }
