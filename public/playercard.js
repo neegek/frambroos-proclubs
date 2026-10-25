@@ -48,12 +48,12 @@ function tierOf(ratings) {
   return { tier: 'goud', label: '', why: base !== null ? `laatste 5: ${l5.toFixed(2)}, normaal ${base.toFixed(2)}` : '' };
 }
 
-// Naam op de kaart: de achternaam van de pro (zoals in het spel), anders de accountnaam.
+// Naam op de kaart: voorletter en achternaam van de pro (P. Selie), anders de accountnaam. Eén woord blijft heel.
 function cardName(career, name) {
   const pro = (career?.proName || '').trim();
   if (!pro) return name;
   const parts = pro.split(/\s+/);
-  return parts.length > 1 ? parts.slice(1).join(' ') : pro;
+  return parts.length > 1 ? `${parts[0].charAt(0).toUpperCase()}. ${parts.slice(1).join(' ')}` : pro;
 }
 
 function lastArch(rows) { const r = [...rows].reverse().find(x => x.p.archetypeId); return r ? r.p.archetypeId : null; }
@@ -74,7 +74,7 @@ function render(name) {
   // Op de kaart: face stats van de ingevulde build (als die bij het laatste archetype hoort), anders seizoenscijfers.
   const faces = build && (!build.archetype || Number(build.archetype) === arch) && ['pac', 'sho', 'pas', 'dri', 'def', 'phy'].every(k => build[k]);
   const stats = faces ? [['PAC', build.pac], ['SHO', build.sho], ['PAS', build.pas], ['DRI', build.dri], ['DEF', build.def], ['PHY', build.phy]]
-    : career ? [['WED', career.gamesPlayed], ['RAT', career.ratingAve ?? '–'], ['GLS', career.goals], ['ASS', career.assists], ['MOTM', career.mom], ['WIN', `${career.winRate ?? '–'}%`]] // totalen volgens EA
+    : career ? [['WED', career.gamesPlayed], ['RAT', career.ratingAve === null || career.ratingAve === undefined ? '–' : Number(career.ratingAve).toFixed(1)], ['GLS', career.goals], ['ASS', career.assists], ['MOTM', career.mom], ['WIN', `${career.winRate ?? '–'}%`]] // totalen volgens EA
     : [['WED', rows.length], ['RAT', rating === null ? '–' : rating.toFixed(1)], ['GLS', g], ['ASS', a], ['MOTM', mom], ['WIN', `${s.winPct ?? '–'}%`]];
 
   // Builds die gespeeld zijn, laatst gespeelde voorop.
@@ -94,7 +94,7 @@ function render(name) {
           <div class="fut-photo">${photo ? '' : personIcon()}</div>
         </div>
         <div class="fut-bottom">
-        <div class="fut-name" title="${esc(name)}">${esc(cardName(career, name))}</div>
+        <div class="fut-name${cardName(career, name).length > 12 ? ' long' : ''}" title="${esc(name)}">${esc(cardName(career, name))}</div>
         <div class="fut-stats"><div class="fut-col">${stats.slice(0, 3).map(([l, v]) => `<div><b>${v}</b><span>${l}</span></div>`).join('')}</div><div class="fut-col">${stats.slice(3).map(([l, v]) => `<div><b>${v}</b><span>${l}</span></div>`).join('')}</div></div>
         </div>
       </div>
