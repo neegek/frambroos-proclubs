@@ -11,9 +11,9 @@ function personIcon() {
     <circle cx="60" cy="42" r="22"/><path d="M18 108c4-24 20-36 42-36s38 12 42 36"/></svg>`;
 }
 
-// De kaartvorm (300×430): gebogen schouders, kroontje bovenin, punt met inkeping onderaan. Eén pad voor de rand,
+// De kaartvorm (300×430): gebogen schouders naar een vlakke bovenkant, punt met inkeping onderaan. Eén pad voor de rand,
 // de donkere lijn, de binnenrand en de achtergrond; kleuren komen uit de tier-tokens in style.css.
-const FUT_SHAPE = 'M18 70C18 40 60 30 118 28C128 27 136 18 150 26C164 18 172 27 182 28C240 30 282 40 282 70L282 352C282 380 262 400 230 408C200 414 172 424 160 428L150 423L140 428C128 424 100 414 70 408C38 400 18 380 18 352Z';
+const FUT_SHAPE = 'M18 74C18 46 52 30 102 28L198 28C248 30 282 46 282 74L282 352C282 380 262 400 230 408C200 414 172 424 160 428L150 423L140 428C128 424 100 414 70 408C38 400 18 380 18 352Z';
 function futFrame() {
   const inset = (sx, sy) => `transform="translate(150 215) scale(${sx} ${sy}) translate(-150 -215)"`;
   return `<svg class="fut-frame" viewBox="0 0 300 430" aria-hidden="true">
@@ -40,6 +40,14 @@ function tierOf(ratings) {
   if (l5 >= 8) return { tier: 'top', label: 'Topvorm', why: `laatste 5: ${l5.toFixed(2)}` };
   if (base !== null && l5 >= base + 0.3) return { tier: 'zwart', label: 'In vorm', why: `laatste 5: ${l5.toFixed(2)}, normaal ${base.toFixed(2)}` };
   return { tier: 'goud', label: '', why: base !== null ? `laatste 5: ${l5.toFixed(2)}, normaal ${base.toFixed(2)}` : '' };
+}
+
+// Naam op de kaart: de achternaam van de pro (zoals in het spel), anders de accountnaam.
+function cardName(career, name) {
+  const pro = (career?.proName || '').trim();
+  if (!pro) return name;
+  const parts = pro.split(/\s+/);
+  return parts.length > 1 ? parts.slice(1).join(' ') : pro;
 }
 
 function lastArch(rows) { const r = [...rows].reverse().find(x => x.p.archetypeId); return r ? r.p.archetypeId : null; }
@@ -78,10 +86,9 @@ function render(name) {
           <div class="fut-ovr"><b>${career?.proOverall ?? '–'}</b><span>${pos ?? ''}</span><img src="crest.png" alt="" width="34" height="34"></div>
           <div class="fut-photo">${photo ? `<img src="${photo}" alt="">` : personIcon()}</div>
         </div>
-        <div class="fut-name">${esc(name)}</div>
-        <div class="fut-arch">${info ? info.name : ''}</div>
-        ${tier.label ? `<div class="fut-tier">${tier.label}</div>` : ''}
-        <div class="fut-stats">${stats.map(([l, v]) => `<div><span>${l}</span><b>${v}</b></div>`).join('')}</div>
+        <div class="fut-name" title="${esc(name)}">${esc(cardName(career, name))}</div>
+        <div class="fut-arch">${info ? info.name : ''}${tier.label ? ` <span class="fut-tier">${tier.label}</span>` : ''}</div>
+        <div class="fut-stats"><div class="fut-col">${stats.slice(0, 3).map(([l, v]) => `<div><b>${v}</b><span>${l}</span></div>`).join('')}</div><div class="fut-col">${stats.slice(3).map(([l, v]) => `<div><b>${v}</b><span>${l}</span></div>`).join('')}</div></div>
       </div>
     </div>
     <dl class="pc-details">

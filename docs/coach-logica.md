@@ -342,8 +342,10 @@ voor de sterkte van de tegenstander, eigen vergelijking voor verdedigers en keep
 
 ## 9c. Spelerskaart: tiers
 
-De kaart op de spelerspagina heeft de vorm van een FC-kaart (één pad in `playercard.js`: gebogen schouders, kroontje,
-punt met inkeping, dubbele gouden rand) en een tier die met de vorm meebeweegt. Zonder foto staat er een icoon. Vorm = het
+De kaart op de spelerspagina heeft de vorm van een FC-kaart (één pad in `playercard.js`: gebogen schouders naar een vlakke
+bovenkant, punt met inkeping, dubbele gouden rand) en een tier die met de vorm meebeweegt. Zonder foto staat er een icoon. Bovenste helft: overall, positie, logo en foto;
+onderste helft: de achternaam van de pro (uit `proName`, alles na de voornaam; één woord blijft heel) en zes cijfers
+in twee kolommen. Vorm = het
 gemiddelde van de EA-rating over de **laatste 5 wedstrijden** tegenover het eigen gemiddelde over **alle andere**
 wedstrijden. De tier kijkt dus naar hoe iemand nu speelt tegenover eigen normaal, niet naar de rol.
 
