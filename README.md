@@ -32,17 +32,15 @@ label (sterk, redelijk, zwak) zegt op hoeveel wedstrijden een inzicht rust.
 ## Waarom een verzamelaar?
 
 EA geeft per club alleen de **laatste 10 wedstrijden** per type (league / playoff) terug.
-Alles wat ouder is, is weg. Daarom draait `collect.js` elk kwartier en bewaart het nieuwe
+Alles wat ouder is, is weg. Daarom draait `collect.js` elke 2 uur, de hele dag, en bewaart het nieuwe
 wedstrijden in `data/proclubs.sqlite`. Hoe langer de verzamelaar draait, hoe rijker het dashboard.
 
 ## Waar draait de verzamelaar?
 
-**In GitHub Actions** (`.github/workflows/collect.yml`), ook als je Mac uit staat. De cron vraagt
-om elk kwartier, maar GitHub voert geplande workflows naar eigen inzicht uit: in de praktijk om de
-2 tot 5 uur. Dat is meestal genoeg (EA bewaart 10 wedstrijden per type), maar bij een lange avond
-kan de oudste wedstrijd wegvallen voordat er een run is. Daarom start een externe cron-dienst de workflow elk kwartier
-tussen 19:00 en 02:00, met GitHub's eigen cron als reserve één keer per uur in de avond. Instellen:
-zie [docs/trigger.md](docs/trigger.md).
+**In GitHub Actions** (`.github/workflows/collect.yml`), ook als je Mac uit staat. GitHub's eigen planning is
+onbetrouwbaar (runs komen soms uren te laat), daarom start cron-job.org de workflow elke 2 uur, de hele dag. Tien
+wedstrijden van één type kosten op zijn snelst zo'n 2,5 uur, dus er valt niets weg. GitHub's eigen cron draait elke 3 uur
+als reserve. Instellen en de berekening: zie [docs/trigger.md](docs/trigger.md).
 Nieuwe wedstrijden worden als commit op `main` gezet in `data/proclubs.sqlite`. Dat is de bron
 van waarheid. `npm run dashboard` haalt eerst de nieuwste database op (`npm run sync`, gooit
 lokale wijzigingen aan de database weg) en start dan het dashboard.

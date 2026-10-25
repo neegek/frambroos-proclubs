@@ -1,17 +1,14 @@
 name: Verzamel wedstrijden
 
-# Twee triggers:
-# 1. Hoofdtrigger: een externe cron-dienst start deze workflow elk halfuur tussen 19:30 en 01:00
-#    (Europe/Amsterdam) via workflow_dispatch. Zie docs/trigger.md. GitHub's eigen planning is daarvoor
-#    te onbetrouwbaar: in de praktijk draaide */15 maar om de 2 tot 5 uur.
-# 2. Reserve: GitHub's eigen cron, één keer per uur in de avond, op minuut 47 (niet op het hele uur,
-#    dan is het bij GitHub het drukst). Uren in UTC; dit dekt ongeveer 19:47–02:47 in de zomer en
-#    18:47–01:47 in de winter.
-# EA bewaart 10 wedstrijden per type, ruim 3 uur spelen (een wedstrijd duurt met lobby zo'n 20 minuten).
-# Na een run met nieuwe data wordt ook de site opnieuw gepubliceerd (site.yml).
+# Twee triggers, samen de hele dag:
+# 1. Hoofdtrigger: cron-job.org start deze workflow elke 2 uur (00:00, 02:00, … 22:00, Europe/Amsterdam) via
+#    workflow_dispatch. Zie docs/trigger.md. GitHub's eigen planning is daarvoor te onbetrouwbaar.
+# 2. Reserve: GitHub's eigen cron elke 3 uur, op minuut 47 (niet op het hele uur, dan is het bij GitHub het drukst).
+# EA bewaart 10 wedstrijden per type. Op het snelste gemeten tempo (15 min per wedstrijd) duren 10 wedstrijden
+# zo'n 2,5 uur; om de 2 uur draaien laat dus altijd marge. Na een run met nieuwe data volgt de site (site.yml).
 on:
   schedule:
-    - cron: "47 0,17-23 * * *"
+    - cron: "47 */3 * * *"
   workflow_dispatch:
 
 permissions:
