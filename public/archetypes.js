@@ -89,7 +89,7 @@ function costInfo(archetypeId, attrKey) {
 }
 
 // Icoon per archetype, nagetekend naar de iconen in het spel (FC27, in de volgorde keeper, verdediging, middenveld,
-// aanval): rond met een lijnglyph, 24×24, stroke = currentColor. Welk icoon bij welk archetype hoort staat in
+// aanval): een lijnglyph zonder cirkel eromheen, getekend op 24×24 en bijgesneden tot 4–20, stroke = currentColor. Welk icoon bij welk archetype hoort staat in
 // docs/archetypes.md. Gebruikt op de spelerskaart; later ook bruikbaar op de opstelling.
 const ARCHETYPE_ICON = {
   1: '<path d="M6 17V8h12v9"/><rect x="9.6" y="12" width="4.8" height="3.8" rx=".8" fill="currentColor"/><path d="M10.6 12v-1.1a1.4 1.4 0 0 1 2.8 0V12"/>', // Shot Stopper: doelpalen met een slot in het midden
@@ -106,4 +106,4 @@ const ARCHETYPE_ICON = {
   12: '<path d="M7.5 18.5L13.5 6M16.5 18.5L10.5 6"/><path d="M13.5 6l4.2 1-1.2 3.1-4-1zM10.5 6l-4.2 1 1.2 3.1 4-1z" fill="currentColor" fill-opacity=".45"/>', // Finisher: twee finishvlaggen
   13: '<circle cx="12" cy="14" r="5"/><circle cx="12" cy="14" r="1" fill="currentColor"/><path d="M12 14V5"/><path d="M12 5h5l-1.5 1.8L17 8.6h-5z" fill="currentColor" fill-opacity=".45"/>', // Target: cirkel met een vlag uit het midden
 };
-const archIcon = (id, cls = '') => `<svg class="arch-icon ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="11"/>${ARCHETYPE_ICON[id] || '<circle cx="12" cy="9" r="3"/><path d="M7 18c.5-3 2.5-4.5 5-4.5s4.5 1.5 5 4.5"/>'}</svg>`;
+const archIcon = (id, cls = '') => `<svg class="arch-icon ${cls}" viewBox="3.5 3.5 17 17" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ARCHETYPE_ICON[id] || '<circle cx="12" cy="9" r="3"/><path d="M7 18c.5-3 2.5-4.5 5-4.5s4.5 1.5 5 4.5"/>'}</svg>`;

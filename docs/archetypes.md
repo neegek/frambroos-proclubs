@@ -44,7 +44,7 @@ Controleer bij een nieuwe EA-update eerst de officiële patch notes en werk dan 
 
 ## Iconen
 
-`ARCHETYPE_ICON` in `public/archetypes.js` is een eigen set lijniconen in een cirkel, nagetekend naar de iconen in het
+`ARCHETYPE_ICON` in `public/archetypes.js` is een eigen set lijniconen (zonder cirkel eromheen), nagetekend naar de iconen in het
 spel en de uitleg van Jamal (25 oktober 2026):
 
 | Archetype | Icoon |

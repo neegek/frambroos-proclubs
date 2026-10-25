@@ -365,9 +365,10 @@ function renderPlayer() {
   ], [...rows].reverse());
 }
 
-for (const id of ['#range', '#type']) $(id).addEventListener('change', renderPlayer);
+for (const id of ['#range', '#type']) $(id).addEventListener('change', () => DATA && renderPlayer());
 addEventListener('resize', () => DATA && renderPlayer());
-addEventListener('hashchange', () => { const n = decodeURIComponent(location.hash.slice(1)); if (n && n !== selected) { selected = n; renderPlayer(); } });
+// Andere speler in het menu: meteen tekenen als de data er is, anders onthouden voor zodra die geladen is.
+addEventListener('hashchange', () => { const n = decodeURIComponent(location.hash.slice(1)); if (n && n !== selected) { selected = n; if (DATA) renderPlayer(); } });
 selected = decodeURIComponent(location.hash.slice(1)) || null;
 // Tabbladen: Overzicht en Build en advies. De keuze blijft bewaard tijdens de sessie.
 function setTab(tab) {
