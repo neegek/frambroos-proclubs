@@ -194,9 +194,9 @@ function render() {
 
   // Leden: carrièrecijfers van EA.
   const members = [...DATA.members].sort((a, b) => (b.gamesPlayed || 0) - (a.gamesPlayed || 0));
+  // Kleine spelerskaarten (playercard.js), met de accountnaam eronder.
   $('#members').innerHTML = members.map(m => `<a class="member" href="spelers.html#${encodeURIComponent(m.name)}">
-      <span class="member-head"><span class="member-ovr">${m.proOverall ?? '–'}</span><span><b>${esc(m.name)}</b><small>${esc(m.proName || '')}${m.proPos !== null && POS_CODE[m.proPos] ? ` · ${POS_CODE[m.proPos]}` : ''}</small></span></span>
-      <span class="member-stats"><span><b>${m.gamesPlayed}</b>wed.</span><span><b>${m.winRate}%</b>winst</span><span><b>${m.goals}</b>goals</span><span><b>${m.assists}</b>assists</span><span><b>${m.mom}</b>MOTM</span><span><b>${f1(m.ratingAve)}</b>rating</span></span></a>`).join('');
+      <span class="member-card">${PlayerCard.html(m.name)}</span><span class="member-tag">${esc(m.name)}</span></a>`).join('');
 
   const ins = teamInsights(ms);
   $('#team-insights').innerHTML = ins.length ? ins.slice(0, 3).join('') : '<li class="empty">Nog te weinig wedstrijden voor patronen.</li>';
@@ -214,4 +214,4 @@ function render() {
 
 addEventListener('resize', () => DATA && render());
 window.rerender = () => render();
-loadData().then(render).catch(showError);
+Promise.all([loadData(), PlayerCard.load().catch(() => {})]).then(render).catch(showError);

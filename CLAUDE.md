@@ -100,6 +100,8 @@ zijn daarom altijd relatief (`spelers.html#naam`, nooit `/spelers.html`), en dat
   silhouet, overall, ingestelde positie, laatst gespeelde build en zes cijfers (seizoen, of face stats uit de ingevulde
   build). Ernaast alleen wat níét op de kaart staat (pro, taak, builds, signature, vorm, carrière). Geen dubbele info:
   wat op de kaart staat, komt niet terug in tegels of teksten eronder. Geen clubnaam- of FC27-teksten op de kaart.
+  Dezelfde kaart staat klein in de ledenrij op het Clubhouse (`PlayerCard.html(naam)`); `index.html` laadt daarvoor
+  `playercard.js`.
 - Wedstrijden is alleen de lijst; een wedstrijd opent op `/wedstrijd.html?id=<matchId>` (een laag dieper) met
   "Terug naar wedstrijden" bovenaan. Link naar wedstrijden altijd via dat adres.
 
