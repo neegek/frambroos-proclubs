@@ -118,5 +118,7 @@ grafiektooltips openen ook met een tik.
 ## Git
 
 Commitberichten in het Nederlands. Na controle committen en pushen naar `main` op github.com/neegek/frambroos-proclubs.
-De repo is van het persoonlijke account **neegek**; het werkaccount N33G3K (waarmee `gh` hier is ingelogd) is collaborator
-met schrijfrechten. Persoonlijk werk hoort op neegek, niet op N33G3K.
+De repo is openbaar en van het persoonlijke account **neegek**; het werkaccount N33G3K is collaborator. Op deze Mac is
+N33G3K het standaardaccount, maar **deze map gebruikt neegek**: git heeft hier een eigen credential helper
+(`gh auth token --user neegek`) en commit als neegek. Voor `gh`-opdrachten in dit project:
+`GH_TOKEN=$(gh auth token --user neegek) gh ...`. Nooit `gh auth switch` gebruiken; dan verandert het hele systeem.
