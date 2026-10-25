@@ -44,21 +44,21 @@ Controleer bij een nieuwe EA-update eerst de officiële patch notes en werk dan 
 
 ## Iconen
 
-`ARCHETYPE_ICON` in `public/archetypes.js` is een eigen set lijniconen (zonder cirkel eromheen), nagetekend naar de iconen in het
-spel en de uitleg van Jamal (25 oktober 2026):
+De iconen zijn van Jamal zelf (`docs/archetype-icons.svg`, 25 oktober 2026): gevulde vormpjes, overgenomen in
+`ARCHETYPE_ICON` in `public/archetypes.js` met per icoon een vierkant kader. Ze nemen de tekstkleur over.
 
-| Archetype | Icoon |
-|---|---|
-| Shot Stopper | doelpalen met een slot in het midden |
-| Sweeper Keeper | bezem |
-| Progressor | kronkelende pijl |
-| Boss | vuist |
-| Disruptor | ketting |
-| Marauder | schild, de ene helft transparant, de andere vol |
-| Recycler | recyclepijlen |
-| Maestro | pak met vlinderdas |
-| Creator | lamp |
-| Spark | bliksem |
-| Magician | omgekeerde hoed waar sterretjes uitkomen |
-| Finisher | twee finishvlaggen |
-| Target | cirkel met een vlag waarvan de paal in het midden begint |
+| Archetype | Icoon | id in het bestand |
+|---|---|---|
+| Shot Stopper | doelpalen met een slot in het midden | (geen id) |
+| Sweeper Keeper | bezem | sweeper-keeper |
+| Progressor | kronkelende pijl | progressor |
+| Boss | vuist | boss |
+| Disruptor | ketting | disruptor |
+| Marauder | schild, de ene helft transparant, de andere vol | marauder |
+| Recycler | recyclepijlen | recycler |
+| Maestro | pak met vlinderdas | maestro |
+| Creator | lamp | inventor |
+| Spark | bliksem | spark |
+| Magician | omgekeerde hoed waar sterretjes uitkomen | magician |
+| Finisher | twee finishvlaggen | finisher |
+| Target | cirkel met een vlag waarvan de paal in het midden begint | target |

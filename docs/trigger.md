@@ -84,3 +84,7 @@ Na elke run met nieuwe data publiceert `site.yml` de alleen-lezen app op https:/
 De site laadt bij elke verversing de nieuwste `data.json`; EA zelf aanroepen kan een webpagina niet (EA weigert
 verzoeken van andere websites, getest op 25 oktober 2026). Bij een push met codewijzigingen wordt de site ook opnieuw
 gebouwd.
+
+**Cache.** GitHub Pages laat browsers elk bestand 10 minuten bewaren (`cache-control: max-age=600`, niet aan te passen).
+Daarom zet `src/export.js` een versie achter elk script en elke stijl (`common.js?v=…`) en haalt de site `data.json`
+altijd vers op. Alleen de HTML-pagina zelf kan nog tot 10 minuten oud zijn; een gewone verversing daarna laadt alles nieuw.

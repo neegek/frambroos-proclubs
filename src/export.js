@@ -11,9 +11,12 @@ await rm(OUT, { recursive: true, force: true });
 await mkdir(OUT, { recursive: true });
 
 // Pagina's en scripts; de HTML krijgt de vlag die common.js naar de bestanden laat kijken in plaats van naar /api.
+// GitHub Pages laat browsers elk bestand 10 minuten bewaren; een versie achter elk script en elke stijl zorgt dat een
+// nieuwe publicatie meteen nieuwe code laadt zodra de pagina zelf ververst is.
+const VERSION = Date.now().toString(36);
 for (const f of await readdir(PUBLIC)) {
   if (f.endsWith('.html')) {
-    const html = await readFile(join(PUBLIC, f), 'utf8');
+    const html = (await readFile(join(PUBLIC, f), 'utf8')).replace(/(src|href)="([\w-]+\.(?:js|css))"/g, `$1="$2?v=${VERSION}"`);
     await writeFile(join(OUT, f), html.replace('</title>', '</title>\n<script>window.FRAMBROOS_STATIC = true;</script>'));
   } else await cp(join(PUBLIC, f), join(OUT, f), { recursive: true });
 }

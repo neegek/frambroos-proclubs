@@ -331,7 +331,8 @@ function filtered() {
 
 // ---------- laden ----------
 async function loadData() {
-  const res = await fetch(API.data, { cache: STATIC ? 'no-store' : 'default' }); // site: bij elke verversing de nieuwste data
+  // Site: bij elke verversing de nieuwste data, ook langs de cache van GitHub Pages heen.
+  const res = await fetch(STATIC ? `${API.data}?t=${Date.now()}` : API.data, { cache: STATIC ? 'no-store' : 'default' });
   DATA = await res.json();
   DATA.matches = enrich(DATA.matches);
   DATA.model = fitModel(DATA.matches, DATA.snapshot?.skillRating);
