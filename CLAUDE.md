@@ -79,7 +79,8 @@ zijn daarom altijd relatief (`spelers.html#naam`, nooit `/spelers.html`), en dat
   `public/common.js` in een `.match-cards`-raster (op telefoon horizontaal swipebaar); een sessie begint met één kop
   met zes vaste cijfers (`.sess-figs`, coach-logica §9a) en een deelknop; de spelerspagina heeft vier kaartjes
   (Highlights, Precisie, Frambroos-index met balkjes, Impact); de ranglijst op het Clubhouse is een rij
-  `.rank-card`-kaartjes met de top vier, een tik opent de hele lijst. Geen tabellen waar een kaartje volstaat.
+  `.rank-card`-kaartjes met de top vier, een tik opent de hele lijst; de leden staan in dezelfde swipebare rij.
+  Geen tabellen waar een kaartje volstaat.
 - Weinig tekst op het eerste gezicht: een uitlegregel (`p.hint` direct onder een kaarttitel) is standaard verborgen
   achter de i-knop in de titel (`hintToggles` in `public/common.js`). Houd zo'n regel op één zin. Samenvattingen
   blijven zichtbaar; die zijn de kern.
@@ -94,7 +95,8 @@ zijn daarom altijd relatief (`spelers.html#naam`, nooit `/spelers.html`), en dat
   eronder). Geen aparte analysepagina. De app is bewust eenvoudig: liever één duidelijke kaart dan drie tabellen.
 - Spelerspagina: drie tabbladen (Algemeen, Vorm, Advies). Samengevoegde kaarten tonen hooguit drie punten per kant;
   spelerstabellen zijn compact, met *Alle cijfers* achter een knop.
-- Spelerspagina begint met de spelerskaart (`public/playercard.js`): FC27-stijl in thuis- of uitkleuren, met foto of
+- Spelerspagina begint met de spelerskaart (`public/playercard.js`): FC-vorm met een tier die met de vorm meebeweegt
+  (goud, zwart-goud bij *in vorm*, topvorm; coach-logica §9c; kleuren los van het thema), met foto of
   silhouet, overall, ingestelde positie, laatst gespeelde build en zes cijfers (seizoen, of face stats uit de ingevulde
   build). Ernaast alleen wat níét op de kaart staat (pro, taak, builds, signature, vorm, carrière). Geen dubbele info:
   wat op de kaart staat, komt niet terug in tegels of teksten eronder. Geen clubnaam- of FC27-teksten op de kaart.

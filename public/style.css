@@ -221,24 +221,39 @@ td.split small, .split small { color: var(--muted); }
 :root[data-theme="light"] .player-hero { --c-bg1: #ffffff; --c-bg2: #fbf3ea; --c-bg3: #f6e6d6; --c-ink: #1c2914; --c-muted: #45503f; --c-accent: #a84b06; --c-stripe: rgba(231,109,16,0.07); --c-edge: #e76d10; border: 1px solid var(--border); }
 .player-hero::after { content: ""; position: absolute; right: -40px; top: -40px; width: 220px; height: 220px; background: url(crest.png) center / contain no-repeat; opacity: 0.07; pointer-events: none; }
 .pc-wrap { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 36px; align-items: center; position: relative; z-index: 1; }
-.fut { width: 300px; aspect-ratio: 300 / 430; padding: 4px; background: linear-gradient(160deg, var(--c-edge), color-mix(in srgb, var(--c-edge) 35%, transparent) 50%, var(--c-edge));
-  clip-path: polygon(13% 0, 87% 0, 100% 6%, 100% 87%, 50% 100%, 0 87%, 0 6%); filter: drop-shadow(0 14px 30px rgba(0,0,0,0.4)); }
-.fut-inner { height: 100%; display: grid; grid-template-rows: 1fr auto auto auto; padding: 22px 20px 46px; color: var(--c-ink);
-  background: radial-gradient(110% 65% at 65% 22%, color-mix(in srgb, var(--c-edge) 22%, transparent), transparent 62%), linear-gradient(170deg, var(--c-bg2), var(--c-bg1));
-  clip-path: polygon(13% 0, 87% 0, 100% 6%, 100% 87%, 50% 100%, 0 87%, 0 6%); }
+/* FC-vorm: ingekeepte schouders, een kleine kraag bovenin en een punt onderaan. Rand en vlak delen dezelfde vorm. */
+.fut { --fut-shape: polygon(0 9%, 7% 4.5%, 42% 4.5%, 50% 0, 58% 4.5%, 93% 4.5%, 100% 9%, 100% 86%, 50% 100%, 0 86%);
+  width: 300px; aspect-ratio: 300 / 430; padding: 4px; clip-path: var(--fut-shape); background: var(--t-edge); filter: drop-shadow(0 14px 30px rgba(0,0,0,0.4)); }
+.fut-inner { height: 100%; display: grid; grid-template-rows: 1fr auto auto auto auto; padding: 26px 20px 48px; color: var(--t-ink); clip-path: var(--fut-shape); background: var(--t-bg); }
+/* Tiers (coach-logica §9c). Kleuren staan los van het thema: goud is goud. Contrast nagerekend op de lichtste en donkerste vlakken. */
+.fut[data-tier="goud"] { --t-ink: #2a1d05; --t-muted: #3d2d08; --t-accent: #2a1d05;
+  --t-edge: linear-gradient(160deg, #fff3c4, #c9a136 45%, #8a6a12 100%);
+  --t-bg: repeating-linear-gradient(118deg, rgba(255,255,255,0.22) 0 3px, transparent 3px 34px), radial-gradient(120% 70% at 70% 18%, rgba(255,250,220,0.75), transparent 60%), linear-gradient(168deg, #f2dc92 0%, #d9b24a 55%, #c2932a 100%); }
+.fut[data-tier="zwart"] { --t-ink: #f6e6b8; --t-muted: #cbb98a; --t-accent: #e9c767;
+  --t-edge: linear-gradient(160deg, #fff0b8, #d4a93a 45%, #7a5f12 100%);
+  --t-bg: repeating-linear-gradient(118deg, rgba(233,199,103,0.09) 0 3px, transparent 3px 30px), radial-gradient(110% 60% at 75% 15%, rgba(233,199,103,0.28), transparent 60%), linear-gradient(170deg, #241c0e 0%, #0e0c09 60%, #050403 100%); }
+.fut[data-tier="top"] { --t-ink: #ffffff; --t-muted: #d2f3f1; --t-accent: #e6fffb;
+  --t-edge: conic-gradient(from 200deg, #6ff7ea, #b58cff, #ffe08a, #6ff7ea);
+  --t-bg: repeating-conic-gradient(from 20deg at 72% 22%, rgba(255,255,255,0.10) 0 2deg, transparent 2deg 9deg), radial-gradient(70% 48% at 74% 24%, #2ee6d6 0%, #0a7f7c 32%, #072c36 62%, #04161d 100%); }
+.fut[data-tier="top"] .fut-inner::before { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,0.14) 50%, transparent 65%); background-size: 260% 100%; animation: fut-shine 4.5s ease-in-out infinite; pointer-events: none; }
+.fut-inner { position: relative; }
+.fut-inner > * { position: relative; }
+@keyframes fut-shine { 0%, 60% { background-position: 120% 0; } 100% { background-position: -40% 0; } }
+@media (prefers-reduced-motion: reduce) { .fut[data-tier="top"] .fut-inner::before { animation: none; } }
+.fut-tier { justify-self: center; margin-top: -4px; margin-bottom: 8px; font-size: 10px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--t-accent); color: var(--t-accent); }
 .fut-top { display: grid; grid-template-columns: 62px 1fr; min-height: 0; }
 .fut-ovr { display: grid; justify-items: center; align-content: start; gap: 2px; padding-top: 8px; }
 .fut-ovr b { font-size: 46px; font-weight: 800; line-height: 1; letter-spacing: -0.04em; }
-.fut-ovr span { font-size: 17px; font-weight: 800; color: var(--c-accent); letter-spacing: 0.04em; }
+.fut-ovr span { font-size: 17px; font-weight: 800; color: var(--t-accent); letter-spacing: 0.04em; }
 .fut-ovr img { margin-top: 8px; }
-.fut-photo { position: relative; display: grid; place-items: end center; min-height: 0; overflow: hidden; color: var(--c-ink); margin-right: -8px; }
+.fut-photo { position: relative; display: grid; place-items: end center; min-height: 0; overflow: hidden; color: var(--t-ink); margin-right: -8px; }
 .fut-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
 .fut-sil { width: 100%; max-height: 200px; }
-.fut-name { text-align: center; font-weight: 800; font-size: 24px; letter-spacing: -0.01em; padding-top: 8px; border-top: 1px solid color-mix(in srgb, var(--c-edge) 60%, transparent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.fut-arch { text-align: center; font-size: 12px; font-weight: 800; color: var(--c-accent); text-transform: uppercase; letter-spacing: 0.2em; margin: 2px 0 10px; }
-.fut-stats { display: grid; grid-template-columns: repeat(6, 1fr); text-align: center; border-top: 1px solid color-mix(in srgb, var(--c-edge) 35%, transparent); padding-top: 8px; }
+.fut-name { text-align: center; font-weight: 800; font-size: 24px; letter-spacing: -0.01em; padding-top: 8px; border-top: 1px solid color-mix(in srgb, var(--t-ink) 35%, transparent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fut-arch { text-align: center; font-size: 12px; font-weight: 800; color: var(--t-accent); text-transform: uppercase; letter-spacing: 0.2em; margin: 2px 0 10px; }
+.fut-stats { display: grid; grid-template-columns: repeat(6, 1fr); text-align: center; border-top: 1px solid color-mix(in srgb, var(--t-ink) 25%, transparent); padding-top: 8px; }
 .fut-stats div { display: grid; gap: 1px; }
-.fut-stats span { font-size: 10px; font-weight: 700; color: var(--c-muted); letter-spacing: 0.06em; }
+.fut-stats span { font-size: 10px; font-weight: 700; color: var(--t-muted); letter-spacing: 0.06em; }
 .fut-stats b { font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
 .pc-details { margin: 0; display: grid; gap: 0; max-width: 560px; }
 .pc-row { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px; padding: 10px 0; border-bottom: 1px solid color-mix(in srgb, var(--c-ink) 12%, transparent); align-items: baseline; }
@@ -499,7 +514,8 @@ a.pchip:hover { border-color: var(--brand); }
 .rank-bar { height: 8px; border-radius: 4px; background: var(--grid); overflow: hidden; }
 .rank-bar span { display: block; height: 100%; border-radius: 4px; background: var(--pos); }
 .rank-val { font-family: var(--num-font); font-size: 18px; min-width: 3ch; text-align: right; }
-.members { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+.members { display: grid; grid-auto-flow: column; grid-auto-columns: 250px; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 2px 2px 8px; scrollbar-width: thin; }
+.member { scroll-snap-align: start; }
 .member { display: grid; gap: 12px; padding: 14px 16px; border-radius: var(--radius-sm); background: var(--surface-2); border: 1px solid var(--border); text-decoration: none; color: inherit; }
 .member:hover { border-color: var(--border-strong); }
 .member-head { display: flex; align-items: center; gap: 12px; }

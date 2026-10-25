@@ -16,6 +16,16 @@ function silhouette(kit) {
     <path d="M40 182 L60 160 M160 182 L140 160" stroke="${c3}" stroke-width="6" stroke-linecap="round"/></svg>`;
 }
 
+// Tier van de kaart (coach-logica §9c): vorm over de laatste 5 wedstrijden tegenover eigen normaal.
+function tierOf(ratings) {
+  const last5 = ratings.slice(-5), rest = ratings.slice(0, -5);
+  if (last5.length < 5) return { tier: 'goud', label: '' };
+  const l5 = avg(last5), base = rest.length >= 3 ? avg(rest) : null;
+  if (l5 >= 8) return { tier: 'top', label: 'Topvorm', why: `laatste 5: ${l5.toFixed(2)}` };
+  if (base !== null && l5 >= base + 0.3) return { tier: 'zwart', label: 'In vorm', why: `laatste 5: ${l5.toFixed(2)}, normaal ${base.toFixed(2)}` };
+  return { tier: 'goud', label: '', why: base !== null ? `laatste 5: ${l5.toFixed(2)}, normaal ${base.toFixed(2)}` : '' };
+}
+
 function lastArch(rows) { const r = [...rows].reverse().find(x => x.p.archetypeId); return r ? r.p.archetypeId : null; }
 
 function render(name) {
@@ -43,8 +53,10 @@ function render(name) {
   const last5 = rows.slice(-5).map(r => r.m);
 
   const detail = (label, value) => value ? `<div class="pc-row"><dt>${label}</dt><dd>${value}</dd></div>` : '';
+  const tier = tierOf(ratings);
+  const tierNames = { goud: 'goud', zwart: 'zwart-goud, in vorm', top: 'topvorm' };
   el.innerHTML = `<div class="pc-wrap">
-    <div class="fut" role="img" aria-label="Spelerskaart van ${esc(name)}: overall ${career?.proOverall ?? 'onbekend'}, ${pos ?? ''}, ${info ? info.name : ''}">
+    <div class="fut" data-tier="${tier.tier}" role="img" title="Kaart: ${tierNames[tier.tier]}${tier.why ? ` (${tier.why})` : ''}" aria-label="Spelerskaart van ${esc(name)}: overall ${career?.proOverall ?? 'onbekend'}, ${pos ?? ''}, ${info ? info.name : ''}, ${tierNames[tier.tier]}">
       <div class="fut-inner">
         <div class="fut-top">
           <div class="fut-ovr"><b>${career?.proOverall ?? '–'}</b><span>${pos ?? ''}</span><img src="crest.png" alt="" width="34" height="34"></div>
@@ -52,6 +64,7 @@ function render(name) {
         </div>
         <div class="fut-name">${esc(name)}</div>
         <div class="fut-arch">${info ? info.name : ''}</div>
+        ${tier.label ? `<div class="fut-tier">${tier.label}</div>` : ''}
         <div class="fut-stats">${stats.map(([l, v]) => `<div><span>${l}</span><b>${v}</b></div>`).join('')}</div>
       </div>
     </div>
