@@ -27,8 +27,8 @@ heeft 2.000 minuten per maand.
 
 Ingesteld op 22 oktober 2026. Sinds 25 oktober 2026 staat de repo op het persoonlijke account **neegek** (werkaccount
 N33G3K is collaborator). Het token moet daarom van **neegek** zijn: een fine-grained token kan alleen repo's van zijn
-eigen account aansturen. Het oude token van N33G3K werkt niet meer. Het nieuwe token van neegek (25 oktober 2026)
-verloopt op **24 november 2026**; maak dan een nieuw token met een langere looptijd. Maak dan een nieuw token
+eigen account aansturen. Het oude token van N33G3K werkt niet meer. Het token van neegek is op 25 oktober 2026
+verlengd tot **oktober 2027**, rond de release van de volgende FC. Maak dan een nieuw token
 (zelfde instellingen) en vervang het in de header *Authorization* op cron-job.org.
 
 ### Stap 1: toegangstoken op GitHub
