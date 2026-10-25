@@ -5,10 +5,10 @@ Alle teksten in de app zijn Nederlands.
 
 ## Persoonlijk project, los van werk
 
-Dit is een persoonlijk project van Jamal, helemaal van scratch. Het heeft **niets** met Effectory te maken.
-Gebruik hier geen Effectory-skills, -plugins of -connectors (design system, UX-copy, prototype-toolbar, publisher,
-Smartcat, realistic content, manager personas, Piwik, Figma-structuur), geen Effectory-huisstijl, -content of
--conventies, en geen werkaccounts. `.claude/settings.local.json` zet die skills, de claude.ai-plugins en de
+Dit is een persoonlijk project van Jamal, helemaal van scratch. Het heeft **niets** met Jamals werk te maken.
+Gebruik hier geen werk-skills, -plugins of -connectors (design system, UX-copy, prototype-toolbar, publisher,
+Smartcat, realistic content, manager personas, Piwik, Figma-structuur), geen huisstijl, content of
+conventies van het werk, en geen werkaccounts. `.claude/settings.local.json` zet die skills, de claude.ai-plugins en de
 claude.ai-connectors in deze map uit. Alle stijl, logica en teksten komen uit dit project zelf (zie hieronder).
 
 ## Lees eerst
@@ -38,11 +38,12 @@ verzamelaar in GitHub Actions; de verzamellogica zelf staat in `src/collector.js
 `/api/data?live=0` geeft alleen de opgeslagen data. De gedeelde versie (artifact) kan niet live ophalen: die mag
 geen andere sites aanroepen.
 
-**Delen.** De gedeelde versie is een artifact: https://claude.ai/artifact/Gsz3JZQGKpnKxM96Ht64zo (privé; delen via het
-Share-menu op de pagina). Bijwerken: `npm run export`, daarna `dist/artifact-index.html` opnieuw publiceren met dezelfde
-URL en de overige bestanden uit `dist/` als `files`. In de export staat `window.FRAMBROOS_STATIC`: data uit
-`data.json` naast de pagina en geen buildformulier. Links en paden in `public/` zijn daarom altijd relatief
-(`spelers.html#naam`, nooit `/spelers.html`), en data laden gaat altijd via `API` uit `public/common.js`.
+**Delen.** De gedeelde versie is de site op GitHub Pages: https://neegek.github.io/frambroos-proclubs/ (openbaar voor
+wie het adres kent). `.github/workflows/site.yml` bouwt hem met `npm run export` na elke verzamelrun met nieuwe data en
+bij elke push met codewijzigingen; niets met de hand publiceren. In de export staat `window.FRAMBROOS_STATIC`: data uit
+`data.json` naast de pagina (bij elke verversing opnieuw geladen) en geen buildformulier. Links en paden in `public/`
+zijn daarom altijd relatief (`spelers.html#naam`, nooit `/spelers.html`), en data laden gaat altijd via `API` uit
+`public/common.js`. De repo is openbaar: zet er nooit tokens, wachtwoorden of andere geheimen in.
 
 ## Data
 

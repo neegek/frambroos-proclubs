@@ -331,7 +331,7 @@ function filtered() {
 
 // ---------- laden ----------
 async function loadData() {
-  const res = await fetch(API.data);
+  const res = await fetch(API.data, { cache: STATIC ? 'no-store' : 'default' }); // site: bij elke verversing de nieuwste data
   DATA = await res.json();
   DATA.matches = enrich(DATA.matches);
   DATA.model = fitModel(DATA.matches, DATA.snapshot?.skillRating);
@@ -345,7 +345,9 @@ async function loadData() {
   const s = DATA.snapshot, box = $('#club-box');
   // Lokale app: de server haalt bij het laden de nieuwste wedstrijden live bij EA op (src/live.js).
   const L = DATA.live, freshness = L ? (L.error ? `live ophalen lukte niet (${esc(L.error)}); opgeslagen data` : `live bijgewerkt ${new Date(L.at * 1000).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}`)
+    : STATIC ? `bijgewerkt ${fmtDateTime(DATA.generatedAt)}`
     : `laatste nieuwe data ${DATA.lastRun ? fmtDateTime(DATA.lastRun.started_at) : 'nooit'}${DATA.lastRun?.error ? ` · fout: ${esc(DATA.lastRun.error)}` : ''}`;
+  DATA.freshness = freshness.replace(/<[^>]+>/g, ''); // ook voor de startpagina, want op telefoon is het menu een balk
   if (box) box.innerHTML = `<div class="club-name">${esc(DATA.club.name)}</div><div class="club-meta">${s ? `${s.wins}W ${s.ties}G ${s.losses}V · rating ${s.skillRating}<br>` : ''}${DATA.matches.length} wedstrijden gevolgd<br>${freshness}</div>`;
   if (L?.newMatches) {
     const note = document.createElement('p'); note.className = 'live-note'; note.setAttribute('role', 'status');

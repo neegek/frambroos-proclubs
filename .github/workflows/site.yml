@@ -1,0 +1,48 @@
+name: Site bouwen en publiceren
+
+# Bouwt de alleen-lezen versie van de app (npm run export) en zet die op GitHub Pages:
+# https://neegek.github.io/frambroos-proclubs/
+# Draait na elke verzamelrun met nieuwe data (aangeroepen vanuit collect.yml), bij een push met codewijzigingen,
+# en met de hand. Pushes van de verzamelbot starten zelf geen workflows; daarom roept collect.yml deze aan.
+on:
+  push:
+    branches: [main]
+    paths: ['public/**', 'src/**', 'package.json', '.github/workflows/site.yml']
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main # na een verzamelrun: de net gepushte database
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Exporteer
+        run: node src/export.js
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

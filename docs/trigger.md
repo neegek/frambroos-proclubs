@@ -12,16 +12,17 @@ runs over als het druk is.
 
 ## De oplossing
 
-1. **Hoofdtrigger: een externe cron-dienst** start de workflow elk kwartier tussen 19:00 en 02:00
+1. **Hoofdtrigger: een externe cron-dienst** start de workflow elk halfuur tussen 19:30 en 01:00
    Nederlandse tijd via de GitHub-API. Zulke diensten draaien op de minuut.
 2. **Reserve: GitHub's eigen cron**, één keer per uur in de avond (al ingesteld in
    `.github/workflows/collect.yml`).
 3. **Waarschuwing**: als een run ziet dat alle 10 wedstrijden van een type nieuw zijn, kan er iets
    gemist zijn. Dat verschijnt als waarschuwing bij de run in de Actions-tab.
 
-Kosten: een run duurt minder dan een minuut en telt als één minuut. 28 externe runs plus hooguit
-8 reserveruns per avond is ongeveer 1.100 minuten per maand. Een privérepo op een gratis GitHub-account
-heeft 2.000 minuten per maand.
+Waarom elk halfuur: een wedstrijd duurt met lobby zo'n 20 minuten (gemeten over 43 wedstrijden, oktober 2026).
+Het meeste van één type binnen een uur was 4, binnen twee uur 8. Tien wedstrijden van één type kosten dus ruim
+drie uur; een halfuur laat zes keer marge en houdt de site op speelavonden hooguit een halfuur achter.
+Kosten: een run telt als één minuut; sinds de repo openbaar is (25 oktober 2026) zijn Actions-minuten gratis.
 
 ## Instellen (ongeveer 5 minuten)
 
@@ -48,8 +49,8 @@ Dit token kan alleen workflows in deze ene repo starten. Het kan geen code of da
    - **Title**: `Frambroos verzamelen`
    - **URL**: `https://api.github.com/repos/neegek/frambroos-proclubs/actions/workflows/collect.yml/dispatches`
    - **Execution schedule** → *Custom*:
-     - Minutes: `0, 15, 30, 45`
-     - Hours: `19, 20, 21, 22, 23, 0, 1`
+     - Minutes: `0, 30`
+     - Hours: `19, 20, 21, 22, 23, 0` (plus één run om 1:00; 19:00 mag ook, dat is gewoon een run extra)
      - Days of month, months, weekdays: alles
      - **Time zone: Europe/Amsterdam** (dan regelt de dienst zomer- en wintertijd)
 3. Tabblad *Advanced*:
@@ -74,5 +75,12 @@ Dit token kan alleen workflows in deze ene repo starten. Het kan geen code of da
 gh run list --workflow=collect.yml --limit 20
 ```
 
-Tussen 19:00 en 02:00 hoort daar elk kwartier een `workflow_dispatch`-run te staan. Verloopt het
+Tussen 19:30 en 01:00 hoort daar elk halfuur een `workflow_dispatch`-run te staan. Verloopt het
 token, dan geeft cron-job.org een fout (401) en mailt het je.
+
+## De site
+
+Na elke run met nieuwe data publiceert `site.yml` de alleen-lezen app op https://neegek.github.io/frambroos-proclubs/.
+De site laadt bij elke verversing de nieuwste `data.json`; EA zelf aanroepen kan een webpagina niet (EA weigert
+verzoeken van andere websites, getest op 25 oktober 2026). Bij een push met codewijzigingen wordt de site ook opnieuw
+gebouwd.
