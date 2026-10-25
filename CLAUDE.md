@@ -53,7 +53,7 @@ zijn daarom altijd relatief (`spelers.html#naam`, nooit `/spelers.html`), en dat
 - `data/players/<slug>.<webp|png|jpg>` zijn de foto's op de spelerskaarten. Jamal levert ze aan via de chat; zet ze
   er zelf in. Slug = naam in kleine letters, niet-letters/cijfers worden `-` (bijv. `neegek`, `xero-023`). Verklein
   tot maximaal 900 px aan de lange kant, bij voorkeur WebP of PNG met transparante achtergrond. Wel committen.
-  De app heeft geen uploadknop. Test nooit met nepwaarden in dit bestand;
+  Zonder foto toont de kaart een icoon, geen silhouet. De app heeft geen uploadknop. Test nooit met nepwaarden in dit bestand;
   maak vooraf een kopie en zet die terug.
 - Wat EA niet geeft (formatie, exacte positie, "Any", attribuutpunten, AI-spelers): zie coach-logica §2. Niet verzinnen.
 
