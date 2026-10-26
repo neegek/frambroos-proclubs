@@ -349,13 +349,58 @@ async function loadData() {
     : STATIC ? `bijgewerkt ${fmtDateTime(DATA.generatedAt)}`
     : `laatste nieuwe data ${DATA.lastRun ? fmtDateTime(DATA.lastRun.started_at) : 'nooit'}${DATA.lastRun?.error ? ` · fout: ${esc(DATA.lastRun.error)}` : ''}`;
   DATA.freshness = freshness.replace(/<[^>]+>/g, ''); // ook voor de startpagina, want op telefoon is het menu een balk
-  if (box) box.innerHTML = `<div class="club-name">${esc(DATA.club.name)}</div><div class="club-meta">${s ? `${s.wins}W ${s.ties}G ${s.losses}V · rating ${s.skillRating}<br>` : ''}${DATA.matches.length} wedstrijden gevolgd<br>${freshness}</div>`;
+  if (box) box.innerHTML = `<div class="club-name">${esc(DATA.club.name)}</div><div class="club-meta">${s ? `${s.wins}W ${s.ties}G ${s.losses}V · rating ${s.skillRating}<br>` : ''}${DATA.matches.length} wedstrijden gevolgd<br><span class="freshness">${freshness}</span></div>`;
   if (L?.newMatches) {
     const note = document.createElement('p'); note.className = 'live-note'; note.setAttribute('role', 'status');
     note.textContent = `${capFirst(numWord(L.newMatches))} ${L.newMatches === 1 ? 'wedstrijd is' : 'wedstrijden zijn'} net live bij EA opgehaald en ${L.newMatches === 1 ? 'telt' : 'tellen'} al mee. Opslaan gebeurt bij de volgende verzamelrun.`;
     $('.page-head, .back-link, .player-hero')?.insertAdjacentElement('afterend', note);
   }
+  liveTrigger(); // site: op de achtergrond, de pagina wacht er niet op
   return DATA;
+}
+
+// Site: bij openen of verversen start de site de verzamelaar via een Cloudflare Worker (worker/trigger.js; een
+// webpagina mag EA niet zelf aanroepen). Zodra die klaar is en nieuwe data heeft gepubliceerd, verschijnt een knop.
+// Lukt iets niet, dan blijft gewoon de opgeslagen data staan.
+let liveRunning = false;
+async function liveTrigger() {
+  const url = window.FRAMBROOS_TRIGGER;
+  if (!STATIC || !url || liveRunning) return;
+  liveRunning = true;
+  const call = method => fetch(url, { method, cache: 'no-store' }).then(r => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)));
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const clock = ts => new Date(ts * 1000).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+  const setFresh = text => { const f = $('#club-box .freshness'); if (f) f.textContent = text; };
+  let res;
+  try { res = await call('POST'); } catch { return; }
+  const busy = res.run && res.run.status !== 'completed';
+  if (!res.started && !busy) { if (res.run?.conclusion === 'success') setFresh(`bij EA gekeken ${clock(res.run.updatedAt)}`); return; }
+  // De run die we volgen: de net gestarte (verschijnt pas na een paar seconden) of de run die al liep.
+  const since = res.started ? res.at - 5 : res.run.createdAt;
+  const note = document.createElement('p'); note.className = 'live-note'; note.setAttribute('role', 'status');
+  note.textContent = 'Nieuwe wedstrijden worden bij EA opgehaald, dat duurt ongeveer twee minuten.';
+  $('.page-head, .back-link, .player-hero')?.insertAdjacentElement('afterend', note);
+  for (let i = 0; i < 24; i++) { // hooguit zes minuten volgen
+    await wait(15000);
+    const run = (await call('GET').catch(() => ({}))).run;
+    if (!run || run.createdAt < since || run.status !== 'completed') continue;
+    if (run.conclusion === 'success') setFresh(`bij EA gekeken ${clock(run.updatedAt)}`);
+    // De run publiceert de site zelf; GitHub Pages kan een paar seconden achterlopen.
+    for (let j = 0; j < 4; j++) {
+      const fresh = await fetch(`${API.data}?t=${Date.now()}`, { cache: 'no-store' }).then(r => r.json()).catch(() => null);
+      const added = fresh && fresh.generatedAt > DATA.generatedAt ? fresh.matches.length - DATA.matches.length : 0;
+      if (added > 0) {
+        note.innerHTML = `${capFirst(numWord(added))} nieuwe ${added === 1 ? 'wedstrijd' : 'wedstrijden'} binnen. <button type="button" class="more-btn">Verversen</button>`;
+        note.querySelector('button').addEventListener('click', () => location.reload());
+        return;
+      }
+      if (fresh && fresh.generatedAt > DATA.generatedAt) break; // nieuwe publicatie zonder nieuwe wedstrijden
+      await wait(5000);
+    }
+    note.remove();
+    return;
+  }
+  note.remove();
 }
 
 // Standaard donker (thuistenue); licht (uittenue) wordt onthouden per browser.

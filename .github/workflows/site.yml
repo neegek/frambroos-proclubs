@@ -7,7 +7,7 @@ name: Site bouwen en publiceren
 on:
   push:
     branches: [main]
-    paths: ['public/**', 'src/**', 'package.json', '.github/workflows/site.yml']
+    paths: ['public/**', 'src/**', 'package.json', 'config.json', '.github/workflows/site.yml']
   workflow_dispatch:
   workflow_call:
 

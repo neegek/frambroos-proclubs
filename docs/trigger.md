@@ -22,7 +22,7 @@ ruim 3 uur.
    verschijnt als waarschuwing bij de run in de Actions-tab.
 
 De lokale app haalt bij openen zelf live op (`src/live.js`); de site wordt na elke run met nieuwe data opnieuw
-gepubliceerd en loopt dus hooguit twee uur achter. Kosten: geen, de repo is openbaar (Actions-minuten gratis).
+gepubliceerd en start bij openen zelf een run (zie *Live op de site*), anders loopt hij hooguit twee uur achter. Kosten: geen, de repo is openbaar (Actions-minuten gratis).
 
 ## Instellen (ongeveer 5 minuten)
 
@@ -84,6 +84,47 @@ Na elke run met nieuwe data publiceert `site.yml` de alleen-lezen app op https:/
 De site laadt bij elke verversing de nieuwste `data.json`; EA zelf aanroepen kan een webpagina niet (EA weigert
 verzoeken van andere websites, getest op 25 oktober 2026). Bij een push met codewijzigingen wordt de site ook opnieuw
 gebouwd.
+
+## Live op de site
+
+Zonder meer loopt de site tot twee uur achter (de tijd tussen twee runs). Daarom start de site bij openen of verversen
+zelf een verzamelrun, via een kleine Cloudflare Worker (`worker/trigger.js`). Die bewaart het token, dat niet in de
+openbare site mag. Wat er gebeurt:
+
+1. De pagina toont meteen de opgeslagen data en vraagt de worker op de achtergrond om een run.
+2. De worker start `collect.yml`, tenzij er al een loopt of de laatste minder dan 3 minuten geleden begon. Veel
+   bezoekers tegelijk geven dus hooguit één run per 3 minuten.
+3. Zolang de run loopt, staat bovenaan "Nieuwe wedstrijden worden bij EA opgehaald". Een run plus publicatie duurt
+   ongeveer anderhalve minuut.
+4. Is er iets nieuws, dan verschijnt "Eén nieuwe wedstrijd binnen. *Verversen*". Anders verdwijnt de melding en zegt
+   het menu "bij EA gekeken 23:14".
+
+Lukt de worker niet (niet ingesteld, Cloudflare of GitHub weg), dan werkt de site gewoon zoals eerst. Kosten: geen
+(Cloudflare gratis: 100.000 verzoeken per dag; Actions-minuten gratis voor een openbare repo).
+
+### Instellen (ongeveer 10 minuten)
+
+1. **Token.** Maak een tweede fine-grained token van **neegek** met precies de instellingen uit stap 1 hierboven
+   (naam `frambroos-site-trigger`, alleen deze repo, alleen *Actions: Read and write*). Een eigen token, zodat je het
+   los van cron-job.org kunt intrekken.
+2. **Cloudflare.** Maak een gratis account op https://dash.cloudflare.com. Dan, in deze repo op de Mac:
+   ```bash
+   cd worker
+   npx wrangler login                 # opent de browser
+   npx wrangler secret put GITHUB_TOKEN   # plak het token
+   npx wrangler deploy                # geeft het adres, bijv. https://frambroos-trigger.<naam>.workers.dev
+   ```
+   (Zonder terminal kan het ook in het dashboard: *Workers & Pages* → *Create* → *Hello World*, de inhoud van
+   `worker/trigger.js` erin plakken, *Deploy*, dan *Settings* → *Variables and Secrets* → `GITHUB_TOKEN` als *Secret*.)
+3. **Controleren.** `curl -X POST <adres>` geeft `{"at":…,"started":true,…}` en in de Actions-tab staat een nieuwe
+   run. Een tweede keer geeft `"started":false`.
+4. **Aanzetten.** Zet het adres in `config.json` als `"liveTrigger": "https://frambroos-trigger.<naam>.workers.dev/"`,
+   commit en push. De site wordt opnieuw gebouwd en start vanaf dan bij elk bezoek de verzamelaar.
+
+Het token verloopt net als het andere; vervang het met `npx wrangler secret put GITHUB_TOKEN`.
+
+De worker staat alleen verzoeken toe die de site kan lezen vanaf `https://neegek.github.io`. Iemand anders kan het
+adres wel aanroepen, maar meer dan één run per 3 minuten levert dat niet op.
 
 **Cache.** GitHub Pages laat browsers elk bestand 10 minuten bewaren (`cache-control: max-age=600`, niet aan te passen).
 Daarom zet `src/export.js` een versie achter elk script en elke stijl (`common.js?v=…`) en haalt de site `data.json`

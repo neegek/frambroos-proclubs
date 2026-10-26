@@ -43,7 +43,10 @@ wie het adres kent). `.github/workflows/site.yml` bouwt hem met `npm run export`
 bij elke push met codewijzigingen; niets met de hand publiceren. In de export staat `window.FRAMBROOS_STATIC`: data uit
 `data.json` naast de pagina (bij elke verversing opnieuw geladen) en geen buildformulier. Links en paden in `public/`
 zijn daarom altijd relatief (`spelers.html#naam`, nooit `/spelers.html`), en data laden gaat altijd via `API` uit
-`public/common.js`. De repo is openbaar: zet er nooit tokens, wachtwoorden of andere geheimen in.
+`public/common.js`. Bij openen start de site via een Cloudflare Worker (`worker/trigger.js`, adres als `liveTrigger` in
+`config.json`) een verzamelrun en biedt na afloop *Verversen* aan als er iets nieuws is (docs/trigger.md, *Live op de
+site*). De repo is openbaar: zet er nooit tokens, wachtwoorden of andere geheimen in; het token van de worker staat
+alleen in Cloudflare.
 
 ## Data
 
