@@ -9,7 +9,7 @@ function render() {
   try { sessionStorage.setItem('matchFilters', JSON.stringify({ type, res })); } catch {}
   const list = DATA.matches.filter(m => (type === 'all' || m.matchType === type) && (res === 'all' || m.result === res));
   const own = DATA.snapshot?.skillRating;
-  $('#page-sub').textContent = `${list.length} van ${DATA.matches.length} wedstrijden. Klik op een wedstrijd voor het verhaal, de opstellingen en de spelers.`;
+  $('#page-sub').textContent = list.length === DATA.matches.length ? `${list.length} wedstrijden` : `${list.length} van ${DATA.matches.length} wedstrijden`;
   if (!list.length) { $('#match-list').innerHTML = '<p class="empty">Geen wedstrijden met deze filters.</p>'; return; }
   const byDay = new Map();
   for (const m of [...list].reverse()) { const d = fmtDayLong(m.ts); if (!byDay.has(d)) byDay.set(d, []); byDay.get(d).push(m); }

@@ -362,8 +362,16 @@ function renderPlayer() {
     { label: 'Datum', render: r => fmtDateTime(r.m.ts) }, { label: 'Tegenstander', render: r => `<a href="wedstrijd.html?id=${r.m.matchId}">${esc(r.m.opponent.name)}</a>` },
     { label: 'Score', num: true, render: r => `${r.m.goals}–${r.m.goalsAgainst}` }, { label: 'Uitslag', render: r => `<span class="pill ${r.m.result}">${r.m.result === 'D' ? 'G' : r.m.result === 'L' ? 'V' : 'W'}</span>` },
     { label: 'Rating', num: true, render: r => r.p.rating }, { label: 'Index', num: true, render: r => fiFmt(r.p.fi) }, { label: 'G + A', num: true, render: r => `${r.p.goals} + ${r.p.assists}` },
-  ], [...rows].reverse());
+  ], [...rows].reverse().map((r, i) => ({ ...r, i })), { rowClass: r => r.i >= PM_SHOWN ? 'pm-extra' : '' });
+  // Eerst de laatste acht; de rest achter een knop.
+  const wrap = $('#tbl-player-matches'), extra = rows.length - PM_SHOWN;
+  wrap.classList.remove('show-all');
+  if (extra > 0) {
+    wrap.insertAdjacentHTML('beforeend', `<button type="button" class="more-btn">Alle ${rows.length} wedstrijden</button>`);
+    wrap.querySelector('.more-btn').addEventListener('click', e => { wrap.classList.add('show-all'); e.currentTarget.remove(); });
+  }
 }
+const PM_SHOWN = 8;
 
 for (const id of ['#range', '#type']) $(id).addEventListener('change', () => DATA && renderPlayer());
 addEventListener('resize', () => DATA && renderPlayer());

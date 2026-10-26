@@ -11,9 +11,31 @@ function personIcon() {
     <path d="M24 116V98a32 32 0 0 1 32-32h8a32 32 0 0 1 32 32v18z" fill="currentColor"/></svg>`;
 }
 
+// Vlag onder het clublogo, uit proNationality van EA. EA geeft alleen een nummer; de koppeling volgt de FC-landennummers
+// (Europa alfabetisch 1–51, Azië vanaf 149), gecontroleerd aan de eigen leden. Onbekend nummer: geen vlag, niet gokken.
+const NATIONS = {
+  7: ['België', { v: ['#2d2926', '#fdda24', '#ef3340'] }], 13: ['Denemarken', { cross: ['#c8102e', '#fff'] }],
+  14: ['Engeland', { st: ['#fff', '#ce1124'] }], 17: ['Finland', { cross: ['#fff', '#002f6c'] }],
+  18: ['Frankrijk', { v: ['#002395', '#fff', '#ed2939'] }], 21: ['Duitsland', { h: ['#000', '#dd0000', '#ffce00'] }],
+  27: ['Italië', { v: ['#009246', '#fff', '#ce2b37'] }], 34: ['Nederland', { h: ['#ae1c28', '#fff', '#21468b'] }],
+  45: ['Spanje', { h: ['#aa151b', '#f1bf00', '#f1bf00', '#aa151b'] }], 46: ['Zweden', { cross: ['#006aa7', '#fecc02'] }],
+  160: ['Indonesië', { h: ['#ce1126', '#fff'] }], 163: ['Japan', { sun: ['#fff', '#bc002d'] }],
+};
+function flag(id) {
+  const n = NATIONS[id]; if (!n) return '';
+  const [name, f] = n, W = 30, H = 20;
+  let body = '';
+  if (f.h) body = f.h.map((c, i) => `<rect y="${i * H / f.h.length}" width="${W}" height="${H / f.h.length + 0.1}" fill="${c}"/>`).join('');
+  if (f.v) body = f.v.map((c, i) => `<rect x="${i * W / f.v.length}" width="${W / f.v.length + 0.1}" height="${H}" fill="${c}"/>`).join('');
+  if (f.cross) body = `<rect width="${W}" height="${H}" fill="${f.cross[0]}"/><rect x="9" width="4" height="${H}" fill="${f.cross[1]}"/><rect y="8" width="${W}" height="4" fill="${f.cross[1]}"/>`;
+  if (f.st) body = `<rect width="${W}" height="${H}" fill="${f.st[0]}"/><rect x="13" width="4" height="${H}" fill="${f.st[1]}"/><rect y="8" width="${W}" height="4" fill="${f.st[1]}"/>`;
+  if (f.sun) body = `<rect width="${W}" height="${H}" fill="${f.sun[0]}"/><circle cx="15" cy="10" r="6" fill="${f.sun[1]}"/>`;
+  return `<svg class="fut-flag" viewBox="0 0 ${W} ${H}" role="img" aria-label="${name}"><title>${name}</title>${body}</svg>`;
+}
+
 // De kaartvorm (300×430): gebogen schouders naar een vlakke bovenkant, punt met inkeping onderaan. Eén pad voor de rand,
 // de donkere lijn, de binnenrand en één verloop over de hele kaart; alleen een foto krijgt een eigen vlak, dat zacht
-// overloopt in het verloop. Kleuren komen uit de tier-tokens in style.css.
+// overloopt in het verloop. Geen glans of strepen: alleen een zachte, schuine lichtere baan in het verloop zelf (--t-sheen). Kleuren komen uit de tier-tokens in style.css.
 const FUT_SHAPE = 'M18 74C18 46 52 30 102 28L198 28C248 30 282 46 282 74L282 352C282 380 262 400 230 408C200 414 172 424 160 428L150 423L140 428C128 424 100 414 70 408C38 400 18 380 18 352Z';
 // uid maakt de SVG-ids per kaart uniek, zodat meerdere kaarten op één pagina elkaars verloop niet overnemen.
 function futFrame(photo, uid) {
@@ -23,8 +45,7 @@ function futFrame(photo, uid) {
     <defs>
       <linearGradient id="${id('gold')}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff1bd"/><stop offset=".35" stop-color="#d9b04a"/><stop offset=".7" stop-color="#8d6c15"/><stop offset="1" stop-color="#f1d27a"/></linearGradient>
       <linearGradient id="${id('bg')}" x1="0" y1="0" x2="0.25" y2="1"><stop offset="0" style="stop-color:var(--t-bg1)"/><stop offset=".55" style="stop-color:var(--t-bg2)"/><stop offset="1" style="stop-color:var(--t-bg3)"/></linearGradient>
-      <radialGradient id="${id('glow')}" cx=".72" cy=".2" r=".6"><stop offset="0" style="stop-color:var(--t-glow)"/><stop offset="1" stop-color="transparent"/></radialGradient>
-      <pattern id="${id('lines')}" patternUnits="userSpaceOnUse" width="34" height="34" patternTransform="rotate(28)"><rect width="3" height="34" style="fill:var(--t-lines)"/></pattern>
+      <linearGradient id="${id('sheen')}" x1="0" y1="0" x2="1" y2="0.9"><stop offset=".2" stop-color="#fff" stop-opacity="0"/><stop offset=".45" style="stop-color:var(--t-sheen)"/><stop offset=".75" stop-color="#fff" stop-opacity="0"/></linearGradient>
       <pattern id="${id('dots')}" patternUnits="userSpaceOnUse" width="9" height="9"><circle cx="4" cy="4" r="1" style="fill:var(--t-dots)"/></pattern>
       <linearGradient id="${id('fade')}" x1="0" y1="0" x2="0" y2="1"><stop offset=".72" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>
       <mask id="${id('photo-mask')}"><rect x="0" y="0" width="300" height="250" fill="url(#${id('fade')})"/></mask>
@@ -34,7 +55,7 @@ function futFrame(photo, uid) {
     <path d="${FUT_SHAPE}" fill="#1a1408" ${inset(0.975, 0.982)}/>
     <path d="${FUT_SHAPE}" fill="url(#${id('bg')})" stroke="url(#${id('gold')})" stroke-width="2.2" ${inset(0.952, 0.966)}/>
     <g clip-path="url(#${id('clip')})">
-      <rect width="300" height="430" fill="url(#${id('lines')})"/><rect width="300" height="430" fill="url(#${id('dots')})"/><rect width="300" height="430" fill="url(#${id('glow')})"/>
+      <rect width="300" height="430" fill="url(#${id('sheen')})"/><rect width="300" height="430" fill="url(#${id('dots')})"/>
       ${photo ? `<g mask="url(#${id('photo-mask')})"><rect x="0" y="0" width="300" height="250" style="fill:var(--t-photo)"/><image href="${photo}" x="0" y="20" width="300" height="230" preserveAspectRatio="xMidYMid slice"/></g>` : ''}
     </g>
   </svg>`;
@@ -90,7 +111,7 @@ function cardOf(name) {
       ${futFrame(photo, slugOf(name))}
       <div class="fut-inner">
         <div class="fut-top">
-          <div class="fut-ovr"><b>${career?.proOverall ?? '–'}</b>${arch ? `<span class="fut-archicon" title="${esc(archName(arch))}">${archIcon(arch)}</span>` : ''}<img src="crest.png" alt="" width="34" height="34"></div>
+          <div class="fut-ovr"><b>${career?.proOverall ?? '–'}</b>${arch ? `<span class="fut-archicon" title="${esc(archName(arch))}">${archIcon(arch)}</span>` : ''}<img src="crest.png" alt="" width="34" height="34">${flag(career?.proNationality)}</div>
           <div class="fut-photo">${photo ? '' : personIcon()}</div>
         </div>
         <div class="fut-bottom">

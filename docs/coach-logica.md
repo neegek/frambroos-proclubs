@@ -363,9 +363,14 @@ Een vaste goede speler wordt zo niet gestraft omdat het eigen normaal al hoog li
 
 | Tier | Voorwaarde | Uiterlijk |
 |---|---|---|
-| **Goud** | standaard | goud met lichte strepen, donkere tekst |
+| **Goud** | standaard | goud verloop met een zachte, schuine lichtere baan, donkere tekst |
 | **Zwart-goud** (in vorm) | minstens 5 wedstrijden, en niveau ≥ 7,5 **of** (minstens 8 wedstrijden en groei ≥ 0,3) | zwart met gouden rand en gouden cijfers |
-| **Topvorm** | niveau ≥ 8,0 **en** minstens 3 van de laatste 5 gewonnen | diepblauw met gouden stippen en gouden accenten, een zachte glans |
+| **Topvorm** | niveau ≥ 8,0 **en** minstens 3 van de laatste 5 gewonnen | diepblauw met gouden stippen en gouden accenten |
+
+Vlak en rustig: een lichte schaduw, geen gloed, geen strepen en geen bewegende glans; alleen een zachte, schuine
+lichtere baan in het verloop zelf (`--t-sheen`). Onder het clublogo staat de vlag van het land
+van de pro (`proNationality` van EA, een FC-landennummer: Europa alfabetisch 1–51, Azië vanaf 149; getekend in
+`NATIONS` in `playercard.js`). Een nummer dat daar niet in staat krijgt geen vlag; niet gokken, eerst toevoegen.
 
 Dezelfde kaart staat klein (56 %) in de ledenrij op het Clubhouse, met de accountnaam eronder; cijfers en labels zijn
 daar iets groter gezet zodat ze klein leesbaar blijven. Eén functie (`PlayerCard.html`) maakt beide, met SVG-ids per speler.

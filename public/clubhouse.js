@@ -155,7 +155,7 @@ function render() {
   const sess = sessionsOf(ms), lastS = sess.length >= 2 ? sess[sess.length - 1].matches : null;
   const sl = lastS ? summarize(lastS) : null, sb = lastS ? summarize(ms.filter(m => !lastS.includes(m))) : null;
   const T = 'Laatste speelavond tegenover de avonden daarvoor (gevolgde wedstrijden)';
-  $('#page-sub').textContent = `Clubcijfers van EA over alle wedstrijden; spelers en vorm uit de ${ms.length} gevolgde wedstrijden sinds ${ms.length ? fmtDate(ms[0].ts) : '–'}. ${capFirst(DATA.freshness || '')}.`;
+  $('#page-sub').textContent = `${ms.length} gevolgde wedstrijden sinds ${ms.length ? fmtDate(ms[0].ts) : '–'}; clubcijfers volgens EA.`;
   clubHero();
 
   const g = snap?.gamesPlayed, win = g ? Math.round(100 * snap.wins / g) : null;
@@ -166,7 +166,6 @@ function render() {
     kpiTile('Doelpunten', snap ? `${snap.goals}–${snap.goalsAgainst}` : '–', snap ? `doelsaldo ${signed(snap.goals - snap.goalsAgainst, 0)}` : '', sl && deltaOf(sl.gfAvg - sl.gaAvg, sb.gfAvg - sb.gaAvg, { digits: 1, title: `${T} (doelsaldo per wedstrijd)` })),
     kpiTile('Clean sheets', snap?.cleanSheets ?? '–', 'wedstrijden zonder tegengoal'),
     kpiTile('Promoties', snap?.promotions ?? '–', snap?.relegations !== null && snap?.relegations !== undefined ? `${numWord(snap.relegations)} ${snap.relegations === 1 ? 'degradatie' : 'degradaties'}` : ''),
-    kpiTile('Gevolgd', ms.length, `wedstrijden in deze app${snap?.gamesPlayedPlayoff ? ` · EA telt ${snap.gamesPlayedPlayoff} playoff` : ''}`),
   ].join('');
 
   // Vorm: laatste tien als pillen, en het voortschrijdende gemiddelde.

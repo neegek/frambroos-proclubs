@@ -81,6 +81,9 @@ zijn daarom altijd relatief (`spelers.html#naam`, nooit `/spelers.html`), en dat
   (Highlights, Precisie, Frambroos-index met balkjes, Impact); de ranglijst op het Clubhouse is een rij
   `.rank-card`-kaartjes met de top vier, een tik opent de hele lijst; de leden staan in dezelfde swipebare rij.
   Geen tabellen waar een kaartje volstaat.
+- Compact: kaarten 16 × 18 px binnenruimte, tegels 12 × 16 px, paginatitel 26 px met hooguit één korte regel eronder.
+  Lange lijsten tonen eerst een handvol (bijv. de laatste acht wedstrijden van een speler) met de rest achter een knop
+  (`.more-btn`). Geen tegel die herhaalt wat het menu al zegt (zoals het aantal gevolgde wedstrijden).
 - Weinig tekst op het eerste gezicht: een uitlegregel (`p.hint` direct onder een kaarttitel) is standaard verborgen
   achter de i-knop in de titel (`hintToggles` in `public/common.js`). Houd zo'n regel op één zin. Samenvattingen
   blijven zichtbaar; die zijn de kern.
@@ -97,7 +100,7 @@ zijn daarom altijd relatief (`spelers.html#naam`, nooit `/spelers.html`), en dat
   spelerstabellen zijn compact, met *Alle cijfers* achter een knop.
 - Spelerspagina begint met de spelerskaart (`public/playercard.js`): FC-vorm met een tier die met de vorm meebeweegt
   (goud, zwart-goud bij *in vorm*, topvorm; coach-logica §9c; kleuren los van het thema), met foto of
-  silhouet, overall, ingestelde positie, laatst gespeelde build en zes cijfers (seizoen, of face stats uit de ingevulde
+  silhouet, overall, vlag, ingestelde positie, laatst gespeelde build en zes cijfers (seizoen, of face stats uit de ingevulde
   build). Ernaast alleen wat níét op de kaart staat (pro, taak, builds, signature, vorm, carrière). Geen dubbele info:
   wat op de kaart staat, komt niet terug in tegels of teksten eronder. Geen clubnaam- of FC27-teksten op de kaart.
   Dezelfde kaart staat klein in de ledenrij op het Clubhouse (`PlayerCard.html(naam)`); `index.html` laadt daarvoor
