@@ -13,39 +13,37 @@
 <div class="app">
   <aside class="sidebar" id="sidebar"></aside>
   <main class="content">
-    <header class="page-head">
+    <header class="page-head" id="s-overview-head">
       <div>
         <h1>Sessies</h1>
         <p class="sub" id="page-sub">Per speelavond.</p>
       </div>
-      
     </header>
+    <div class="scards" id="session-cards"></div>
 
-    <div class="session-layout">
-      <div class="session-list" id="session-list" role="listbox" aria-label="Speelsessies"></div>
-      <div class="session-detail">
-        <section class="card sess-head">
-          <div class="sess-top">
-            <div><h2 id="s-title">…</h2><div class="meta" id="s-meta"></div></div>
-            <button type="button" class="btn-ghost" id="s-share" title="Deel deze avond als afbeelding">Delen</button>
-          </div>
-          <div class="sess-body">
-            <div class="podium" id="s-podium" aria-label="Top drie van de avond"></div>
-            <div><p class="summary" id="s-summary"></p><p class="cruijff" id="s-quote"></p></div>
-          </div>
-          <div class="sess-figs" id="s-figs"></div>
-        </section>
-        <section class="card">
-          <h2>Wedstrijden</h2>
-          <p class="hint">Op volgorde van spelen. Tik op een wedstrijd voor het verhaal en de spelers.</p>
-          <div class="match-cards" id="s-matches"></div>
-        </section>
-        <section class="card">
-          <h2>Spelers deze sessie</h2>
-          <p class="hint">Rating deze avond tegenover het eigen gemiddelde. De kroon is man of the match.</p>
-          <div id="s-players"></div>
-        </section>
-      </div>
+    <div class="session-detail" id="session-detail" hidden>
+      <a class="back-link" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Terug naar sessies</a>
+      <section class="card sess-head">
+        <div class="sess-top">
+          <div><h2 id="s-title">…</h2><div class="meta" id="s-meta"></div></div>
+          <button type="button" class="btn-ghost" id="s-share" title="Deel deze avond als afbeelding">Delen</button>
+        </div>
+        <div class="sess-body">
+          <div class="podium" id="s-podium" aria-label="Top drie van de avond"></div>
+          <div><p class="summary" id="s-summary"></p><p class="cruijff" id="s-quote"></p></div>
+        </div>
+        <div class="sess-figs" id="s-figs"></div>
+      </section>
+      <section class="card">
+        <h2>Wedstrijden</h2>
+        <p class="hint">Op volgorde van spelen. Tik op een wedstrijd voor het verhaal en de spelers.</p>
+        <div class="match-cards" id="s-matches"></div>
+      </section>
+      <section class="card">
+        <h2>Spelers deze sessie</h2>
+        <p class="hint">Rating deze avond tegenover het eigen gemiddelde. De kroon is man of the match.</p>
+        <div id="s-players"></div>
+      </section>
     </div>
 
   </main>

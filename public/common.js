@@ -36,7 +36,7 @@ const NAV = [
 ];
 (function mountShell() {
   const side = $('#sidebar'); if (!side) return;
-  const path = PAGE === 'wedstrijd.html' ? 'wedstrijden.html' : PAGE;
+  const path = { 'wedstrijd.html': 'wedstrijden.html', 'nieuws.html': 'index.html' }[PAGE] || PAGE; // een laag dieper: het tabblad erboven
   side.innerHTML = `<a class="brand" href="index.html">${LOGO}<span>Frambroos<b>Coach</b></span></a>
     <nav class="side-nav" aria-label="Hoofdmenu">${NAV.map(n => n.group ? `<div class="nav-group" id="nav-group-players"><a href="${n.href}" class="nav-group-head ${n.href === path ? 'in-group' : ''}" aria-controls="player-nav" aria-expanded="true">${ICONS[n.icon]}<span>${n.label}</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><div class="sub-nav" id="player-nav" aria-label="Spelers"></div></div>` : `<a href="${n.href}" class="${n.href === path ? 'active' : ''}"${n.href === path ? ' aria-current="page"' : ''}>${ICONS[n.icon]}<span>${n.label}</span></a>`).join('')}</nav>
     <div class="side-foot"><div class="club" id="club-box"><div class="club-meta">Data laden…</div></div>
@@ -400,6 +400,30 @@ const signed = (v, d = 1) => v === null || v === undefined ? '–' : `${v > 0 ? 
 const pills = ms => `<span class="pills">${ms.map(m => `<span class="pill ${m.result}" title="${esc(m.opponent.name)} ${m.goals}–${m.goalsAgainst}">${m.result === 'D' ? 'G' : m.result === 'L' ? 'V' : 'W'}</span>`).join('')}</span>`;
 const sessionsOf = ms => { const g = new Map(); for (const m of ms) { if (!g.has(m.session)) g.set(m.session, []); g.get(m.session).push(m); } return [...g].map(([id, list]) => ({ id, matches: list })); };
 
+// Uitslag als letter (W/G/V), meervoud, korte datum, en wedstrijden als rondjes (oudste links, de laatste omlijnd).
+// Met links opent elk rondje de wedstrijd; zonder links (in een kaart die zelf een link is) zijn het gewone rondjes.
+const letter = r => r === 'D' ? 'G' : r === 'L' ? 'V' : 'W';
+const plural = (n, one, more) => `${n} ${n === 1 ? one : more}`;
+const dayLabel = ts => new Date(ts * 1000).toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' });
+
+// Beste speler van een avond: de hoogste gemiddelde rating onder wie minstens de helft van de wedstrijden speelde.
+function bestOfNight(night) {
+  const per = new Map();
+  for (const m of night) for (const p of m.players) {
+    const x = per.get(p.name) || { n: p.name, r: [], g: 0, a: 0, mom: 0 };
+    if (p.rating !== null) x.r.push(p.rating);
+    x.g += p.goals || 0; x.a += p.assists || 0; x.mom += p.mom || 0;
+    per.set(p.name, x);
+  }
+  return [...per.values()].filter(x => x.r.length && x.r.length >= Math.max(1, night.length / 2))
+    .map(x => ({ ...x, v: avg(x.r) })).sort((a, b) => b.v - a.v)[0] || null;
+}
+
+const formDots = (ms, { links = true } = {}) => `<ol class="form-dots">${ms.map((m, i) => {
+  const cls = `dot ${m.result}${i === ms.length - 1 ? ' last' : ''}`, title = `${letter(m.result)} ${m.goals}–${m.goalsAgainst} tegen ${esc(m.opponent.name)}, ${dayLabel(m.ts)}`;
+  return `<li>${links ? `<a class="${cls}" href="wedstrijd.html?id=${m.matchId}" title="${title}">` : `<span class="${cls}" title="${title}">`}${letter(m.result)}${links ? '</a>' : '</span>'}</li>`;
+}).join('')}</ol>`;
+
 const joinAnd = xs => xs.length <= 1 ? (xs[0] || '') : `${xs.slice(0, -1).join(', ')} en ${xs[xs.length - 1]}`;
 const capFirst = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
 
@@ -447,18 +471,20 @@ function matchCard(m, { own = null, player = null } = {}) {
 }
 
 // ---------- wedstrijdrij ----------
-// Eén regel per wedstrijd met tijd, uitslag, tegenstander en score; klik opent de wedstrijdpagina.
-// Gedeeld door Wedstrijden en Sessies, zodat een wedstrijd er overal hetzelfde uitziet.
+// Eén regel per wedstrijd met datum, uitslag, tegenstander, de beste speler en de score; klik opent de wedstrijdpagina.
+// Beste speler: de hoogste EA-rating, met een kroon als die ook man of the match was (coach-logica §9a, Wedstrijden).
 function matchRow(m, own) {
-  const t = new Date(m.ts * 1000).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+  const when = new Date(m.ts * 1000).toLocaleString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
   const diff = m.opponent.skillRating && own ? m.opponent.skillRating - own : null;
   const str = diff === null ? '' : diff >= 250 ? 'veel sterker' : diff >= 100 ? 'sterker' : diff <= -100 ? 'zwakker' : 'gelijkwaardig';
+  const best = [...m.players].filter(p => p.rating !== null).sort((x, y) => y.rating - x.rating)[0];
+  const bestHtml = best ? `<span class="mr-best-name">${esc(best.name)}${best.mom ? ' <span class="crown" title="Man of the match">♛</span>' : ''}</span><b>${f1(best.rating)}</b>` : '';
   return `<a class="match-row" href="wedstrijd.html?id=${m.matchId}">
-    <span class="mr-time">${t}</span>
-    <span class="pill ${m.result}">${m.result === 'D' ? 'G' : m.result === 'L' ? 'V' : 'W'}</span>
-    <span class="mr-opp">${kitShirt(m.opponent.kit, m.opponent.name)}<span><b>${esc(m.opponent.name)}</b><small>${m.matchType === 'playoffMatch' ? 'playoff' : 'league'}${m.opponent.skillRating ? ` · rating ${m.opponent.skillRating}${str ? `, ${str}` : ''}` : ''} · ${m.players.length} tegen ${m.opponentPlayers.length} mensen${m.winnerByDnf ? ' · opgave' : ''}${m.live ? ' · live, nog niet opgeslagen' : ''}</small></span></span>
-    <span class="mr-score">${m.goals}–${m.goalsAgainst}</span>
-    <span class="mr-chev" aria-hidden="true">›</span></a>`;
+    <span class="mr-time">${when}</span>
+    <span class="pill ${m.result}">${letter(m.result)}</span>
+    <span class="mr-opp">${kitShirt(m.opponent.kit, m.opponent.name)}<span><b>${esc(m.opponent.name)}</b><small>${m.matchType === 'playoffMatch' ? 'playoff' : 'league'}${m.opponent.skillRating ? ` · rating ${m.opponent.skillRating}${str ? `, ${str}` : ''}` : ''}${m.winnerByDnf ? ' · opgave' : ''}${m.live ? ' · live, nog niet opgeslagen' : ''}</small><small class="mr-when">${best ? `${esc(best.name)} ${f1(best.rating)}${best.mom ? ' ♛' : ''} · ` : ''}${dayLabel(m.ts)}</small></span></span>
+    <span class="mr-best" title="Beste speler van de wedstrijd">${bestHtml}</span>
+    <span class="mr-score">${m.goals}–${m.goalsAgainst}</span></a>`;
 }
 
 // ---------- KPI-tegels ----------

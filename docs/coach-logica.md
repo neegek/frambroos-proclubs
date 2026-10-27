@@ -303,8 +303,9 @@ Daarnaast *Positiespel en keuzes* en *Al sterk*.
 op de clubpagina's van de Premier League). Van boven naar beneden:
 
 1. **Hero**: een getekend stadion bij avond als achtergrond (eigen SVG, vaste kleuren los van het thema), het clublogo
-   groot, de clubnaam, stadion en divisie, en de **laatste 10 wedstrijden** als rondjes (W/G/V, oudste links, nieuwste
-   rechts en omlijnd; een tik opent de wedstrijd). Geen reeks: de rondjes zeggen het al.
+   groot, het stadion erboven, de clubnaam, en daaronder skill rating en huidige divisie. Dan de **laatste 10
+   wedstrijden** als rondjes (W/G/V, oudste links, nieuwste rechts en omlijnd; een tik opent de wedstrijd), zonder
+   label en zonder reeks: de rondjes zeggen het zelf. Niet alles hoeft benoemd te worden.
 2. **Seizoen**: één kaart met bovenin de totalen volgens EA over alle wedstrijden (wedstrijden, gewonnen, gelijk,
    verloren, winstpercentage, doelpunten voor en tegen, clean sheets; geen badges, dit zijn feiten) en daaronder de
    **vormgrafiek** over de gevolgde wedstrijden. Per wedstrijd een staafje: hoogte = doelsaldo, kleur = uitslag. Daar
@@ -316,7 +317,7 @@ op de clubpagina's van de Premier League). Van boven naar beneden:
    tegenstanders tegenover de onze, *Tegenstanders tov ons* (badge grijs: sterkere tegenstanders zijn niet beter of slechter). EA geeft alleen
    de huidige rating van een tegenstander, niet die op de dag van de wedstrijd. De tooltip per wedstrijd noemt uitslag, tegenstander, diens rating
    en wat er verwacht werd.
-3. **Nieuws**: korte berichten die uit de cijfers volgen (zie hieronder), het belangrijkste groot.
+3. **Nieuws**: één kaart met het nieuwste artikel en een link naar de nieuwspagina (`nieuws.html`) met alle artikelen.
 4. **Laatste uitslagen**: de laatste vier wedstrijden als `matchCard`, met een link naar alle wedstrijden.
 5. **Topspelers**: vier ranglijstkaartjes (Frambroos-index, rating, goals, assists); de andere vijf achter een knop.
    Een tik op een kaartje opent geen speler maar een **uitlegscherm** over die ranglijst: waar de score op gebaseerd
@@ -327,23 +328,25 @@ Niet meer op de startpagina: de KPI-tegels met badges, de tenues, de reeks en de
 nieuwsbericht over de laatste speelavond). *Gevaarlijkst*, *Wat opvalt* en *Beste
 tweetallen* blijven weg (verbanden, §9d). EA geeft geen aantal fans; dat tonen we niet.
 
-**Nieuws** schrijft zichzelf uit de gevolgde wedstrijden. Elk bericht heeft een label, een kop van hooguit tien woorden,
-één zin uitleg met de cijfers, een datum en een beeld (spelerskaarten, rondjes of één groot cijfer). Alleen wat waar en
-opvallend is; liever drie berichten dan zes zwakke. Hooguit zes, in de volgorde van de tabel (binnen één avond zegt
-de tijd niets); het eerste bericht is groot.
+**Nieuws** schrijft zichzelf uit de gevolgde wedstrijden: **één artikel per sessie** (minstens 2 wedstrijden), gerekend
+met wat er tot en met die avond bekend was. Het artikel krijgt de kop van het sterkste bericht van die avond, in de
+volgorde van de tabel; is er niets bijzonders, of haalde het team minder dan één punt per wedstrijd (dan is de avond
+zelf het nieuws), dan de kop van *Speelavond*. De tekst is de uitleg van dat bericht plus de
+zin over de avond (uitslag, doelsaldo, beste speler). Elk artikel heeft een label, een kop van hooguit tien woorden, een
+datum en een beeld (spelerskaarten bij het nieuwste topvormbericht, anders rondjes of één groot cijfer) en linkt naar
+die sessie. De nieuwspagina toont alle artikelen, nieuwste eerst en groot.
 
 | Bericht | Wanneer | Voorbeeldkop |
 |---|---|---|
-| Topvorm | spelers met de blauwe kaart (§9c) | *Neegek en KFH Guip 023 in topvorm* |
-| Speelavond | altijd, over de laatste speelavond (minstens 2 wedstrijden) | *Vier zeges en een gelijkspel* |
-| Uitschieter | hoogste rating van de laatste avond, als die ≥ 9,0 is | *9.9 voor Neegek tegen X* |
-| Hattrick | 3+ goals van één speler in één wedstrijd op de laatste avond (niet als dat al de uitschieter is) | *Hattrick voor Xero 023* |
-| Grote zege | winst met ≥ 4 verschil op de laatste avond (de grootste) | *7–1 tegen X* |
-| Scoort op rij | een speler scoorde in elk van de laatste ≥ 3 eigen wedstrijden | *Xero 023 scoort vier keer op rij* |
-| De nul | ≥ 2 clean sheets op de laatste avond | *Twee keer de nul gehouden* |
+| Topvorm | spelers die die avond de blauwe kaart kregen (§9c) en hem daarvoor niet hadden | *Neegek en KFH Guip 023 in topvorm* |
+| Uitschieter | hoogste rating van de avond, als die ≥ 9,0 is | *9.9 voor Neegek tegen X* |
+| Hattrick | 3+ goals van één speler in één wedstrijd die avond | *Hattrick voor Xero 023* |
+| Grote zege | winst met ≥ 4 verschil die avond (de grootste) | *7–1 tegen X* |
+| Scoort op rij | een speler scoorde in elk van de laatste ≥ 3 eigen wedstrijden, tot en met die avond | *Xero 023 scoort vier keer op rij* |
+| De nul | ≥ 2 clean sheets die avond | *Twee keer de nul gehouden* |
+| Speelavond | anders | *Vier zeges en een gelijkspel* |
 
-Het grote bericht is *Topvorm* als dat er is, anders *Speelavond* (die staat altijd als eerste daarna). Geen
-reeksen: die staan al in de rondjes bovenaan.
+Geen reeksen: die staan al in de rondjes bovenaan.
 
 - **Clubcijfers** komen uit EA (`overallStats` en `allTimeLeaderboard/search`, samen in het clubsnapshot). Alles over
   spelers en vorm komt uit onze eigen gevolgde wedstrijden, met het aantal erbij.
@@ -353,6 +356,18 @@ reeksen: die staan al in de rondjes bovenaan.
   eronder. Voor percentages de minimale aantallen uit §4.
 - **Leden**: elk lid als spelerskaart (§9c), **gesorteerd op vorm**: eerst topvorm, dan in vorm, dan de rest; binnen
   een tier op de rating van de laatste vijf, dan op aantal wedstrijden.
+
+**Sessies** begint met een kaart per avond, nieuwste eerst (geïnspireerd op de sessiekaart van FC Clubs): datum en
+duur, de uitslag groot als W-G-V, en drie cijfers: doelpunten, punten per wedstrijd (groen bij ≥ 0,3 boven het eigen
+normaal, rood bij ≥ 0,3 eronder) en de gemiddelde rating van het team. Daaronder de tijdlijn: per wedstrijd een rondje
+met de uitslag, het shirt van de tegenstander en de score. Onderaan de **speler van de sessie**: de hoogste gemiddelde
+rating onder wie minstens de helft van de wedstrijden speelde, met een kleine foto (zonder foto een icoon), goals en
+assists. Het kopvlak kleurt zacht mee met de avond: blauw bij ≥ 2 punten per wedstrijd, rood bij < 1. Een tik opent de
+sessie (`sessies.html#<id>`) met "Terug naar sessies".
+
+**Wedstrijden** is één lijst van alle wedstrijden, nieuwste eerst, niet per avond verdeeld. Per wedstrijd: datum en
+tijd, uitslag, tegenstander, score en de beste speler van de wedstrijd (hoogste EA-rating, met een kroon als die ook man of
+the match was). Eerst de laatste twintig, de rest achter een knop.
 
 **Sessiekop**: elke speelavond toont dezelfde zes cijfers, zodat avonden op dezelfde manier te vergelijken zijn:
 wedstrijden (met W-G-V en de badge punten per wedstrijd tegenover normaal), duur (eerste tot laatste wedstrijd plus een

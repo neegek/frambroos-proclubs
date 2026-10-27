@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nieuws · Frambroos Coach</title>
+<link rel="icon" href="crest.png">
+<meta name="theme-color" content="#090b0d">
+<script>try { if (localStorage.getItem('theme') === 'light') document.documentElement.dataset.theme = 'light'; } catch (e) {}</script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="content">
+    <a class="back-link" href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Terug naar Clubhouse</a>
+    <header class="page-head">
+      <div>
+        <h1>Nieuws</h1>
+        <p class="sub">Eén artikel per speelavond, uit de cijfers.</p>
+      </div>
+    </header>
+    <div class="news" id="news-all"></div>
+  </main>
+</div>
+<div id="tooltip" class="tooltip" hidden></div>
+<script src="common.js"></script>
+<script src="archetypes.js"></script>
+<script src="playercard.js"></script>
+<script src="news.js"></script>
+<script src="nieuws.js"></script>
+</body>
+</html>
