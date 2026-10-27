@@ -306,17 +306,25 @@ op de clubpagina's van de Premier League). Van boven naar beneden:
    groot, het stadion erboven, de clubnaam, en daaronder skill rating en huidige divisie. Dan de **laatste 10
    wedstrijden** als rondjes (W/G/V, oudste links, nieuwste rechts en omlijnd; een tik opent de wedstrijd), zonder
    label en zonder reeks: de rondjes zeggen het zelf. Niet alles hoeft benoemd te worden.
-2. **Seizoen**: één kaart met bovenin de totalen volgens EA over alle wedstrijden (wedstrijden, gewonnen, gelijk,
-   verloren, winstpercentage, doelpunten voor en tegen, clean sheets; geen badges, dit zijn feiten) en daaronder de
-   **vormgrafiek** over de gevolgde wedstrijden. Per wedstrijd een staafje: hoogte = doelsaldo, kleur = uitslag. Daar
-   doorheen twee lijnen, beide gemiddeld over vijf wedstrijden: het **doelsaldo** en het **verwachte doelsaldo** op basis van de
-   tegenstander (skill rating tegenover de onze en het aantal mensen per kant, het verwachtingsmodel uit §3). Ligt de eerste lijn
-   boven de tweede, dan doen we het beter dan de tegenstanders deden verwachten. Rechts in de kop vier cijfers over de
-   laatste tien, met een badge tegenover de wedstrijden daarvoor: punten per wedstrijd, doelsaldo per wedstrijd, het
-   verwachte doelsaldo (de kleurtjes zijn ook de legenda van de twee lijnen) en de gemiddelde rating van de
-   tegenstanders tegenover de onze, *Tegenstanders tov ons* (badge grijs: sterkere tegenstanders zijn niet beter of slechter). EA geeft alleen
-   de huidige rating van een tegenstander, niet die op de dag van de wedstrijd. De tooltip per wedstrijd noemt uitslag, tegenstander, diens rating
-   en wat er verwacht werd.
+2. **Seizoen**: één kaart, bewust simpel (sinds 27 oktober 2026). Bovenin **In het kort**: drie regels die iedereen
+   snapt, elk een vergelijking met één duidelijke basis, in woorden met hooguit twee getallen:
+   - *Laatste avond*: "5 van de 7 gewonnen", met **beter / slechter / zoals normaal** (punten per wedstrijd tegenover
+     het eigen gemiddelde over alle andere gevolgde wedstrijden; verschil ≥ 0,3 telt).
+   - *Deze week tegenover vorige week*: winstpercentage van de laatste 7 dagen naast dat van de 7 dagen ervoor
+     (alleen als beide minstens 3 wedstrijden hebben; anders de laatste 7 dagen alleen).
+   - *Tegen sterkere clubs*: winstpercentage tegen clubs met een skill rating ≥ 100 boven de onze naast dat tegen de
+     rest (alleen als beide minstens 3 wedstrijden hebben). Dit is het ene verband dat in de data overeind blijft en
+     dat je kunt gebruiken: tegen de rest niet achteroverleunen.
+   Daaronder de totalen volgens EA over alle wedstrijden (wedstrijden, gewonnen, gelijk, verloren, winstpercentage,
+   doelpunten voor en tegen, clean sheets; geen badges, dit zijn feiten) en de **vormgrafiek** over de gevolgde
+   wedstrijden: per wedstrijd een staafje (hoogte = doelsaldo, kleur = uitslag) met daardoorheen **één lijn**, het
+   doelsaldo gemiddeld over vijf. Rechts in de kop twee cijfers over de laatste tien met een badge tegenover de
+   wedstrijden daarvoor: punten per wedstrijd en doelsaldo per wedstrijd. Niet meer: de lijn en het cijfer *verwacht
+   doelsaldo* en *tegenstanders tov ons* (jargon; het verwachtingsmodel uit §3 blijft wel in de badges op de
+   wedstrijdkaarten). De tooltip per wedstrijd noemt uitslag, tegenstander en diens rating.
+   **Niet mogelijk**: "nog X punten tot promotie". EA's `lastMatch0..9` is een rollend venster van de laatste vijf
+   uitslagen (1 = winst, 2 = verlies, 3 = gelijk, −1 = leeg), geen seizoensstand; de divisieregels (`settings`) slaan we
+   wel op voor als dat ooit kan.
 3. **Nieuws**: één kaart met het nieuwste artikel en een link naar de nieuwspagina (`nieuws.html`) met alle artikelen.
 4. **Laatste uitslagen**: de laatste vier wedstrijden als `matchCard`, met een link naar alle wedstrijden.
 5. **Topspelers**: vier ranglijstkaartjes (Frambroos-index, rating, goals, assists); de andere vijf achter een knop.
@@ -356,6 +364,13 @@ Geen reeksen: die staan al in de rondjes bovenaan.
   eronder. Voor percentages de minimale aantallen uit §4.
 - **Leden**: elk lid als spelerskaart (§9c), **gesorteerd op vorm**: eerst topvorm, dan in vorm, dan de rest; binnen
   een tier op de rating van de laatste vijf, dan op aantal wedstrijden.
+
+**Spelerspagina, tab Algemeen** (sinds 27 oktober 2026, *less is more*): in één blik te lezen. Van boven naar
+beneden: de spelerskaart; de samenvatting (één alinea: rol en vorm); **drie cijfers** over de gekozen periode (goals
+per wedstrijd, assists per wedstrijd, winstpercentage met deze speler erbij); de laatste acht wedstrijden. Alles wat
+meer wil weten staat achter één knop **Meer cijfers** (ingeklapt): Highlights en precisie, Frambroos-index met
+onderdelen, resultaat met deze speler, *Aan de bal in context* (§4a) en *Sterk en zwak*. Uitbreiden gebeurt daar, of
+in de tabbladen Vorm en Advies; het eerste scherm blijft vier dingen.
 
 **Sessies** begint met een kaart per avond, nieuwste eerst (geïnspireerd op de sessiekaart van FC Clubs): datum en
 duur, de uitslag groot als W-G-V, en drie cijfers: doelpunten, punten per wedstrijd (groen bij ≥ 0,3 boven het eigen

@@ -57,7 +57,7 @@ function futFrame(photo, uid) {
     <path d="${FUT_SHAPE}" fill="url(#${id('bg')})" stroke="url(#${id('gold')})" stroke-width="2.2" ${inset(0.952, 0.966)}/>
     <g clip-path="url(#${id('clip')})">
       <rect width="300" height="430" fill="url(#${id('sheen')})"/><rect width="300" height="430" fill="url(#${id('dots')})"/>
-      ${photo ? `<g mask="url(#${id('photo-mask')})"><rect x="0" y="0" width="300" height="250" style="fill:var(--t-photo)"/><image href="${photo}" x="74" y="52" width="200" height="198" preserveAspectRatio="xMidYMin slice"/></g>` : ''}
+      ${photo ? `<g mask="url(#${id('photo-mask')})"><rect x="0" y="0" width="300" height="250" style="fill:var(--t-photo)"/><image href="${photo}" x="34" y="52" width="240" height="198" preserveAspectRatio="xMaxYMin slice"/></g>` : ''}
     </g>
   </svg>`;
 }

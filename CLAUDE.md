@@ -113,10 +113,13 @@ alleen in Cloudflare.
   stippen (alleen bij hover). Klassenamen in componenten specifiek houden (bijv. `.pitch-line`, niet `.line`).
 - Menu: Clubhouse (startpagina, coach-logica §9a), Sessies, Wedstrijden, Spelers. De spelersnamen staan als knoppen
   bovenaan de spelerspagina (`#chips`), niet in het menu. Het Clubhouse heeft geen KPI-tegels maar één kaart *Seizoen*:
-  totalen zonder badges (`.totals-band`) en daaronder de vormgrafiek (staafjes per wedstrijd plus doelsaldo en verwacht
-  doelsaldo tegen deze tegenstanders), met de kerncijfers via `figsHtml` in de kop. Geen aparte analysepagina. De app is bewust eenvoudig: liever één duidelijke kaart dan drie tabellen.
-- Spelerspagina: drie tabbladen (Algemeen, Vorm, Advies). Samengevoegde kaarten tonen hooguit drie punten per kant;
-  spelerstabellen zijn compact, met *Alle cijfers* achter een knop.
+  eerst *In het kort* (`.kort`: drie regels in woorden, coach-logica §9a), dan de totalen zonder badges
+  (`.totals-band`) en de vormgrafiek (staafjes per wedstrijd plus één lijn: doelsaldo over vijf), met twee kerncijfers
+  via `figsHtml` in de kop. Geen "verwacht" of "tov ons" op de startpagina. Geen aparte analysepagina. De app is bewust eenvoudig: liever één duidelijke kaart dan drie tabellen.
+- Spelerspagina: drie tabbladen (Algemeen, Vorm, Advies). Algemeen is vier dingen: kaart, samenvatting, drie cijfers
+  (`#p-three`), laatste acht wedstrijden; de rest staat ingeklapt achter *Meer cijfers* (`details.more-cijfers`,
+  coach-logica §9a). Samengevoegde kaarten tonen hooguit drie punten per kant; spelerstabellen zijn compact, met
+  *Alle cijfers* achter een knop.
 - Spelerspagina begint met de spelerskaart (`public/playercard.js`): FC-vorm met een tier die met de vorm meebeweegt
   (goud, zwart-goud bij *in vorm*, topvorm; coach-logica §9c; kleuren los van het thema), met foto of
   silhouet, overall, vlag, ingestelde positie, laatst gespeelde build en zes cijfers (seizoen, of face stats uit de ingevulde

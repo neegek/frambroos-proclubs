@@ -256,6 +256,13 @@ function renderPlayer() {
   fill('#list-strengths', sw.strengths.slice(0, 3), 'Nog geen maat waarop deze speler bovenaan staat.');
   fill('#list-weaknesses', sw.weaknesses.slice(0, 3), 'Nog geen maat waarop deze speler duidelijk onderaan staat.');
   $('#p-summary').innerHTML = playerSummary(selected, rows, career, sw);
+  // Drie cijfers over de gekozen periode (coach-logica §9a); de rest staat achter Meer cijfers.
+  const three = (label, value, sub) => `<div class="sfig"><span class="sfig-label">${label}</span><span class="sfig-value">${value}</span><span class="sfig-sub">${sub}</span></div>`;
+  $('#p-three').innerHTML = rows.length ? [
+    three('Goals per wedstrijd', f2(g / n), `${g} in ${rows.length} wedstrijden`),
+    three('Assists per wedstrijd', f2(as / n), `${as} in ${rows.length} wedstrijden`),
+    three('Gewonnen', fmtPct(s.winPct), `${s.W}-${s.D}-${s.L} met deze speler`),
+  ].join('') : '';
   renderContext(selected, ms);
   window.PlayerCard.render(selected);
   document.title = `${selected} · Frambroos Coach`;

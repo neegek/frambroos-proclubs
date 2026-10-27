@@ -68,15 +68,15 @@ function totals() {
   $('#totals').innerHTML = items.map(([l, v]) => `<div><dt>${l}</dt><dd>${v ?? '–'}</dd></div>`).join('');
 }
 
-// Vormgrafiek (coach-logica §9a): per wedstrijd een staafje (doelsaldo, kleur = uitslag), met daardoorheen het doelsaldo
-// en het verwachte doelsaldo tegen deze tegenstanders, beide gemiddeld over vijf. Een tik of muis toont de wedstrijd.
+// Vormgrafiek (coach-logica §9a): per wedstrijd een staafje (doelsaldo, kleur = uitslag), met daardoorheen één lijn:
+// het doelsaldo gemiddeld over vijf. Een tik of muis toont de wedstrijd.
 function formChart(container, ms) {
   if (!ms.length) { container.innerHTML = '<p class="empty">Nog geen wedstrijden.</p>'; return; }
   const width = Math.max(320, Math.min(1400, container.clientWidth || 800)), height = 230;
   const { svg, inner } = frame(container, width, height, { l: 34, t: 10, r: 8, b: 26 });
   const n = ms.length, own = DATA.snapshot?.skillRating;
-  const gd = rolling(ms.map(m => m.goalDiff), 5), ex = rolling(ms.map(m => m.expected ?? 0), 5);
-  const all = [...ms.map(m => m.goalDiff), ...gd, ...ex, 0];
+  const gd = rolling(ms.map(m => m.goalDiff), 5);
+  const all = [...ms.map(m => m.goalDiff), ...gd, 0];
   const yt = niceTicks(Math.min(...all), Math.max(...all), 4), y0 = Math.min(...all, yt[0]), y1 = Math.max(...all, yt.at(-1));
   const step = inner.w / n, sx = i => inner.x + (i + 0.5) * step, sy = v => inner.y + inner.h - (v - y0) / (y1 - y0) * inner.h;
   yAxis(svg, inner, sy, yt, v => v > 0 ? `+${v}` : v);
@@ -90,7 +90,6 @@ function formChart(container, ms) {
     const top = Math.min(sy(0), sy(m.goalDiff)), h = Math.max(2, Math.abs(sy(m.goalDiff) - sy(0)));
     return el('rect', { x: sx(i) - bw / 2, y: m.goalDiff === 0 ? sy(0) - 1 : top, width: bw, height: h, rx: Math.min(3, bw / 3), fill: fill[m.result], 'fill-opacity': 0.5 }, svg);
   });
-  el('path', { d: smoothPath(ex.map((v, i) => [sx(i), sy(v)])), fill: 'none', stroke: 'var(--ink-2)', 'stroke-width': 2, 'stroke-dasharray': '5 4', 'stroke-linecap': 'round' }, svg);
   el('path', { d: smoothPath(gd.map((v, i) => [sx(i), sy(v)])), fill: 'none', stroke: 'var(--brand)', 'stroke-width': 2.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, svg);
   const hit = el('rect', { class: 'hit', x: inner.x, y: inner.y, width: inner.w, height: inner.h }, svg);
   let on = null, pointer = 'mouse';
@@ -101,7 +100,7 @@ function formChart(container, ms) {
     if (on !== null) bars[on].setAttribute('fill-opacity', 0.5);
     bars[i].setAttribute('fill-opacity', 1); on = i;
     const opp = m.opponent.skillRating ? `rating ${m.opponent.skillRating}${own ? ` (${signed(m.opponent.skillRating - own, 0)} tegenover ons)` : ''}` : 'rating onbekend';
-    showTip(`<b>${letter(m.result)} ${m.goals}–${m.goalsAgainst} tegen ${esc(m.opponent.name)}</b>${dayLabel(m.ts)} · ${opp}<br>Verwacht doelsaldo ${signed(m.expected, 1)}${m.winnerByDnf ? ' · opgave' : ''}<br>Gemiddeld over 5: doelsaldo ${signed(gd[i], 1)}, verwacht ${signed(ex[i], 1)}`, e);
+    showTip(`<b>${letter(m.result)} ${m.goals}–${m.goalsAgainst} tegen ${esc(m.opponent.name)}</b>${dayLabel(m.ts)} · ${opp}${m.winnerByDnf ? ' · opgave' : ''}<br>Doelsaldo gemiddeld over 5: ${signed(gd[i], 1)}`, e);
   });
   // Na een tik stuurt de browser soms meteen mouseleave; dan blijft de tooltip staan tot een tik ernaast (common.js).
   hit.addEventListener('mouseleave', () => { if (pointer !== 'mouse') return; if (on !== null) bars[on].setAttribute('fill-opacity', 0.5); on = null; hideTip(); });
@@ -112,17 +111,38 @@ function formChart(container, ms) {
 // Kerncijfers in de kop: de laatste tien tegenover de wedstrijden daarvoor.
 function seasonFigs(ms) {
   if (ms.length < 3) { $('#fig-season').innerHTML = ''; return; }
-  const last = ms.slice(-10), before = ms.slice(0, -10), own = DATA.snapshot?.skillRating, T = 'Laatste tien tegenover de gevolgde wedstrijden daarvoor';
+  const last = ms.slice(-10), before = ms.slice(0, -10), T = 'Laatste tien tegenover de gevolgde wedstrijden daarvoor';
   const a = summarize(last), b = before.length >= 5 ? summarize(before) : null;
-  const opp = list => { const r = list.map(m => m.opponent.skillRating).filter(Boolean); return r.length && own ? avg(r) - own : null; };
-  const oa = opp(last), ob = b ? opp(before) : null;
-  const neutral = d => d && { ...d, good: null }; // sterkere tegenstanders zijn niet beter of slechter, alleen anders
   $('#fig-season').innerHTML = figsHtml([
     { label: 'Punten per wedstrijd', value: a.ppg.toFixed(1), delta: b && deltaOf(a.ppg, b.ppg, { digits: 1, title: T }) },
     { label: 'Doelsaldo', color: 'var(--brand)', value: signed(a.gfAvg - a.gaAvg, 1), delta: b && deltaOf(a.gfAvg - a.gaAvg, b.gfAvg - b.gaAvg, { digits: 1, title: `${T} (per wedstrijd)` }) },
-    { label: 'Verwacht', color: 'var(--ink-2)', value: signed(avg(last.map(m => m.expected ?? 0)), 1) },
-    { label: 'Tegenstanders tov ons', value: oa === null ? '–' : signed(oa, 0), delta: ob !== null && oa !== null ? neutral(deltaOf(oa, ob, { digits: 0, min: 10, title: `${T}: gemiddelde rating van de tegenstanders tegenover de onze` })) : null },
   ]);
+}
+
+// In het kort (coach-logica §9a): drie regels in woorden, elk één vergelijking met een duidelijke basis.
+function kort(ms) {
+  const lines = [];
+  const won = list => `${list.filter(m => m.result === 'W').length} van de ${list.length}`;
+  const pctW = list => Math.round(100 * list.filter(m => m.result === 'W').length / list.length);
+  const tone = (good, txt) => `<span class="kort-tag ${good === true ? 'up' : good === false ? 'down' : ''}">${txt}</span>`;
+  // 1. Laatste avond tegenover normaal
+  const sess = sessionsOf(ms), last = sess.at(-1);
+  if (last && last.matches.length >= 2) {
+    const rest = ms.filter(m => m.session !== last.id), a = summarize(last.matches), b = rest.length >= 3 ? summarize(rest) : null;
+    const d = b ? a.ppg - b.ppg : null;
+    lines.push({ label: 'Laatste avond', main: `${won(last.matches)} gewonnen`, tag: d === null ? '' : tone(d >= 0.3 ? true : d <= -0.3 ? false : null, d >= 0.3 ? 'beter dan normaal' : d <= -0.3 ? 'slechter dan normaal' : 'zoals normaal') });
+  }
+  // 2. Deze week tegenover vorige week
+  const now = ms.at(-1)?.ts ?? 0, week = 7 * 86400;
+  const thisW = ms.filter(m => m.ts > now - week), prevW = ms.filter(m => m.ts <= now - week && m.ts > now - 2 * week);
+  if (thisW.length >= 3) lines.push({ label: 'Deze week', main: `${pctW(thisW)}% gewonnen`, tag: prevW.length >= 3 ? tone(pctW(thisW) - pctW(prevW) >= 10 ? true : pctW(prevW) - pctW(thisW) >= 10 ? false : null, `vorige week ${pctW(prevW)}%`) : '' });
+  // 3. Tegen sterkere clubs tegenover de rest
+  const own = DATA.snapshot?.skillRating;
+  if (own) {
+    const strong = ms.filter(m => m.opponent.skillRating >= own + 100), rest = ms.filter(m => m.opponent.skillRating && m.opponent.skillRating < own + 100);
+    if (strong.length >= 3 && rest.length >= 3) lines.push({ label: 'Tegen sterkere clubs', main: `${pctW(strong)}% gewonnen`, tag: tone(null, `tegen de rest ${pctW(rest)}%`) });
+  }
+  $('#kort').innerHTML = lines.map(l => `<div class="kort-row"><span class="kort-label">${l.label}</span><b>${l.main}</b>${l.tag}</div>`).join('');
 }
 
 // ---------- per speler: totalen uit de gevolgde wedstrijden ----------
@@ -187,6 +207,7 @@ function openRank(R, totals) {
 function render() {
   const ms = DATA.matches;
   homeHero(ms);
+  kort(ms);
   totals();
   seasonFigs(ms);
   formChart($('#chart-form'), ms);

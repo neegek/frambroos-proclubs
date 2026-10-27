@@ -511,6 +511,22 @@ a.pchip:hover { border-color: var(--brand); }
 .season .card-head { margin-bottom: 12px; }
 .season-chart { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--grid); }
 .season-chart .hit { cursor: pointer; }
+.kort { display: grid; gap: 6px; margin: 4px 0 14px; }
+.kort-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; font-size: 14.5px; }
+.kort-label { color: var(--ink-2); min-width: 150px; }
+.kort-row b { font-weight: 620; }
+.kort-tag { font-size: 12.5px; color: var(--ink-2); padding: 2px 8px; border-radius: 999px; background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.kort-tag.up { color: var(--good-text); background: color-mix(in srgb, var(--pos) 16%, transparent); }
+.kort-tag.down { color: var(--neg-text); background: color-mix(in srgb, var(--neg) 16%, transparent); }
+@media (max-width: 600px) { .kort-row { gap: 4px 8px; } .kort-label { min-width: 100%; font-size: 12px; } }
+.p-three { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 0; padding-top: 0; border-top: 0; }
+.more-cijfers > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 8px; font-weight: 560; color: var(--brand-text); min-height: 40px; }
+.more-cijfers > summary::-webkit-details-marker { display: none; }
+.more-cijfers > summary::before { content: "+"; font-size: 18px; width: 22px; text-align: center; }
+.more-cijfers[open] > summary::before { content: "–"; }
+.more-cijfers[open] > summary { margin-bottom: 12px; }
+.more-cijfers .card { margin-bottom: 12px; }
+.more-cijfers .card:last-child { margin-bottom: 0; }
 .totals-band { margin: 0; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); }
 .totals-band div { padding: 4px 14px; border-left: 1px solid var(--grid); min-width: 0; }
 .totals-band div:first-child { border-left: 0; padding-left: 0; }
