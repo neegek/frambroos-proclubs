@@ -1,4 +1,4 @@
-# Betrouwbaar verzamelen in de avond
+# Betrouwbaar en snel verzamelen
 
 ## Waarom
 
@@ -13,16 +13,22 @@ ruim 3 uur.
 
 ## De oplossing
 
-1. **Hoofdtrigger: cron-job.org, elke 2 uur, de hele dag** (00:00, 02:00, … 22:00 Nederlandse tijd), via de
-   GitHub-API. Tussen twee runs zitten hooguit zo'n 8 wedstrijden van één type, ook op het snelste tempo.
-   12 runs per dag.
+1. **Hoofdtrigger: cron-job.org, twee taken** (Nederlandse tijd), via de GitHub-API:
+   - **Speelavond**: elke 10 minuten van 18:00 tot en met 00:50. Nieuwe wedstrijden staan dan binnen zo'n
+     10 minuten (plus een minuut bouwen) op de site. 42 runs.
+   - **Rest van de dag**: elke 2 uur, 02:00 tot en met 16:00. Tussen twee runs zitten hooguit zo'n 8 wedstrijden van
+     één type, ook op het snelste tempo. 8 runs.
+
+   Samen 50 runs per dag van elk zo'n 15 seconden. Sinds 27 oktober 2026; daarvoor elke 2 uur de hele dag.
 2. **Reserve: GitHub's eigen cron, elke 3 uur** (`47 */3 * * *`, in `.github/workflows/collect.yml`). Valt
    cron-job.org uit, dan is het gat nog steeds korter dan 10 wedstrijden.
 3. **Waarschuwing**: ziet een run dat alle 10 wedstrijden van een type nieuw zijn, dan kan er iets gemist zijn. Dat
    verschijnt als waarschuwing bij de run in de Actions-tab.
 
 De lokale app haalt bij openen zelf live op (`src/live.js`); de site wordt na elke run met nieuwe data opnieuw
-gepubliceerd en start bij openen zelf een run (zie *Live op de site*), anders loopt hij hooguit twee uur achter. Kosten: geen, de repo is openbaar (Actions-minuten gratis).
+gepubliceerd en loopt 's avonds hooguit zo'n 10 minuten achter, overdag hooguit twee uur; met de worker start de site bij openen zelf een run (zie *Live op de site*). Kosten: geen. cron-job.org
+is gratis (draait op donaties) en stuurt alleen een klein verzoek naar GitHub; GitHub Actions is gratis en onbeperkt
+voor openbare repo's. EA krijgt per run twee kleine verzoeken. Lege runs schrijven niets weg en bouwen de site niet.
 
 ## Instellen (ongeveer 5 minuten)
 
@@ -45,12 +51,12 @@ Dit token kan alleen workflows in deze ene repo starten. Het kan geen code of da
 ### Stap 2: cron-job.org
 
 1. Maak een gratis account op https://cron-job.org.
-2. *Create cronjob*:
+2. *Create cronjob* (taak *Rest van de dag*):
    - **Title**: `Frambroos verzamelen`
    - **URL**: `https://api.github.com/repos/neegek/frambroos-proclubs/actions/workflows/collect.yml/dispatches`
    - **Execution schedule** → *Custom*:
      - Minutes: `0`
-     - Hours: `0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22`
+     - Hours: `2, 4, 6, 8, 10, 12, 14, 16`
      - Days of month, months, weekdays: alles
      - **Time zone: Europe/Amsterdam** (dan regelt de dienst zomer- en wintertijd)
 3. Tabblad *Advanced*:
@@ -68,6 +74,9 @@ Dit token kan alleen workflows in deze ene repo starten. Het kan geen code of da
    - **422**: de body is niet precies `{"ref":"main"}`.
 5. Controleer in https://github.com/neegek/frambroos-proclubs/actions dat er een nieuwe run staat met
    als trigger *workflow_dispatch*.
+6. Taak *Speelavond*: kloon de taak (dan gaan URL, headers en body mee) en noem hem `Frambroos speelavond`, met
+   *Execution schedule* → *Custom*: Minutes `0, 10, 20, 30, 40, 50`, Hours `18, 19, 20, 21, 22, 23, 0`, zelfde
+   tijdzone. Overlappen twee runs toch, dan wacht de tweede (`concurrency` in `collect.yml`) en vindt niets nieuws.
 
 ### Controleren of het blijft werken
 
@@ -75,7 +84,7 @@ Dit token kan alleen workflows in deze ene repo starten. Het kan geen code of da
 gh run list --workflow=collect.yml --limit 20
 ```
 
-Elke 2 uur hoort daar een `workflow_dispatch`-run te staan, de hele dag. Verloopt het
+Tussen 18:00 en 01:00 hoort daar elke 10 minuten een `workflow_dispatch`-run te staan, de rest van de dag elke 2 uur. Verloopt het
 token, dan geeft cron-job.org een fout (401) en mailt het je.
 
 ## De site
@@ -87,7 +96,7 @@ gebouwd.
 
 ## Live op de site
 
-Zonder meer loopt de site tot twee uur achter (de tijd tussen twee runs). Daarom start de site bij openen of verversen
+Zonder meer loopt de site 's avonds tot 10 minuten en overdag tot twee uur achter (de tijd tussen twee runs). Daarom start de site bij openen of verversen
 zelf een verzamelrun, via een kleine Cloudflare Worker (`worker/trigger.js`). Die bewaart het token, dat niet in de
 openbare site mag. Wat er gebeurt:
 

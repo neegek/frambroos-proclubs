@@ -65,15 +65,15 @@ function futFrame(photo, uid) {
 const PTS = { W: 3, D: 1, L: 0 };
 function tierOf(rows) {
   const r = rows.filter(x => x.p.rating !== null), last5 = r.slice(-5), rest = r.slice(0, -5);
-  if (last5.length < 5) return { tier: 'goud', why: '' };
+  if (last5.length < 5) return { tier: 'goud', why: '', level: avg(last5.map(x => x.p.rating)), growth: null };
   const level = avg(last5.map(x => x.p.rating)), wins = last5.filter(x => x.m.result === 'W').length;
   const growth = rest.length >= 3
     ? (level - avg(rest.map(x => x.p.rating))) + 0.25 * (avg(last5.map(x => PTS[x.m.result])) - avg(rest.map(x => PTS[x.m.result])))
     : null;
   const why = `laatste 5: rating ${level.toFixed(2)}, ${wins}× gewonnen${growth !== null ? `, groei ${growth >= 0 ? '+' : ''}${growth.toFixed(2)}` : ''}`;
-  if (level >= 8 && wins >= 3) return { tier: 'top', why };
-  if (level >= 7.5 || (growth !== null && r.length >= 8 && growth >= 0.3)) return { tier: 'zwart', why };
-  return { tier: 'goud', why };
+  if (level >= 8 && wins >= 3) return { tier: 'top', why, level, growth };
+  if (level >= 7.5 || (growth !== null && r.length >= 8 && growth >= 0.3)) return { tier: 'zwart', why, level, growth };
+  return { tier: 'goud', why, level, growth };
 }
 
 // Naam op de kaart: voorletter en achternaam van de pro (P. Selie), anders de accountnaam. Eén woord blijft heel.
@@ -117,10 +117,11 @@ function cardOf(name) {
         <div class="fut-bottom">
         <div class="fut-name${shown.length > 12 ? ' long' : ''}" title="${esc(name)}">${esc(shown)}</div>
         <div class="fut-stats">${col(stats.slice(0, 3))}${col(stats.slice(3))}</div>
+        ${tier.tier === 'top' ? '<div class="fut-tier">Topvorm</div>' : tier.tier === 'zwart' ? '<div class="fut-tier">In vorm</div>' : ''}
         </div>
       </div>
     </div>`;
-  return { html, rows, career, arch, rating, g, a };
+  return { html, rows, career, arch, rating, g, a, tier };
 }
 
 function render(name) {
@@ -147,5 +148,7 @@ function render(name) {
   </div>`;
 }
 
-window.PlayerCard = { load: () => fetch(API.photos).then(r => r.json()).then(p => { PHOTOS = p || {}; }), render, html: name => cardOf(name).html };
+// tier(name): { tier, level, growth } voor sorteren en samenvattingen (coach-logica §9c). TIER_RANK: hoger is beter.
+const TIER_RANK = { top: 2, zwart: 1, goud: 0 };
+window.PlayerCard = { load: () => fetch(API.photos).then(r => r.json()).then(p => { PHOTOS = p || {}; }), render, html: name => cardOf(name).html, tier: name => cardOf(name).tier, TIER_RANK };
 })();
