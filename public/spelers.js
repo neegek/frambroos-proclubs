@@ -231,15 +231,21 @@ function renderPlayer() {
   const ratings = rows.map(r => r.p.rating).filter(v => v !== null);
   // Rating, goals, assists en carrièrecijfers staan al op de spelerskaart; hier alleen wat daar niet staat.
   const fi = fiForRows(rows.map(r => r.p).filter(p => p.fi !== null));
-  // Vier kaartjes naast de samenvatting: highlights, precisie, Frambroos-index en het resultaat met deze speler erbij.
+  // Drie kaartjes naast de samenvatting: highlights (per wedstrijd en precisie samen), Frambroos-index en het resultaat
+  // met deze speler erbij.
   const n = rows.length || 1, g = sum(rows, r => r.p.goals), as = sum(rows, r => r.p.assists), sa = sum(evRows(rows), r => r.p.ev.second_assists);
   const sh = sum(rows, r => r.p.shots), pm = sum(rows, r => r.p.passesMade), pa = sum(rows, r => r.p.passAttempts), tm = sum(rows, r => r.p.tacklesMade), ta = sum(rows, r => r.p.tackleAttempts);
   const hl = (label, v) => `<div class="hl-row"><span>${label}</span><b>${v}</b></div>`;
-  const prec = (label, num, den) => `<div><span class="prec-label">${label}</span><span class="prec-value">${den ? fmtPct(pct(num, den)) : '–'}</span><span class="prec-frac">${num}/${den}</span></div>`;
+  // Highlights: links wat iemand per wedstrijd oplevert, rechts hoe nauwkeurig; per rij wat bij elkaar hoort.
+  const cell = (label, v, frac = '') => `<div><span>${label}</span><b>${v}</b>${frac ? `<small>${frac}</small>` : ''}</div>`;
+  const prec = (label, num, den) => cell(label, den ? fmtPct(pct(num, den)) : '–', `${num}/${den}`);
   const bar = (label, v) => `<div class="fi-bar"><span>${label}</span><i style="--w:${Math.max(2, Math.min(100, v ?? 0))}%"></i><b>${fiFmt(v)}</b></div>`;
   $('#p-cards').innerHTML = [
-    `<section class="card"><h2>Highlights</h2>${hl('Goals per wedstrijd', f2(g / n))}${hl('Assists per wedstrijd', f2(as / n))}${hl('Betrokken bij goals', f2((g + as + sa) / n))}</section>`,
-    `<section class="card"><h2>Precisie</h2><div class="prec">${prec('Conversie', g, sh)}${prec('Pass', pm, pa)}${prec('Duels', tm, ta)}</div></section>`,
+    `<section class="card"><h2>Highlights</h2><div class="hl-grid">
+      <span class="hl-col">Per wedstrijd</span><span class="hl-col">Precisie</span>
+      ${cell('Goals', f2(g / n))}${prec('Conversie', g, sh)}
+      ${cell('Assists', f2(as / n))}${prec('Pass', pm, pa)}
+      ${cell('Betrokken bij goals', f2((g + as + sa) / n))}${prec('Duels', tm, ta)}</div></section>`,
     `<section class="card"><h2>Frambroos-index</h2><div class="fi-card"><span class="fi-num">${fiFmt(fi.score)}</span><span class="fi-label">${fi.score === null ? 'minstens 3 wedstrijden' : fiLabel(fi.score)}</span><div class="fi-bars">${bar('Afronden', fi.parts.shoot)}${bar('Creëren', fi.parts.pass)}${bar('Aan de bal', fi.parts.ball)}${bar('Verdedigen', fi.parts.defend)}</div></div></section>`,
     `<section class="card"><h2>Resultaat met deze speler</h2>${hl('Gewonnen', s.n ? `${fmtPct(s.winPct)}` : '–')}${hl('Winst, gelijk, verlies', s.n ? `${s.W}-${s.D}-${s.L}` : '–')}${hl('Doelsaldo per wedstrijd', s.n ? signed(s.gfAvg - s.gaAvg, 1) : '–')}</section>`,
   ].join('');

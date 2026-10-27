@@ -43,7 +43,10 @@ wie het adres kent). `.github/workflows/site.yml` bouwt hem met `npm run export`
 bij elke push met codewijzigingen; niets met de hand publiceren. In de export staat `window.FRAMBROOS_STATIC`: data uit
 `data.json` naast de pagina (bij elke verversing opnieuw geladen) en geen buildformulier. Links en paden in `public/`
 zijn daarom altijd relatief (`spelers.html#naam`, nooit `/spelers.html`), en data laden gaat altijd via `API` uit
-`public/common.js`. De repo is openbaar: zet er nooit tokens, wachtwoorden of andere geheimen in.
+`public/common.js`. Bij openen start de site via een Cloudflare Worker (`worker/trigger.js`, adres als `liveTrigger` in
+`config.json`) een verzamelrun en biedt na afloop *Verversen* aan als er iets nieuws is (docs/trigger.md, *Live op de
+site*). De repo is openbaar: zet er nooit tokens, wachtwoorden of andere geheimen in; het token van de worker staat
+alleen in Cloudflare.
 
 ## Data
 
@@ -68,19 +71,22 @@ zijn daarom altijd relatief (`spelers.html#naam`, nooit `/spelers.html`), en dat
 - Attribuutnamen in het Engels zoals in het spel (Ball Control, Short Passing, ...); de rest van de app in het Nederlands.
 - Stijl: donker thuistenue (standaard) en licht uittenue; tokens staan bovenaan `public/style.css`. Nieuwe kleuren eerst
   op contrast controleren: tekst ≥ 4,5:1, grafische elementen ≥ 3:1. Datakleuren (winst blauw, verlies rood) niet aanpassen.
-- Opbouw: het menu is een zwevende kaart (afgeronde hoeken, eigen schaduw `--float`) los van de paginarand; op
-  telefoon (≤ 600 px) is het één balk onderin met de vier tabbladen met labels en de themaknop; geen tweede balk
-  bovenaan. Tablet: één balk bovenaan. Alleen het menu heeft de paarse gloed (`--side-bg`), zonder kleurenbies.
+- Opbouw: het menu is één zwevende balk **bovenaan** (afgeronde hoeken, eigen schaduw `--float`) los van de
+  paginarand, met logo, de vier tabbladen met labels, de versheid van de data en de themaknop; op telefoon (≤ 600 px)
+  is het één balk onderin met de vier tabbladen met labels en de themaknop; geen tweede balk bovenaan. Alleen het menu heeft de paarse gloed (`--side-bg`), zonder kleurenbies.
   Kaarten, tegels en sessie-items zijn effen donkerpaars (`--panel`) met dezelfde rand (`--panel-border`) en
   schaduw als het menu; in het uittenue wit. Pagina's zijn een strak raster van kaarten met 12 px tussenruimte. Titel en
-  filters staan op één rij (filters rechts). Op het Clubhouse komt eerst wie we zijn, dan de KPI-tegels. Een
+  filters staan op één rij (filters rechts). Het Clubhouse heeft geen paginatitel maar een hero (stadion,
+  groot logo, laatste 10), dan de totalen, het nieuws en de rest (coach-logica §9a). Een
   grafiekkaart toont zijn kerncijfers rechts in de kop via `figsHtml(...)` uit `public/common.js`, niet als legenda.
 - Kaartjes (geïnspireerd op FC Clubs, in eigen stijl): één wedstrijd is één `matchCard(m, {own, player})` uit
   `public/common.js` in een `.match-cards`-raster (op telefoon horizontaal swipebaar); een sessie begint met één kop
-  met zes vaste cijfers (`.sess-figs`, coach-logica §9a) en een deelknop; de spelerspagina heeft vier kaartjes
-  (Highlights, Precisie, Frambroos-index met balkjes, Resultaat met deze speler); de ranglijst op het Clubhouse is een
-  rij `.rank-card`-kaartjes met per stat **alle** spelers, niets uitklappen; de leden staan in dezelfde swipebare rij
-  als kleine spelerskaarten, gesorteerd op vorm. Een sessie toont de top drie van de avond als waaier van kleine
+  met zes vaste cijfers (`.sess-figs`, coach-logica §9a) en een deelknop; de spelerspagina heeft drie kaartjes
+  (Highlights met per wedstrijd en precisie naast elkaar, Frambroos-index met balkjes, Resultaat met deze speler); de ranglijst op het Clubhouse
+  (*Topspelers*) is een raster van `.rank-card`-kaartjes met per stat **alle** spelers, vier open en de rest achter een
+  knop; een tik op een kaartje opent geen speler maar het uitlegscherm van die ranglijst (`#rank-dialog`: waar de score
+  op gebaseerd is, wie meetelt, de hele lijst); de leden (*Selectie*) staan in een swipebare rij als kleine spelerskaarten, gesorteerd op vorm. Het nieuws op het
+  Clubhouse is een raster van `.news-item`-kaartjes met een beeldvlak in clubpaars, het eerste groot. Een sessie toont de top drie van de avond als waaier van kleine
   spelerskaarten (`.podium`), met een anekdote en een Cruijff-quote in plaats van een tekst over wie de beste was.
   Geen tabellen waar een kaartje volstaat.
 - Geen vage verbanden: *Wat opvalt*, *Beste tweetallen*, *Wanneer het loopt*, *Patronen*, *Opvallend* (sessie) en
@@ -94,12 +100,13 @@ zijn daarom altijd relatief (`spelers.html#naam`, nooit `/spelers.html`), en dat
 - Dashboardstijl: rustige kaarten met een dunne rand en geen zware schaduw; kaarttitel ingetogen met een korte uitleg
   achter de i-knop; filters als pil-knoppen met icoon (`data-icon` op `.filter`); grote cijfers in `--num-font`.
 - KPI-tegels altijd via `kpiTile(label, waarde, regel, deltaOf(...))` uit `public/common.js`. De badge toont een
-  verandering: groen beter, rood slechter, grijs gelijk, met een `title` die zegt waartegen. Clubhouse: laatste speelavond
-  tegenover de avonden daarvoor. Sessie: deze avond tegenover normaal. Speler: met tegenover zonder deze speler.
+  verandering: groen beter, rood slechter, grijs gelijk, met een `title` die zegt waartegen. Sessie: deze avond tegenover normaal. Speler: met tegenover zonder deze speler.
 - Lijngrafieken: vloeiend (monotone spline), hoofdlijn met `area: true` voor een zachte vlakvulling, geen vaste
   stippen (alleen bij hover). Klassenamen in componenten specifiek houden (bijv. `.pitch-line`, niet `.line`).
-- Menu: Clubhouse (startpagina, coach-logica §9a), Sessies, Wedstrijden, Spelers (in- en uitklapbaar, met de namen
-  eronder). Geen aparte analysepagina. De app is bewust eenvoudig: liever één duidelijke kaart dan drie tabellen.
+- Menu: Clubhouse (startpagina, coach-logica §9a), Sessies, Wedstrijden, Spelers. De spelersnamen staan als knoppen
+  bovenaan de spelerspagina (`#chips`), niet in het menu. Het Clubhouse heeft geen KPI-tegels maar één kaart *Seizoen*:
+  totalen zonder badges (`.totals-band`) en daaronder de vormgrafiek (staafjes per wedstrijd plus doelsaldo en verwacht
+  doelsaldo tegen deze tegenstanders), met de kerncijfers via `figsHtml` in de kop. Geen aparte analysepagina. De app is bewust eenvoudig: liever één duidelijke kaart dan drie tabellen.
 - Spelerspagina: drie tabbladen (Algemeen, Vorm, Advies). Samengevoegde kaarten tonen hooguit drie punten per kant;
   spelerstabellen zijn compact, met *Alle cijfers* achter een knop.
 - Spelerspagina begint met de spelerskaart (`public/playercard.js`): FC-vorm met een tier die met de vorm meebeweegt

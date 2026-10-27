@@ -39,7 +39,7 @@ const NAV = [
   const path = PAGE === 'wedstrijd.html' ? 'wedstrijden.html' : PAGE;
   side.innerHTML = `<a class="brand" href="index.html">${LOGO}<span>Frambroos<b>Coach</b></span></a>
     <nav class="side-nav" aria-label="Hoofdmenu">${NAV.map(n => n.group ? `<div class="nav-group" id="nav-group-players"><a href="${n.href}" class="nav-group-head ${n.href === path ? 'in-group' : ''}" aria-controls="player-nav" aria-expanded="true">${ICONS[n.icon]}<span>${n.label}</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><div class="sub-nav" id="player-nav" aria-label="Spelers"></div></div>` : `<a href="${n.href}" class="${n.href === path ? 'active' : ''}"${n.href === path ? ' aria-current="page"' : ''}>${ICONS[n.icon]}<span>${n.label}</span></a>`).join('')}</nav>
-    <div class="side-foot"><div class="club" id="club-box"><div class="club-name">Frambroos</div><div class="club-meta">Data laden…</div></div>
+    <div class="side-foot"><div class="club" id="club-box"><div class="club-meta">Data laden…</div></div>
     <button id="theme" class="icon-btn" type="button" title="Wissel tussen thuistenue (donker) en uittenue (licht)" aria-label="Wissel tussen thuistenue, donker, en uittenue, licht">${ICONS.theme}</button></div>`;
 })();
 // Spelersnamen onder het kopje Spelers in het menu; de actieve speler volgt de hash op de spelerspagina.
@@ -51,22 +51,6 @@ function fillPlayerNav() {
 }
 addEventListener('hashchange', () => fillPlayerNav());
 
-// Spelers in het menu in- en uitklappen. Op een breed scherm klapt een klik de namen in of uit (stand wordt onthouden);
-// op een smal scherm staan de namen niet in het menu en is het kopje gewoon een link naar de spelerspagina.
-(function playersToggle() {
-  const group = $('#nav-group-players'); if (!group) return;
-  const head = group.querySelector('.nav-group-head'), wide = matchMedia('(min-width: 961px)');
-  const set = open => { group.classList.toggle('collapsed', !open); head.setAttribute('aria-expanded', String(open)); };
-  let open = true; try { open = localStorage.getItem('playersOpen') !== '0'; } catch {}
-  set(open);
-  head.addEventListener('click', e => {
-    if (!wide.matches) return;
-    e.preventDefault();
-    open = group.classList.contains('collapsed');
-    set(open);
-    try { localStorage.setItem('playersOpen', open ? '1' : '0'); } catch {}
-  });
-})();
 const showError = e => { const b = $('#club-box .club-meta'); if (b) b.textContent = `Kon data niet laden: ${e.message}`; console.error(e); };
 
 let DATA = null;
@@ -349,13 +333,58 @@ async function loadData() {
     : STATIC ? `bijgewerkt ${fmtDateTime(DATA.generatedAt)}`
     : `laatste nieuwe data ${DATA.lastRun ? fmtDateTime(DATA.lastRun.started_at) : 'nooit'}${DATA.lastRun?.error ? ` · fout: ${esc(DATA.lastRun.error)}` : ''}`;
   DATA.freshness = freshness.replace(/<[^>]+>/g, ''); // ook voor de startpagina, want op telefoon is het menu een balk
-  if (box) box.innerHTML = `<div class="club-name">${esc(DATA.club.name)}</div><div class="club-meta">${s ? `${s.wins}W ${s.ties}G ${s.losses}V · rating ${s.skillRating}<br>` : ''}${DATA.matches.length} wedstrijden gevolgd<br>${freshness}</div>`;
+  if (box) box.innerHTML = `<div class="club-meta"><span class="freshness">${freshness}</span></div>`; // het menu zegt alleen hoe vers de data is
   if (L?.newMatches) {
     const note = document.createElement('p'); note.className = 'live-note'; note.setAttribute('role', 'status');
     note.textContent = `${capFirst(numWord(L.newMatches))} ${L.newMatches === 1 ? 'wedstrijd is' : 'wedstrijden zijn'} net live bij EA opgehaald en ${L.newMatches === 1 ? 'telt' : 'tellen'} al mee. Opslaan gebeurt bij de volgende verzamelrun.`;
-    $('.page-head, .back-link, .player-hero')?.insertAdjacentElement('afterend', note);
+    $('.page-head, .home-hero, .back-link, .player-hero')?.insertAdjacentElement('afterend', note);
   }
+  liveTrigger(); // site: op de achtergrond, de pagina wacht er niet op
   return DATA;
+}
+
+// Site: bij openen of verversen start de site de verzamelaar via een Cloudflare Worker (worker/trigger.js; een
+// webpagina mag EA niet zelf aanroepen). Zodra die klaar is en nieuwe data heeft gepubliceerd, verschijnt een knop.
+// Lukt iets niet, dan blijft gewoon de opgeslagen data staan.
+let liveRunning = false;
+async function liveTrigger() {
+  const url = window.FRAMBROOS_TRIGGER;
+  if (!STATIC || !url || liveRunning) return;
+  liveRunning = true;
+  const call = method => fetch(url, { method, cache: 'no-store' }).then(r => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)));
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const clock = ts => new Date(ts * 1000).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+  const setFresh = text => { const f = $('#club-box .freshness'); if (f) f.textContent = text; };
+  let res;
+  try { res = await call('POST'); } catch { return; }
+  const busy = res.run && res.run.status !== 'completed';
+  if (!res.started && !busy) { if (res.run?.conclusion === 'success') setFresh(`bij EA gekeken ${clock(res.run.updatedAt)}`); return; }
+  // De run die we volgen: de net gestarte (verschijnt pas na een paar seconden) of de run die al liep.
+  const since = res.started ? res.at - 5 : res.run.createdAt;
+  const note = document.createElement('p'); note.className = 'live-note'; note.setAttribute('role', 'status');
+  note.textContent = 'Nieuwe wedstrijden worden bij EA opgehaald, dat duurt ongeveer twee minuten.';
+  $('.page-head, .home-hero, .back-link, .player-hero')?.insertAdjacentElement('afterend', note);
+  for (let i = 0; i < 24; i++) { // hooguit zes minuten volgen
+    await wait(15000);
+    const run = (await call('GET').catch(() => ({}))).run;
+    if (!run || run.createdAt < since || run.status !== 'completed') continue;
+    if (run.conclusion === 'success') setFresh(`bij EA gekeken ${clock(run.updatedAt)}`);
+    // De run publiceert de site zelf; GitHub Pages kan een paar seconden achterlopen.
+    for (let j = 0; j < 4; j++) {
+      const fresh = await fetch(`${API.data}?t=${Date.now()}`, { cache: 'no-store' }).then(r => r.json()).catch(() => null);
+      const added = fresh && fresh.generatedAt > DATA.generatedAt ? fresh.matches.length - DATA.matches.length : 0;
+      if (added > 0) {
+        note.innerHTML = `${capFirst(numWord(added))} nieuwe ${added === 1 ? 'wedstrijd' : 'wedstrijden'} binnen. <button type="button" class="more-btn">Verversen</button>`;
+        note.querySelector('button').addEventListener('click', () => location.reload());
+        return;
+      }
+      if (fresh && fresh.generatedAt > DATA.generatedAt) break; // nieuwe publicatie zonder nieuwe wedstrijden
+      await wait(5000);
+    }
+    note.remove();
+    return;
+  }
+  note.remove();
 }
 
 // Standaard donker (thuistenue); licht (uittenue) wordt onthouden per browser.
@@ -440,7 +469,7 @@ function kpiTile(label, value, meta, delta, { small = false } = {}) {
 }
 // Kerncijfers rechtsboven in een kaart: gekleurd bolletje, label, groot cijfer en optioneel een badge.
 function figsHtml(items) {
-  return items.map(f => `<div class="fig"><span class="fig-label"><i style="--c:${f.color}"></i>${f.label}</span><span class="fig-value">${f.value}${f.delta ? `<span class="kpi-badge ${f.delta.good === true ? 'up' : f.delta.good === false ? 'down' : ''}"${f.delta.title ? ` title="${esc(f.delta.title)}"` : ''}>${f.delta.txt}</span>` : ''}</span></div>`).join('');
+  return items.map(f => `<div class="fig"><span class="fig-label">${f.color ? `<i style="--c:${f.color}"></i>` : ''}${f.label}</span><span class="fig-value">${f.value}${f.delta ? `<span class="kpi-badge ${f.delta.good === true ? 'up' : f.delta.good === false ? 'down' : ''}"${f.delta.title ? ` title="${esc(f.delta.title)}"` : ''}>${f.delta.txt}</span>` : ''}</span></div>`).join('');
 }
 // Verschil a − b als badge. hib: hoger is beter. min: kleiner verschil telt als gelijk.
 function deltaOf(a, b, { digits = 1, unit = '', hib = true, min = 0.05, title = '' } = {}) {
@@ -455,7 +484,7 @@ function deltaOf(a, b, { digits = 1, unit = '', hib = true, min = 0.05, title = 
 // Zo blijft een pagina rustig en blijft de uitleg wel bereikbaar. Kaarten met data-keep-hint houden de uitleg zichtbaar.
 (function hintToggles() {
   for (const hint of document.querySelectorAll('.card p.hint')) {
-    const head = hint.previousElementSibling;
+    const prev = hint.previousElementSibling, head = prev?.classList.contains('sec-head') ? prev.querySelector('h2') : prev; // .sec-head: titel met link ernaast
     if (!head || !/^H[23]$/.test(head.tagName) || hint.closest('[data-keep-hint]')) continue;
     const btn = document.createElement('button');
     btn.type = 'button'; btn.className = 'info'; btn.textContent = 'i';

@@ -3,7 +3,7 @@
 // Gebruik: npm run export
 import { cp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { ROOT } from './db.js';
+import { ROOT, config } from './db.js';
 import { buildData, listPhotos, readBuilds, PHOTO_DIR } from './data.js';
 
 const OUT = join(ROOT, 'dist'), PUBLIC = join(ROOT, 'public');
@@ -14,10 +14,12 @@ await mkdir(OUT, { recursive: true });
 // GitHub Pages laat browsers elk bestand 10 minuten bewaren; een versie achter elk script en elke stijl zorgt dat een
 // nieuwe publicatie meteen nieuwe code laadt zodra de pagina zelf ververst is.
 const VERSION = Date.now().toString(36);
+// Met een worker-adres in config.json (liveTrigger) start de site bij openen de verzamelaar (worker/trigger.js).
+const FLAGS = `window.FRAMBROOS_STATIC = true;${config.liveTrigger ? ` window.FRAMBROOS_TRIGGER = ${JSON.stringify(config.liveTrigger)};` : ''}`;
 for (const f of await readdir(PUBLIC)) {
   if (f.endsWith('.html')) {
     const html = (await readFile(join(PUBLIC, f), 'utf8')).replace(/(src|href)="([\w-]+\.(?:js|css))"/g, `$1="$2?v=${VERSION}"`);
-    await writeFile(join(OUT, f), html.replace('</title>', '</title>\n<script>window.FRAMBROOS_STATIC = true;</script>'));
+    await writeFile(join(OUT, f), html.replace('</title>', `</title>\n<script>${FLAGS}</script>`));
   } else await cp(join(PUBLIC, f), join(OUT, f), { recursive: true });
 }
 

@@ -13,46 +13,46 @@
 <div class="app">
   <aside class="sidebar" id="sidebar"></aside>
   <main class="content">
-    <header class="page-head">
-      <div>
-        <h1>Clubhouse</h1>
-        <p class="sub" id="page-sub">Alles over Frambroos als club.</p>
+    <section class="home-hero" id="home-hero" aria-label="Frambroos"></section>
+
+    <section class="card season">
+      <div class="card-head">
+        <div><h2>Seizoen</h2><p class="hint">Bovenin de totalen volgens EA. Daaronder elke gevolgde wedstrijd als staafje (doelsaldo), met het doelsaldo en het verwachte doelsaldo tegen deze tegenstanders, gemiddeld over vijf.</p></div>
+        <div class="card-figs" id="fig-season"></div>
       </div>
-    </header>
+      <dl class="totals-band" id="totals"></dl>
+      <div id="chart-form" class="season-chart"></div>
+    </section>
 
-    <section class="card club-hero" id="club-hero" aria-label="De club"></section>
-
-    <section class="tiles" id="tiles" aria-label="Clubcijfers"></section>
-
-    <div class="grid-2">
-      <section class="card">
-        <div class="card-head">
-          <div><h2>Vorm</h2><p class="hint">De laatste tien wedstrijden en het doelsaldo, gemiddeld over vijf.</p></div>
-          <div class="card-figs" id="fig-form"></div>
-        </div>
-        <div class="form-pills" id="form-pills"></div>
-        <div id="chart-form"></div>
-      </section>
-      <section class="card">
-        <h2>Samenvatting</h2>
-        <p class="summary" id="team-summary"></p>
-      </section>
-    </div>
-
-    <section class="card">
-      <h2>Ranglijst</h2>
-      <p class="hint">Per stat alle spelers met minstens drie wedstrijden. De Frambroos-index zegt wat iemand zelf bijdraagt: 50 is gemiddeld voor de rol.</p>
-      <div class="rank-cards" id="rank-cards"></div>
+    <section class="news-sec" aria-labelledby="news-title">
+      <div class="sec-head"><h2 id="news-title">Nieuws</h2></div>
+      <div class="news" id="news"></div>
     </section>
 
     <section class="card">
-      <h2>Leden</h2>
+      <div class="sec-head"><h2>Laatste uitslagen</h2><a class="sec-link" href="wedstrijden.html">Alle wedstrijden</a></div>
+      <div class="match-cards" id="results"></div>
+    </section>
+
+    <section class="card">
+      <div class="sec-head"><h2>Topspelers</h2></div>
+      <p class="hint">Per stat alle spelers met minstens drie wedstrijden. De Frambroos-index zegt wat iemand zelf bijdraagt: 50 is gemiddeld voor de rol.</p>
+      <div class="rank-cards" id="rank-cards"></div>
+      <button type="button" class="more-btn" id="rank-more" aria-expanded="false">Alle ranglijsten</button>
+    </section>
+
+    <section class="card">
+      <div class="sec-head"><h2>Selectie</h2></div>
       <p class="hint">Op vorm: wie in topvorm of in vorm is staat vooraan. Cijfers volgens EA; tik op een kaart voor het profiel.</p>
       <div class="members" id="members"></div>
     </section>
 
   </main>
 </div>
+<dialog class="rank-dialog" id="rank-dialog" aria-labelledby="rd-title">
+  <button type="button" class="icon-btn rd-close" aria-label="Sluiten">✕</button>
+  <div class="rd-body"></div>
+</dialog>
 <div id="tooltip" class="tooltip" hidden></div>
 <script src="common.js"></script>
 <script src="archetypes.js"></script>

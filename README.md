@@ -1,6 +1,7 @@
 # Frambroos Coach
 
-De app staat online op https://neegek.github.io/frambroos-proclubs/ en wordt na elke verzamelrun bijgewerkt.
+De app staat online op https://neegek.github.io/frambroos-proclubs/ en wordt na elke verzamelrun bijgewerkt. Wie de
+site opent, start zelf een verzamelrun (docs/trigger.md, *Live op de site*).
 
 Verzamelt de wedstrijd- en spelersdata van Pro Clubs-club **Frambroos** (FC27, PS5) uit de
 onofficiële EA-API en toont een dashboard met correlaties die de bestaande apps niet bieden.
