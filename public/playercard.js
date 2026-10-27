@@ -35,7 +35,8 @@ function flag(id) {
 
 // De kaartvorm (300×430): gebogen schouders naar een vlakke bovenkant, punt met inkeping onderaan. Eén pad voor de rand,
 // de donkere lijn, de binnenrand en één verloop over de hele kaart; alleen een foto krijgt een eigen vlak, dat zacht
-// overloopt in het verloop. Geen glans of strepen: alleen een zachte, schuine lichtere baan in het verloop zelf (--t-sheen). Kleuren komen uit de tier-tokens in style.css.
+// overloopt in het verloop. De foto staat rechts van rating en iconen en is aan de bovenkant uitgelijnd, zodat het hele
+// hoofd zichtbaar is (zoals op een FC-kaart); onderaan loopt hij zacht weg. Geen glans of strepen: alleen een zachte, schuine lichtere baan in het verloop zelf (--t-sheen). Kleuren komen uit de tier-tokens in style.css.
 const FUT_SHAPE = 'M18 74C18 46 52 30 102 28L198 28C248 30 282 46 282 74L282 352C282 380 262 400 230 408C200 414 172 424 160 428L150 423L140 428C128 424 100 414 70 408C38 400 18 380 18 352Z';
 // uid maakt de SVG-ids per kaart uniek, zodat meerdere kaarten op één pagina elkaars verloop niet overnemen.
 function futFrame(photo, uid) {
@@ -56,7 +57,7 @@ function futFrame(photo, uid) {
     <path d="${FUT_SHAPE}" fill="url(#${id('bg')})" stroke="url(#${id('gold')})" stroke-width="2.2" ${inset(0.952, 0.966)}/>
     <g clip-path="url(#${id('clip')})">
       <rect width="300" height="430" fill="url(#${id('sheen')})"/><rect width="300" height="430" fill="url(#${id('dots')})"/>
-      ${photo ? `<g mask="url(#${id('photo-mask')})"><rect x="0" y="0" width="300" height="250" style="fill:var(--t-photo)"/><image href="${photo}" x="0" y="20" width="300" height="230" preserveAspectRatio="xMidYMid slice"/></g>` : ''}
+      ${photo ? `<g mask="url(#${id('photo-mask')})"><rect x="0" y="0" width="300" height="250" style="fill:var(--t-photo)"/><image href="${photo}" x="58" y="34" width="224" height="216" preserveAspectRatio="xMidYMin slice"/></g>` : ''}
     </g>
   </svg>`;
 }
