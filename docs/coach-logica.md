@@ -373,21 +373,21 @@ meer wil weten staat achter één knop **Meer cijfers** (ingeklapt): Highlights 
 onderdelen, resultaat met deze speler, *Aan de bal in context* (§4a) en *Sterk en zwak*. Uitbreiden gebeurt daar, of
 in de tabbladen Vorm en Advies; het eerste scherm blijft vier dingen.
 
-**Sessies** begint met een kaart per avond, nieuwste eerst (geïnspireerd op de sessiekaart van FC Clubs): datum en
-duur, de uitslag groot als W-G-V, en drie cijfers: doelpunten, punten per wedstrijd (groen bij ≥ 0,3 boven het eigen
+**Sessies** begint met een kaart per avond, nieuwste eerst (geïnspireerd op de sessiekaart van FC Clubs): de datum,
+de uitslag groot als W-G-V, en drie cijfers: doelpunten, punten per wedstrijd (groen bij ≥ 0,3 boven het eigen
 normaal, rood bij ≥ 0,3 eronder) en de gemiddelde rating van het team. Daaronder de tijdlijn: per wedstrijd een rondje
 met de uitslag, het shirt van de tegenstander en de score. Onderaan de **speler van de sessie**: de hoogste gemiddelde
-rating onder wie minstens de helft van de wedstrijden speelde, met een kleine foto (zonder foto een icoon), goals en
-assists. Het kopvlak kleurt zacht mee met de avond: blauw bij ≥ 2 punten per wedstrijd, rood bij < 1. Een tik opent de
+rating onder wie minstens de helft van de wedstrijden speelde, met een kleine foto (zonder foto een icoon) in een
+rondje met de rand- en achtergrondkleur van de huidige vorm van die speler (goud, zwart-goud of blauw, §9c), goals en
+assists. Geen duur van de avond: die zegt niets. Het kopvlak kleurt zacht mee met de avond: blauw bij ≥ 2 punten per wedstrijd, rood bij < 1. Een tik opent de
 sessie (`sessies.html#<id>`) met "Terug naar sessies".
 
 **Wedstrijden** is één lijst van alle wedstrijden, nieuwste eerst, niet per avond verdeeld. Per wedstrijd: datum en
 tijd, uitslag, tegenstander, score en de beste speler van de wedstrijd (hoogste EA-rating, met een kroon als die ook man of
 the match was). Eerst de laatste twintig, de rest achter een knop.
 
-**Sessiekop**: elke speelavond toont dezelfde zes cijfers, zodat avonden op dezelfde manier te vergelijken zijn:
-wedstrijden (met W-G-V en de badge punten per wedstrijd tegenover normaal), duur (eerste tot laatste wedstrijd plus een
-kwartier), doelsaldo (met de badge tov verwachting), passnauwkeurigheid, conversie en clean sheets, elk met "normaal"
+**Sessiekop**: elke speelavond toont dezelfde vijf cijfers, zodat avonden op dezelfde manier te vergelijken zijn:
+wedstrijden (met W-G-V en de badge punten per wedstrijd tegenover normaal), doelsaldo (met de badge tov verwachting), passnauwkeurigheid, conversie en clean sheets, elk met "normaal"
 eronder (alle andere wedstrijden). Daarnaast de **top drie van de avond** als spelerskaarten (§9c) op rating over
 deze avond, als waaier: de beste vooraan en groot, nummer twee en drie erachter en iets lager, elk met plek en rating.
 Bij nul punten heet het "hield het best stand", maar de kaarten blijven hetzelfde. Man of the match staat als kroon

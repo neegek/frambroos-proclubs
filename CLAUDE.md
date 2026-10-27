@@ -87,10 +87,10 @@ alleen in Cloudflare.
 - Kaartjes (geïnspireerd op FC Clubs, in eigen stijl): één wedstrijd is één `matchCard(m, {own, player})` uit
   `public/common.js` in een `.match-cards`-raster (op telefoon horizontaal swipebaar), behalve op de pagina
   Wedstrijden: die is één lijst van `matchRow`-regels, nieuwste eerst, met de beste speler per wedstrijd. Sessies
-  begint met een `.scard` per avond (datum, duur, W-G-V, goals, punten per wedstrijd, team rating, tijdlijn met
-  uitslagen en shirts, speler van de sessie met kleine foto of icoon via `PlayerCard.photo`); een tik opent
+  begint met een `.scard` per avond (datum, W-G-V, goals, punten per wedstrijd, team rating, tijdlijn met
+  uitslagen en shirts, speler van de sessie met kleine foto of icoon via `PlayerCard.photo` in een rondje in de kleuren van de vorm; nergens de duur van een avond); een tik opent
   `sessies.html#<id>` met "Terug naar sessies". Een geopende sessie begint met één kop
-  met zes vaste cijfers (`.sess-figs`, coach-logica §9a) en een deelknop; de spelerspagina heeft drie kaartjes
+  met vijf vaste cijfers (`.sess-figs`, coach-logica §9a) en een deelknop; de spelerspagina heeft drie kaartjes
   (Highlights met per wedstrijd en precisie naast elkaar, Frambroos-index met balkjes, Resultaat met deze speler); de ranglijst op het Clubhouse
   (*Topspelers*) is een raster van `.rank-card`-kaartjes met per stat **alle** spelers, vier open en de rest achter een
   knop; een tik op een kaartje opent geen speler maar het uitlegscherm van die ranglijst (`#rank-dialog`: waar de score
