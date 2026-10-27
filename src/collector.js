@@ -88,6 +88,9 @@ async function snapshotClub(q, cid, maxAgeSeconds) {
   if (own) {
     const entry = ((await ea.searchClubs(platform, config.clubName)) || []).find(c => String(c.clubId) === String(cid));
     if (entry) for (const k of ['currentDivision', 'cleanSheets', 'points']) if (entry[k] !== undefined) stats[k] = entry[k];
+    // Divisieregels (punten voor promotie, handhaving en titel) en de ranglijstpositie: bewaren voor later gebruik.
+    if (entry?.rank !== undefined) stats.rank = entry.rank;
+    try { const d = await ea.settings(platform); if (d) stats.divisions = d; } catch { /* niet essentieel */ }
   }
   q.insClubSnapshot.run(now(), cid, num(stats.skillRating), num(stats.gamesPlayed), num(stats.wins), num(stats.losses), num(stats.ties),
     num(stats.goals), num(stats.goalsAgainst), num(stats.bestDivision), num(stats.promotions), num(stats.relegations), JSON.stringify(stats));

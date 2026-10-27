@@ -29,7 +29,10 @@ function clubExtras(raw) {
   let s = {}; try { s = JSON.parse(raw); } catch {}
   const n = k => s[k] === undefined || s[k] === '' ? null : Number(s[k]);
   return { currentDivision: n('currentDivision'), cleanSheets: n('cleanSheets'), winStreak: n('wstreak'), unbeatenStreak: n('unbeatenstreak'),
-    promotions: n('promotions'), relegations: n('relegations'), gamesPlayedPlayoff: n('gamesPlayedPlayoff'), reputationTier: n('reputationtier') };
+    promotions: n('promotions'), relegations: n('relegations'), gamesPlayedPlayoff: n('gamesPlayedPlayoff'), reputationTier: n('reputationtier'),
+    points: n('points'), rank: n('rank'), leagueAppearances: n('leagueAppearances'), bestFinishGroup: n('bestFinishGroup'),
+    // Divisieregels volgens EA (settings): per divisie de punten voor promotie, handhaving en titel. Null tot de eerste run die ze ophaalt.
+    divisions: s.divisions ? Object.fromEntries(Object.values(s.divisions).map(d => [d.divisionId, { promotion: d.pointsForPromotion, hold: d.pointsToHoldDivision, title: d.pointsToTitle }])) : null };
 }
 // Zonder argument uit de echte database; src/live.js geeft de tijdelijke kopie met live opgehaalde wedstrijden mee.
 export function buildData(db = realDb) {
@@ -55,6 +58,10 @@ export function buildData(db = realDb) {
   });
   const hexOf = n => '#' + Number(n || 0).toString(16).padStart(6, '0');
   const kitOf = details => { const k = details?.customKit; return k ? [1, 2, 3].map(i => hexOf(k[`kitColor${i}`])) : null; };
+  // Alles wat EA over de tegenstander meegeeft, zodat we er later uit kunnen kiezen: stadion, regio, crest-id (EA host
+  // geen afbeelding op een openbaar adres, getest 27 okt 2026) en de kleuren van alle tenues.
+  const clubOf = details => { const k = details?.customKit; return k ? { stadium: k.stadName || null, regionId: details.regionId ?? null, teamId: details.teamId ?? null, crestAssetId: k.crestAssetId ?? null, crestColor: hexOf(k.crestColor),
+    kits: { home: [1, 2, 3, 4].map(i => hexOf(k[`kitColor${i}`])), away: [1, 2, 3, 4].map(i => hexOf(k[`kitAColor${i}`])), third: [1, 2, 3, 4].map(i => hexOf(k[`kitThrdColor${i}`])) } } : null; };
   const matches = matchRows.map(r => {
     const raw = JSON.parse(r.raw);
     const opp = r.opponent_id ? latestSnapshot.get(r.opponent_id) : null;
@@ -68,6 +75,7 @@ export function buildData(db = realDb) {
         bestDivision: opp?.best_division ?? null,
         humanPlayers: r.opponent_id ? oppCount.get(r.match_id, r.opponent_id).c : null,
         kit: kitOf(raw.clubs?.[r.opponent_id]?.details),
+        club: clubOf(raw.clubs?.[r.opponent_id]?.details),
       },
       players: playersFor.all(r.match_id, clubId).map(mapPlayer),
       opponentPlayers: r.opponent_id ? playersFor.all(r.match_id, r.opponent_id).map(mapPlayer) : [],
@@ -80,7 +88,7 @@ export function buildData(db = realDb) {
     const k = JSON.parse(lastRaw.raw).clubs?.[clubId]?.details?.customKit;
     const hex = n => '#' + Number(n || 0).toString(16).padStart(6, '0');
     if (k) kits = {
-      stadium: k.stadName, crestColor: hex(k.crestColor),
+      stadium: k.stadName, crestColor: hex(k.crestColor), crestAssetId: k.crestAssetId ?? null,
       home: [1, 2, 3, 4].map(i => hex(k[`kitColor${i}`])), away: [1, 2, 3, 4].map(i => hex(k[`kitAColor${i}`])), third: [1, 2, 3, 4].map(i => hex(k[`kitThrdColor${i}`])),
     };
   }

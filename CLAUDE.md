@@ -18,6 +18,7 @@ claude.ai-connectors in deze map uit. Alle stijl, logica en teksten komen uit di
 - `docs/archetypes.md`: wat we over FC27-archetypes weten (AP-kosten, masteries, signature PlayStyles, EA-patch),
   met bron en datum per gegeven. Bij een nieuwe EA-update eerst daar bijwerken, dan `public/archetypes.js`.
 - `docs/event-codes.md`: betekenis van de EA-eventcodes. `docs/trigger.md`: hoe en wanneer de verzamelaar draait.
+- `docs/ea-data.md`: alles wat EA geeft (en niet geeft, zoals logo's van tegenstanders), en wat al in `DATA` zit.
 
 ## Draaien
 
@@ -56,6 +57,7 @@ alleen in Cloudflare.
 - `data/players/<slug>.<webp|png|jpg>` zijn de foto's op de spelerskaarten. Jamal levert ze aan via de chat; zet ze
   er zelf in. Slug = naam in kleine letters, niet-letters/cijfers worden `-` (bijv. `neegek`, `xero-023`). Verklein
   tot maximaal 900 px aan de lange kant, bij voorkeur WebP of PNG met transparante achtergrond. Wel committen.
+  Een tweede foto `<slug>-vorm.<ext>` is de vormfoto: die staat op de kaart bij *in vorm* en *topvorm*.
   Zonder foto toont de kaart een icoon, geen silhouet. De app heeft geen uploadknop. Test nooit met nepwaarden in dit bestand;
   maak vooraf een kopie en zet die terug.
 - Wat EA niet geeft (formatie, exacte positie, "Any", attribuutpunten, AI-spelers): zie coach-logica §2. Niet verzinnen.

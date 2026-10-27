@@ -452,7 +452,8 @@ lichtere baan in het verloop zelf (`--t-sheen`). Onder het clublogo staat de vla
 van de pro (`proNationality` van EA, een FC-landennummer: Europa alfabetisch 1–51, Azië vanaf 149; getekend in
 `NATIONS` in `playercard.js`). Een nummer dat daar niet in staat krijgt geen vlag; niet gokken, eerst toevoegen.
 
-Onderaan de kaart, onder de cijfers, staat een klein label als de speler in vorm is: *IN VORM* (zwart-goud) of
+Bij *in vorm* en *topvorm* toont de kaart de **vormfoto** (`data/players/<slug>-vorm.webp`, een juichende of
+stoere pose) als die er is; anders de gewone foto. Onderaan de kaart, onder de cijfers, staat een klein label als de speler in vorm is: *IN VORM* (zwart-goud) of
 *TOPVORM* (blauw). Goud heeft geen label.
 
 Dezelfde kaart staat klein (56 %) in de ledenrij op het Clubhouse en in de top drie van een sessie op het Clubhouse, met de accountnaam eronder; cijfers en labels zijn

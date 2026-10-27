@@ -32,4 +32,5 @@ export const ea = {
   matches: (platform, clubIds, matchType) => get('/clubs/matches', { platform, clubIds, matchType, maxResultCount: 100 }),
   memberStats: (platform, clubId) => get('/members/stats', { platform, clubId }),
   careerStats: (platform, clubId) => get('/members/career/stats', { platform, clubId }),
+  settings: platform => get('/settings', { platform }), // divisieregels: punten voor promotie, handhaving en titel
 };

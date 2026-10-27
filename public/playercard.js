@@ -96,7 +96,9 @@ function cardOf(name) {
   const s = summarize(rows.map(r => r.m));
   const rating = avg(rows.map(r => r.p.rating).filter(v => v !== null));
   const g = rows.reduce((a, r) => a + (r.p.goals || 0), 0), a = rows.reduce((x, r) => x + (r.p.assists || 0), 0), mom = rows.reduce((x, r) => x + (r.p.mom || 0), 0);
-  const photo = PHOTOS[slugOf(name)];
+  // Foto: bij in vorm of topvorm de vormfoto (<slug>-vorm), anders de gewone; ontbreekt de vormfoto, dan de gewone.
+  const tier = tierOf(rows), slug = slugOf(name);
+  const photo = (tier.tier !== 'goud' && PHOTOS[`${slug}-vorm`]) || PHOTOS[slug];
 
   // Op de kaart: face stats van de ingevulde build (als die bij het laatste archetype hoort), anders seizoenscijfers.
   const faces = build && (!build.archetype || Number(build.archetype) === arch) && ['pac', 'sho', 'pas', 'dri', 'def', 'phy'].every(k => build[k]);
@@ -104,7 +106,6 @@ function cardOf(name) {
     : career ? [['WED', career.gamesPlayed], ['RAT', career.ratingAve === null || career.ratingAve === undefined ? '–' : Number(career.ratingAve).toFixed(1)], ['GLS', career.goals], ['ASS', career.assists], ['MOTM', career.mom], ['WIN', `${career.winRate ?? '–'}%`]] // totalen volgens EA
     : [['WED', rows.length], ['RAT', rating === null ? '–' : rating.toFixed(1)], ['GLS', g], ['ASS', a], ['MOTM', mom], ['WIN', `${s.winPct ?? '–'}%`]];
 
-  const tier = tierOf(rows);
   const tierNames = { goud: 'goud', zwart: 'zwart-goud, in vorm', top: 'topvorm' };
   const shown = cardName(career, name);
   const col = list => `<div class="fut-col">${list.map(([l, v]) => `<div><b>${v}</b><span>${l}</span></div>`).join('')}</div>`;
