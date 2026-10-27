@@ -422,9 +422,9 @@ voor de sterkte van de tegenstander, eigen vergelijking voor verdedigers en keep
 
 ## 9c. Spelerskaart: tiers
 
-De kaart op de spelerspagina heeft de vorm van een FC-kaart (één pad in `playercard.js`: gebogen schouders naar een vlakke
-bovenkant, punt met inkeping, dubbele gouden rand) en een tier die met de vorm meebeweegt. Zonder foto staat er een icoon. Bovenste helft: overall, archetype-icoon
-(`ARCHETYPE_ICON` in `public/archetypes.js`, eigen lijniconen), logo en foto; de foto vult de hele bovenste helft.
+De kaart op de spelerspagina heeft de vorm van een FC-kaart (één pad in `playercard.js`: scherpe hoeken bovenaan met één boog
+ertussen, punt met inkeping, dubbele gouden rand) en een tier die met de vorm meebeweegt. Zonder foto staat er een icoon. Bovenste helft: overall, archetype-icoon
+(`ARCHETYPE_ICON` in `public/archetypes.js`, eigen lijniconen), logo en foto; de foto staat rechts van rating en iconen, met wat lucht boven het hoofd.
 Eén verloop over de hele kaart; alleen een foto krijgt een eigen vlak (`--t-photo`) dat zacht overloopt in het
 verloop, met een gloed achter de overall. Zonder foto een gevuld, licht transparant silhouet in de tekstkleur (donker op
 goud, licht op zwart en blauw). Onderste helft: voorletter en achternaam van de pro (uit `proName`,
