@@ -194,7 +194,6 @@ td.split small, .split small { color: var(--muted); }
 .scard-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .scard-date { display: inline-flex; align-items: center; gap: 8px; font-weight: 650; font-size: 16px; letter-spacing: -0.01em; min-width: 0; }
 .scard-date svg { width: 20px; height: 20px; flex: none; color: var(--brand-text); }
-.scard-dur { flex: none; font-size: 12.5px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: color-mix(in srgb, var(--ink) 9%, transparent); color: var(--ink-2); font-variant-numeric: tabular-nums; }
 .scard-main { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
 .scard-record { display: grid; }
 .scard-record b { font-family: var(--num-font); font-size: 44px; font-weight: 600; letter-spacing: -0.05em; line-height: 1; }
@@ -213,7 +212,8 @@ td.split small, .split small { color: var(--muted); }
 .tl-item .shirt { width: 26px; height: 24px; }
 .tl-item b { font-family: var(--num-font); font-size: 13px; font-weight: 600; letter-spacing: -0.02em; }
 .scard-mvp { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; margin: 0 14px 14px; padding: 10px 12px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--border); }
-.mvp-avatar { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; overflow: hidden; background: var(--brand-soft); color: var(--brand-text); border: 1.5px solid var(--brand); }
+/* Rondje van de speler van de sessie: achtergrond en rand in de kleuren van de vorm, zoals de spelerskaart (§9c). */
+.mvp-avatar { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; overflow: hidden; color: var(--t-ink); background: linear-gradient(160deg, var(--t-bg1), var(--t-bg3)); border: 2px solid var(--t-ring); }
 .mvp-avatar svg { width: 24px; height: 24px; margin-top: 6px; }
 .mvp-avatar img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
 .mvp-who { display: grid; min-width: 0; }
@@ -247,9 +247,9 @@ td.split small, .split small { color: var(--muted); }
 .fut-name.long { font-size: 19px; letter-spacing: 0; }
 .fut-icon { width: 128px; height: 128px; color: var(--t-ink); opacity: 0.28; align-self: end; }
 /* Tiers (coach-logica §9c). Kleuren los van het thema. Contrast nagerekend op de lichtste en donkerste vlakken. */
-.fut[data-tier="goud"] { --t-ink: #2a1d05; --t-muted: #3d2d08; --t-accent: #2a1d05; --t-photo: #b98c2a; --t-halo: rgba(255,244,210,0.9); --t-bg1: #f2dc92; --t-bg2: #d9b24a; --t-bg3: #c2932a; --t-sheen: rgba(255,250,228,0.28); --t-dots: transparent; }
-.fut[data-tier="zwart"] { --t-ink: #f6e6b8; --t-muted: #cbb98a; --t-accent: #e9c767; --t-photo: #2a2214; --t-halo: rgba(0,0,0,0.85); --t-bg1: #241c0e; --t-bg2: #0e0c09; --t-bg3: #050403; --t-sheen: rgba(233,199,103,0.07); --t-dots: transparent; }
-.fut[data-tier="top"] { --t-ink: #ffffff; --t-muted: #d6dcff; --t-accent: #ffd98a; --t-photo: #14237a; --t-halo: rgba(3,6,30,0.85); --t-bg1: #1b2e9a; --t-bg2: #0b1a5c; --t-bg3: #05092b; --t-sheen: rgba(255,255,255,0.06); --t-dots: rgba(255,217,138,0.45); }
+.fut[data-tier="goud"], .mvp-avatar[data-tier="goud"] { --t-ink: #2a1d05; --t-muted: #3d2d08; --t-accent: #2a1d05; --t-photo: #b98c2a; --t-halo: rgba(255,244,210,0.9); --t-bg1: #f2dc92; --t-bg2: #d9b24a; --t-bg3: #c2932a; --t-ring: #8d6c15; --t-sheen: rgba(255,250,228,0.28); --t-dots: transparent; }
+.fut[data-tier="zwart"], .mvp-avatar[data-tier="zwart"] { --t-ink: #f6e6b8; --t-muted: #cbb98a; --t-accent: #e9c767; --t-photo: #2a2214; --t-halo: rgba(0,0,0,0.85); --t-bg1: #241c0e; --t-bg2: #0e0c09; --t-bg3: #050403; --t-ring: #d9b04a; --t-sheen: rgba(233,199,103,0.07); --t-dots: transparent; }
+.fut[data-tier="top"], .mvp-avatar[data-tier="top"] { --t-ink: #ffffff; --t-muted: #d6dcff; --t-accent: #ffd98a; --t-photo: #14237a; --t-halo: rgba(3,6,30,0.85); --t-bg1: #1b2e9a; --t-bg2: #0b1a5c; --t-bg3: #05092b; --t-ring: #ffd98a; --t-sheen: rgba(255,255,255,0.06); --t-dots: rgba(255,217,138,0.45); }
 .fut-inner > * { position: relative; }
 .fut-tier { justify-self: center; margin-top: 12px; font-size: 10px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--t-accent); color: var(--t-accent); }
 /* Bovenste helft: overall, positie en logo links, foto rechts. Onderste helft: naam en cijfers in twee kolommen. */
@@ -703,7 +703,7 @@ details.build-form-card[open] > summary { margin-bottom: 12px; }
 .sfig-label { font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
 .sfig-value { display: flex; align-items: center; gap: 8px; font-family: var(--num-font); font-size: 24px; font-weight: 500; letter-spacing: -0.04em; line-height: 1.15; }
 .sfig-sub { font-size: 12.5px; color: var(--ink-2); }
-@media (min-width: 900px) { .sess-figs { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+@media (min-width: 900px) { .sess-figs { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
 
 /* spelerspagina: highlights, precisie, index, impact */
 .pcards4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }

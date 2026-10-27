@@ -4,7 +4,6 @@
 // Samenvatting: docs/coach-logica.md §9 (Sessie).
 
 const WEEKDAY_LONG = ['zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag'];
-const fmtTime = ts => new Date(ts * 1000).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
 const longDate = ts => { const d = new Date(ts * 1000); return `${WEEKDAY_LONG[d.getDay()]} ${d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' })}`; };
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const typeLabel = list => { const t = new Set(list.map(m => m.matchType)); return t.size > 1 ? 'league en playoff' : t.has('playoffMatch') ? 'playoff' : 'league'; };
@@ -12,12 +11,10 @@ const strengthLabel = d => d === null ? '' : d >= 250 ? 'veel sterker' : d >= 10
 const pSum = (rows, f) => rows.reduce((a, r) => a + (f(r.p) || 0), 0);
 
 let sessions = [], selectedId = null;
-// Duur: eerste tot laatste wedstrijd plus een kwartier, in hele minuten (afronden vóór het splitsen, anders "2u 60m").
-const durationOf = ms => { const min = Math.round((ms[ms.length - 1].ts - ms[0].ts) / 60) + 15, h = Math.floor(min / 60); return h ? `${h}u ${String(min % 60).padStart(2, '0')}m` : `${min}m`; };
 const CAL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>';
 const PERSON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="8.5" r="4"/><path d="M4 21c.6-4.4 3.9-7 8-7s7.4 2.6 8 7z"/></svg>';
 
-// Overzicht (coach-logica §9a, Sessies): per avond één kaart met datum, duur, uitslag, drie cijfers, de tijdlijn en de
+// Overzicht (coach-logica §9a, Sessies): per avond één kaart met datum, uitslag, drie cijfers, de tijdlijn en de
 // speler van de sessie. Een tik opent de avond. De kleur van het kopvlak volgt de avond.
 function renderCards() {
   const ppgOf = list => list.length ? (3 * list.filter(m => m.result === 'W').length + list.filter(m => m.result === 'D').length) / list.length : null;
@@ -30,14 +27,14 @@ function renderCards() {
     const mvp = bestOfNight(ms), photo = mvp && PlayerCard.photo(mvp.n);
     return `<a class="scard ${tone}" href="#${s.id}">
       <span class="scard-top">
-        <span class="scard-head"><span class="scard-date">${CAL}${cap(longDate(ms[0].ts))}</span><span class="scard-dur">${durationOf(ms)}</span></span>
+        <span class="scard-head"><span class="scard-date">${CAL}${cap(longDate(ms[0].ts))}</span></span>
         <span class="scard-main">
           <span class="scard-record"><b>${sm.W}-${sm.D}-${sm.L}</b><small>W-G-V</small></span>
           <span class="scard-figs"><span><b>${sm.gf}</b><small>Goals</small></span><span><b class="${ppgCls}">${ppg.toFixed(2)}</b><small>Punten p/w</small></span><span><b>${team === null ? '–' : f2(team)}</b><small>Team rating</small></span></span>
         </span>
       </span>
       <span class="scard-line" aria-label="Uitslagen op volgorde">${ms.map(m => `<span class="tl-item" title="${esc(m.opponent.name)}"><span class="tl-dot ${m.result}">${letter(m.result)}</span>${kitShirt(m.opponent.kit, m.opponent.name)}<b>${m.goals}-${m.goalsAgainst}</b></span>`).join('')}</span>
-      ${mvp ? `<span class="scard-mvp"><span class="mvp-avatar">${photo ? `<img src="${photo}" alt="">` : PERSON}</span><span class="mvp-who"><small>Speler van de sessie</small><b>${esc(proName(mvp.n))}</b></span><span class="mvp-stats"><b>${f2(mvp.v)}</b><small>${mvp.g} G · ${mvp.a} A${mvp.mom ? ` · ${mvp.mom}× MOTM` : ''}</small></span></span>` : ''}
+      ${mvp ? `<span class="scard-mvp"><span class="mvp-avatar" data-tier="${PlayerCard.tier(mvp.n).tier}">${photo ? `<img src="${photo}" alt="">` : PERSON}</span><span class="mvp-who"><small>Speler van de sessie</small><b>${esc(proName(mvp.n))}</b></span><span class="mvp-stats"><b>${f2(mvp.v)}</b><small>${mvp.g} G · ${mvp.a} A${mvp.mom ? ` · ${mvp.mom}× MOTM` : ''}</small></span></span>` : ''}
     </a>`;
   }).join('');
 }
@@ -123,7 +120,7 @@ function render() {
   const own = DATA.snapshot?.skillRating;
   const names = [...new Set(ms.flatMap(m => m.players.map(p => p.name)))];
   $('#s-title').textContent = `${cap(longDate(ms[0].ts))} · ${typeLabel(ms)}`;
-  $('#s-meta').textContent = `${fmtTime(ms[0].ts)} tot ${fmtTime(ms[ms.length - 1].ts)} · ${names.length} spelers: ${names.map(proName).join(', ')}`;
+  $('#s-meta').textContent = `${names.length} spelers: ${names.map(proName).join(', ')}`;
 
   const opp = avg(ms.map(m => m.opponent.skillRating).filter(Boolean));
   // Badges: deze avond tegenover normaal (alle andere wedstrijden).
@@ -133,12 +130,10 @@ function render() {
   const passPct = list => pct(pSum(ourP(list).map(p => ({ p })), p => p.passesMade), pSum(ourP(list).map(p => ({ p })), p => p.passAttempts));
   const convPct = list => pct(pSum(ourP(list).map(p => ({ p })), p => p.goals), pSum(ourP(list).map(p => ({ p })), p => p.shots));
   const cleanSheets = list => list.filter(m => m.goalsAgainst === 0).length;
-  const durTxt = durationOf(ms);
   const fig = (label, value, sub, badge) => `<div class="sfig"><span class="sfig-label">${label}</span><span class="sfig-value">${value}${badge ? `<span class="kpi-badge ${badge.good === true ? 'up' : badge.good === false ? 'down' : ''}" title="${esc(badge.title || '')}">${badge.txt}</span>` : ''}</span><span class="sfig-sub">${sub}</span></div>`;
   const cmpOk = others.length >= 3;
   $('#s-figs').innerHTML = [
     fig('Wedstrijden', sm.n, `${sm.W}-${sm.D}-${sm.L}`, cmpOk ? deltaOf(sm.ppg, no.ppg, { digits: 2, title: `${TN}: punten per wedstrijd` }) : null),
-    fig('Duur', durTxt, `${fmtTime(ms[0].ts)} tot ${fmtTime(ms[ms.length - 1].ts)}`),
     fig('Doelsaldo', signed(sm.gf - sm.ga, 0), `${sm.gf} voor · ${sm.ga} tegen`, cmpOk ? deltaOf(sm.resid, no.resid, { digits: 2, title: `${TN}: doelsaldo tov verwachting` }) : null),
     fig('Pass', fmtPct(passPct(ms)), cmpOk ? `normaal ${fmtPct(passPct(others))}` : ''),
     fig('Conversie', fmtPct(convPct(ms)), cmpOk ? `normaal ${fmtPct(convPct(others))}` : ''),
