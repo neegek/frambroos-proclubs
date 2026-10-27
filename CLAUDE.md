@@ -69,7 +69,9 @@ alleen in Cloudflare.
   zijn meet EA niet; "geen goede optie" is de benadering en heet *lastige balmomenten*.
 - Advies en samenvattingen: volg coach-logica §1, §8 en §9. Kort gezegd: verder kijken dan één cijfer, twee richtingen,
   build bepaalt wat goed is, iedereen dezelfde opbouw, samenvattingen kwalitatief in drie of vier zinnen.
-- Over spelers geen *hij* of *zij*.
+- Over spelers geen *hij* of *zij*. Waar de app over onze spelers praat of ze noemt (samenvattingen, nieuws, ranglijsten,
+  menu, knoppen), staat de **naam van de pro** (Terry Yaki), niet de accountnaam (Neegek): `proName(naam)` uit
+  `public/common.js`. Links en hashes houden de accountnaam; tegenstanders houden hun EA-naam.
 - Attribuutnamen in het Engels zoals in het spel (Ball Control, Short Passing, ...); de rest van de app in het Nederlands.
 - Stijl: donker thuistenue (standaard) en licht uittenue; tokens staan bovenaan `public/style.css`. Nieuwe kleuren eerst
   op contrast controleren: tekst ≥ 4,5:1, grafische elementen ≥ 3:1. Datakleuren (winst blauw, verlies rood) niet aanpassen.

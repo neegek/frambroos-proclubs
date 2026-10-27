@@ -436,8 +436,8 @@ function renderAdvice() {
   const ctx = ballContext(res, prof);
   const riskStyle = ctx.risk ? 'speelt met veel risico aan de bal' : ctx.key === 'rustpunt' || ctx.key === 'opZeker' ? 'speelt veilig en houdt de bal goed in de ploeg' : rel(res.fwdShare) >= 0.1 ? 'zoekt vaak de pass vooruit' : 'speelt een gebalanceerde rol';
   const isLast = mainBuild === lastArchetype(name);
-  parts.push(isLast ? `<b>${esc(name)}</b> speelt nu als ${archName(mainBuild)}, met als taak ${prof.task}.` : `Dit advies bekijkt <b>${esc(name)}</b> als ${archName(mainBuild)}, niet de laatst gespeelde build; de taak is dan ${prof.task}.`);
-  parts.push(`${esc(name)} ${riskStyle}.`);
+  parts.push(isLast ? `<b>${esc(proName(name))}</b> speelt nu als ${archName(mainBuild)}, met als taak ${prof.task}.` : `Dit advies bekijkt <b>${esc(proName(name))}</b> als ${archName(mainBuild)}, niet de laatst gespeelde build; de taak is dan ${prof.task}.`);
+  parts.push(`${esc(proName(name))} ${riskStyle}.`);
   if (T.length) parts.push(`De grootste winst zit in ${joinAnd(T.slice(0, 2).map(t => t.short))}${T[0].means[0].includes('betaalt zich') || T[0].means[0].includes('afweging') ? ', al is een deel daarvan de prijs van een bewuste speelstijl' : ''}.`);
   if (strengths.length) parts.push(`Om op te bouwen: ${joinAnd(strengths.slice(0, 2).map(x => x[0].toLowerCase()))}.`);
   if (behaviour.length) parts.push(`Zonder extra punten valt er winst te halen in het positiespel: ${behaviour[0].title.toLowerCase()}.`);

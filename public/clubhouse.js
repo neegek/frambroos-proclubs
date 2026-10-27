@@ -190,7 +190,7 @@ const rankRows = (R, totals) => totals.filter(t => t.n >= 3).map(t => ({ t, v: R
 function renderRanking(totals) {
   $('#rank-cards').innerHTML = RANKS.map(R => { const rows = rankRows(R, totals); return `<button type="button" class="rank-card" data-key="${R.key}" aria-haspopup="dialog">
       <span class="rank-card-label">${R.label}<span class="rank-more" aria-hidden="true">i</span></span>
-      <ol>${rows.map((x, i) => `<li><span>${i + 1}</span><span>${esc(x.t.name)}</span><b>${R.main(x.t)}</b></li>`).join('') || '<li class="empty">Nog te weinig wedstrijden.</li>'}</ol></button>`; }).join('');
+      <ol>${rows.map((x, i) => `<li><span>${i + 1}</span><span>${esc(proName(x.t.name))}</span><b>${R.main(x.t)}</b></li>`).join('') || '<li class="empty">Nog te weinig wedstrijden.</li>'}</ol></button>`; }).join('');
   for (const b of $('#rank-cards').querySelectorAll('.rank-card')) b.addEventListener('click', () => openRank(RANKS.find(R => R.key === b.dataset.key), totals));
 }
 
@@ -200,7 +200,7 @@ function openRank(R, totals) {
     <h3>Waar het op gebaseerd is</h3><p>${R.about}</p>
     <h3>Wie meetelt</h3><p>${R.who} ${BASE}</p>
     <h3>De hele lijst</h3>
-    <ol class="rd-list">${rows.map((x, i) => `<li><span>${i + 1}</span><span>${esc(x.t.name)}</span><b>${R.main(x.t)}</b><small>${esc(R.sub(x.t))}</small></li>`).join('') || '<li class="empty">Nog te weinig wedstrijden.</li>'}</ol>`;
+    <ol class="rd-list">${rows.map((x, i) => `<li><span>${i + 1}</span><span>${esc(proName(x.t.name))}</span><b>${R.main(x.t)}</b><small>${esc(R.sub(x.t))}</small></li>`).join('') || '<li class="empty">Nog te weinig wedstrijden.</li>'}</ol>`;
   d.showModal();
 }
 
@@ -220,7 +220,7 @@ function render() {
   const members = DATA.members.map(m => ({ m, t: PlayerCard.tier(m.name) }))
     .sort((a, b) => PlayerCard.TIER_RANK[b.t.tier] - PlayerCard.TIER_RANK[a.t.tier] || (b.t.level ?? 0) - (a.t.level ?? 0) || (b.m.gamesPlayed || 0) - (a.m.gamesPlayed || 0));
   $('#members').innerHTML = members.map(({ m }) => `<a class="member" href="spelers.html#${encodeURIComponent(m.name)}">
-      <span class="fut-mini">${PlayerCard.html(m.name)}</span><span class="member-tag">${esc(m.name)}</span></a>`).join('');
+      <span class="fut-mini">${PlayerCard.html(m.name)}</span><span class="member-tag">${esc(proName(m.name))}</span></a>`).join('');
 }
 
 // Uitlegscherm van een ranglijst: sluiten met de knop, Esc of een tik naast het scherm.

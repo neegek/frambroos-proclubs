@@ -254,7 +254,8 @@ Daarnaast *Positiespel en keuzes* en *Al sterk*.
 
 ## 9. Schrijfregels
 
-- Nederlands. Over spelers geen *hij* of *zij*: gebruik de naam, *deze speler* of *je*.
+- Nederlands. Over spelers geen *hij* of *zij*: gebruik de naam, *deze speler* of *je*. De naam is die van de pro
+  (Terry Yaki, Petra Selie), niet de accountnaam; dat houdt de roleplay heel (sinds 27 oktober 2026).
 - Samenvattingen zijn **één korte alinea van drie of vier zinnen** die vertelt wat er gebeurde, **zonder cijfers op te
   lezen**. De cijfers staan eronder. Kleine aantallen in woorden ("twee assists").
 - In het data-deel van advies wél cijfers, altijd met het positiegemiddelde erbij.

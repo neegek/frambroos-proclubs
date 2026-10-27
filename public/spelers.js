@@ -87,7 +87,7 @@ function playerSummary(name, rows, career, sw) {
   };
   const s = sw.sRaw.filter(x => GOOD[x.key]), w = sw.wRaw.filter(x => BAD[x.key]);
   const parts = [];
-  const nm = `<b>${esc(name)}</b>`;
+  const nm = `<b>${esc(proName(name))}</b>`;
   // 1. Rol en kenmerk
   const traits = s.slice(0, 2).map(x => GOOD[x.key]).filter((v, i, a) => a.indexOf(v) === i);
   const flaws = w.slice(0, 2).map(x => BAD[x.key]).filter((v, i, a) => a.indexOf(v) === i);
@@ -143,7 +143,7 @@ function renderSessionsTab(name) {
   $('#ps-title').textContent = `${name} per sessie`;
   const best = [...items].filter(i => i.d !== null).sort((a, b) => b.d - a.d)[0], worst = [...items].filter(i => i.d !== null).sort((a, b) => a.d - b.d)[0];
   const trend = items.length >= 3 ? items[items.length - 1].r - avg(items.slice(0, -1).map(i => i.r)) : null;
-  const parts = [`<b>${esc(name)}</b> speelde ${numWord(items.length)} ${items.length === 1 ? 'sessie' : 'sessies'} mee.`];
+  const parts = [`<b>${esc(proName(name))}</b> speelde ${numWord(items.length)} ${items.length === 1 ? 'sessie' : 'sessies'} mee.`];
   if (best && best !== worst && best.d >= 0.3) parts.push(`De beste avond was ${pDay(best.s.matches[0].ts).toLowerCase()}${best.g + best.a ? `, met ${joinAnd([best.g ? `${numWord(best.g)} ${best.g === 1 ? 'goal' : 'goals'}` : '', best.a ? `${numWord(best.a)} ${best.a === 1 ? 'assist' : 'assists'}` : ''].filter(Boolean))}` : ''}.`);
   if (worst && best !== worst && worst.d <= -0.3) parts.push(`De minste was ${pDay(worst.s.matches[0].ts).toLowerCase()}.`);
   if (trend !== null) parts.push(Math.abs(trend) < 0.3 ? 'De laatste sessie lag op het normale niveau.' : trend > 0 ? 'De laatste sessie was beter dan de avonden daarvoor.' : 'De laatste sessie was minder dan de avonden daarvoor.');
@@ -170,7 +170,7 @@ function renderLastTab(name) {
   const notes = others.length >= 3 ? notesFor([last], others) : [];
   const bits = [p.goals ? `${numWord(p.goals)} ${p.goals === 1 ? 'doelpunt' : 'doelpunten'}` : '', p.assists ? `${numWord(p.assists)} ${p.assists === 1 ? 'assist' : 'assists'}` : ''].filter(Boolean);
   const level = d === null ? '' : d >= 0.5 ? 'een van de betere wedstrijden' : d <= -0.5 ? 'een mindere wedstrijd' : 'een wedstrijd op het normale niveau';
-  const parts = [`In de laatste wedstrijd, tegen ${esc(m.opponent.name)}, speelde <b>${esc(name)}</b> ${level}${bits.length ? `, met ${joinAnd(bits)}` : ''}${p.mom ? ', en was man van de wedstrijd' : ''}.`];
+  const parts = [`In de laatste wedstrijd, tegen ${esc(m.opponent.name)}, speelde <b>${esc(proName(name))}</b> ${level}${bits.length ? `, met ${joinAnd(bits)}` : ''}${p.mom ? ', en was man van de wedstrijd' : ''}.`];
   const good = notes.filter(n => n.better).slice(0, 2).map(n => n.text), bad = notes.filter(n => n.better === false).slice(0, 2).map(n => n.text);
   if (good.length && bad.length) parts.push(`Opvallend: ${joinAnd(good)} dan normaal, maar ook ${joinAnd(bad)}.`);
   else if (good.length) parts.push(`Opvallend: ${joinAnd(good)} dan normaal.`);
@@ -219,7 +219,7 @@ function renderPlayer() {
   const ms = filtered(), players = DATA.players;
   if (!selected || !players.includes(selected)) selected = players.includes('Neegek') ? 'Neegek' : players[0];
   location.hash = encodeURIComponent(selected);
-  $('#chips').innerHTML = players.map(p => `<button type="button" class="chip ${p === selected ? 'active' : ''}" data-p="${esc(p)}">${esc(p)}</button>`).join('');
+  $('#chips').innerHTML = players.map(p => `<button type="button" class="chip ${p === selected ? 'active' : ''}" data-p="${esc(p)}">${esc(proName(p))}</button>`).join('');
   for (const b of $('#chips').querySelectorAll('.chip')) b.addEventListener('click', () => { selected = b.dataset.p; renderPlayer(); });
 
   const rows = rowsFor(ms, selected), career = DATA.members.find(x => x.name === selected);
@@ -265,7 +265,7 @@ function renderPlayer() {
   ].join('') : '';
   renderContext(selected, ms);
   window.PlayerCard.render(selected);
-  document.title = `${selected} · Frambroos Coach`;
+  document.title = `${proName(selected)} · Frambroos Coach`;
   renderSessionsTab(selected);
   renderLastTab(selected);
   window.BuildTab.show(selected);

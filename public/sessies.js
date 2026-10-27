@@ -37,7 +37,7 @@ function renderCards() {
         </span>
       </span>
       <span class="scard-line" aria-label="Uitslagen op volgorde">${ms.map(m => `<span class="tl-item" title="${esc(m.opponent.name)}"><span class="tl-dot ${m.result}">${letter(m.result)}</span>${kitShirt(m.opponent.kit, m.opponent.name)}<b>${m.goals}-${m.goalsAgainst}</b></span>`).join('')}</span>
-      ${mvp ? `<span class="scard-mvp"><span class="mvp-avatar">${photo ? `<img src="${photo}" alt="">` : PERSON}</span><span class="mvp-who"><small>Speler van de sessie</small><b>${esc(mvp.n)}</b></span><span class="mvp-stats"><b>${f2(mvp.v)}</b><small>${mvp.g} G · ${mvp.a} A${mvp.mom ? ` · ${mvp.mom}× MOTM` : ''}</small></span></span>` : ''}
+      ${mvp ? `<span class="scard-mvp"><span class="mvp-avatar">${photo ? `<img src="${photo}" alt="">` : PERSON}</span><span class="mvp-who"><small>Speler van de sessie</small><b>${esc(proName(mvp.n))}</b></span><span class="mvp-stats"><b>${f2(mvp.v)}</b><small>${mvp.g} G · ${mvp.a} A${mvp.mom ? ` · ${mvp.mom}× MOTM` : ''}</small></span></span>` : ''}
     </a>`;
   }).join('');
 }
@@ -56,7 +56,7 @@ const QUOTE = {
   toeval: 'Toeval is logisch.',
 };
 function anecdote(ms, sm, prow) {
-  const c = [], nm = n => `<b>${esc(n)}</b>`, res = ms.map(m => m.result), n = ms.length;
+  const c = [], nm = n => `<b>${esc(proName(n))}</b>`, res = ms.map(m => m.result), n = ms.length;
   const pot = i => ['de eerste pot', 'de tweede pot', 'de derde pot', 'de vierde pot', 'de vijfde pot'][i] || `pot ${i + 1}`;
   // Spelersmomenten
   for (const m of ms) for (const p of m.players) if (p.goals >= 3) c.push({ w: 10 + p.goals, text: `${nm(p.name)} schoot er tegen ${esc(m.opponent.name)} in ${numWord(p.goals)} keer in${m.result === 'W' ? '' : ', en toch werd het niets'}.`, q: 'schieten' });
@@ -123,7 +123,7 @@ function render() {
   const own = DATA.snapshot?.skillRating;
   const names = [...new Set(ms.flatMap(m => m.players.map(p => p.name)))];
   $('#s-title').textContent = `${cap(longDate(ms[0].ts))} · ${typeLabel(ms)}`;
-  $('#s-meta').textContent = `${fmtTime(ms[0].ts)} tot ${fmtTime(ms[ms.length - 1].ts)} · ${names.length} spelers: ${names.join(', ')}`;
+  $('#s-meta').textContent = `${fmtTime(ms[0].ts)} tot ${fmtTime(ms[ms.length - 1].ts)} · ${names.length} spelers: ${names.map(proName).join(', ')}`;
 
   const opp = avg(ms.map(m => m.opponent.skillRating).filter(Boolean));
   // Badges: deze avond tegenover normaal (alle andere wedstrijden).
@@ -159,10 +159,10 @@ function render() {
   $('#s-share').onclick = () => shareSession(ms, sm, prow, $('#s-summary').innerText);
   // Top drie als kaarten, de beste vooraan.
   const top = prow.filter(r => r.rH !== null).slice(0, 3);
-  $('#s-podium').innerHTML = top.map((r, i) => `<a class="podium-card p${i + 1}" href="spelers.html#${encodeURIComponent(r.name)}" title="${esc(r.name)}: rating ${f2(r.rH)} deze avond">
+  $('#s-podium').innerHTML = top.map((r, i) => `<a class="podium-card p${i + 1}" href="spelers.html#${encodeURIComponent(r.name)}" title="${esc(proName(r.name))}: rating ${f2(r.rH)} deze avond">
       <span class="podium-rank">${i + 1}</span><span class="fut-mini">${PlayerCard.html(r.name)}</span><span class="podium-rating">${f2(r.rH)}${r.mom ? ' <span class="crown" title="Man of the match">♛</span>' : ''}</span></a>`).join('');
   $('#s-players').innerHTML = `<div class="pcards">${prow.map(r => `<a class="pcard" href="spelers.html#${encodeURIComponent(r.name)}">
-    <div class="pcard-head"><span class="pcard-name">${esc(r.name)}${r.mom ? ' <span class="crown" title="Man of the match">♛</span>' : ''}</span><span class="pcard-rating">${f2(r.rH)}</span></div>
+    <div class="pcard-head"><span class="pcard-name">${esc(proName(r.name))}${r.mom ? ' <span class="crown" title="Man of the match">♛</span>' : ''}</span><span class="pcard-rating">${f2(r.rH)}</span></div>
     <div class="pcard-sub">${r.n} ${r.n === 1 ? 'wedstrijd' : 'wedstrijden'} · normaal ${f2(r.rT)} ${r.d === null ? '' : residCell(r.d)}</div>
     <div class="pcard-stats"><span><b>${r.g}</b> goals</span><span><b>${r.a}</b> assists</span><span><b>${r.mom}</b> MOTM</span></div></a>`).join('')}</div>`;
 }
@@ -199,8 +199,8 @@ async function shareSession(ms, sm, prow, summaryText) {
   // uitblinker en betrokken bij goals
   const best = prow[0], inv = [...prow].sort((a, b) => (b.g + b.a) - (a.g + a.a))[0];
   const box = (bx, label, name, val) => { g.fillStyle = 'rgba(255,255,255,0.06)'; g.beginPath(); g.roundRect(bx, 512, 452, 200, 28); g.fill(); g.fillStyle = accent; font(24, 600); g.fillText(label.toUpperCase(), bx + 32, 562); g.fillStyle = ink; font(40, 700); g.fillText(name, bx + 32, 622); mono(56, 500); g.textAlign = 'right'; g.fillText(val, bx + 420, 688); g.textAlign = 'left'; };
-  if (best) box(72, 'Uitblinker', best.name, f2(best.rH));
-  if (inv) box(556, 'Goals + assists', inv.name, String(inv.g + inv.a));
+  if (best) box(72, 'Uitblinker', proName(best.name), f2(best.rH));
+  if (inv) box(556, 'Goals + assists', proName(inv.name), String(inv.g + inv.a));
   // samenvatting (eerste twee zinnen)
   g.fillStyle = ink; font(32, 400);
   const sentences = summaryText.replace(/\s+/g, ' ').match(/[^.!?]+[.!?]/g) || [summaryText];

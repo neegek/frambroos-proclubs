@@ -9,6 +9,8 @@ const fmtDateTime = ts => new Date(ts * 1000).toLocaleString('nl-NL', { day: 'nu
 const pct = (num, den) => den ? Math.round(100 * num / den) : null;
 const fmtPct = v => v === null || v === undefined ? '–' : `${v}%`;
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+// Naam van de pro (Terry Yaki) voor een accountnaam (Neegek): zo praat de app over spelers. Onbekend: de accountnaam.
+const proName = n => DATA?.members?.find(x => x.name === n)?.proName || n;
 
 
 // ---------- app-shell: zijmenu ----------
@@ -47,7 +49,7 @@ function fillPlayerNav() {
   const nav = $('#player-nav'); if (!nav || !DATA) return;
   const onPlayers = PAGE === 'spelers.html';
   const current = onPlayers ? decodeURIComponent(location.hash.slice(1)) || (DATA.players.includes('Neegek') ? 'Neegek' : DATA.players[0]) : null;
-  nav.innerHTML = DATA.players.map(n => `<a href="spelers.html#${encodeURIComponent(n)}" class="${n === current ? 'active' : ''}"${n === current ? ' aria-current="page"' : ''}>${esc(n)}</a>`).join('');
+  nav.innerHTML = DATA.players.map(n => `<a href="spelers.html#${encodeURIComponent(n)}" class="${n === current ? 'active' : ''}"${n === current ? ' aria-current="page"' : ''}>${esc(proName(n))}</a>`).join('');
 }
 addEventListener('hashchange', () => fillPlayerNav());
 
@@ -241,7 +243,7 @@ const summarize = list => {
   const resid = list.length ? +(list.reduce((a, m) => a + (m.resid ?? 0), 0) / list.length).toFixed(2) : null;
   return { n: list.length, W, D, L, winPct: pct(W, list.length), ppg: list.length ? +((3 * W + D) / list.length).toFixed(2) : null, resid, gf, ga, gfAvg: list.length ? +(gf / list.length).toFixed(1) : null, gaAvg: list.length ? +(ga / list.length).toFixed(1) : null };
 };
-const lineupOf = m => m.players.map(p => p.name).sort().join(' · ');
+const lineupOf = m => m.players.map(p => proName(p.name)).sort().join(' · ');
 const deltaCell = (d, unit = ' pt', digits = 0) => d === null || d === undefined ? '–' : `<span class="${d > 0.005 ? 'delta-pos' : d < -0.005 ? 'delta-neg' : ''}">${d > 0 ? '+' : ''}${(+d).toFixed(digits)}${unit}</span>`;
 const avg = xs => xs.length ? xs.reduce((x, y) => x + y, 0) / xs.length : null;
 const residCell = v => deltaCell(v, '', 2);
@@ -461,7 +463,7 @@ function matchCard(m, { own = null, player = null } = {}) {
   const str = diff === null ? '' : diff >= 250 ? 'veel sterker' : diff >= 100 ? 'sterker' : diff <= -100 ? 'zwakker' : '';
   const p = player ? m.players.find(x => x.name === player) : [...m.players].sort((x, y) => (y.rating ?? 0) - (x.rating ?? 0))[0];
   const foot = !p ? '' : player ? `<b>${p.rating ?? '–'}</b> ${p.goals} G, ${p.assists} A${p.mom ? ' · ★' : ''}`
-    : `<b>${p.rating ?? '–'}</b> ${esc(p.name)}`;
+    : `<b>${p.rating ?? '–'}</b> ${esc(proName(p.name))}`;
   const r = m.resid, badge = r === null || r === undefined ? '' : `<span class="kpi-badge ${r >= 0.5 ? 'up' : r <= -0.5 ? 'down' : ''}" title="Tov verwachting: doelsaldo tegenover wat de tegenstander deed verwachten">${signed(r, 1)}</span>`;
   return `<a class="mcard" href="wedstrijd.html?id=${m.matchId}">
     <span class="mcard-top"><span class="pill ${m.result}">${m.result === 'D' ? 'G' : m.result === 'L' ? 'V' : 'W'}</span><span class="mcard-type">${m.matchType === 'playoffMatch' ? 'playoff' : 'league'} · ${t}${m.winnerByDnf ? ' · opgave' : ''}${m.live ? ' · live' : ''}</span></span>
@@ -478,7 +480,7 @@ function matchRow(m, own) {
   const diff = m.opponent.skillRating && own ? m.opponent.skillRating - own : null;
   const str = diff === null ? '' : diff >= 250 ? 'veel sterker' : diff >= 100 ? 'sterker' : diff <= -100 ? 'zwakker' : 'gelijkwaardig';
   const best = [...m.players].filter(p => p.rating !== null).sort((x, y) => y.rating - x.rating)[0];
-  const bestHtml = best ? `<span class="mr-best-name">${esc(best.name)}${best.mom ? ' <span class="crown" title="Man of the match">♛</span>' : ''}</span><b>${f1(best.rating)}</b>` : '';
+  const bestHtml = best ? `<span class="mr-best-name">${esc(proName(best.name))}${best.mom ? ' <span class="crown" title="Man of the match">♛</span>' : ''}</span><b>${f1(best.rating)}</b>` : '';
   return `<a class="match-row" href="wedstrijd.html?id=${m.matchId}">
     <span class="mr-time">${when}</span>
     <span class="pill ${m.result}">${letter(m.result)}</span>

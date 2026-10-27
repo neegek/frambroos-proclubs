@@ -38,7 +38,7 @@ function matchSummary(m) {
   const best = [...m.players].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))[0];
   if (best) {
     const bits = [best.goals ? `${numWord(best.goals)} ${best.goals === 1 ? 'doelpunt' : 'doelpunten'}` : '', best.assists ? `${numWord(best.assists)} ${best.assists === 1 ? 'assist' : 'assists'}` : ''].filter(Boolean);
-    parts.push(`<b>${esc(best.name)}</b> was de beste man${bits.length ? `, met ${joinAnd(bits)}` : ''}${best.mom ? ', en werd man van de wedstrijd' : ''}.`);
+    parts.push(`<b>${esc(proName(best.name))}</b> was de beste man${bits.length ? `, met ${joinAnd(bits)}` : ''}${best.mom ? ', en werd man van de wedstrijd' : ''}.`);
   }
   return parts.join(' ');
 }
@@ -47,7 +47,7 @@ function pitch(players, title, link) {
   const byLine = Object.fromEntries(LINES.map(([k]) => [k, []]));
   for (const p of players) (byLine[p.pos] || byLine.midfielder).push(p);
   const chip = p => {
-    const inner = `<b>${esc(p.name)}</b><small>${esc(archName(p.archetypeId))} · ${p.rating ?? '–'}${p.mom ? ' · ★' : ''}</small>`;
+    const inner = `<b>${esc(link ? proName(p.name) : p.name)}</b><small>${esc(archName(p.archetypeId))} · ${p.rating ?? '–'}${p.mom ? ' · ★' : ''}</small>`;
     return link ? `<a class="pchip" href="spelers.html#${encodeURIComponent(p.name)}">${inner}</a>` : `<div class="pchip">${inner}</div>`;
   };
   const ai = Math.max(0, 11 - players.length);
@@ -80,7 +80,7 @@ function h2h(m) {
 // reconstrueren (docs/coach-logica.md §9a). EA geeft per speler alleen aantallen, niet bij welke goal.
 function goalChain(m) {
   if (m.goals !== 1) return '';
-  const who = f => m.players.filter(f).map(p => `<b>${esc(p.name)}</b>`);
+  const who = f => m.players.filter(f).map(p => `<b>${esc(proName(p.name))}</b>`);
   const scorer = who(p => p.goals > 0), assist = who(p => p.assists > 0), second = who(p => p.ev?.second_assists > 0);
   if (scorer.length > 1 || assist.length > 1 || second.length > 1) return '';
   const steps = [];
@@ -95,7 +95,7 @@ function goalChain(m) {
 function playerTable(el, players, link) {
   const rows = [...players].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
   if (!rows.length) { el.innerHTML = '<p class="empty">Geen menselijke spelers.</p>'; return; }
-  const name = { label: 'Speler', render: p => link ? `<a href="spelers.html#${encodeURIComponent(p.name)}">${esc(p.name)}</a>${p.mom ? ' ★' : ''}` : `${esc(p.name)}${p.mom ? ' ★' : ''}` };
+  const name = { label: 'Speler', render: p => link ? `<a href="spelers.html#${encodeURIComponent(p.name)}">${esc(proName(p.name))}</a>${p.mom ? ' ★' : ''}` : `${esc(p.name)}${p.mom ? ' ★' : ''}` };
   const compact = [name,
     { label: 'Rating', num: true, render: p => p.rating ?? '–' }, { label: 'Index', num: true, render: p => p.fi === null ? '–' : `<span title="Frambroos-index: 50 is gemiddeld voor de rol${fiMatchLabel(p.fi) ? ` · ${fiMatchLabel(p.fi)}` : ''}">${fiFmt(p.fi)}</span>` },
     { label: 'Goals', num: true, key: 'goals' }, { label: 'Assists', num: true, key: 'assists' },
@@ -105,7 +105,7 @@ function playerTable(el, players, link) {
   el.innerHTML = '<div class="pt-compact"></div><details class="all-stats"><summary>Alle cijfers</summary><div class="pt-full"></div></details>';
   table(el.querySelector('.pt-compact'), compact, rows);
   table(el.querySelector('.pt-full'), [
-    { label: 'Speler', render: p => link ? `<a href="spelers.html#${encodeURIComponent(p.name)}">${esc(p.name)}</a>${p.mom ? ' ★' : ''}` : `${esc(p.name)}${p.mom ? ' ★' : ''}` },
+    { label: 'Speler', render: p => link ? `<a href="spelers.html#${encodeURIComponent(p.name)}">${esc(proName(p.name))}</a>${p.mom ? ' ★' : ''}` : `${esc(p.name)}${p.mom ? ' ★' : ''}` },
     { label: 'Positie', render: p => POS_NL[p.pos] || p.pos }, { label: 'Build', render: p => esc(archName(p.archetypeId)) },
     { label: 'Rating', num: true, render: p => p.rating ?? '–' }, { label: 'Goals', num: true, key: 'goals' }, { label: 'Assists', num: true, key: 'assists' }, { label: '2e assist', num: true, render: p => p.ev ? (p.ev.second_assists || 0) : '–' },
     { label: 'Schoten', num: true, key: 'shots' }, { label: 'Passes', num: true, render: p => `${p.passesMade}/${p.passAttempts}` },

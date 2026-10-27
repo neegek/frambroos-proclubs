@@ -254,7 +254,7 @@ td.split small, .split small { color: var(--muted); }
 .fut-tier { justify-self: center; margin-top: 12px; font-size: 10px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--t-accent); color: var(--t-accent); }
 /* Bovenste helft: overall, positie en logo links, foto rechts. Onderste helft: naam en cijfers in twee kolommen. */
 .fut-top { display: grid; grid-template-columns: 64px 1fr; min-height: 0; }
-.fut-ovr { display: grid; justify-items: center; align-content: start; gap: 2px; padding-top: 6px; }
+.fut-ovr { display: grid; justify-items: center; align-content: start; gap: 2px; padding-top: 18px; } /* de boog bovenin loopt links lager; de rating moet eronder blijven */
 .fut-ovr b { font-size: 40px; font-weight: 800; line-height: 1; letter-spacing: -0.04em; }
 .fut-archicon { display: grid; place-items: center; width: 34px; height: 34px; color: var(--t-ink); margin-top: 4px; }
 .fut-archicon .arch-icon { width: 32px; height: 32px; }
@@ -626,11 +626,11 @@ button.rank-card:hover .rank-more { color: var(--brand-text); border-color: var(
 /* Kleine kaart (ledenrij, top drie van een sessie): dezelfde kaart geschaald met --s; cijfers en labels iets groter. */
 .fut-mini { display: block; width: calc(300px * var(--s, 0.56)); height: calc(430px * var(--s, 0.56)); }
 .fut-mini .fut { transform: scale(var(--s, 0.56)); transform-origin: top left; transition: transform .15s ease; }
-.fut-mini .fut-name { font-size: 27px; }
+.fut-mini .fut-name { font-size: 26px; }
 .fut-mini .fut-name.long { font-size: 22px; }
-.fut-mini .fut-col b { font-size: 22px; }
+.fut-mini .fut-col b { font-size: 20px; }
 .fut-mini .fut-col span { font-size: 15px; letter-spacing: 0.04em; }
-.fut-mini .fut-tier { font-size: 13px; }
+.fut-mini .fut-tier { font-size: 12px; margin-top: 6px; padding: 2px 9px; }
 .member:hover .fut { transform: scale(var(--s, 0.56)) translateY(-6px); }
 /* Top drie van een sessie: waaier, de beste vooraan. */
 .podium { position: relative; --s: 0.5; --step: 112px; height: calc(430px * var(--s) + 52px); width: calc(300px * var(--s) + 2 * var(--step)); max-width: 100%; }
