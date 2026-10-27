@@ -469,7 +469,7 @@ function kpiTile(label, value, meta, delta, { small = false } = {}) {
 }
 // Kerncijfers rechtsboven in een kaart: gekleurd bolletje, label, groot cijfer en optioneel een badge.
 function figsHtml(items) {
-  return items.map(f => `<div class="fig"><span class="fig-label"><i style="--c:${f.color}"></i>${f.label}</span><span class="fig-value">${f.value}${f.delta ? `<span class="kpi-badge ${f.delta.good === true ? 'up' : f.delta.good === false ? 'down' : ''}"${f.delta.title ? ` title="${esc(f.delta.title)}"` : ''}>${f.delta.txt}</span>` : ''}</span></div>`).join('');
+  return items.map(f => `<div class="fig"><span class="fig-label">${f.color ? `<i style="--c:${f.color}"></i>` : ''}${f.label}</span><span class="fig-value">${f.value}${f.delta ? `<span class="kpi-badge ${f.delta.good === true ? 'up' : f.delta.good === false ? 'down' : ''}"${f.delta.title ? ` title="${esc(f.delta.title)}"` : ''}>${f.delta.txt}</span>` : ''}</span></div>`).join('');
 }
 // Verschil a − b als badge. hib: hoger is beter. min: kleiner verschil telt als gelijk.
 function deltaOf(a, b, { digits = 1, unit = '', hib = true, min = 0.05, title = '' } = {}) {

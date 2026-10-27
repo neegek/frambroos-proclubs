@@ -15,7 +15,14 @@
   <main class="content">
     <section class="home-hero" id="home-hero" aria-label="Frambroos"></section>
 
-    <section class="card totals" id="totals" aria-label="Totaalcijfers volgens EA"></section>
+    <section class="card season">
+      <div class="card-head">
+        <div><h2>Seizoen</h2><p class="hint">Bovenin de totalen volgens EA. Daaronder elke gevolgde wedstrijd als staafje (doelsaldo), met het doelsaldo en het verwachte doelsaldo tegen deze tegenstanders, gemiddeld over vijf.</p></div>
+        <div class="card-figs" id="fig-season"></div>
+      </div>
+      <dl class="totals-band" id="totals"></dl>
+      <div id="chart-form" class="season-chart"></div>
+    </section>
 
     <section class="news-sec" aria-labelledby="news-title">
       <div class="sec-head"><h2 id="news-title">Nieuws</h2></div>
@@ -42,6 +49,10 @@
 
   </main>
 </div>
+<dialog class="rank-dialog" id="rank-dialog" aria-labelledby="rd-title">
+  <button type="button" class="icon-btn rd-close" aria-label="Sluiten">✕</button>
+  <div class="rd-body"></div>
+</dialog>
 <div id="tooltip" class="tooltip" hidden></div>
 <script src="common.js"></script>
 <script src="archetypes.js"></script>

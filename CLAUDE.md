@@ -81,10 +81,11 @@ alleen in Cloudflare.
   grafiekkaart toont zijn kerncijfers rechts in de kop via `figsHtml(...)` uit `public/common.js`, niet als legenda.
 - Kaartjes (geïnspireerd op FC Clubs, in eigen stijl): één wedstrijd is één `matchCard(m, {own, player})` uit
   `public/common.js` in een `.match-cards`-raster (op telefoon horizontaal swipebaar); een sessie begint met één kop
-  met zes vaste cijfers (`.sess-figs`, coach-logica §9a) en een deelknop; de spelerspagina heeft vier kaartjes
-  (Highlights, Precisie, Frambroos-index met balkjes, Resultaat met deze speler); de ranglijst op het Clubhouse
+  met zes vaste cijfers (`.sess-figs`, coach-logica §9a) en een deelknop; de spelerspagina heeft drie kaartjes
+  (Highlights met per wedstrijd en precisie naast elkaar, Frambroos-index met balkjes, Resultaat met deze speler); de ranglijst op het Clubhouse
   (*Topspelers*) is een raster van `.rank-card`-kaartjes met per stat **alle** spelers, vier open en de rest achter een
-  knop; de leden (*Selectie*) staan in een swipebare rij als kleine spelerskaarten, gesorteerd op vorm. Het nieuws op het
+  knop; een tik op een kaartje opent geen speler maar het uitlegscherm van die ranglijst (`#rank-dialog`: waar de score
+  op gebaseerd is, wie meetelt, de hele lijst); de leden (*Selectie*) staan in een swipebare rij als kleine spelerskaarten, gesorteerd op vorm. Het nieuws op het
   Clubhouse is een raster van `.news-item`-kaartjes met een beeldvlak in clubpaars, het eerste groot. Een sessie toont de top drie van de avond als waaier van kleine
   spelerskaarten (`.podium`), met een anekdote en een Cruijff-quote in plaats van een tekst over wie de beste was.
   Geen tabellen waar een kaartje volstaat.
@@ -103,8 +104,9 @@ alleen in Cloudflare.
 - Lijngrafieken: vloeiend (monotone spline), hoofdlijn met `area: true` voor een zachte vlakvulling, geen vaste
   stippen (alleen bij hover). Klassenamen in componenten specifiek houden (bijv. `.pitch-line`, niet `.line`).
 - Menu: Clubhouse (startpagina, coach-logica §9a), Sessies, Wedstrijden, Spelers. De spelersnamen staan als knoppen
-  bovenaan de spelerspagina (`#chips`), niet in het menu. Het Clubhouse heeft geen KPI-tegels maar één band met totalen
-  zonder badges (`.totals-band`). Geen aparte analysepagina. De app is bewust eenvoudig: liever één duidelijke kaart dan drie tabellen.
+  bovenaan de spelerspagina (`#chips`), niet in het menu. Het Clubhouse heeft geen KPI-tegels maar één kaart *Seizoen*:
+  totalen zonder badges (`.totals-band`) en daaronder de vormgrafiek (staafjes per wedstrijd plus doelsaldo en verwacht
+  doelsaldo tegen deze tegenstanders), met de kerncijfers via `figsHtml` in de kop. Geen aparte analysepagina. De app is bewust eenvoudig: liever één duidelijke kaart dan drie tabellen.
 - Spelerspagina: drie tabbladen (Algemeen, Vorm, Advies). Samengevoegde kaarten tonen hooguit drie punten per kant;
   spelerstabellen zijn compact, met *Alle cijfers* achter een knop.
 - Spelerspagina begint met de spelerskaart (`public/playercard.js`): FC-vorm met een tier die met de vorm meebeweegt

@@ -469,9 +469,6 @@ a.pchip:hover { border-color: var(--brand); }
 .hh-meta { margin: 8px 0 0; font-size: 14px; color: #d9d4e0; }
 .hh-form { grid-area: form; display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; margin-top: 14px; }
 .hh-label { font-size: 12px; font-weight: 650; letter-spacing: 0.1em; text-transform: uppercase; color: #d9d4e0; }
-.hh-streak { font-size: 14px; font-weight: 650; color: #fff; }
-.hh-streak.W, .hh-streak.U { color: #8fbcf5; }
-.hh-streak.L { color: #f5a3a3; }
 .form-dots { list-style: none; margin: 0; padding: 0; display: flex; gap: 6px; flex-wrap: wrap; }
 .form-dots .dot { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%; font: 700 13px/1 system-ui, sans-serif; color: #fff; text-decoration: none; background: var(--pill-d); }
 .form-dots .dot.W { background: var(--pill-w); }
@@ -479,7 +476,10 @@ a.pchip:hover { border-color: var(--brand); }
 .form-dots .dot.last { box-shadow: 0 0 0 2px #07050d, 0 0 0 4px #fff; }
 .form-dots .dot:hover { transform: translateY(-2px); }
 
-/* Totalen: één band met grote cijfers. */
+/* Seizoen: totalen als band met grote cijfers, daaronder de vormgrafiek, samen in één kaart. */
+.season .card-head { margin-bottom: 12px; }
+.season-chart { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--grid); }
+.season-chart .hit { cursor: pointer; }
 .totals-band { margin: 0; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); }
 .totals-band div { padding: 4px 14px; border-left: 1px solid var(--grid); min-width: 0; }
 .totals-band div:first-child { border-left: 0; padding-left: 0; }
@@ -517,6 +517,25 @@ a.pchip:hover { border-color: var(--brand); }
 
 /* Topspelers: vier ranglijsten open, de rest achter de knop. */
 .rank-cards:not(.all) .rank-card:nth-child(n+5) { display: none; }
+button.rank-card { font: inherit; color: inherit; text-align: left; cursor: pointer; }
+button.rank-card:hover { border-color: var(--border-strong); }
+.rank-more { flex: none; width: 18px; height: 18px; display: inline-grid; place-items: center; border-radius: 50%; border: 1px solid var(--border-strong); font: 600 11px/1 var(--num-font); text-transform: none; letter-spacing: 0; }
+button.rank-card:hover .rank-more { color: var(--brand-text); border-color: var(--brand-text); }
+
+/* Uitlegscherm van een ranglijst. */
+.rank-dialog { width: min(560px, calc(100vw - 24px)); max-height: calc(100dvh - 48px); padding: 20px 22px 22px; border: 1px solid var(--panel-border); border-radius: 18px; background: var(--panel); color: var(--ink); box-shadow: var(--float); }
+.rank-dialog::backdrop { background: rgba(5,4,8,0.6); backdrop-filter: blur(2px); }
+.rd-close { position: absolute; top: 14px; right: 14px; width: 40px; height: 40px; font-size: 15px; }
+.rd-body h2 { margin: 0 48px 6px 0; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+.rd-body h3 { margin: 16px 0 4px; font-size: 11.5px; font-weight: 650; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.rd-body p { margin: 0; font-size: 14px; color: var(--ink-2); max-width: 62ch; }
+.rd-list { list-style: none; margin: 4px 0 0; padding: 0; }
+.rd-list li { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; column-gap: 10px; align-items: baseline; padding: 8px 0; border-top: 1px solid var(--grid); }
+.rd-list li:first-child { border-top: 0; }
+.rd-list li > span:first-child { font-family: var(--num-font); color: var(--muted); font-size: 12px; }
+.rd-list li > span:nth-child(2) { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rd-list b { font-family: var(--num-font); font-weight: 500; font-size: 17px; color: var(--brand-text); }
+.rd-list small { grid-column: 2 / -1; font-size: 12px; color: var(--muted); }
 @media (min-width: 601px) { .rank-cards { grid-auto-flow: row; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); overflow: visible; } }
 
 @media (max-width: 1100px) {
@@ -637,11 +656,13 @@ details.build-form-card[open] > summary { margin-bottom: 12px; }
 .hl-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 6px 0; border-top: 1px solid var(--grid); font-size: 13.5px; color: var(--ink-2); }
 .hl-row:first-of-type { border-top: 0; padding-top: 2px; }
 .hl-row b { font-family: var(--num-font); font-size: 20px; font-weight: 500; letter-spacing: -0.04em; color: var(--ink); }
-.prec { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.prec > div { display: grid; gap: 2px; min-width: 0; }
-.prec-label { font-size: 12px; color: var(--muted); }
-.prec-value { font-family: var(--num-font); font-size: 22px; font-weight: 500; letter-spacing: -0.04em; }
-.prec-frac { font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+/* Highlights: per wedstrijd links, precisie rechts; elke rij hoort bij elkaar (goals bij conversie, enz.). */
+.hl-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 18px; }
+.hl-col { font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); padding-bottom: 4px; }
+.hl-grid > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; column-gap: 8px; padding: 7px 0; border-top: 1px solid var(--grid); min-width: 0; }
+.hl-grid > div span { font-size: 13px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hl-grid > div b { font-family: var(--num-font); font-size: 20px; font-weight: 500; letter-spacing: -0.04em; color: var(--ink); }
+.hl-grid > div small { grid-column: 1 / -1; font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .fi-card { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 18px; align-items: center; }
 .fi-num { font-family: var(--num-font); font-size: 44px; font-weight: 500; letter-spacing: -0.06em; line-height: 1; }
 .fi-label { grid-column: 1; font-size: 12.5px; color: var(--ink-2); }
@@ -657,8 +678,6 @@ details.build-form-card[open] > summary { margin-bottom: 12px; }
 .rank-card-label { font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
 .rank-card ol { list-style: none; margin: 0; padding: 0; display: grid; }
 .rank-card li { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 4px 0; border-top: 1px solid var(--grid); font-size: 13.5px; }
-.rank-card li a { color: inherit; text-decoration: none; }
-.rank-card li a:hover { text-decoration: underline; }
 .rank-card li:first-child { border-top: 0; }
 .rank-card li span:first-child { font-family: var(--num-font); color: var(--muted); font-size: 12px; }
 .rank-card li span:nth-child(2) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 560; }

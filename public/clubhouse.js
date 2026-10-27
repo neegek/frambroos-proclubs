@@ -1,6 +1,7 @@
 // Clubhouse: de startpagina over de club als geheel (docs/coach-logica.md §9a), visueel en eenvoudig. Clubcijfers komen
 // van EA, alles over spelers, vorm en nieuws uit de gevolgde wedstrijden in DATA (zie common.js).
 
+const rolling = (xs, k) => xs.map((_, i) => { const w = xs.slice(Math.max(0, i - k + 1), i + 1); return w.reduce((a, b) => a + b, 0) / w.length; });
 const letter = r => r === 'D' ? 'G' : r === 'L' ? 'V' : 'W';
 const plural = (n, one, more) => `${n} ${n === 1 ? one : more}`;
 const dayLabel = ts => new Date(ts * 1000).toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' });
@@ -51,18 +52,8 @@ const formDots = (ms, { links = true } = {}) => `<ol class="form-dots">${ms.map(
   return `<li>${links ? `<a class="${cls}" href="wedstrijd.html?id=${m.matchId}" title="${title}">` : `<span class="${cls}" title="${title}">`}${letter(m.result)}${links ? '</a>' : '</span>'}</li>`;
 }).join('')}</ol>`;
 
-// Huidige reeks uit de gevolgde wedstrijden: gewonnen, ongeslagen of verloren op rij.
-function streakOf(ms) {
-  const r = ms.slice().reverse(), run = pred => { let n = 0; while (n < r.length && pred(r[n])) n++; return n; };
-  const w = run(m => m.result === 'W'), u = run(m => m.result !== 'L'), l = run(m => m.result === 'L');
-  if (w >= 2) return { kind: 'W', n: w, text: `${w} keer op rij gewonnen` };
-  if (u >= 2) return { kind: 'U', n: u, text: `${u} wedstrijden ongeslagen` };
-  if (l >= 2) return { kind: 'L', n: l, text: `${l} keer op rij verloren` };
-  return { kind: '', n: 0, text: '' };
-}
-
 function homeHero(ms) {
-  const c = DATA.club, s = DATA.snapshot, k = c.kits, st = streakOf(ms);
+  const c = DATA.club, s = DATA.snapshot, k = c.kits;
   const kicker = [k?.stadium, s?.currentDivision ? `Divisie ${s.currentDivision}` : ''].filter(Boolean).map(esc).join(' · ');
   const meta = [s?.skillRating ? `Skill rating ${s.skillRating}` : '', s?.bestDivision ? `hoogst bereikt: divisie ${s.bestDivision}` : ''].filter(Boolean).join(' · ');
   $('#home-hero').innerHTML = `${stadiumSvg()}
@@ -73,18 +64,75 @@ function homeHero(ms) {
         <h1 class="hh-name">${esc(c.name)}</h1>
         ${meta ? `<p class="hh-meta">${meta}</p>` : ''}
       </div>
-      ${ms.length ? `<div class="hh-form"><span class="hh-label">Laatste ${Math.min(10, ms.length)}</span>${formDots(ms.slice(-10))}${st.text ? `<span class="hh-streak ${st.kind}">${st.text}</span>` : ''}</div>` : ''}
+      ${ms.length ? `<div class="hh-form"><span class="hh-label">Laatste ${Math.min(10, ms.length)}</span>${formDots(ms.slice(-10))}</div>` : ''}
     </div>`;
 }
 
-// ---------- totalen volgens EA ----------
+// ---------- seizoen: totalen volgens EA en de vorm over de gevolgde wedstrijden ----------
 function totals() {
   const s = DATA.snapshot; if (!s) { $('#totals').hidden = true; return; }
   const items = [
     ['Wedstrijden', s.gamesPlayed], ['Gewonnen', s.wins], ['Gelijk', s.ties], ['Verloren', s.losses],
     ['Winst', s.gamesPlayed ? `${Math.round(100 * s.wins / s.gamesPlayed)}%` : '–'], ['Doelpunten', s.goals], ['Tegengoals', s.goalsAgainst], ['Clean sheets', s.cleanSheets ?? '–'],
   ];
-  $('#totals').innerHTML = `<dl class="totals-band">${items.map(([l, v]) => `<div><dt>${l}</dt><dd>${v ?? '–'}</dd></div>`).join('')}</dl>`;
+  $('#totals').innerHTML = items.map(([l, v]) => `<div><dt>${l}</dt><dd>${v ?? '–'}</dd></div>`).join('');
+}
+
+// Vormgrafiek (coach-logica §9a): per wedstrijd een staafje (doelsaldo, kleur = uitslag), met daardoorheen het doelsaldo
+// en het verwachte doelsaldo tegen deze tegenstanders, beide gemiddeld over vijf. Een tik of muis toont de wedstrijd.
+function formChart(container, ms) {
+  if (!ms.length) { container.innerHTML = '<p class="empty">Nog geen wedstrijden.</p>'; return; }
+  const width = Math.max(320, Math.min(1400, container.clientWidth || 800)), height = 230;
+  const { svg, inner } = frame(container, width, height, { l: 34, t: 10, r: 8, b: 26 });
+  const n = ms.length, own = DATA.snapshot?.skillRating;
+  const gd = rolling(ms.map(m => m.goalDiff), 5), ex = rolling(ms.map(m => m.expected ?? 0), 5);
+  const all = [...ms.map(m => m.goalDiff), ...gd, ...ex, 0];
+  const yt = niceTicks(Math.min(...all), Math.max(...all), 4), y0 = Math.min(...all, yt[0]), y1 = Math.max(...all, yt.at(-1));
+  const step = inner.w / n, sx = i => inner.x + (i + 0.5) * step, sy = v => inner.y + inner.h - (v - y0) / (y1 - y0) * inner.h;
+  yAxis(svg, inner, sy, yt, v => v > 0 ? `+${v}` : v);
+  el('line', { x1: inner.x, x2: inner.x + inner.w, y1: sy(0), y2: sy(0), stroke: 'var(--axis)', 'stroke-width': 1 }, svg);
+  let lastX = -Infinity;
+  ms.forEach((m, i) => {
+    if ((i === 0 || m.session !== ms[i - 1].session) && sx(i) - lastX > 56) { text(svg, sx(i), inner.y + inner.h + 18, fmtDate(m.ts), { class: 'tick', 'text-anchor': 'middle' }); lastX = sx(i); }
+  });
+  const bw = Math.max(2, Math.min(18, step * 0.62)), fill = { W: 'var(--pos)', L: 'var(--neg)', D: 'var(--neutral)' };
+  const bars = ms.map((m, i) => {
+    const top = Math.min(sy(0), sy(m.goalDiff)), h = Math.max(2, Math.abs(sy(m.goalDiff) - sy(0)));
+    return el('rect', { x: sx(i) - bw / 2, y: m.goalDiff === 0 ? sy(0) - 1 : top, width: bw, height: h, rx: Math.min(3, bw / 3), fill: fill[m.result], 'fill-opacity': 0.5 }, svg);
+  });
+  el('path', { d: smoothPath(ex.map((v, i) => [sx(i), sy(v)])), fill: 'none', stroke: 'var(--ink-2)', 'stroke-width': 2, 'stroke-dasharray': '5 4', 'stroke-linecap': 'round' }, svg);
+  el('path', { d: smoothPath(gd.map((v, i) => [sx(i), sy(v)])), fill: 'none', stroke: 'var(--brand)', 'stroke-width': 2.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, svg);
+  const hit = el('rect', { class: 'hit', x: inner.x, y: inner.y, width: inner.w, height: inner.h }, svg);
+  let on = null, pointer = 'mouse';
+  hit.addEventListener('pointerdown', e => { pointer = e.pointerType; });
+  hit.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') pointer = 'mouse'; });
+  hit.addEventListener('mousemove', e => {
+    const r = svg.getBoundingClientRect(), i = Math.max(0, Math.min(n - 1, Math.floor(((e.clientX - r.left) * width / r.width - inner.x) / step))), m = ms[i];
+    if (on !== null) bars[on].setAttribute('fill-opacity', 0.5);
+    bars[i].setAttribute('fill-opacity', 1); on = i;
+    const opp = m.opponent.skillRating ? `rating ${m.opponent.skillRating}${own ? ` (${signed(m.opponent.skillRating - own, 0)} tegenover ons)` : ''}` : 'rating onbekend';
+    showTip(`<b>${letter(m.result)} ${m.goals}–${m.goalsAgainst} tegen ${esc(m.opponent.name)}</b>${dayLabel(m.ts)} · ${opp}<br>Verwacht doelsaldo ${signed(m.expected, 1)}${m.winnerByDnf ? ' · opgave' : ''}<br>Gemiddeld over 5: doelsaldo ${signed(gd[i], 1)}, verwacht ${signed(ex[i], 1)}`, e);
+  });
+  // Na een tik stuurt de browser soms meteen mouseleave; dan blijft de tooltip staan tot een tik ernaast (common.js).
+  hit.addEventListener('mouseleave', () => { if (pointer !== 'mouse') return; if (on !== null) bars[on].setAttribute('fill-opacity', 0.5); on = null; hideTip(); });
+  // Muis: een klik opent de wedstrijd. Telefoon: een tik toont alleen de tooltip (common.js); naar de wedstrijd via de rondjes.
+  hit.addEventListener('click', e => pointer === 'mouse' && (location.href = `wedstrijd.html?id=${ms[Math.max(0, Math.min(n - 1, Math.floor(((e.clientX - svg.getBoundingClientRect().left) * width / svg.getBoundingClientRect().width - inner.x) / step)))].matchId}`));
+}
+
+// Kerncijfers in de kop: de laatste tien tegenover de wedstrijden daarvoor.
+function seasonFigs(ms) {
+  if (ms.length < 3) { $('#fig-season').innerHTML = ''; return; }
+  const last = ms.slice(-10), before = ms.slice(0, -10), own = DATA.snapshot?.skillRating, T = 'Laatste tien tegenover de gevolgde wedstrijden daarvoor';
+  const a = summarize(last), b = before.length >= 5 ? summarize(before) : null;
+  const opp = list => { const r = list.map(m => m.opponent.skillRating).filter(Boolean); return r.length && own ? avg(r) - own : null; };
+  const oa = opp(last), ob = b ? opp(before) : null;
+  const neutral = d => d && { ...d, good: null }; // sterkere tegenstanders zijn niet beter of slechter, alleen anders
+  $('#fig-season').innerHTML = figsHtml([
+    { label: 'Punten per wedstrijd', value: a.ppg.toFixed(1), delta: b && deltaOf(a.ppg, b.ppg, { digits: 1, title: T }) },
+    { label: 'Doelsaldo', color: 'var(--brand)', value: signed(a.gfAvg - a.gaAvg, 1), delta: b && deltaOf(a.gfAvg - a.gaAvg, b.gfAvg - b.gaAvg, { digits: 1, title: `${T} (per wedstrijd)` }) },
+    { label: 'Verwacht', color: 'var(--ink-2)', value: signed(avg(last.map(m => m.expected ?? 0)), 1) },
+    { label: 'Tegenstanders tov ons', value: oa === null ? '–' : signed(oa, 0), delta: ob !== null && oa !== null ? neutral(deltaOf(oa, ob, { digits: 0, min: 10, title: `${T}: gemiddelde rating van de tegenstanders tegenover de onze` })) : null },
+  ]);
 }
 
 // ---------- nieuws uit de cijfers (coach-logica §9a) ----------
@@ -144,17 +192,6 @@ function newsItems(ms) {
       body: scorers.length ? `Doelpunten: ${joinAnd(scorers)}.` : 'De grootste zege van de avond.', visual: bigNum(`${big.goals}–${big.goalsAgainst}`) });
   }
 
-  // Reeks: nu minstens drie zeges, vier ongeslagen of drie nederlagen op rij.
-  const st = streakOf(ms);
-  if ((st.kind === 'W' && st.n >= 3) || (st.kind === 'U' && st.n >= 4) || (st.kind === 'L' && st.n >= 3)) {
-    const before = ms[ms.length - 1 - st.n];
-    const title = st.kind === 'W' ? `${capFirst(numWord(st.n))} zeges op rij` : st.kind === 'U' ? `${capFirst(numWord(st.n))} wedstrijden ongeslagen` : `${capFirst(numWord(st.n))} nederlagen op rij`;
-    const body = before ? (st.kind === 'L' ? `Voor het laatst gewonnen of gelijk: ${before.goals}–${before.goalsAgainst} tegen ${esc(before.opponent.name)} op ${dayLabel(before.ts)}.`
-      : `De laatste ${before.result === 'L' ? 'nederlaag' : 'wedstrijd zonder zege'} was ${before.goals}–${before.goalsAgainst} tegen ${esc(before.opponent.name)} op ${dayLabel(before.ts)}.`)
-      : `Sinds het begin van de gevolgde wedstrijden.`;
-    out.push({ key: 'streak', tag: 'Reeks', ts: ms.at(-1).ts, href: 'wedstrijden.html', title, body, visual: formDots(ms.slice(-Math.min(st.n, 10)), { links: false }) });
-  }
-
   // Scoort op rij: in elk van de laatste drie of meer eigen wedstrijden, met de laatste op de laatste avond.
   for (const n of DATA.players) {
     const own = ms.filter(m => m.players.some(p => p.name === n)).map(m => ({ m, p: m.players.find(p => p.name === n) }));
@@ -199,31 +236,55 @@ function playerTotals(ms) {
 // Ranglijst: negen stats die iedereen snapt (coach-logica §9a). v = waarde om op te sorteren, main = wat er staat,
 // sub = het totaal eronder. null = niet genoeg data.
 const per = (x, n) => n ? (x / n).toFixed(2) : '–';
-const count = (key, label, total, games) => ({ key, label, v: t => games(t) ? total(t) / games(t) : null, main: t => per(total(t), games(t)), sub: t => `${total(t)} in ${games(t)}` });
+const count = (key, label, total, games, { about, who = 'Minstens 3 wedstrijden.' }) => ({ key, label, about, who, v: t => games(t) ? total(t) / games(t) : null, main: t => per(total(t), games(t)), sub: t => `${total(t)} in ${games(t)}` });
+// about: waar de score op gebaseerd is; who: wie meetelt. Staat in het uitlegscherm van elke ranglijst.
+const BASE = 'Alleen de wedstrijden die deze app volgt, niet de hele EA-carrière.';
 const RANKS = [
-  { key: 'index', label: 'Frambroos-index', v: t => DATA.fi[t.name]?.score ?? null, main: t => fiFmt(DATA.fi[t.name].score), sub: t => fiLabel(DATA.fi[t.name].score) },
-  { key: 'rating', label: 'Rating', v: t => t.rating, main: t => f2(t.rating), sub: t => `${t.n} wedstrijden` },
-  count('goals', 'Goals per wedstrijd', t => t.g, t => t.n),
-  count('assists', 'Assists per wedstrijd', t => t.a, t => t.n),
-  count('involved', 'Betrokken bij goals', t => t.involved, t => t.n),
-  count('mom', 'Man of the match', t => t.mom, t => t.n),
-  { key: 'pass', label: 'Passnauwkeurigheid', v: t => t.pa >= 40 ? t.pm / t.pa : null, main: t => `${Math.round(100 * t.pm / t.pa)}%`, sub: t => `${t.pm} van ${t.pa}` },
-  count('won', 'Balwinst per wedstrijd', t => t.won, t => t.nEv),
-  { key: 'duels', label: 'Duels gewonnen', v: t => t.ta >= 15 ? t.tm / t.ta : null, main: t => `${Math.round(100 * t.tm / t.ta)}%`, sub: t => `${t.tm} van ${t.ta}` },
+  { key: 'index', label: 'Frambroos-index', v: t => DATA.fi[t.name]?.score ?? null, main: t => fiFmt(DATA.fi[t.name].score), sub: t => fiLabel(DATA.fi[t.name].score),
+    about: 'Wat iemand zelf bijdraagt, los van de uitslag. Per wedstrijd vier onderdelen: afronden, creëren, aan de bal en verdedigen. Elk cijfer wordt vergeleken met alle spelers op dezelfde positie die we tegenkwamen, tegenstanders inbegrepen, en de onderdelen tellen mee naar de build van die wedstrijd. 50 is gemiddeld voor de rol; bij weinig wedstrijden wordt de score naar 50 getrokken.',
+    who: 'Minstens 3 wedstrijden van 45 minuten of langer.' },
+  { key: 'rating', label: 'Rating', v: t => t.rating, main: t => f2(t.rating), sub: t => `${t.n} wedstrijden`,
+    about: 'Het gemiddelde van de matchrating die EA na elke wedstrijd geeft (0 tot 10). EA laat daarin ook de uitslag meetellen: winnen trekt de rating omhoog.',
+    who: 'Minstens 3 wedstrijden.' },
+  count('goals', 'Goals per wedstrijd', t => t.g, t => t.n, { about: 'Doelpunten gedeeld door het aantal gespeelde wedstrijden.' }),
+  count('assists', 'Assists per wedstrijd', t => t.a, t => t.n, { about: 'De laatste pass voor een doelpunt, per wedstrijd.' }),
+  count('involved', 'Betrokken bij goals', t => t.involved, t => t.n, { about: 'Goals, assists en tweede assists (de pass vóór de assist) samen, per wedstrijd. Zo telt ook wie de aanval opzet.' }),
+  count('mom', 'Man of the match', t => t.mom, t => t.n, { about: 'Hoe vaak EA iemand tot man of the match koos, per wedstrijd.' }),
+  { key: 'pass', label: 'Passnauwkeurigheid', v: t => t.pa >= 40 ? t.pm / t.pa : null, main: t => `${Math.round(100 * t.pm / t.pa)}%`, sub: t => `${t.pm} van ${t.pa}`,
+    about: 'Geslaagde passes gedeeld door alle passes. Wie veel risico neemt met steekpasses komt lager uit dan wie vooral breed speelt; kijk dus ook naar de rol.',
+    who: 'Minstens 3 wedstrijden en 40 passes.' },
+  count('won', 'Balwinst per wedstrijd', t => t.won, t => t.nEv, { about: 'Hoe vaak iemand de bal verovert: onderscheppingen, gewonnen duels en losse ballen volgens de gebeurtenissen die EA per wedstrijd meegeeft.', who: 'Minstens 3 wedstrijden; alleen wedstrijden waarvan EA de gebeurtenissen meegaf.' }),
+  { key: 'duels', label: 'Duels gewonnen', v: t => t.ta >= 15 ? t.tm / t.ta : null, main: t => `${Math.round(100 * t.tm / t.ta)}%`, sub: t => `${t.tm} van ${t.ta}`,
+    about: 'Gewonnen tackles gedeeld door alle tackles.',
+    who: 'Minstens 3 wedstrijden en 15 tackles.' },
 ];
 
-// Ranglijst als swipebare kaartjes: per stat alle spelers, niets uitklappen.
+const rankRows = (R, totals) => totals.filter(t => t.n >= 3).map(t => ({ t, v: R.v(t) })).filter(x => x.v !== null && x.v !== undefined).sort((a, b) => b.v - a.v);
+
+// Topspelers: een kaartje per stat met alle spelers. Een tik opent het uitlegscherm van die ranglijst, geen speler.
 function renderRanking(totals) {
-  const rowsFor = R => totals.filter(t => t.n >= 3).map(t => ({ t, v: R.v(t) })).filter(x => x.v !== null && x.v !== undefined).sort((a, b) => b.v - a.v);
-  $('#rank-cards').innerHTML = RANKS.map(R => { const rows = rowsFor(R); return `<div class="rank-card">
-      <span class="rank-card-label">${R.label}</span>
-      <ol>${rows.map((x, i) => `<li><span>${i + 1}</span><a href="spelers.html#${encodeURIComponent(x.t.name)}" title="${esc(R.sub(x.t))}">${esc(x.t.name)}</a><b>${R.main(x.t)}</b></li>`).join('') || '<li class="empty">Nog te weinig wedstrijden.</li>'}</ol></div>`; }).join('');
+  $('#rank-cards').innerHTML = RANKS.map(R => { const rows = rankRows(R, totals); return `<button type="button" class="rank-card" data-key="${R.key}" aria-haspopup="dialog">
+      <span class="rank-card-label">${R.label}<span class="rank-more" aria-hidden="true">i</span></span>
+      <ol>${rows.map((x, i) => `<li><span>${i + 1}</span><span>${esc(x.t.name)}</span><b>${R.main(x.t)}</b></li>`).join('') || '<li class="empty">Nog te weinig wedstrijden.</li>'}</ol></button>`; }).join('');
+  for (const b of $('#rank-cards').querySelectorAll('.rank-card')) b.addEventListener('click', () => openRank(RANKS.find(R => R.key === b.dataset.key), totals));
+}
+
+function openRank(R, totals) {
+  const rows = rankRows(R, totals), d = $('#rank-dialog');
+  d.querySelector('.rd-body').innerHTML = `<h2 id="rd-title">${R.label}</h2>
+    <h3>Waar het op gebaseerd is</h3><p>${R.about}</p>
+    <h3>Wie meetelt</h3><p>${R.who} ${BASE}</p>
+    <h3>De hele lijst</h3>
+    <ol class="rd-list">${rows.map((x, i) => `<li><span>${i + 1}</span><span>${esc(x.t.name)}</span><b>${R.main(x.t)}</b><small>${esc(R.sub(x.t))}</small></li>`).join('') || '<li class="empty">Nog te weinig wedstrijden.</li>'}</ol>`;
+  d.showModal();
 }
 
 function render() {
   const ms = DATA.matches;
   homeHero(ms);
   totals();
+  seasonFigs(ms);
+  formChart($('#chart-form'), ms);
   renderNews(ms);
   $('#results').innerHTML = ms.slice(-4).reverse().map(m => matchCard(m, { own: DATA.snapshot?.skillRating })).join('') || '<p class="muted">Nog geen wedstrijden.</p>';
   renderRanking(playerTotals(ms));
@@ -235,6 +296,9 @@ function render() {
       <span class="fut-mini">${PlayerCard.html(m.name)}</span><span class="member-tag">${esc(m.name)}</span></a>`).join('');
 }
 
+// Uitlegscherm van een ranglijst: sluiten met de knop, Esc of een tik naast het scherm.
+$('#rank-dialog').addEventListener('click', e => { if (e.target === e.currentTarget || e.target.closest('.rd-close')) e.currentTarget.close(); });
+
 // Topspelers: de eerste vier ranglijsten open, de rest achter de knop.
 $('#rank-more').addEventListener('click', e => {
   const open = $('#rank-cards').classList.toggle('all');
@@ -242,5 +306,6 @@ $('#rank-more').addEventListener('click', e => {
   e.currentTarget.textContent = open ? 'Minder ranglijsten' : 'Alle ranglijsten';
 });
 
+addEventListener('resize', () => DATA && formChart($('#chart-form'), DATA.matches));
 window.rerender = () => render();
 Promise.all([loadData(), PlayerCard.load().catch(() => {})]).then(render).catch(showError);

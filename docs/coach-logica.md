@@ -304,16 +304,27 @@ op de clubpagina's van de Premier League). Van boven naar beneden:
 
 1. **Hero**: een getekend stadion bij avond als achtergrond (eigen SVG, vaste kleuren los van het thema), het clublogo
    groot, de clubnaam, stadion en divisie, en de **laatste 10 wedstrijden** als rondjes (W/G/V, oudste links, nieuwste
-   rechts en omlijnd; een tik opent de wedstrijd) met de huidige reeks erbij.
-2. **Totalen**: één band met grote cijfers volgens EA over alle wedstrijden: wedstrijden, gewonnen, gelijk, verloren,
-   winstpercentage, doelpunten voor en tegen, clean sheets. Geen badges of uitleg: dit zijn feiten.
+   rechts en omlijnd; een tik opent de wedstrijd). Geen reeks: de rondjes zeggen het al.
+2. **Seizoen**: één kaart met bovenin de totalen volgens EA over alle wedstrijden (wedstrijden, gewonnen, gelijk,
+   verloren, winstpercentage, doelpunten voor en tegen, clean sheets; geen badges, dit zijn feiten) en daaronder de
+   **vormgrafiek** over de gevolgde wedstrijden. Per wedstrijd een staafje: hoogte = doelsaldo, kleur = uitslag. Daar
+   doorheen twee lijnen, beide gemiddeld over vijf wedstrijden: het **doelsaldo** en het **verwachte doelsaldo** op basis van de
+   tegenstander (skill rating tegenover de onze en het aantal mensen per kant, het verwachtingsmodel uit §3). Ligt de eerste lijn
+   boven de tweede, dan doen we het beter dan de tegenstanders deden verwachten. Rechts in de kop vier cijfers over de
+   laatste tien, met een badge tegenover de wedstrijden daarvoor: punten per wedstrijd, doelsaldo per wedstrijd, het
+   verwachte doelsaldo (de kleurtjes zijn ook de legenda van de twee lijnen) en de gemiddelde rating van de
+   tegenstanders tegenover de onze, *Tegenstanders tov ons* (badge grijs: sterkere tegenstanders zijn niet beter of slechter). EA geeft alleen
+   de huidige rating van een tegenstander, niet die op de dag van de wedstrijd. De tooltip per wedstrijd noemt uitslag, tegenstander, diens rating
+   en wat er verwacht werd.
 3. **Nieuws**: korte berichten die uit de cijfers volgen (zie hieronder), het belangrijkste groot.
 4. **Laatste uitslagen**: de laatste vier wedstrijden als `matchCard`, met een link naar alle wedstrijden.
 5. **Topspelers**: vier ranglijstkaartjes (Frambroos-index, rating, goals, assists); de andere vijf achter een knop.
+   Een tik op een kaartje opent geen speler maar een **uitlegscherm** over die ranglijst: waar de score op gebaseerd
+   is, wie meetelt (minimaal aantal wedstrijden of pogingen) en de hele lijst met de onderliggende aantallen.
 6. **Selectie**: de leden als spelerskaarten.
 
-Niet meer op de startpagina: de vormgrafiek (de rondjes zeggen het), de KPI-tegels met badges, de tenues en de losse
-samenvatting (die is nu het nieuwsbericht over de laatste speelavond). *Gevaarlijkst*, *Wat opvalt* en *Beste
+Niet meer op de startpagina: de KPI-tegels met badges, de tenues, de reeks en de losse samenvatting (die is nu het
+nieuwsbericht over de laatste speelavond). *Gevaarlijkst*, *Wat opvalt* en *Beste
 tweetallen* blijven weg (verbanden, §9d). EA geeft geen aantal fans; dat tonen we niet.
 
 **Nieuws** schrijft zichzelf uit de gevolgde wedstrijden. Elk bericht heeft een label, een kop van hooguit tien woorden,
@@ -328,11 +339,11 @@ de tijd niets); het eerste bericht is groot.
 | Uitschieter | hoogste rating van de laatste avond, als die ≥ 9,0 is | *9.9 voor Neegek tegen X* |
 | Hattrick | 3+ goals van één speler in één wedstrijd op de laatste avond (niet als dat al de uitschieter is) | *Hattrick voor Xero 023* |
 | Grote zege | winst met ≥ 4 verschil op de laatste avond (de grootste) | *7–1 tegen X* |
-| Reeks | nu ≥ 3 keer op rij gewonnen, ≥ 4 ongeslagen, of ≥ 3 keer op rij verloren | *Vijf zeges op rij* |
 | Scoort op rij | een speler scoorde in elk van de laatste ≥ 3 eigen wedstrijden | *Xero 023 scoort vier keer op rij* |
 | De nul | ≥ 2 clean sheets op de laatste avond | *Twee keer de nul gehouden* |
 
-Het grote bericht is *Topvorm* als dat er is, anders *Speelavond* (die staat altijd als eerste daarna). Een slechte reeks noemen we ook: nieuws is eerlijk.
+Het grote bericht is *Topvorm* als dat er is, anders *Speelavond* (die staat altijd als eerste daarna). Geen
+reeksen: die staan al in de rondjes bovenaan.
 
 - **Clubcijfers** komen uit EA (`overallStats` en `allTimeLeaderboard/search`, samen in het clubsnapshot). Alles over
   spelers en vorm komt uit onze eigen gevolgde wedstrijden, met het aantal erbij.
