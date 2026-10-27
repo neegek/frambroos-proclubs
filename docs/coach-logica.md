@@ -264,15 +264,36 @@ Daarnaast *Positiespel en keuzes* en *Al sterk*.
 
 ### Samenvattingen per pagina
 
-- **Clubhouse** (de startpagina, vroeger Team): karakter van de periode en verloop; tegen wie het lukt; waar winst van
-  afhangt (alleen factoren die bij winst echt beter zijn); wie het verschil maakt.
-- **Sessie**: soort avond en tegenstand (met verwachting); verloop en uitblinker ("hield nog het best stand" bij nul
-  punten); het opvallendste verschil met normaal.
-- **Wedstrijd**: uitslag, sterkte en mensen van de tegenstander; verloop op basis van kansen; beste speler; opvallendste
-  verschil met normaal.
-- **Speler, algemeen**: rol en kenmerk, wanneer het het best en minst gaat, opvallendste patroon. De *rol* hier is de
+- **Clubhouse** (de startpagina, vroeger Team): karakter van de periode en verloop; tegen wie het lukt. Niet meer:
+  waar winst van afhangt en wie het verschil maakt (verbanden, zie §9d).
+- **Sessie**: drie delen, elk één of twee zinnen. (1) Het karakter van de avond en de tegenstand, in gewone taal.
+  (2) **De anekdote**: het ene moment of de ene speler die de avond kenmerkte, als een verhaaltje en niet als cijfer
+  ("Konijnenlover22 schoot er in één pot drie in", "na twee verloren potten draaide het team de avond om").
+  (3) **Een Cruijff-quote** die bij de anekdote past, als los regeltje onder de samenvatting, met naam erbij.
+  Wie de beste was staat niet in de tekst: dat laat de top drie als kaarten zien (§9a).
+  Anekdotes, in volgorde van kracht (de sterkste wint; bij gelijke kracht de meest recente):
+  hattrick of meer in één pot; iemand scoorde in elke wedstrijd; iemand was elke wedstrijd man of the match;
+  comeback (eerste twee potten geen winst, daarna wel); inzakker (goed begin, de laatste twee niet gewonnen);
+  alles gewonnen of niets gewonnen; de hele avond de nul gehouden; een tegenstander gaf op; een verloren pot met
+  veel meer schoten dan de tegenstander (minstens dubbel, en minstens acht); een monsterscore (vier of meer verschil);
+  iemand speelde ver boven of ver onder het eigen normaal (minstens 1,0 rating, bij minstens drie andere wedstrijden).
+  Is er niets van dit alles, dan zegt de anekdote wie het meest bij de goals betrokken was.
+  Cruijff-quotes per anekdote (korte, bekende uitspraken, altijd met "Johan Cruijff" erbij):
+  hattrick en scoren in elke pot: "Je moet schieten, anders kun je niet scoren." · elke pot man of the match:
+  "Je gaat het pas zien als je het doorhebt." · comeback: "Elk nadeel heb z'n voordeel." · inzakker:
+  "Als je niet kunt winnen, moet je zorgen dat je niet verliest." · alles gewonnen: "Voetbal is simpel, maar het
+  moeilijkste wat er is, is simpel voetballen." · niets gewonnen: "Voordat ik een fout maak, maak ik die fout niet." ·
+  de nul gehouden: "Als wij de bal hebben, kunnen zij niet scoren." · tegenstander gaf op: "Italianen kunnen niet van
+  je winnen, maar je kan wel van ze verliezen." · verloren met veel schoten: "Toeval is logisch." · ver boven normaal:
+  "Je gaat het pas zien als je het doorhebt." · ver onder normaal: "Elk nadeel heb z'n voordeel." · monsterscore en
+  overig: "Voetbal is simpel, maar het moeilijkste wat er is, is simpel voetballen."
+- **Wedstrijd**: uitslag, sterkte en mensen van de tegenstander; verloop op basis van kansen; beste speler. Niet meer:
+  het verschil met normaal.
+- **Speler, algemeen**: rol en kenmerk, en de vorm van de laatste vijf wedstrijden (in woorden: in topvorm, in vorm,
+  op het eigen niveau, of een mindere reeks; de regels staan in §9c). De *rol* hier is de
   rol die uit de data blijkt (aangever, afmaker, spelmaker, ballenafpakker, dribbelaar, rustige kracht), op basis van de
   sterkste punten binnen het team. Die kan afwijken van de gekozen build; dat is informatief, geen fout.
+  Niet meer: wanneer het het best gaat en patronen (verbanden, §9d).
 - **Speler, advies**: gekozen archetype met zijn taak (§2a), speelstijl, grootste winst, waar op te bouwen,
   positiespel. Bij een ander archetype dan het laatst gespeelde zegt de eerste zin dat.
 
@@ -280,23 +301,27 @@ Daarnaast *Positiespel en keuzes* en *Al sterk*.
 
 **Clubhouse** is de startpagina over de club als geheel, zonder filters. Van boven naar beneden: wie we zijn (logo,
 naam, stadion, platform, huidige en beste divisie, skill rating, reputatie, tenues); clubcijfers van EA over alle
-wedstrijden (winstpercentage, reeks, wedstrijden, doelsaldo, clean sheets, promoties); vorm en samenvatting; de
-gevaarlijkste spelers; de ranglijst per stat; de leden; wat opvalt en de beste tweetallen. EA geeft geen aantal fans;
-dat tonen we niet.
+wedstrijden (winstpercentage, reeks, doelsaldo, clean sheets, promoties); vorm en samenvatting; de ranglijst per stat;
+de leden. Niet meer: *Gevaarlijkst* (staat al in de ranglijst als *Betrokken bij goals*), *Wat opvalt* en *Beste
+tweetallen* (verbanden, §9d). EA geeft geen aantal fans; dat tonen we niet.
 
 - **Clubcijfers** komen uit EA (`overallStats` en `allTimeLeaderboard/search`, samen in het clubsnapshot). Alles over
   spelers en vorm komt uit onze eigen gevolgde wedstrijden, met het aantal erbij.
-- **Gevaarlijkst** = betrokken bij goals per wedstrijd: goals + assists + tweede assists, minimaal 3 wedstrijden.
-  De top drie, met de verdeling erbij.
-- **Ranglijst**: per stat alle spelers met minimaal 3 wedstrijden, totaal en per wedstrijd. Voor percentages
-  (passnauwkeurigheid, duels) de minimale aantallen uit §4.
-- **Leden**: de carrièrecijfers van EA per lid (wedstrijden, winstpercentage, goals, assists, man of the match,
-  gemiddelde rating), met overall en ingestelde positie.
+- **Ranglijst**: negen stats die iedereen snapt, elk een kaartje met **alle** spelers (minimaal 3 wedstrijden) erop,
+  niets uitklappen: Frambroos-index, rating, goals, assists, betrokken bij goals (goals + assists + tweede assists),
+  man of the match, passnauwkeurigheid, balwinst, duels gewonnen. Tellende stats per wedstrijd, met het totaal
+  eronder. Voor percentages de minimale aantallen uit §4.
+- **Leden**: elk lid als spelerskaart (§9c), **gesorteerd op vorm**: eerst topvorm, dan in vorm, dan de rest; binnen
+  een tier op de rating van de laatste vijf, dan op aantal wedstrijden.
 
 **Sessiekop**: elke speelavond toont dezelfde zes cijfers, zodat avonden op dezelfde manier te vergelijken zijn:
 wedstrijden (met W-G-V en de badge punten per wedstrijd tegenover normaal), duur (eerste tot laatste wedstrijd plus een
 kwartier), doelsaldo (met de badge tov verwachting), passnauwkeurigheid, conversie en clean sheets, elk met "normaal"
-eronder (alle andere wedstrijden). Man of the match staat als kroon bij de speler. De deelkaart (afbeelding van
+eronder (alle andere wedstrijden). Daarnaast de **top drie van de avond** als spelerskaarten (§9c) op rating over
+deze avond, als waaier: de beste vooraan en groot, nummer twee en drie erachter en iets lager, elk met plek en rating.
+Bij nul punten heet het "hield het best stand", maar de kaarten blijven hetzelfde. Man of the match staat als kroon
+bij de speler. *Spelers deze sessie* toont per speler alleen rating met het verschil met normaal, goals, assists en
+man of the match; geen vergelijkingen per maat meer. De deelkaart (afbeelding van
 1080×1080 in thuiskleuren) toont W-G-V, punten per wedstrijd, winstpercentage, doelsaldo, uitblinker, meeste goals
 plus assists en de eerste twee zinnen van de samenvatting.
 
@@ -372,11 +397,23 @@ lichtere baan in het verloop zelf (`--t-sheen`). Onder het clublogo staat de vla
 van de pro (`proNationality` van EA, een FC-landennummer: Europa alfabetisch 1–51, Azië vanaf 149; getekend in
 `NATIONS` in `playercard.js`). Een nummer dat daar niet in staat krijgt geen vlag; niet gokken, eerst toevoegen.
 
-Dezelfde kaart staat klein (56 %) in de ledenrij op het Clubhouse, met de accountnaam eronder; cijfers en labels zijn
+Onderaan de kaart, onder de cijfers, staat een klein label als de speler in vorm is: *IN VORM* (zwart-goud) of
+*TOPVORM* (blauw). Goud heeft geen label.
+
+Dezelfde kaart staat klein (56 %) in de ledenrij op het Clubhouse en in de top drie van een sessie op het Clubhouse, met de accountnaam eronder; cijfers en labels zijn
 daar iets groter gezet zodat ze klein leesbaar blijven. Eén functie (`PlayerCard.html`) maakt beide, met SVG-ids per speler.
 
 De tier staat ook als `title` op de kaart. Voorbeeld (25 okt 2026): GoodTimes 023 in vorm door groei (+0,47), Neegek door niveau (7,62) en groei (+0,32);
 niemand in topvorm.
+
+## 9d. Verbanden: weggehaald, eerst naar de tekentafel
+
+Op 27 oktober 2026 zijn alle "verbanden" uit de app gehaald omdat ze vaag of nietszeggend waren voor wie niet in
+data zit: *Wat opvalt* en *Beste tweetallen* (Clubhouse), *Wanneer het loopt* en *Patronen* (speler), *Opvallend* en
+de vergelijkingen per maat bij spelers (sessie), *Impact* met en zonder speler, en de zinnen "opvallend was dat …"
+in samenvattingen. De rekencode is mee weggehaald. Wat terugkomt, wordt eerst hier uitgewerkt en pas daarna gebouwd.
+Blijft wel: *tov verwachting* (§3) in badges en op de wedstrijdkaarten, en *Aan de bal in context* (§4a); ook die
+staan op de lijst om opnieuw te bekijken.
 
 ## 10. Waar staat wat
 

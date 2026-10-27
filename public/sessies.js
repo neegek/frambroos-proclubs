@@ -1,5 +1,6 @@
-// Sessiepagina: per speelavond uitslagen, tegenstanders en wat beter of slechter ging dan normaal.
+// Sessiepagina: per speelavond uitslagen, de top drie als kaarten, een verhaaltje met een Cruijff-quote en de spelers.
 // Een sessie is een reeks wedstrijden met minder dan 3 uur ertussen (SESSION_GAP in common.js).
+// Samenvatting: docs/coach-logica.md §9 (Sessie).
 
 const WEEKDAY_LONG = ['zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag'];
 const fmtTime = ts => new Date(ts * 1000).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
@@ -7,24 +8,7 @@ const longDate = ts => { const d = new Date(ts * 1000); return `${WEEKDAY_LONG[d
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const typeLabel = list => { const t = new Set(list.map(m => m.matchType)); return t.size > 1 ? 'league en playoff' : t.has('playoffMatch') ? 'playoff' : 'league'; };
 const strengthLabel = d => d === null ? '' : d >= 250 ? 'veel sterker' : d >= 100 ? 'sterker' : d <= -100 ? 'zwakker' : 'gelijkwaardig';
-
-// Spelersmaten voor "wat viel op" (rijen {m, p}).
 const pSum = (rows, f) => rows.reduce((a, r) => a + (f(r.p) || 0), 0);
-const pMin = rows => pSum(rows, p => p.secondsPlayed) / 60;
-const p90 = f => rows => { const m = pMin(rows); return m ? 90 * pSum(rows, f) / m : null; };
-const pEv = rows => rows.filter(r => r.p.ev);
-const pEv90 = k => rows => { const e = pEv(rows); return e.length ? p90(p => p.ev[k])(e) : null; };
-const P_METRICS = [
-  { label: 'schoten per 90', hib: true, fmt: f1, calc: p90(p => p.shots) },
-  { label: 'conversie', hib: true, fmt: fmtPct, min: rows => pSum(rows, p => p.shots) >= 3, calc: rows => pct(pSum(rows, p => p.goals), pSum(rows, p => p.shots)) },
-  { label: 'passnauwkeurigheid', hib: true, fmt: fmtPct, calc: rows => pct(pSum(rows, p => p.passesMade), pSum(rows, p => p.passAttempts)) },
-  { label: 'balacties per 90', hib: null, fmt: f1, calc: pEv90('ball_actions') },
-  { label: 'dribbels per 90', hib: true, fmt: f1, calc: pEv90('dribbles_completed') },
-  { label: 'balverlies per 90', hib: false, fmt: f1, calc: pEv90('possession_lost') },
-  { label: 'onderscheppingen per 90', hib: true, fmt: f1, calc: pEv90('interceptions') },
-  { label: 'tackle-rendement', hib: true, fmt: fmtPct, min: rows => pSum(rows, p => p.tackleAttempts) >= 5, calc: rows => pct(pSum(rows, p => p.tacklesMade), pSum(rows, p => p.tackleAttempts)) },
-  { label: 'uit positie', hib: false, fmt: fmtPct, calc: rows => { const e = pEv(rows); const o = pSum(e, p => p.ev.out_of_position); return e.length ? pct(o, o + pSum(e, p => p.ev.in_position)) : null; } },
-];
 
 let sessions = [], selectedId = null;
 
@@ -40,7 +24,59 @@ function renderList() {
   for (const b of $('#session-list').querySelectorAll('.session-item')) b.addEventListener('click', () => { selectedId = Number(b.dataset.id); render(); });
 }
 
-function sessionSummary(ms, others, sm, names, opp, own, cmp, prow) {
+// De anekdote van de avond (coach-logica §9): het ene moment of de ene speler die de avond kenmerkte, met de
+// Cruijff-quote die erbij hoort. Kandidaten krijgen een kracht; de sterkste wint, bij gelijke kracht de laatste.
+const QUOTE = {
+  schieten: 'Je moet schieten, anders kun je niet scoren.',
+  doorhebben: 'Je gaat het pas zien als je het doorhebt.',
+  nadeel: 'Elk nadeel heb z\'n voordeel.',
+  nietVerliezen: 'Als je niet kunt winnen, moet je zorgen dat je niet verliest.',
+  simpel: 'Voetbal is simpel, maar het moeilijkste wat er is, is simpel voetballen.',
+  fout: 'Voordat ik een fout maak, maak ik die fout niet.',
+  bal: 'Als wij de bal hebben, kunnen zij niet scoren.',
+  italianen: 'Italianen kunnen niet van je winnen, maar je kan wel van ze verliezen.',
+  toeval: 'Toeval is logisch.',
+};
+function anecdote(ms, sm, prow) {
+  const c = [], nm = n => `<b>${esc(n)}</b>`, res = ms.map(m => m.result), n = ms.length;
+  const pot = i => ['de eerste pot', 'de tweede pot', 'de derde pot', 'de vierde pot', 'de vijfde pot'][i] || `pot ${i + 1}`;
+  // Spelersmomenten
+  for (const m of ms) for (const p of m.players) if (p.goals >= 3) c.push({ w: 10 + p.goals, text: `${nm(p.name)} schoot er tegen ${esc(m.opponent.name)} in ${numWord(p.goals)} keer in${m.result === 'W' ? '' : ', en toch werd het niets'}.`, q: 'schieten' });
+  if (n >= 3) for (const r of prow) {
+    const rows = ms.map(m => m.players.find(p => p.name === r.name)).filter(Boolean);
+    if (rows.length === n && rows.every(p => p.goals > 0)) c.push({ w: 9, text: `${nm(r.name)} scoorde in elke pot van de avond, ${numWord(pSum(rows.map(p => ({ p })), p => p.goals))} goals in totaal.`, q: 'schieten' });
+    if (rows.length === n && rows.every(p => p.mom)) c.push({ w: 9, text: `${nm(r.name)} was elke pot man of the match. De rest mocht meedoen.`, q: 'doorhebben' });
+  }
+  // Verloop
+  if (n >= 4 && res[0] !== 'W' && res[1] !== 'W' && res.slice(2).every(r => r === 'W')) c.push({ w: 8, text: `Na twee potten zonder winst draaide het team de avond om en won het alles wat erna kwam.`, q: 'nadeel' });
+  else if (n >= 4 && res[0] !== 'W' && res[1] !== 'W' && res.slice(2).some(r => r === 'W')) c.push({ w: 6, text: `De eerste twee potten leverden niets op; daarna kwam het team op gang.`, q: 'nadeel' });
+  if (n >= 4 && res.slice(-2).every(r => r !== 'W') && res.slice(0, -2).every(r => r === 'W')) c.push({ w: 8, text: `Een vliegende start, maar de laatste twee potten gingen verloren. Eerder stoppen was een optie geweest.`, q: 'nietVerliezen' });
+  else if (n >= 4 && res.slice(-2).every(r => r !== 'W') && res.slice(0, -2).some(r => r === 'W')) c.push({ w: 6, text: `Na een goed begin zakte het aan het eind in: de laatste twee potten leverden niets op.`, q: 'nietVerliezen' });
+  if (n >= 3 && res.every(r => r === 'W')) c.push({ w: 7, text: `Alles gewonnen, ${numWord(n)} uit ${numWord(n)}. Zo'n avond komt niet vaak voorbij.`, q: 'simpel' });
+  if (n >= 3 && res.every(r => r !== 'W')) c.push({ w: 7, text: `Geen enkele pot gewonnen. Soms is het gewoon niet de avond.`, q: 'fout' });
+  if (n >= 3 && ms.every(m => m.goalsAgainst === 0)) c.push({ w: 7, text: `De hele avond de nul gehouden: ${numWord(n)} potten zonder tegengoal.`, q: 'bal' });
+  // Losse momenten
+  for (const [i, m] of ms.entries()) {
+    if (m.winnerByDnf) c.push({ w: 6, text: `${esc(m.opponent.name)} gaf in ${pot(i)} op bij ${m.goals}–${m.goalsAgainst}. Ook een manier om te winnen.`, q: 'italianen' });
+    const sUs = m.players.reduce((a, p) => a + (p.shots || 0), 0), sThem = m.opponentPlayers.reduce((a, p) => a + (p.shots || 0), 0);
+    if (m.result === 'L' && sUs >= 8 && sUs >= 2 * sThem) c.push({ w: 5, text: `Tegen ${esc(m.opponent.name)} schoot het team ${numWord(sUs)} keer en zij ${numWord(sThem)} keer, en toch ging die pot verloren.`, q: 'toeval' });
+    const d = m.goals - m.goalsAgainst;
+    if (d >= 4) c.push({ w: 4 + d / 10, text: `${esc(m.opponent.name)} werd in ${pot(i)} met ${m.goals}–${m.goalsAgainst} van het veld gespeeld.`, q: 'simpel' });
+    if (d <= -4) c.push({ w: 4 - d / 10, text: `Tegen ${esc(m.opponent.name)} liep het in ${pot(i)} helemaal uit de hand: ${m.goals}–${m.goalsAgainst}.`, q: 'nadeel' });
+  }
+  // Ver boven of onder het eigen normaal
+  for (const r of prow) if (r.nT >= 3 && r.d !== null) {
+    if (r.d >= 1) c.push({ w: 3 + r.d, text: `${nm(r.name)} speelde ver boven het eigen niveau${r.g + r.a ? `, met ${joinAnd([r.g ? `${numWord(r.g)} ${r.g === 1 ? 'goal' : 'goals'}` : '', r.a ? `${numWord(r.a)} ${r.a === 1 ? 'assist' : 'assists'}` : ''].filter(Boolean))}` : ''}.`, q: 'doorhebben' });
+    if (r.d <= -1) c.push({ w: 3 - r.d, text: `Voor ${nm(r.name)} was het een avond om snel te vergeten; dat gebeurt de besten.`, q: 'nadeel' });
+  }
+  // Niets bijzonders: wie het meest bij de goals betrokken was.
+  const inv = [...prow].sort((a, b) => (b.g + b.a) - (a.g + a.a))[0];
+  if (inv && inv.g + inv.a > 0) c.push({ w: 1, text: `${nm(inv.name)} was bij de meeste goals betrokken: ${joinAnd([inv.g ? `${numWord(inv.g)} ${inv.g === 1 ? 'goal' : 'goals'}` : '', inv.a ? `${numWord(inv.a)} ${inv.a === 1 ? 'assist' : 'assists'}` : ''].filter(Boolean))}.`, q: 'simpel' });
+  if (!c.length) return { text: '', q: 'simpel' };
+  return c.reduce((best, x) => x.w >= best.w ? x : best);
+}
+
+function sessionSummary(ms, sm, opp, own, prow) {
   const parts = [];
   // 1. Karakter van de avond en tegenstand
   const type = typeLabel(ms) === 'playoff' ? 'playoffavond' : typeLabel(ms) === 'league' ? 'competitieavond' : 'avond';
@@ -52,25 +88,10 @@ function sessionSummary(ms, others, sm, names, opp, own, cmp, prow) {
   if (sm.resid >= 0.75) lead += strongOpp ? ', en jullie deden het beter dan je mocht verwachten' : ', beter dan de tegenstand deed vermoeden';
   else if (sm.resid <= -0.75) lead += strongOpp ? ', en zelfs voor die tegenstand viel het tegen' : ', terwijl er meer in had gezeten';
   parts.push(lead + '.');
-  // 2. Verloop en uitblinker
-  const res = ms.map(m => m.result), best = prow[0];
-  let course = '';
-  if (res.length >= 4 && res[0] !== 'W' && res[1] !== 'W' && res.slice(2).some(r => r === 'W')) course = 'Na een stroeve start kwam het team op gang';
-  else if (res.length >= 4 && res.slice(-2).every(r => r !== 'W') && res.slice(0, -2).some(r => r === 'W')) course = 'Na een goed begin zakte het aan het eind in';
-  else if (res.length >= 3 && res.every(r => r === 'W')) course = 'Het team won alles';
-  else if (res.length >= 3 && res.every(r => r !== 'W')) course = 'Het wilde de hele avond niet lukken';
-  else if (res.length >= 4) course = 'Winst en verlies wisselden elkaar af';
-  const star = best && best.rH !== null ? `<b>${esc(best.name)}</b>` : '';
-  if (course && star) parts.push(sm.W === 0 ? `${course}; ${star} hield nog het best stand.` : `${course}, met ${star} als uitblinker.`);
-  else if (course) parts.push(`${course}.`);
-  else if (star) parts.push(sm.W === 0 ? `${star} hield nog het best stand.` : `${star} was de uitblinker.`);
-  // 3. Wat opviel tegenover normaal
-  const notable = cmp.filter(d => TEAM_PHRASE[d.key] && Math.abs(d.rel) >= 0.2 && Math.abs(d.diff) > 0.15).sort((a, b) => Math.abs(b.rel) - Math.abs(a.rel));
-  const good = notable.find(d => d.good && !['gf', 'ga'].includes(d.key)), bad = notable.find(d => !d.good && !['gf', 'ga'].includes(d.key));
-  if (good && bad) parts.push(`Opvallend was dat ${TEAM_PHRASE[good.key][0]}, maar ${TEAM_PHRASE[bad.key][1]}.`);
-  else if (good) parts.push(`Opvallend was dat ${TEAM_PHRASE[good.key][0]}.`);
-  else if (bad) parts.push(`Wat tegenviel, was dat ${TEAM_PHRASE[bad.key][1]}.`);
-  return parts.join(' ');
+  // 2. De anekdote
+  const a = anecdote(ms, sm, prow);
+  if (a.text) parts.push(a.text);
+  return { html: parts.join(' '), quote: QUOTE[a.q] };
 }
 
 function render() {
@@ -86,8 +107,6 @@ function render() {
   $('#s-meta').textContent = `${fmtTime(ms[0].ts)} tot ${fmtTime(ms[ms.length - 1].ts)} · ${names.length} spelers: ${names.join(', ')}`;
 
   const opp = avg(ms.map(m => m.opponent.skillRating).filter(Boolean));
-  const moms = ms.flatMap(m => m.players.filter(p => p.mom).map(p => p.name));
-  const momCount = Object.entries(moms.reduce((a, n) => (a[n] = (a[n] || 0) + 1, a), {})).sort((a, b) => b[1] - a[1]);
   // Badges: deze avond tegenover normaal (alle andere wedstrijden).
   const no = summarize(others), TN = 'Deze avond tegenover normaal (alle andere wedstrijden)';
   // Zes vaste cijfers per avond (coach-logica §9a), met "normaal" eronder waar dat iets zegt.
@@ -107,48 +126,33 @@ function render() {
     fig('Clean sheets', cleanSheets(ms), cmpOk ? `normaal ${fmtPct(pct(cleanSheets(others), others.length))} van de potten` : `van ${sm.n}`),
   ].join('');
   $('#s-matches').innerHTML = ms.map(m => matchCard(m, { own })).join('');
-  $('#s-share').onclick = () => shareSession(ms, sm, prow, $('#s-summary').innerText);
 
-
-  // Team tegenover normaal
-  const cmp = others.length >= 3 ? compareTeam(ms, others) : [];
-  const notable = cmp.filter(d => Math.abs(d.rel) >= 0.2 && Math.abs(d.diff) > 0.15).sort((a, b) => Math.abs(b.rel) - Math.abs(a.rel));
-  const conf = CONF(ms.length, others.length);
-  const item = d => insightLi(`${d.label}: ${d.fmt(d.a)} tegenover ${d.fmt(d.b)} normaal`, `${d.good ? 'Beter' : 'Slechter'} dan in de ${others.length} andere wedstrijden${d.hib ? '' : ' (lager is hier beter)'}.`, conf);
-  const good = notable.filter(d => d.good).map(item), bad = notable.filter(d => !d.good).map(item);
-  if (sm.resid >= 0.75) good.unshift(insightLi('Beter dan je mocht verwachten', `Gemiddeld ${signed(sm.resid, 2)} doelsaldo per wedstrijd boven wat de sterkte en het aantal mensen van de tegenstander voorspelden.`, null));
-  if (sm.resid <= -0.75) bad.unshift(insightLi('Slechter dan je mocht verwachten', `Gemiddeld ${signed(sm.resid, 2)} doelsaldo per wedstrijd onder wat de sterkte en het aantal mensen van de tegenstander voorspelden.`, null));
-  $('#s-good').innerHTML = good.length ? good.slice(0, 3).join('') : `<li class="empty">${others.length < 3 ? 'Te weinig andere wedstrijden om mee te vergelijken.' : 'Niets dat duidelijk beter ging dan normaal.'}</li>`;
-  $('#s-bad').innerHTML = bad.length ? bad.slice(0, 3).join('') : `<li class="empty">${others.length < 3 ? 'Te weinig andere wedstrijden om mee te vergelijken.' : 'Niets dat duidelijk slechter ging dan normaal.'}</li>`;
-  // Spelers
+  // Spelers: rating deze avond tegenover het eigen normaal (alle andere wedstrijden), goals, assists, man of the match.
   const prow = names.map(name => {
     const here = ms.map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p);
     const there = others.map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p);
     const rH = avg(here.map(r => r.p.rating).filter(v => v !== null)), rT = avg(there.map(r => r.p.rating).filter(v => v !== null));
-    const notes = [];
-    if (there.length >= 3) for (const mt of P_METRICS) {
-      if (mt.min && (!mt.min(here) || !mt.min(there))) continue;
-      const a = mt.calc(here), b = mt.calc(there); if (a === null || b === null || !b) continue;
-      const rel = (a - b) / Math.abs(b); if (Math.abs(rel) < 0.3) continue;
-      const better = mt.hib === null ? null : mt.hib ? a > b : a < b;
-      notes.push({ rel: Math.abs(rel), html: `<span class="${better === null ? '' : better ? 'delta-pos' : 'delta-neg'}">${a > b ? 'meer' : 'minder'} ${mt.label}</span> (${mt.fmt(a)} tegen ${mt.fmt(b)})` });
-    }
-    notes.sort((x, y) => y.rel - x.rel);
-    const evH = pEv(here);
-    return { name, n: here.length, rH, rT, d: rT === null || rH === null ? null : rH - rT, g: pSum(here, p => p.goals), a: pSum(here, p => p.assists), mom: pSum(here, p => p.mom), actions: evH.length ? pSum(evH, p => p.ev.ball_actions) / evH.length : null, notes: there.length < 3 ? '<small>Te weinig andere wedstrijden om mee te vergelijken.</small>' : notes.slice(0, 3).map(x => `<div>${x.html}</div>`).join('') || '<small>Op het eigen normale niveau.</small>' };
+    return { name, n: here.length, nT: there.length, rH, rT, d: rT === null || rH === null ? null : rH - rT, g: pSum(here, p => p.goals), a: pSum(here, p => p.assists), mom: pSum(here, p => p.mom) };
   }).sort((x, y) => (y.rH ?? 0) - (x.rH ?? 0));
-  $('#s-summary').innerHTML = sessionSummary(ms, others, sm, names, opp, own, cmp, prow);
+  const sum = sessionSummary(ms, sm, opp, own, prow);
+  $('#s-summary').innerHTML = sum.html;
+  $('#s-quote').innerHTML = `„${sum.quote}” <small>— Johan Cruijff</small>`;
+  $('#s-share').onclick = () => shareSession(ms, sm, prow, $('#s-summary').innerText);
+  // Top drie als kaarten, de beste vooraan.
+  const top = prow.filter(r => r.rH !== null).slice(0, 3);
+  $('#s-podium').innerHTML = top.map((r, i) => `<a class="podium-card p${i + 1}" href="spelers.html#${encodeURIComponent(r.name)}" title="${esc(r.name)}: rating ${f2(r.rH)} deze avond">
+      <span class="podium-rank">${i + 1}</span><span class="fut-mini">${PlayerCard.html(r.name)}</span><span class="podium-rating">${f2(r.rH)}${r.mom ? ' <span class="crown" title="Man of the match">♛</span>' : ''}</span></a>`).join('');
   $('#s-players').innerHTML = `<div class="pcards">${prow.map(r => `<a class="pcard" href="spelers.html#${encodeURIComponent(r.name)}">
     <div class="pcard-head"><span class="pcard-name">${esc(r.name)}${r.mom ? ' <span class="crown" title="Man of the match">♛</span>' : ''}</span><span class="pcard-rating">${f2(r.rH)}</span></div>
     <div class="pcard-sub">${r.n} ${r.n === 1 ? 'wedstrijd' : 'wedstrijden'} · normaal ${f2(r.rT)} ${r.d === null ? '' : residCell(r.d)}</div>
-    <div class="pcard-stats"><span><b>${r.g}</b> goals</span><span><b>${r.a}</b> assists</span><span><b>${r.mom}</b> MOTM</span><span><b>${f1(r.actions)}</b> balacties</span></div>
-    <div class="pcard-notes">${r.notes}</div></a>`).join('')}</div>`;
+    <div class="pcard-stats"><span><b>${r.g}</b> goals</span><span><b>${r.a}</b> assists</span><span><b>${r.mom}</b> MOTM</span></div></a>`).join('')}</div>`;
 }
 
 addEventListener('resize', () => DATA && render());
 addEventListener('hashchange', () => { const id = Number(location.hash.slice(1)); if (id && id !== selectedId) { selectedId = id; render(); } });
 selectedId = Number(location.hash.slice(1)) || null;
-loadData().then(() => { sessions = sessionsOf(DATA.matches); render(); }).catch(showError);
+window.rerender = () => render(); // thema wisselen: kaarten opnieuw in thuis- of uitkleuren
+Promise.all([loadData(), PlayerCard.load().catch(() => {})]).then(() => { sessions = sessionsOf(DATA.matches); render(); }).catch(showError);
 
 // ---------- deelkaart ----------
 // Een avond als afbeelding (1080×1080) voor de groepsapp: uitslag, kerncijfers, uitblinker, de eerste zin van de

@@ -29,25 +29,20 @@
             <div><h2 id="s-title">…</h2><div class="meta" id="s-meta"></div></div>
             <button type="button" class="btn-ghost" id="s-share" title="Deel deze avond als afbeelding">Delen</button>
           </div>
-          <p class="summary" id="s-summary"></p>
+          <div class="sess-body">
+            <div class="podium" id="s-podium" aria-label="Top drie van de avond"></div>
+            <div><p class="summary" id="s-summary"></p><p class="cruijff" id="s-quote"></p></div>
+          </div>
           <div class="sess-figs" id="s-figs"></div>
         </section>
         <section class="card">
           <h2>Wedstrijden</h2>
-          <p class="hint">Op volgorde van spelen. Klik op een wedstrijd voor het verhaal en de spelers.</p>
+          <p class="hint">Op volgorde van spelen. Tik op een wedstrijd voor het verhaal en de spelers.</p>
           <div class="match-cards" id="s-matches"></div>
         </section>
         <section class="card">
-          <h2>Opvallend</h2>
-          <p class="hint">Waar het team deze avond duidelijk beter of slechter deed dan normaal (alle andere wedstrijden).</p>
-          <div class="split">
-            <div><h3 class="good-text">Ging goed</h3><ul class="insight-list" id="s-good"></ul></div>
-            <div><h3 class="bad-text">Kan beter</h3><ul class="insight-list" id="s-bad"></ul></div>
-          </div>
-        </section>
-        <section class="card">
           <h2>Spelers deze sessie</h2>
-          <p class="hint">Rating tegenover het eigen gemiddelde in andere wedstrijden, en wat er bij iemand opviel. De kroon is man of the match.</p>
+          <p class="hint">Rating deze avond tegenover het eigen gemiddelde. De kroon is man of the match.</p>
           <div id="s-players"></div>
         </section>
       </div>
@@ -57,6 +52,9 @@
 </div>
 <div id="tooltip" class="tooltip" hidden></div>
 <script src="common.js"></script>
+<script src="archetypes.js"></script>
+<script src="frambroos-index.js"></script>
+<script src="playercard.js"></script>
 <script src="sessies.js"></script>
 </body>
 </html>

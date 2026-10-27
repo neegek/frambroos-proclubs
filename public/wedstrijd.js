@@ -10,7 +10,7 @@ const resLetter = r => r === 'D' ? 'G' : r === 'L' ? 'V' : 'W';
 const side = (players, k) => players.reduce((a, p) => a + (p[k] || 0), 0);
 const sideEv = (players, k) => players.some(p => p.ev) ? players.reduce((a, p) => a + (p.ev?.[k] || 0), 0) : null;
 
-function matchSummary(m, others) {
+function matchSummary(m) {
   const own = DATA.snapshot?.skillRating, d = m.goals - m.goalsAgainst, parts = [];
   // 1. Uitslag, tegenstander, verwachting
   let base = m.result === 'W' ? (m.winnerByDnf ? 'Een zege doordat de tegenstander opgaf' : d >= 3 ? 'Een ruime zege' : d === 1 ? 'Een nipte zege' : 'Een verdiende zege')
@@ -40,11 +40,6 @@ function matchSummary(m, others) {
     const bits = [best.goals ? `${numWord(best.goals)} ${best.goals === 1 ? 'doelpunt' : 'doelpunten'}` : '', best.assists ? `${numWord(best.assists)} ${best.assists === 1 ? 'assist' : 'assists'}` : ''].filter(Boolean);
     parts.push(`<b>${esc(best.name)}</b> was de beste man${bits.length ? `, met ${joinAnd(bits)}` : ''}${best.mom ? ', en werd man van de wedstrijd' : ''}.`);
   }
-  // 4. Het opvallendste verschil met normaal
-  if (others.length >= 3) {
-    const n = compareTeam([m], others).filter(x => TEAM_PHRASE[x.key] && !['gf', 'ga', 'shots', 'shotsAg', 'fouls'].includes(x.key) && Math.abs(x.rel) >= 0.3 && Math.abs(x.diff) > 0.2).sort((a, b) => Math.abs(b.rel) - Math.abs(a.rel))[0];
-    if (n) parts.push(n.good ? `Opvallend was dat ${TEAM_PHRASE[n.key][0]}.` : `Wat tegenviel, was dat ${TEAM_PHRASE[n.key][1]}.`);
-  }
   return parts.join(' ');
 }
 
@@ -63,21 +58,14 @@ function h2h(m) {
   const us = m.players, them = m.opponentPlayers;
   const pctOf = (a, b) => b ? Math.round(100 * a / b) : null;
   const out = (us.length ? us : them).length;
-  const op = (players, k) => { const e = players.filter(p => p.ev); return e.length ? (k === 'out' ? pctOf(e.reduce((a, p) => a + p.ev.out_of_position, 0), e.reduce((a, p) => a + p.ev.out_of_position + p.ev.in_position, 0)) : null) : null; };
   const rows = [
     ['Doelpunten', m.goals, m.goalsAgainst, true],
     ['Schoten', side(us, 'shots'), side(them, 'shots'), true],
-    ['Passes gelukt', side(us, 'passesMade'), side(them, 'passesMade'), true],
     ['Passnauwkeurigheid', pctOf(side(us, 'passesMade'), side(us, 'passAttempts')), pctOf(side(them, 'passesMade'), side(them, 'passAttempts')), true, '%'],
-    ['Tackles gewonnen', side(us, 'tacklesMade'), side(them, 'tacklesMade'), true],
-    ['Onderscheppingen', sideEv(us, 'interceptions'), sideEv(them, 'interceptions'), true],
     ['Balwinst', sideEv(us, 'possession_won'), sideEv(them, 'possession_won'), true],
     ['Balverlies', sideEv(us, 'possession_lost'), sideEv(them, 'possession_lost'), false],
     ['Geslaagde dribbels', sideEv(us, 'dribbles_completed'), sideEv(them, 'dribbles_completed'), true],
-    ['Steekpasses', sideEv(us, 'through_balls'), sideEv(them, 'through_balls'), true],
-    ['Uit positie', op(us, 'out'), op(them, 'out'), false, '%'],
     ['Overtredingen', sideEv(us, 'fouls_conceded_total'), sideEv(them, 'fouls_conceded_total'), false],
-    ['Gele kaarten', sideEv(us, 'yellow_cards_total'), sideEv(them, 'yellow_cards_total'), false],
   ].filter(r => r[1] !== null && r[2] !== null);
   void out;
   return `<div class="legend"><span style="--c:var(--s1)">Frambroos</span><span style="--c:var(--s2)">${esc(m.opponent.name)}</span></div>
@@ -134,7 +122,7 @@ function render() {
   const id = new URLSearchParams(location.search).get('id');
   const idx = DATA.matches.findIndex(x => x.matchId === id);
   if (idx < 0) { $('#page-title').textContent = 'Wedstrijd niet gevonden'; $('#page-sub').textContent = 'Deze wedstrijd staat niet (meer) in de data.'; $('#m-detail').hidden = true; return; }
-  const m = DATA.matches[idx], others = DATA.matches.filter(x => x.matchId !== m.matchId);
+  const m = DATA.matches[idx];
   const own = DATA.snapshot?.skillRating, kits = DATA.club.kits;
   document.title = `Frambroos tegen ${m.opponent.name} · Frambroos Coach`;
   $('#page-title').textContent = `Tegen ${m.opponent.name}`;
@@ -145,8 +133,8 @@ function render() {
   $('#m-score').innerHTML = `<div class="sl-team">${kitShirt(kits?.home, 'Frambroos')}<span>Frambroos</span></div>
     <div class="sl-score"><span>${m.goals}–${m.goalsAgainst}</span><span class="pill ${m.result}">${m.result === 'W' ? 'Gewonnen' : m.result === 'L' ? 'Verloren' : 'Gelijk'}</span></div>
     <div class="sl-team">${kitShirt(m.opponent.kit, m.opponent.name)}<span>${esc(m.opponent.name)}</span></div>`;
-  $('#m-meta').textContent = `Tegenstander rating ${m.opponent.skillRating ?? 'onbekend'}${m.opponent.skillRating && own ? ` (jullie ${own})` : ''} · mensen: jullie ${m.players.length}, zij ${m.opponentPlayers.length} · tov verwachting ${signed(m.resid, 1)}${m.winnerByDnf ? ' · tegenstander gaf op' : ''}`;
-  $('#m-summary').innerHTML = matchSummary(m, others) + goalChain(m);
+  $('#m-meta').textContent = `Tegenstander rating ${m.opponent.skillRating ?? 'onbekend'}${m.opponent.skillRating && own ? ` (jullie ${own})` : ''} · mensen: jullie ${m.players.length}, zij ${m.opponentPlayers.length}${m.winnerByDnf ? ' · tegenstander gaf op' : ''}`;
+  $('#m-summary').innerHTML = matchSummary(m) + goalChain(m);
   $('#m-pitches').innerHTML = pitch(m.players, 'Frambroos', true) + pitch(m.opponentPlayers, m.opponent.name, false);
   $('#m-h2h').innerHTML = h2h(m);
   $('#m-theirs-title').textContent = m.opponent.name;
