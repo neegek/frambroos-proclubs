@@ -1,4 +1,5 @@
-// Sessiepagina: per speelavond uitslagen, de top drie als kaarten, een verhaaltje met een Cruijff-quote en de spelers.
+// Sessiepagina: een overzicht met een kaart per speelavond; een tik opent de avond met uitslagen, de top drie als
+// kaarten, een verhaaltje met een Cruijff-quote en de spelers.
 // Een sessie is een reeks wedstrijden met minder dan 3 uur ertussen (SESSION_GAP in common.js).
 // Samenvatting: docs/coach-logica.md §9 (Sessie).
 
@@ -11,17 +12,34 @@ const strengthLabel = d => d === null ? '' : d >= 250 ? 'veel sterker' : d >= 10
 const pSum = (rows, f) => rows.reduce((a, r) => a + (f(r.p) || 0), 0);
 
 let sessions = [], selectedId = null;
+// Duur: eerste tot laatste wedstrijd plus een kwartier, in hele minuten (afronden vóór het splitsen, anders "2u 60m").
+const durationOf = ms => { const min = Math.round((ms[ms.length - 1].ts - ms[0].ts) / 60) + 15, h = Math.floor(min / 60); return h ? `${h}u ${String(min % 60).padStart(2, '0')}m` : `${min}m`; };
+const CAL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>';
+const PERSON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="8.5" r="4"/><path d="M4 21c.6-4.4 3.9-7 8-7s7.4 2.6 8 7z"/></svg>';
 
-function renderList() {
-  $('#session-list').innerHTML = [...sessions].reverse().map(s => {
-    const sm = summarize(s.matches), opp = avg(s.matches.map(m => m.opponent.skillRating).filter(Boolean));
-    return `<button type="button" role="option" class="session-item ${s.id === selectedId ? 'active' : ''}" aria-selected="${s.id === selectedId}" data-id="${s.id}">
-      <div class="s-date">${cap(longDate(s.matches[0].ts))}</div>
-      <div>${pills(s.matches)}</div>
-      <div class="s-meta">${sm.n} ${sm.n === 1 ? 'wedstrijd' : 'wedstrijden'} · ${sm.gf}–${sm.ga} · ${typeLabel(s.matches)}${opp ? ` · tegenstanders gem. ${Math.round(opp)}` : ''}</div>
-    </button>`;
+// Overzicht (coach-logica §9a, Sessies): per avond één kaart met datum, duur, uitslag, drie cijfers, de tijdlijn en de
+// speler van de sessie. Een tik opent de avond. De kleur van het kopvlak volgt de avond.
+function renderCards() {
+  const ppgOf = list => list.length ? (3 * list.filter(m => m.result === 'W').length + list.filter(m => m.result === 'D').length) / list.length : null;
+  $('#page-sub').textContent = `${sessions.length} ${sessions.length === 1 ? 'speelavond' : 'speelavonden'}, nieuwste eerst.`;
+  $('#session-cards').innerHTML = [...sessions].reverse().map(s => {
+    const ms = s.matches, sm = summarize(ms), normal = ppgOf(DATA.matches.filter(m => m.session !== s.id));
+    const ppg = ppgOf(ms), ppgCls = normal === null ? '' : ppg >= normal + 0.3 ? 'good' : ppg <= normal - 0.3 ? 'bad' : '';
+    const tone = ppg >= 2 ? 'good' : ppg < 1 ? 'bad' : '';
+    const team = avg(ms.flatMap(m => m.players.map(p => p.rating)).filter(v => v !== null));
+    const mvp = bestOfNight(ms), photo = mvp && PlayerCard.photo(mvp.n);
+    return `<a class="scard ${tone}" href="#${s.id}">
+      <span class="scard-top">
+        <span class="scard-head"><span class="scard-date">${CAL}${cap(longDate(ms[0].ts))}</span><span class="scard-dur">${durationOf(ms)}</span></span>
+        <span class="scard-main">
+          <span class="scard-record"><b>${sm.W}-${sm.D}-${sm.L}</b><small>W-G-V</small></span>
+          <span class="scard-figs"><span><b>${sm.gf}</b><small>Goals</small></span><span><b class="${ppgCls}">${ppg.toFixed(2)}</b><small>Punten p/w</small></span><span><b>${team === null ? '–' : f2(team)}</b><small>Team rating</small></span></span>
+        </span>
+      </span>
+      <span class="scard-line" aria-label="Uitslagen op volgorde">${ms.map(m => `<span class="tl-item" title="${esc(m.opponent.name)}"><span class="tl-dot ${m.result}">${letter(m.result)}</span>${kitShirt(m.opponent.kit, m.opponent.name)}<b>${m.goals}-${m.goalsAgainst}</b></span>`).join('')}</span>
+      ${mvp ? `<span class="scard-mvp"><span class="mvp-avatar">${photo ? `<img src="${photo}" alt="">` : PERSON}</span><span class="mvp-who"><small>Speler van de sessie</small><b>${esc(mvp.n)}</b></span><span class="mvp-stats"><b>${f2(mvp.v)}</b><small>${mvp.g} G · ${mvp.a} A${mvp.mom ? ` · ${mvp.mom}× MOTM` : ''}</small></span></span>` : ''}
+    </a>`;
   }).join('');
-  for (const b of $('#session-list').querySelectorAll('.session-item')) b.addEventListener('click', () => { selectedId = Number(b.dataset.id); render(); });
 }
 
 // De anekdote van de avond (coach-logica §9): het ene moment of de ene speler die de avond kenmerkte, met de
@@ -95,10 +113,11 @@ function sessionSummary(ms, sm, opp, own, prow) {
 }
 
 function render() {
-  if (!sessions.length) { $('#s-title').textContent = 'Nog geen sessies'; return; }
-  if (!sessions.some(s => s.id === selectedId)) selectedId = sessions[sessions.length - 1].id;
-  history.replaceState(null, '', `#${selectedId}`);
-  renderList();
+  if (!sessions.some(s => s.id === selectedId)) selectedId = null;
+  // Zonder sessie in het adres: het overzicht met kaarten. Met #<id>: die avond, met "Terug naar sessies".
+  $('#s-overview-head').hidden = $('#session-cards').hidden = selectedId !== null;
+  $('#session-detail').hidden = selectedId === null;
+  if (selectedId === null) { renderCards(); document.title = 'Sessies · Frambroos Coach'; return; }
   const s = sessions.find(x => x.id === selectedId), ms = s.matches, sm = summarize(ms);
   const others = DATA.matches.filter(m => m.session !== s.id);
   const own = DATA.snapshot?.skillRating;
@@ -114,7 +133,7 @@ function render() {
   const passPct = list => pct(pSum(ourP(list).map(p => ({ p })), p => p.passesMade), pSum(ourP(list).map(p => ({ p })), p => p.passAttempts));
   const convPct = list => pct(pSum(ourP(list).map(p => ({ p })), p => p.goals), pSum(ourP(list).map(p => ({ p })), p => p.shots));
   const cleanSheets = list => list.filter(m => m.goalsAgainst === 0).length;
-  const dur = ms[ms.length - 1].ts - ms[0].ts + 15 * 60, durTxt = `${Math.floor(dur / 3600)}u ${String(Math.round(dur % 3600 / 60)).padStart(2, '0')}m`;
+  const durTxt = durationOf(ms);
   const fig = (label, value, sub, badge) => `<div class="sfig"><span class="sfig-label">${label}</span><span class="sfig-value">${value}${badge ? `<span class="kpi-badge ${badge.good === true ? 'up' : badge.good === false ? 'down' : ''}" title="${esc(badge.title || '')}">${badge.txt}</span>` : ''}</span><span class="sfig-sub">${sub}</span></div>`;
   const cmpOk = others.length >= 3;
   $('#s-figs').innerHTML = [
@@ -149,7 +168,7 @@ function render() {
 }
 
 addEventListener('resize', () => DATA && render());
-addEventListener('hashchange', () => { const id = Number(location.hash.slice(1)); if (id && id !== selectedId) { selectedId = id; render(); } });
+addEventListener('hashchange', () => { const id = Number(location.hash.slice(1)) || null; if (id !== selectedId) { selectedId = id; render(); if (id) scrollTo(0, 0); } });
 selectedId = Number(location.hash.slice(1)) || null;
 window.rerender = () => render(); // thema wisselen: kaarten opnieuw in thuis- of uitkleuren
 Promise.all([loadData(), PlayerCard.load().catch(() => {})]).then(() => { sessions = sessionsOf(DATA.matches); render(); }).catch(showError);

@@ -77,16 +77,22 @@ alleen in Cloudflare.
   Kaarten, tegels en sessie-items zijn effen donkerpaars (`--panel`) met dezelfde rand (`--panel-border`) en
   schaduw als het menu; in het uittenue wit. Pagina's zijn een strak raster van kaarten met 12 px tussenruimte. Titel en
   filters staan op één rij (filters rechts). Het Clubhouse heeft geen paginatitel maar een hero (stadion,
-  groot logo, laatste 10), dan de totalen, het nieuws en de rest (coach-logica §9a). Een
+  groot logo, skill rating en divisie, de laatste 10 als rondjes zonder label), dan *Seizoen*, één nieuwskaart en de
+  rest (coach-logica §9a). Niet alles hoeft benoemd te worden: geen labels die het beeld al zegt. Een
   grafiekkaart toont zijn kerncijfers rechts in de kop via `figsHtml(...)` uit `public/common.js`, niet als legenda.
 - Kaartjes (geïnspireerd op FC Clubs, in eigen stijl): één wedstrijd is één `matchCard(m, {own, player})` uit
-  `public/common.js` in een `.match-cards`-raster (op telefoon horizontaal swipebaar); een sessie begint met één kop
+  `public/common.js` in een `.match-cards`-raster (op telefoon horizontaal swipebaar), behalve op de pagina
+  Wedstrijden: die is één lijst van `matchRow`-regels, nieuwste eerst, met de beste speler per wedstrijd. Sessies
+  begint met een `.scard` per avond (datum, duur, W-G-V, goals, punten per wedstrijd, team rating, tijdlijn met
+  uitslagen en shirts, speler van de sessie met kleine foto of icoon via `PlayerCard.photo`); een tik opent
+  `sessies.html#<id>` met "Terug naar sessies". Een geopende sessie begint met één kop
   met zes vaste cijfers (`.sess-figs`, coach-logica §9a) en een deelknop; de spelerspagina heeft drie kaartjes
   (Highlights met per wedstrijd en precisie naast elkaar, Frambroos-index met balkjes, Resultaat met deze speler); de ranglijst op het Clubhouse
   (*Topspelers*) is een raster van `.rank-card`-kaartjes met per stat **alle** spelers, vier open en de rest achter een
   knop; een tik op een kaartje opent geen speler maar het uitlegscherm van die ranglijst (`#rank-dialog`: waar de score
-  op gebaseerd is, wie meetelt, de hele lijst); de leden (*Selectie*) staan in een swipebare rij als kleine spelerskaarten, gesorteerd op vorm. Het nieuws op het
-  Clubhouse is een raster van `.news-item`-kaartjes met een beeldvlak in clubpaars, het eerste groot. Een sessie toont de top drie van de avond als waaier van kleine
+  op gebaseerd is, wie meetelt, de hele lijst); de leden (*Selectie*) staan in een swipebare rij als kleine spelerskaarten, gesorteerd op vorm. Nieuws: één artikel per
+  sessie (`public/news.js`, coach-logica §9a); het Clubhouse toont het nieuwste als één `.news-item`-kaart, de pagina
+  `nieuws.html` (een laag dieper, "Terug naar Clubhouse") toont ze allemaal. Een sessie toont de top drie van de avond als waaier van kleine
   spelerskaarten (`.podium`), met een anekdote en een Cruijff-quote in plaats van een tekst over wie de beste was.
   Geen tabellen waar een kaartje volstaat.
 - Geen vage verbanden: *Wat opvalt*, *Beste tweetallen*, *Wanneer het loopt*, *Patronen*, *Opvallend* (sessie) en
@@ -118,7 +124,7 @@ alleen in Cloudflare.
   Dezelfde kaart staat klein in de ledenrij op het Clubhouse en in de top drie van een sessie (`PlayerCard.html(naam)`
   in een `.fut-mini`); `index.html` en `sessies.html` laden daarvoor `playercard.js`. `PlayerCard.tier(naam)` geeft
   de tier voor sorteren en samenvattingen.
-- Wedstrijden is alleen de lijst; een wedstrijd opent op `/wedstrijd.html?id=<matchId>` (een laag dieper) met
+- Wedstrijden is alleen de lijst (eerst twintig, de rest achter een knop); een wedstrijd opent op `/wedstrijd.html?id=<matchId>` (een laag dieper) met
   "Terug naar wedstrijden" bovenaan. Link naar wedstrijden altijd via dat adres.
 
 ## Controleren na een wijziging

@@ -2,9 +2,6 @@
 // van EA, alles over spelers, vorm en nieuws uit de gevolgde wedstrijden in DATA (zie common.js).
 
 const rolling = (xs, k) => xs.map((_, i) => { const w = xs.slice(Math.max(0, i - k + 1), i + 1); return w.reduce((a, b) => a + b, 0) / w.length; });
-const letter = r => r === 'D' ? 'G' : r === 'L' ? 'V' : 'W';
-const plural = (n, one, more) => `${n} ${n === 1 ? one : more}`;
-const dayLabel = ts => new Date(ts * 1000).toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' });
 
 // ---------- hero: stadion bij avond ----------
 // Eigen tekening met vaste kleuren, los van het thema (zoals de spelerskaart): lucht, vier lichtmasten, tribune met
@@ -45,17 +42,10 @@ function stadiumSvg() {
   </svg>`;
 }
 
-// Wedstrijden als rondjes, oudste links; in de hero opent elk rondje de wedstrijd. In een nieuwsbericht (zelf een link)
-// zijn het gewone rondjes: een link in een link breekt de pagina.
-const formDots = (ms, { links = true } = {}) => `<ol class="form-dots">${ms.map((m, i) => {
-  const cls = `dot ${m.result}${i === ms.length - 1 ? ' last' : ''}`, title = `${letter(m.result)} ${m.goals}–${m.goalsAgainst} tegen ${esc(m.opponent.name)}, ${dayLabel(m.ts)}`;
-  return `<li>${links ? `<a class="${cls}" href="wedstrijd.html?id=${m.matchId}" title="${title}">` : `<span class="${cls}" title="${title}">`}${letter(m.result)}${links ? '</a>' : '</span>'}</li>`;
-}).join('')}</ol>`;
-
 function homeHero(ms) {
   const c = DATA.club, s = DATA.snapshot, k = c.kits;
-  const kicker = [k?.stadium, s?.currentDivision ? `Divisie ${s.currentDivision}` : ''].filter(Boolean).map(esc).join(' · ');
-  const meta = [s?.skillRating ? `Skill rating ${s.skillRating}` : '', s?.bestDivision ? `hoogst bereikt: divisie ${s.bestDivision}` : ''].filter(Boolean).join(' · ');
+  const kicker = k?.stadium ? esc(k.stadium) : '';
+  const meta = [s?.skillRating ? `Skill rating ${s.skillRating}` : '', s?.currentDivision ? `Divisie ${s.currentDivision}` : ''].filter(Boolean).join(' · ');
   $('#home-hero').innerHTML = `${stadiumSvg()}
     <div class="hh-body">
       <img class="hh-crest" src="crest.png" alt="Clublogo van ${esc(c.name)}" width="256" height="256">
@@ -64,7 +54,7 @@ function homeHero(ms) {
         <h1 class="hh-name">${esc(c.name)}</h1>
         ${meta ? `<p class="hh-meta">${meta}</p>` : ''}
       </div>
-      ${ms.length ? `<div class="hh-form"><span class="hh-label">Laatste ${Math.min(10, ms.length)}</span>${formDots(ms.slice(-10))}</div>` : ''}
+      ${ms.length ? `<div class="hh-form" aria-label="Laatste ${Math.min(10, ms.length)} wedstrijden">${formDots(ms.slice(-10))}</div>` : ''}
     </div>`;
 }
 
@@ -135,91 +125,6 @@ function seasonFigs(ms) {
   ]);
 }
 
-// ---------- nieuws uit de cijfers (coach-logica §9a) ----------
-// Elk bericht: { key, tag, title, body, ts, href, visual }. Alleen wat waar en opvallend is.
-function newsItems(ms) {
-  const out = [], sess = sessionsOf(ms), last = sess.at(-1)?.matches || [];
-  const night = last.length >= 2 ? last : [];
-  const bigNum = (v, small = '') => `<span class="news-big">${v}${small ? `<small>${small}</small>` : ''}</span>`;
-
-  // Topvorm: spelers met de blauwe kaart (§9c).
-  const top = DATA.players.map(n => ({ n, t: PlayerCard.tier(n) })).filter(x => x.t.tier === 'top').sort((a, b) => b.t.level - a.t.level);
-  if (top.length) {
-    const lastTs = Math.max(...top.map(x => [...ms].reverse().find(m => m.players.some(p => p.name === x.n))?.ts || 0));
-    out.push({ key: 'top', tag: 'Topvorm', ts: lastTs, href: `spelers.html#${encodeURIComponent(top[0].n)}`,
-      title: `${joinAnd(top.map(x => esc(x.n)))} in topvorm`,
-      body: `${joinAnd(top.map(x => `${esc(x.n)} ${f2(x.t.level)}`))} gemiddeld over de laatste vijf wedstrijden, met minstens drie zeges.`,
-      visual: `<div class="news-cards">${top.slice(0, 3).map(x => `<span class="fut-mini">${PlayerCard.html(x.n)}</span>`).join('')}</div>` });
-  }
-
-  // Speelavond: de laatste avond in het kort.
-  if (night.length) {
-    const s = summarize(night), endTs = night.at(-1).ts;
-    const parts = [s.W ? `${numWord(s.W)} ${s.W === 1 ? 'zege' : 'zeges'}` : '', s.D ? `${numWord(s.D)} ${s.D === 1 ? 'gelijkspel' : 'gelijke spelen'}` : '', s.L ? `${numWord(s.L)} ${s.L === 1 ? 'nederlaag' : 'nederlagen'}` : ''].filter(Boolean);
-    const per = new Map();
-    for (const m of night) for (const p of m.players) if (p.rating !== null) { const x = per.get(p.name) || []; x.push(p.rating); per.set(p.name, x); }
-    const best = [...per].filter(([, r]) => r.length >= Math.max(2, night.length / 2)).map(([n, r]) => ({ n, v: avg(r) })).sort((a, b) => b.v - a.v)[0];
-    const gd = night.reduce((a, m) => a + m.goalDiff, 0);
-    out.push({ key: 'night', tag: 'Speelavond', ts: endTs, href: 'sessies.html',
-      title: capFirst(joinAnd(parts)),
-      body: `${plural(night.length, 'wedstrijd', 'wedstrijden')} op ${new Date(endTs * 1000).toLocaleDateString('nl-NL', { weekday: 'long' })}, doelsaldo ${signed(gd, 0)}.${best ? ` Beste speler: ${esc(best.n)} met gemiddeld ${f2(best.v)}.` : ''}`,
-      visual: formDots(night, { links: false }) });
-  }
-
-  // Uitschieter, hattrick en grote zege: alleen over de laatste avond.
-  const perfs = night.flatMap(m => m.players.map(p => ({ m, p })));
-  const peak = perfs.filter(x => x.p.rating !== null).sort((a, b) => b.p.rating - a.p.rating)[0];
-  if (peak && peak.p.rating >= 9) {
-    const { m, p } = peak;
-    out.push({ key: 'peak', tag: 'Uitschieter', ts: m.ts, href: `wedstrijd.html?id=${m.matchId}`,
-      title: `${f1(p.rating)} voor ${esc(p.name)} tegen ${esc(m.opponent.name)}`,
-      body: `${capFirst(joinAnd([p.goals ? plural(p.goals, 'goal', 'goals') : '', p.assists ? plural(p.assists, 'assist', 'assists') : ''].filter(Boolean))) || 'Zonder goal of assist'}${p.mom ? ', man of the match' : ''}. De hoogste rating van de avond.`,
-      visual: bigNum(f1(p.rating)) });
-  }
-  // Hattrick: niet als dezelfde wedstrijd van dezelfde speler al de uitschieter is.
-  for (const { m, p } of perfs.filter(x => (x.p.goals || 0) >= 3 && !(peak?.p.rating >= 9 && x.m === peak.m && x.p.name === peak.p.name)).sort((a, b) => b.p.goals - a.p.goals).slice(0, 2)) {
-    out.push({ key: `hat-${m.matchId}-${p.name}`, tag: 'Hattrick', ts: m.ts, href: `wedstrijd.html?id=${m.matchId}`,
-      title: p.goals === 3 ? `Hattrick voor ${esc(p.name)}` : `${capFirst(numWord(p.goals))} goals voor ${esc(p.name)}`,
-      body: `${p.goals} keer raak tegen ${esc(m.opponent.name)}, eindstand ${m.goals}–${m.goalsAgainst}.`,
-      visual: bigNum(p.goals, 'goals') });
-  }
-
-  const big = night.filter(m => m.goalDiff >= 4).sort((a, b) => b.goalDiff - a.goalDiff || b.goals - a.goals)[0];
-  if (big) {
-    const scorers = big.players.filter(p => p.goals).sort((a, b) => b.goals - a.goals).map(p => `${esc(p.name)}${p.goals > 1 ? ` (${p.goals})` : ''}`);
-    out.push({ key: 'bigwin', tag: 'Grote zege', ts: big.ts, href: `wedstrijd.html?id=${big.matchId}`,
-      title: `${big.goals}–${big.goalsAgainst} tegen ${esc(big.opponent.name)}`,
-      body: scorers.length ? `Doelpunten: ${joinAnd(scorers)}.` : 'De grootste zege van de avond.', visual: bigNum(`${big.goals}–${big.goalsAgainst}`) });
-  }
-
-  // Scoort op rij: in elk van de laatste drie of meer eigen wedstrijden, met de laatste op de laatste avond.
-  for (const n of DATA.players) {
-    const own = ms.filter(m => m.players.some(p => p.name === n)).map(m => ({ m, p: m.players.find(p => p.name === n) }));
-    let k = 0; while (k < own.length && (own[own.length - 1 - k].p.goals || 0) > 0) k++;
-    if (k >= 3 && night.includes(own.at(-1).m)) {
-      const sum = own.slice(-k).reduce((a, x) => a + x.p.goals, 0);
-      out.push({ key: `scorer-${n}`, tag: 'Scoort op rij', ts: own.at(-1).m.ts, href: `spelers.html#${encodeURIComponent(n)}`,
-        title: `${esc(n)} scoort ${numWord(k)} keer op rij`,
-        body: `In elk van de laatste ${k} eigen wedstrijden minstens één goal, samen ${sum}.`, visual: bigNum(`${k}×`) });
-    }
-  }
-
-  const cs = night.filter(m => m.goalsAgainst === 0).length;
-  if (cs >= 2) out.push({ key: 'clean', tag: 'De nul', ts: night.at(-1).ts, href: 'sessies.html',
-    title: `${capFirst(numWord(cs))} keer de nul gehouden`, body: `${cs} van de ${night.length} wedstrijden van de laatste avond zonder tegengoal.`, visual: bigNum(0, 'tegen') });
-
-  // Volgorde van belang (coach-logica §9a): de berichten staan hierboven al zo; het grote is topvorm, anders de speelavond.
-  return out.slice(0, 6);
-}
-
-function renderNews(ms) {
-  const items = newsItems(ms);
-  $('#news').innerHTML = items.length ? items.map((n, i) => `<a class="news-item${i === 0 ? ' lead' : ''}" href="${n.href}">
-      <span class="news-visual">${n.visual}</span>
-      <span class="news-text"><span class="news-tag">${n.tag}</span><span class="news-title">${n.title}</span><span class="news-body">${n.body}</span><time datetime="${new Date(n.ts * 1000).toISOString()}">${dayLabel(n.ts)}</time></span>
-    </a>`).join('') : '<p class="muted">Nog geen nieuws: speel een avond, dan schrijft het zichzelf.</p>';
-}
-
 // ---------- per speler: totalen uit de gevolgde wedstrijden ----------
 function playerTotals(ms) {
   const out = new Map();
@@ -285,7 +190,8 @@ function render() {
   totals();
   seasonFigs(ms);
   formChart($('#chart-form'), ms);
-  renderNews(ms);
+  const latest = newsArticles()[0];
+  $('#news').innerHTML = latest ? newsCard(latest, { lead: true }) : '<p class="empty">Nog geen nieuws: speel een avond, dan schrijft het zichzelf.</p>';
   $('#results').innerHTML = ms.slice(-4).reverse().map(m => matchCard(m, { own: DATA.snapshot?.skillRating })).join('') || '<p class="muted">Nog geen wedstrijden.</p>';
   renderRanking(playerTotals(ms));
 
