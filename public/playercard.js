@@ -88,6 +88,10 @@ function cardName(career, name) {
 function lastArch(rows) { const r = [...rows].reverse().find(x => x.p.archetypeId); return r ? r.p.archetypeId : null; }
 
 // Alles wat de kaart nodig heeft, plus de kaart zelf (html). Gedeeld door de spelerspagina en de ledenrij op het Clubhouse.
+// Foto: bij in vorm of topvorm de vormfoto (<slug>-vorm), anders de gewone; ontbreekt de vormfoto, dan de gewone.
+// Dezelfde regel voor de kaart en voor de rondjes elders (speler van de sessie).
+const photoOf = (name, tier) => (tier !== 'goud' && PHOTOS[`${slugOf(name)}-vorm`]) || PHOTOS[slugOf(name)] || null;
+
 function cardOf(name) {
   const rows = DATA.matches.map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p);
   const career = DATA.members.find(x => x.name === name);
@@ -96,9 +100,7 @@ function cardOf(name) {
   const s = summarize(rows.map(r => r.m));
   const rating = avg(rows.map(r => r.p.rating).filter(v => v !== null));
   const g = rows.reduce((a, r) => a + (r.p.goals || 0), 0), a = rows.reduce((x, r) => x + (r.p.assists || 0), 0), mom = rows.reduce((x, r) => x + (r.p.mom || 0), 0);
-  // Foto: bij in vorm of topvorm de vormfoto (<slug>-vorm), anders de gewone; ontbreekt de vormfoto, dan de gewone.
-  const tier = tierOf(rows), slug = slugOf(name);
-  const photo = (tier.tier !== 'goud' && PHOTOS[`${slug}-vorm`]) || PHOTOS[slug];
+  const tier = tierOf(rows), photo = photoOf(name, tier.tier);
 
   // Op de kaart: face stats van de ingevulde build (als die bij het laatste archetype hoort), anders seizoenscijfers.
   const faces = build && (!build.archetype || Number(build.archetype) === arch) && ['pac', 'sho', 'pas', 'dri', 'def', 'phy'].every(k => build[k]);
@@ -152,6 +154,6 @@ function render(name) {
 
 // tier(name): { tier, level, growth } voor sorteren en samenvattingen (coach-logica §9c). TIER_RANK: hoger is beter.
 const TIER_RANK = { top: 2, zwart: 1, goud: 0 };
-// tierOf(rows): de tier op een eerder moment (rows = [{ m, p }] tot dan, zoals in cardOf). photo(name): adres van de foto of null.
-window.PlayerCard = { load: () => fetch(API.photos).then(r => r.json()).then(p => { PHOTOS = p || {}; }), render, html: name => cardOf(name).html, tier: name => cardOf(name).tier, tierOf, photo: name => PHOTOS[slugOf(name)] || null, TIER_RANK };
+// tierOf(rows): de tier op een eerder moment (rows = [{ m, p }] tot dan, zoals in cardOf). photo(name): de foto die bij de huidige vorm hoort, of null.
+window.PlayerCard = { load: () => fetch(API.photos).then(r => r.json()).then(p => { PHOTOS = p || {}; }), render, html: name => cardOf(name).html, tier: name => cardOf(name).tier, tierOf, photo: name => photoOf(name, cardOf(name).tier.tier), TIER_RANK };
 })();
