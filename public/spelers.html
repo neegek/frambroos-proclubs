@@ -14,129 +14,43 @@
   <aside class="sidebar" id="sidebar"></aside>
   <main class="content">
     <section class="chips mobile-only" id="chips"></section>
-    <section class="player-hero" id="player-hero" aria-label="Spelerskaart"></section>
+    <section class="player-hero" id="player-hero" aria-label="Spelerskaart"><div class="pc-wrap"><div class="skel fut"></div></div></section>
 
-
-  <div class="tabs-row">
-  <div class="tabs" role="tablist" aria-label="Weergave">
-    <button type="button" role="tab" class="tab" id="tab-btn-overview" aria-controls="tab-overview" aria-selected="true">Algemeen</button>
-    <button type="button" role="tab" class="tab" id="tab-btn-sessions" aria-controls="tab-sessions" aria-selected="false">Vorm</button>
-    <button type="button" role="tab" class="tab" id="tab-btn-build" aria-controls="tab-build" aria-selected="false">Advies</button>
-  </div>
-  <div class="filters">
-        <label class="filter" data-icon="calendar">Periode
-          <select id="range">
-            <option value="all">Alles</option>
-            <option value="30">Laatste 30 dagen</option>
-            <option value="7">Laatste 7 dagen</option>
-          </select>
-        </label>
-        <label class="filter" data-icon="trophy">Type
-          <select id="type">
-            <option value="all">League en playoff</option>
-            <option value="leagueMatch">League</option>
-            <option value="playoffMatch">Playoff</option>
-          </select>
-        </label>
-      </div>
-  </div>
-
-  <div id="tab-overview" role="tabpanel" aria-labelledby="tab-btn-overview" class="tabpanel">
-  <section class="card">
-    <h2 class="card-title">Samenvatting</h2>
-    <p class="summary" id="p-summary"></p>
-    <div class="sess-figs p-three" id="p-three"></div>
-  </section>
-
-  <section class="card">
-    <h2>Wedstrijden van deze speler</h2>
-    <p class="hint">De laatste acht; klik op een wedstrijd voor alle cijfers.</p>
-    <div id="tbl-player-matches"></div>
-  </section>
-
-  <details class="card more-cijfers">
-    <summary>Meer cijfers</summary>
-    <div class="pcards4" id="p-cards"></div>
-
-    <section class="card">
-      <div class="card-head">
-        <div>
-          <h2>Aan de bal in context</h2>
-          <p class="hint">Balverlies naast wat er tegenover staat, vergeleken met <span id="ctx-group">dezelfde build</span>. Hoe lastig ontvangen passes zijn, meet EA niet; momenten zonder aanspeelpunt zijn de benadering.</p>
-        </div>
-        <div class="card-figs" id="ctx-figs"></div>
-      </div>
-      <div class="ctx-verdict" id="ctx-verdict"></div>
-      <div class="tiles ctx-tiles" id="ctx-tiles"></div>
-    </section>
-
-    <section class="card">
-      <h2>Sterk en zwak</h2>
-      <p class="hint">Waar deze speler bovenaan of onderaan staat in het team.</p>
-      <div class="split">
-        <div><h3 class="good-text">Sterk in</h3><ul class="insight-list" id="list-strengths"></ul></div>
-        <div><h3 class="bad-text">Kan beter</h3><ul class="insight-list" id="list-weaknesses"></ul></div>
-      </div>
-    </section>
-  </details>
+    <div class="filters page-filters">
+      <label class="filter" data-icon="calendar">Periode
+        <select id="range">
+          <option value="all">Alles</option>
+          <option value="30">Laatste 30 dagen</option>
+          <option value="7">Laatste 7 dagen</option>
+        </select>
+      </label>
+      <label class="filter" data-icon="trophy">Type
+        <select id="type">
+          <option value="all">League en playoff</option>
+          <option value="leagueMatch">League</option>
+          <option value="playoffMatch">Playoff</option>
+        </select>
+      </label>
     </div>
 
-  <div id="tab-sessions" role="tabpanel" aria-labelledby="tab-btn-sessions" class="tabpanel" hidden>
     <section class="card">
-      <h2>Laatste wedstrijd</h2>
-      <div class="scoreline" id="pl-score"></div>
-      <div class="meta match-meta" id="pl-meta"></div>
-      <p class="summary" id="pl-summary"></p>
-    </section>
-    <section class="card">
-      <h2>Laatste wedstrijden</h2>
-      <p class="hint">Eigen rating, goals en assists per wedstrijd.</p>
-      <div class="match-cards" id="pv-cards"></div>
-      <details class="all-stats"><summary>Laatste wedstrijd tegenover normaal</summary><div id="pl-compare"></div></details>
-    </section>
-    <section class="card">
-      <h2 id="ps-title">Per sessie</h2>
-      <p class="summary" id="ps-summary"></p>
-    </section>
-    <section class="card">
-      <h2>Rating per sessie tegenover het eigen gemiddelde</h2>
-      <p class="hint">Boven de lijn: een betere avond dan normaal. Beweeg over of tik op een balk voor de details.</p>
-      <div id="ps-chart"></div>
-    </section>
-    <div class="ps-cards" id="ps-cards"></div>
-  </div>
-
-  <div id="tab-build" role="tabpanel" aria-labelledby="tab-btn-build" class="tabpanel" hidden>
-    <section class="card">
-      <div class="arch-head"><h2 id="b-title">Advies</h2><div id="arch-picker"></div></div>
-      <p class="summary" id="b-summary"></p>
-      <details class="arch-details"><summary>Over deze build</summary><div class="arch-info" id="arch-info"></div></details>
+      <h2 class="card-title">Samenvatting</h2>
+      <p class="summary" id="p-summary"><span class="skel text"></span><span class="skel text short"></span></p>
+      <div class="sess-figs p-three" id="p-three"><div class="skel row"></div><div class="skel row"></div><div class="skel row"></div></div>
     </section>
 
-    <div class="build-layout">
-      <div class="build-advice">
-        <section class="card bad">
-          <h2>Waar de meeste winst zit</h2>
-          <p class="hint">De drie grootste kansen, voor iedereen op dezelfde manier bepaald: wat iets kost tegenover wat het oplevert, gewogen naar de build en vergeleken met dezelfde build of positie.</p>
-          <ul class="insight-list" id="b-problems"></ul>
-        </section>
-        <section class="card">
-          <h2>Positiespel en wat al sterk is</h2>
-          <div class="split">
-            <div><h3>Positiespel en keuzes</h3><p class="hint">Wat geen build oplost, maar keuzes en positie.</p><ul class="insight-list" id="b-behaviour"></ul></div>
-            <div><h3 class="good-text">Al sterk</h3><p class="hint">Hier hoeven geen extra punten heen.</p><ul class="insight-list" id="b-strengths"></ul></div>
-          </div>
-        </section>
-      </div>
+    <section class="card">
+      <h2>Cijfers</h2>
+      <p class="hint">Alles wat EA per wedstrijd telt, over de gekozen periode: het totaal en per wedstrijd.</p>
+      <div class="stat-groups" id="p-stats"><div class="skel block"></div><div class="skel block"></div><div class="skel block"></div><div class="skel block"></div></div>
+    </section>
 
-      <details class="card build-form-card">
-        <summary><h2>Build invullen</h2><span class="hint">Je eigen attributen en PlayStyles, voor preciezer advies.</span></summary>
-        <p class="hint">Alles is optioneel; attributen in het Engels, zoals in het spel.</p>
-        <form id="build-form" autocomplete="off"></form>
-      </details>
-    </div>
-  </div>
-</main>
+    <section class="card">
+      <h2>Wedstrijden van deze speler</h2>
+      <p class="hint">De laatste acht; klik op een wedstrijd voor alle cijfers.</p>
+      <div id="tbl-player-matches"><div class="skel tall"></div></div>
+    </section>
+  </main>
 </div>
 <div id="tooltip" class="tooltip" hidden></div>
 <script src="common.js"></script>

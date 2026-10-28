@@ -57,7 +57,7 @@ function futFrame(photo, uid) {
     <path d="${FUT_SHAPE}" fill="url(#${id('bg')})" stroke="url(#${id('gold')})" stroke-width="2.2" ${inset(0.952, 0.966)}/>
     <g clip-path="url(#${id('clip')})">
       <rect width="300" height="430" fill="url(#${id('sheen')})"/><rect width="300" height="430" fill="url(#${id('dots')})"/>
-      ${photo ? `<g mask="url(#${id('photo-mask')})"><rect x="0" y="0" width="300" height="250" style="fill:var(--t-photo)"/><image href="${photo}" x="34" y="52" width="240" height="198" preserveAspectRatio="xMaxYMin slice"/></g>` : ''}
+      ${photo ? `<g mask="url(#${id('photo-mask')})"><rect x="0" y="0" width="300" height="250" style="fill:var(--t-photo)"/><image class="fut-img" href="${photo}" x="34" y="52" width="240" height="198" preserveAspectRatio="xMaxYMin slice"/><rect class="fut-skel" x="74" y="60" width="190" height="180" rx="14"/></g>` : ''}
     </g>
   </svg>`;
 }
@@ -130,31 +130,27 @@ function cardOf(name) {
 
 function render(name) {
   const el = $('#player-hero'); if (!el || !DATA) return;
-  const { html, rows, career, arch, rating, g, a } = cardOf(name);
-  const info = ARCHETYPE_INFO[arch], prof = ARCHETYPE_PROFILE[arch];
-
-  // Builds die gespeeld zijn, laatst gespeelde voorop.
-  const used = {}; for (const r of rows) if (r.p.archetypeId) used[r.p.archetypeId] = (used[r.p.archetypeId] || 0) + 1;
-  const builds = Object.entries(used).sort((x, y) => (Number(y[0]) === arch) - (Number(x[0]) === arch) || y[1] - x[1]);
+  const { html, rows } = cardOf(name);
   const last5 = rows.slice(-5).map(r => r.m);
 
-  const detail = (label, value) => value ? `<div class="pc-row"><dt>${label}</dt><dd>${value}</dd></div>` : '';
+  // Onder de kaart alleen de vorm (laatste vijf uitslagen); de rest staat op de kaart of in de cijfers.
   el.innerHTML = `<div class="pc-wrap">
     ${html}
-    <dl class="pc-details">
-      ${detail('Pro', career ? `${esc(career.proName)}${career.proHeight ? ` · ${career.proHeight} cm` : ''}` : '')}
-      ${detail('Taak', info ? `${prof.task.charAt(0).toUpperCase() + prof.task.slice(1)}.` : '')}
-      ${detail('Builds', builds.map(([id, n]) => `<span class="pc-badge ${Number(id) === arch ? 'on' : ''}">${archName(id)} <small>${Number(id) === arch ? 'laatst · ' : ''}${n}×</small></span>`).join(' '))}
-      ${detail('Signature', info ? info.signature : '')}
-      ${detail('Vorm', last5.length ? pills(last5) : '')}
-      ${detail('Gevolgd', rows.length ? `${rows.length} wedstrijden · ${g} goals · ${a} assists · rating ${rating === null ? '–' : rating.toFixed(2)} <small>in deze app</small>` : '')}
-    </dl>
+    ${last5.length ? `<div class="pc-form" title="Laatste ${last5.length} wedstrijden">${pills(last5)}</div>` : ''}
   </div>`;
+  reveal(el);
+}
+
+// Foto's laten verschijnen zodra ze geladen zijn (fade); tot die tijd pulseert een vlak. Na 2 s komt een foto hoe dan ook (css).
+function reveal(root) {
+  for (const img of root.querySelectorAll('image.fut-img:not(.on)')) {
+    const i = new Image(); i.onload = i.onerror = () => img.classList.add('on'); i.src = img.getAttribute('href');
+  }
 }
 
 // tier(name): { tier, level, growth } voor sorteren en samenvattingen (coach-logica §9c). TIER_RANK: hoger is beter.
 const TIER_RANK = { top: 2, zwart: 1, goud: 0 };
 // tierOf(rows): de tier op een eerder moment (rows = [{ m, p }] tot dan, zoals in cardOf). photo(name): de foto die bij de huidige vorm hoort, of null.
 // portrait(name): altijd de gewone portretfoto, voor rondjes (een gezicht is daar herkenbaarder dan een actiefoto).
-window.PlayerCard = { load: () => fetch(API.photos).then(r => r.json()).then(p => { PHOTOS = p || {}; }), render, html: name => cardOf(name).html, tier: name => cardOf(name).tier, tierOf, photo: name => photoOf(name, cardOf(name).tier.tier), portrait: name => PHOTOS[slugOf(name)] || null, TIER_RANK };
+window.PlayerCard = { load: () => fetch(API.photos).then(r => r.json()).then(p => { PHOTOS = p || {}; }), render, reveal, html: name => cardOf(name).html, tier: name => cardOf(name).tier, tierOf, photo: name => photoOf(name, cardOf(name).tier.tier), portrait: name => PHOTOS[slugOf(name)] || null, TIER_RANK };
 })();

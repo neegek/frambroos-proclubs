@@ -502,7 +502,7 @@ function context(name, matchIds) {
   return { res, scope, rows, arch, ctx: ballContext(res, prof) };
 }
 
-$('#build-form').addEventListener('submit', save);
+$('#build-form')?.addEventListener('submit', save); // het formulier staat voorlopig niet op de pagina (coach-logica §9a)
 window.BuildTab = {
   load: () => fetch(API.builds).then(r => r.json()).then(x => { BUILDS = x || {}; }),
   show, context,

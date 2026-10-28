@@ -213,6 +213,7 @@ function render() {
   formChart($('#chart-form'), ms);
   const latest = newsArticles()[0];
   $('#news').innerHTML = latest ? newsCard(latest, { lead: true }) : '<p class="empty">Nog geen nieuws: speel een avond, dan schrijft het zichzelf.</p>';
+  PlayerCard.reveal($('#news'));
   $('#results').innerHTML = ms.slice(-4).reverse().map(m => matchCard(m, { own: DATA.snapshot?.skillRating })).join('') || '<p class="muted">Nog geen wedstrijden.</p>';
   renderRanking(playerTotals(ms));
 
@@ -221,6 +222,7 @@ function render() {
     .sort((a, b) => PlayerCard.TIER_RANK[b.t.tier] - PlayerCard.TIER_RANK[a.t.tier] || (b.t.level ?? 0) - (a.t.level ?? 0) || (b.m.gamesPlayed || 0) - (a.m.gamesPlayed || 0));
   $('#members').innerHTML = members.map(({ m }) => `<a class="member" href="spelers.html#${encodeURIComponent(m.name)}">
       <span class="fut-mini">${PlayerCard.html(m.name)}</span><span class="member-tag">${esc(proName(m.name))}</span></a>`).join('');
+  PlayerCard.reveal($('#members'));
 }
 
 // Uitlegscherm van een ranglijst: sluiten met de knop, Esc of een tik naast het scherm.

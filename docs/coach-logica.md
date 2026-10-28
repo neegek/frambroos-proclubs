@@ -22,6 +22,10 @@ code.** De code verwijst hiernaar. Zo blijft het advies consistent en hoeft niet
 
 ## 2. Data: wat er is en wat niet
 
+**AI-spelers**: EA geeft per wedstrijd alleen de menselijke spelers; `aggregate` is precies de som van die spelers
+(gecontroleerd op 28 oktober 2026 over 24 clubwedstrijden). Van AI-spelers is er dus niets, behalve indirect: de
+clubscore min de goals van de mensen zijn goals van AI (of eigen doelpunten). Geen assists, ratings of andere cijfers.
+
 - Bron: onofficiële EA Pro Clubs-API, maximaal 10 wedstrijden per type. De verzamelaar draait 's avonds (zie
   `docs/trigger.md`).
 - Per speler per wedstrijd: grove positie (keeper, verdediger, middenvelder, aanvaller), build (`archetypeid` 1–13),
@@ -290,11 +294,15 @@ Daarnaast *Positiespel en keuzes* en *Al sterk*.
   overig: "Voetbal is simpel, maar het moeilijkste wat er is, is simpel voetballen."
 - **Wedstrijd**: uitslag, sterkte en mensen van de tegenstander; verloop op basis van kansen; beste speler. Niet meer:
   het verschil met normaal.
-- **Speler, algemeen**: rol en kenmerk, en de vorm van de laatste vijf wedstrijden (in woorden: in topvorm, in vorm,
-  op het eigen niveau, of een mindere reeks; de regels staan in §9c). De *rol* hier is de
-  rol die uit de data blijkt (aangever, afmaker, spelmaker, ballenafpakker, dribbelaar, rustige kracht), op basis van de
-  sterkste punten binnen het team. Die kan afwijken van de gekozen build; dat is informatief, geen fout.
-  Niet meer: wanneer het het best gaat en patronen (verbanden, §9d).
+- **Speler, algemeen** (sinds 28 oktober 2026, twee of drie zinnen, geen afgeleide "rollen" meer):
+  1. **Wie en wat**: de naam van de pro, de laatst gespeelde build en de linie, en wat die in de gekozen periode
+     opleverde, in gewone woorden met hooguit twee getallen. Aanval en middenveld: goals en assists. Verdediging:
+     veroverde ballen per wedstrijd en hoe vaak de nul werd gehouden. Keeper: reddingen en de nul.
+     Voorbeeld: "Terry Yaki speelt als Magician in de aanval: 24 goals en 23 assists in 39 wedstrijden."
+  2. **Vorm** van de laatste vijf (§9c): in topvorm, in vorm, op het eigen niveau, of een mindere reeks.
+  3. Alleen als het er echt uitspringt: het ene waarin deze speler **de beste van het team** is (plek 1, minstens
+     25 % boven het teamgemiddelde), in gewone taal ("Niemand in het team speelt meer tegenstanders uit."). Anders
+     geen derde zin. Nooit een zwak punt in de samenvatting: dat staat in de cijfers.
 - **Speler, advies**: gekozen archetype met zijn taak (§2a), speelstijl, grootste winst, waar op te bouwen,
   positiespel. Bij een ander archetype dan het laatst gespeelde zegt de eerste zin dat.
 
@@ -366,12 +374,26 @@ Geen reeksen: die staan al in de rondjes bovenaan.
 - **Leden**: elk lid als spelerskaart (§9c), **gesorteerd op vorm**: eerst topvorm, dan in vorm, dan de rest; binnen
   een tier op de rating van de laatste vijf, dan op aantal wedstrijden.
 
-**Spelerspagina, tab Algemeen** (sinds 27 oktober 2026, *less is more*): in één blik te lezen. Van boven naar
-beneden: de spelerskaart; de samenvatting (één alinea: rol en vorm); **drie cijfers** over de gekozen periode (goals
-per wedstrijd, assists per wedstrijd, winstpercentage met deze speler erbij); de laatste acht wedstrijden. Alles wat
-meer wil weten staat achter één knop **Meer cijfers** (ingeklapt): Highlights en precisie, Frambroos-index met
-onderdelen, resultaat met deze speler, *Aan de bal in context* (§4a) en *Sterk en zwak*. Uitbreiden gebeurt daar, of
-in de tabbladen Vorm en Advies; het eerste scherm blijft vier dingen.
+**Spelerspagina** (sinds 28 oktober 2026, zonder tabbladen): één pagina, van boven naar beneden:
+1. De spelerskaart, met daaronder alleen de **vorm** als rondjes (laatste vijf uitslagen). Geen lijst met pro, taak,
+   builds en signature meer: wat erop staat, staat op de kaart; de builds staan in de cijfers.
+2. De samenvatting (hierboven) met de **drie cijfers** over de gekozen periode (goals per wedstrijd, assists per
+   wedstrijd, winstpercentage met deze speler erbij).
+3. **Cijfers**: één lijst met alles wat voor een speler telt, in vier groepen, elk als totaal met per wedstrijd
+   ernaast (percentages met de breuk). *Algemeen*: wedstrijden, minuten per wedstrijd, rating, Frambroos-index,
+   man of the match, builds gespeeld (met aantal, laatst gespeelde eerst). *Aanvallen*: goals, assists, tweede
+   assists, schoten, conversie, dribbels, tegenstanders uitgespeeld. *Passen*: passes gelukt van pogingen,
+   steekpasses, aandeel vooruit. *Verdedigen*: balwinst, onderscheppingen, tackles gewonnen van pogingen, de nul
+   gehouden; voor keepers ook reddingen. *Discipline*: balverlies, uit positie, overtredingen, kaarten. Geen oordeel
+   erbij; alleen wat EA telt (§2 en docs/event-codes.md).
+4. De laatste acht wedstrijden, de rest achter een knop.
+Het advies (§8), *Aan de bal in context* (§4a), de vormgrafiek per sessie en het buildformulier staan voorlopig niet
+op de pagina; de code blijft, zodat ze terug kunnen als het eerste scherm klaar is.
+
+**Laden**: elke pagina toont meteen de opbouw met grijze, zacht pulserende vlakken op de plek van kaart, tekst en
+lijsten tot de data er is, en een dun bewegend lijntje bovenaan zolang er wordt geladen. Foto's op de kaart komen
+met een korte fade tevoorschijn, met tot die tijd een pulserend vlak; na twee seconden verschijnt een foto hoe dan
+ook.
 
 **Sessies** begint met een kaart per avond, nieuwste eerst (geïnspireerd op de sessiekaart van FC Clubs): de datum,
 de uitslag groot als W-G-V, en drie cijfers: doelpunten, punten per wedstrijd (groen bij ≥ 0,3 boven het eigen

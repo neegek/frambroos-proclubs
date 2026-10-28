@@ -156,6 +156,7 @@ function render() {
   const top = prow.filter(r => r.rH !== null).slice(0, 3);
   $('#s-podium').innerHTML = top.map((r, i) => `<a class="podium-card p${i + 1}" href="spelers.html#${encodeURIComponent(r.name)}" title="${esc(proName(r.name))}: rating ${f2(r.rH)} deze avond">
       <span class="podium-rank">${i + 1}</span><span class="fut-mini">${PlayerCard.html(r.name)}</span><span class="podium-rating">${f2(r.rH)}${r.mom ? ' <span class="crown" title="Man of the match">♛</span>' : ''}</span></a>`).join('');
+  PlayerCard.reveal($('#s-podium'));
   $('#s-players').innerHTML = `<div class="pcards">${prow.map(r => `<a class="pcard" href="spelers.html#${encodeURIComponent(r.name)}">
     <div class="pcard-head"><span class="pcard-name">${esc(proName(r.name))}${r.mom ? ' <span class="crown" title="Man of the match">♛</span>' : ''}</span><span class="pcard-rating">${f2(r.rH)}</span></div>
     <div class="pcard-sub">${r.n} ${r.n === 1 ? 'wedstrijd' : 'wedstrijden'} · normaal ${f2(r.rT)} ${r.d === null ? '' : residCell(r.d)}</div>

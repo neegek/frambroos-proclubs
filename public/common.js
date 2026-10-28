@@ -317,6 +317,11 @@ function filtered() {
 
 // ---------- laden ----------
 async function loadData() {
+  // Zolang de data laadt: een dun lijntje bovenaan en pulserende vlakken (html.loading, .skel in style.css).
+  document.documentElement.classList.add('loading');
+  try { return await loadDataInner(); } finally { document.documentElement.classList.remove('loading'); }
+}
+async function loadDataInner() {
   // Site: bij elke verversing de nieuwste data, ook langs de cache van GitHub Pages heen.
   const res = await fetch(STATIC ? `${API.data}?t=${Date.now()}` : API.data, { cache: STATIC ? 'no-store' : 'default' });
   DATA = await res.json();
