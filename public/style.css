@@ -274,8 +274,20 @@ td.split small, .split small { color: var(--muted); }
 .fut-col div { display: grid; grid-template-columns: 48px 1fr; align-items: baseline; gap: 6px; line-height: 1.25; }
 .fut-col b { font-size: 19px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; text-align: right; }
 .fut-col span { font-size: 12px; font-weight: 700; color: var(--t-muted); letter-spacing: 0.08em; }
-.pc-form { display: flex; justify-content: center; }
-.pc-form .pill { min-width: 26px; height: 26px; }
+.pc-form { display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pc-form-date { font-size: 12px; color: var(--muted); }
+/* Reeks van één speler: per wedstrijd de rating in een rondje in de kleur van de uitslag (coach-logica §9c). */
+.rdots { list-style: none; margin: 0; padding: 0; display: flex; gap: 6px; flex-wrap: wrap; }
+.rdots .tl-dot { width: 34px; height: 34px; font-family: var(--num-font); font-size: 11.5px; letter-spacing: -0.03em; text-decoration: none; }
+a.tl-dot:hover { transform: translateY(-2px); }
+/* Spelers deze sessie: sessiekaart klein, naam, rating en de reeks. */
+.splayers { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 12px; }
+.sp-item { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: center; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--surface-2); border: 1px solid var(--border); }
+.sp-item .fut-mini { --s: 0.34; }
+.sp-info { display: grid; gap: 6px; min-width: 0; }
+.sp-info .pcard-name { text-decoration: none; color: inherit; }
+.sp-info .pcard-name:hover { text-decoration: underline; }
+.sp-rating { font-family: var(--num-font); font-weight: 500; font-size: 18px; color: var(--ink); margin-right: 6px; }
 /* Laden: dun bewegend lijntje bovenaan zolang de data laadt, en grijze pulserende vlakken op de plek van de inhoud. */
 html.loading body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 60; background: linear-gradient(90deg, transparent 0%, var(--brand) 50%, transparent 100%); background-size: 40% 100%; animation: loadbar 1.1s linear infinite; }
 @keyframes loadbar { 0% { background-position: -40% 0; } 100% { background-position: 140% 0; } }

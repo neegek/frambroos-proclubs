@@ -17,12 +17,12 @@ function articleFor(sess, latest) {
   const perfs = night.flatMap(m => m.players.map(p => ({ m, p })));
   const c = [];
 
-  // Topvorm: wie die avond de blauwe kaart kreeg en hem daarvoor niet had.
+  // Topvorm: wie die avond de blauwe kaart kreeg (vorm per sessie, §9c) en hem daarvoor niet had; met de sessiekaart.
   const top = names.map(n => ({ n, now: PlayerCard.tierOf(rowsOf(upTo, n)), was: PlayerCard.tierOf(rowsOf(before, n)) }))
     .filter(x => x.now.tier === 'top' && x.was.tier !== 'top').sort((a, b) => b.now.level - a.now.level);
   if (top.length) c.push({ tag: 'Topvorm', title: `${joinAnd(top.map(x => esc(proName(x.n))))} in topvorm`,
-    body: `${joinAnd(top.map(x => `${esc(proName(x.n))} ${f2(x.now.level)}`))} gemiddeld over de laatste vijf wedstrijden, met minstens drie zeges.`,
-    visual: latest ? `<div class="news-cards">${top.slice(0, 3).map(x => `<span class="fut-mini">${PlayerCard.html(x.n)}</span>`).join('')}</div>` : bigNum(f1(top[0].now.level), 'gemiddeld') });
+    body: `${joinAnd(top.map(x => `${esc(proName(x.n))} ${f2(x.now.level)}`))} gemiddeld deze avond, en het team won er het grootste deel van.`,
+    visual: `<div class="news-cards">${top.slice(0, 3).map(x => `<span class="fut-mini">${PlayerCard.html(x.n, { session: sess.id })}</span>`).join('')}</div>` });
 
   // Uitschieter: de hoogste rating van de avond, vanaf 9,0.
   const peak = perfs.filter(x => x.p.rating !== null).sort((a, b) => b.p.rating - a.p.rating)[0];

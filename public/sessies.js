@@ -34,7 +34,7 @@ function renderCards() {
         </span>
       </span>
       <span class="scard-line" aria-label="Uitslagen op volgorde">${ms.map(m => `<span class="tl-item" title="${esc(m.opponent.name)}"><span class="tl-dot ${m.result}">${letter(m.result)}</span>${kitShirt(m.opponent.kit, m.opponent.name)}<b>${m.goals}-${m.goalsAgainst}</b></span>`).join('')}</span>
-      ${mvp ? `<span class="scard-mvp"><span class="mvp-avatar" data-tier="${PlayerCard.tier(mvp.n).tier}">${photo ? `<img src="${photo}" alt="">` : PERSON}</span><span class="mvp-who"><small>Speler van de sessie</small><b>${esc(proName(mvp.n))}</b></span><span class="mvp-stats"><b>${f2(mvp.v)}</b><small>${mvp.g} G · ${mvp.a} A${mvp.mom ? ` · ${mvp.mom}× MOTM` : ''}</small></span></span>` : ''}
+      ${mvp ? `<span class="scard-mvp"><span class="mvp-avatar" data-tier="${PlayerCard.sessionTier(mvp.n, s.id).tier}">${photo ? `<img src="${photo}" alt="">` : PERSON}</span><span class="mvp-who"><small>Speler van de sessie</small><b>${esc(proName(mvp.n))}</b></span><span class="mvp-stats"><b>${f2(mvp.v)}</b><small>${mvp.g} G · ${mvp.a} A${mvp.mom ? ` · ${mvp.mom}× MOTM` : ''}</small></span></span>` : ''}
     </a>`;
   }).join('');
 }
@@ -152,15 +152,21 @@ function render() {
   $('#s-summary').innerHTML = sum.html;
   $('#s-quote').innerHTML = `„${sum.quote}” <small>— Johan Cruijff</small>`;
   $('#s-share').onclick = () => shareSession(ms, sm, prow, $('#s-summary').innerText);
-  // Top drie als kaarten, de beste vooraan.
+  // Top drie als sessiekaarten (tier, foto en cijfers van deze avond, coach-logica §9c), de beste vooraan.
   const top = prow.filter(r => r.rH !== null).slice(0, 3);
   $('#s-podium').innerHTML = top.map((r, i) => `<a class="podium-card p${i + 1}" href="spelers.html#${encodeURIComponent(r.name)}" title="${esc(proName(r.name))}: rating ${f2(r.rH)} deze avond">
-      <span class="podium-rank">${i + 1}</span><span class="fut-mini">${PlayerCard.html(r.name)}</span><span class="podium-rating">${f2(r.rH)}${r.mom ? ' <span class="crown" title="Man of the match">♛</span>' : ''}</span></a>`).join('');
+      <span class="podium-rank">${i + 1}</span><span class="fut-mini">${PlayerCard.html(r.name, { session: s.id, key: '-p' })}</span><span class="podium-rating">${f2(r.rH)}${r.mom ? ' <span class="crown" title="Man of the match">♛</span>' : ''}</span></a>`).join('');
   PlayerCard.reveal($('#s-podium'));
-  $('#s-players').innerHTML = `<div class="pcards">${prow.map(r => `<a class="pcard" href="spelers.html#${encodeURIComponent(r.name)}">
-    <div class="pcard-head"><span class="pcard-name">${esc(proName(r.name))}${r.mom ? ' <span class="crown" title="Man of the match">♛</span>' : ''}</span><span class="pcard-rating">${f2(r.rH)}</span></div>
-    <div class="pcard-sub">${r.n} ${r.n === 1 ? 'wedstrijd' : 'wedstrijden'} · normaal ${f2(r.rT)} ${r.d === null ? '' : residCell(r.d)}</div>
-    <div class="pcard-stats"><span><b>${r.g}</b> goals</span><span><b>${r.a}</b> assists</span><span><b>${r.mom}</b> MOTM</span></div></a>`).join('')}</div>`;
+  // Per speler de sessiekaart, de rating van de avond tegenover normaal, en de reeks met per wedstrijd de rating.
+  $('#s-players').innerHTML = `<div class="splayers">${prow.map(r => {
+    const rows = ms.map(m => ({ m, p: m.players.find(p => p.name === r.name) })).filter(x => x.p);
+    return `<div class="sp-item">
+      <a class="fut-mini" href="spelers.html#${encodeURIComponent(r.name)}" aria-label="${esc(proName(r.name))}">${PlayerCard.html(r.name, { session: s.id, key: '-l' })}</a>
+      <div class="sp-info"><div class="pcard-head"><a class="pcard-name" href="spelers.html#${encodeURIComponent(r.name)}">${esc(proName(r.name))}</a>${r.mom ? ' <span class="crown" title="Man of the match">♛</span>' : ''}</div>
+        <div class="pcard-sub"><b class="sp-rating">${f2(r.rH)}</b> normaal ${f2(r.rT)} ${r.d === null ? '' : residCell(r.d)}</div>
+        ${ratingDots(rows)}</div></div>`;
+  }).join('')}</div>`;
+  PlayerCard.reveal($('#s-players'));
 }
 
 addEventListener('resize', () => DATA && render());

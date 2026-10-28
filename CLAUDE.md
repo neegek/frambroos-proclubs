@@ -131,9 +131,14 @@ alleen in Cloudflare.
   build) en onderaan een klein label bij *in vorm* of *topvorm*. Ernaast alleen wat níét op de kaart staat (pro,
   taak, builds, signature, vorm, carrière). Geen dubbele info:
   wat op de kaart staat, komt niet terug in tegels of teksten eronder. Geen clubnaam- of FC27-teksten op de kaart.
-  Dezelfde kaart staat klein in de ledenrij op het Clubhouse en in de top drie van een sessie (`PlayerCard.html(naam)`
+  De **vorm is per sessie** (coach-logica §9c): de tier van nu komt uit de laatste sessie met minstens drie eigen
+  wedstrijden, niet uit de laatste vijf. Dezelfde kaart staat klein in de ledenrij op het Clubhouse (`PlayerCard.html(naam)`
   in een `.fut-mini`); `index.html` en `sessies.html` laden daarvoor `playercard.js`. `PlayerCard.tier(naam)` geeft
-  de tier voor sorteren en samenvattingen.
+  de tier voor sorteren en samenvattingen. Per sessie heeft elke speler een **sessiekaart**
+  (`PlayerCard.html(naam, { session })`: tier, foto en zes cijfers van die avond), in de top drie en bij *Spelers deze
+  sessie*. Waar het over één speler gaat, staat de vorm als **reeks van één sessie** met per wedstrijd de rating
+  (`ratingDots(rows)` uit `public/common.js`): onder de kaart op de spelerspagina en per speler bij een geopende sessie.
+  Alleen de hero op het Clubhouse houdt de laatste tien uitslagen van de club.
 - Wedstrijden is alleen de lijst (eerst twintig, de rest achter een knop); een wedstrijd opent op `/wedstrijd.html?id=<matchId>` (een laag dieper) met
   "Terug naar wedstrijden" bovenaan. Link naar wedstrijden altijd via dat adres.
 
