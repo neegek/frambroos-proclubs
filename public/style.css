@@ -778,3 +778,19 @@ details.build-form-card[open] > summary { margin-bottom: 12px; }
 .rank-card li b { font-family: var(--num-font); font-weight: 500; color: var(--brand-text); }
 .rank-card li:first-child b { color: var(--pos-text); }
 .crown { color: var(--brand-text); font-size: 13px; margin-left: 4px; }
+
+/* Radar van de avond (sessie.html, coach-logica §9a): per speler een vlak in de vaste spelerskleur. */
+.radar-wrap { display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 12px 24px; align-items: center; }
+.radar-svg { width: 100%; height: auto; display: block; overflow: visible; font: 12px system-ui, -apple-system, "Segoe UI", sans-serif; }
+.radar-ring { fill: none; stroke: var(--grid); stroke-width: 1; }
+.radar-axis { stroke: var(--grid); stroke-width: 1; }
+.radar-label { fill: var(--ink-2); font-weight: 560; }
+.radar-shape { fill-opacity: 0.08; stroke-width: 2; stroke-linejoin: round; transition: fill-opacity .15s, stroke-opacity .15s; }
+.radar-shape.on { fill-opacity: 0.3; stroke-width: 3; }
+.radar-shape.dim { fill-opacity: 0.02; stroke-opacity: 0.25; }
+.radar-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.radar-chip { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--ink); font: inherit; font-size: 13.5px; cursor: pointer; }
+.radar-chip i { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.radar-chip.on { border-color: var(--brand); background: var(--brand-soft); font-weight: 600; }
+.radar-line { margin: 12px 0 0; font-size: 13.5px; color: var(--ink-2); }
+@media (max-width: 760px) { .radar-wrap { grid-template-columns: minmax(0, 1fr); } .radar { max-width: 420px; justify-self: center; width: 100%; } }

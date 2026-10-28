@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sessie · Frambroos Coach</title>
+<link rel="icon" href="crest.png">
+<meta name="theme-color" content="#090b0d">
+<script>try { if (localStorage.getItem('theme') === 'light') document.documentElement.dataset.theme = 'light'; } catch (e) {}</script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="content">
+    <div class="session-detail" id="session-detail">
+      <a class="back-link" href="sessies.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Terug naar sessies</a>
+      <section class="card sess-head">
+        <div class="sess-top">
+          <div><h2 id="s-title">…</h2><div class="meta" id="s-meta"></div></div>
+          <button type="button" class="btn-ghost" id="s-share" title="Deel deze avond als afbeelding">Delen</button>
+        </div>
+        <div class="sess-body">
+          <div class="podium" id="s-podium" aria-label="Top drie van de avond"></div>
+          <div><p class="summary" id="s-summary"></p><p class="cruijff" id="s-quote"></p></div>
+        </div>
+        <div class="sess-figs" id="s-figs"></div>
+      </section>
+      <section class="card">
+        <div class="card-head"><div><h2>Radar van de avond</h2><p class="hint">Per speler: hoe goed deze avond was tegenover al onze eigen avonden. Het midden is slecht, de rand de beste avond ooit.</p></div></div>
+        <div class="radar-wrap"><div id="s-radar" class="radar"></div><div><div class="radar-chips" id="s-radar-chips" role="group" aria-label="Speler uitlichten"></div><p class="radar-line" id="s-radar-line"></p></div></div>
+      </section>
+      <section class="card">
+        <h2>Wedstrijden</h2>
+        <p class="hint">Op volgorde van spelen. Tik op een wedstrijd voor het verhaal en de spelers.</p>
+        <div class="match-cards" id="s-matches"></div>
+      </section>
+      <section class="card">
+        <h2>Spelers deze sessie</h2>
+        <p class="hint">Rating deze avond tegenover het eigen gemiddelde. De kroon is man of the match.</p>
+        <div id="s-players"></div>
+      </section>
+    </div>
+
+  </main>
+</div>
+<div id="tooltip" class="tooltip" hidden></div>
+<script src="common.js"></script>
+<script src="archetypes.js"></script>
+<script src="frambroos-index.js"></script>
+<script src="playercard.js"></script>
+<script src="sessie.js"></script>
+</body>
+</html>

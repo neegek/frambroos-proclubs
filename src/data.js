@@ -81,6 +81,13 @@ export function buildData(db = realDb) {
       opponentPlayers: r.opponent_id ? playersFor.all(r.match_id, r.opponent_id).map(mapPlayer) : [],
     };
   });
+  // AI-spelers (docs/ea-data.md): EA geeft van hen niets per speler. Wel af te leiden: hoeveel er meededen (11 min de
+  // mensen) en de doelpunten die niet van een mens kwamen (clubscore min de goals van de mensen: AI of eigen doelpunt).
+  for (const m of matches) {
+    const human = list => list.reduce((a, p) => a + (p.goals || 0), 0);
+    m.ai = { players: Math.max(0, 11 - m.players.length), goals: Math.max(0, m.goals - human(m.players)),
+      opponentPlayers: m.opponent.id ? Math.max(0, 11 - m.opponentPlayers.length) : null, opponentGoals: m.opponent.id ? Math.max(0, m.goalsAgainst - human(m.opponentPlayers)) : null };
+  }
   // Tenues en clubkleur uit de meest recente wedstrijd (EA geeft kleuren als decimale RGB).
   const lastRaw = db.prepare('SELECT m.raw FROM matches m JOIN match_clubs mc ON mc.match_id = m.match_id AND mc.club_id = ? ORDER BY m.ts DESC LIMIT 1').get(clubId);
   let kits = null;
