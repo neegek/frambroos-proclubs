@@ -88,7 +88,7 @@ alleen in Cloudflare.
   `public/common.js` in een `.match-cards`-raster (op telefoon horizontaal swipebaar), behalve op de pagina
   Wedstrijden: die is één lijst van `matchRow`-regels, nieuwste eerst, met de beste speler per wedstrijd. Sessies
   begint met een `.scard` per avond (datum, W-G-V, goals, punten per wedstrijd, team rating, tijdlijn met
-  uitslagen en shirts, speler van de sessie met kleine foto of icoon via `PlayerCard.photo` in een rondje in de kleuren van de vorm; nergens de duur van een avond); een tik opent
+  uitslagen en shirts, speler van de sessie met de portretfoto (`PlayerCard.portrait`, ook bij in vorm) of een icoon in een rondje in de kleuren van de vorm; nergens de duur van een avond); een tik opent
   `sessies.html#<id>` met "Terug naar sessies". Een geopende sessie begint met één kop
   met vijf vaste cijfers (`.sess-figs`, coach-logica §9a) en een deelknop; de spelerspagina heeft drie kaartjes
   (Highlights met per wedstrijd en precisie naast elkaar, Frambroos-index met balkjes, Resultaat met deze speler); de ranglijst op het Clubhouse

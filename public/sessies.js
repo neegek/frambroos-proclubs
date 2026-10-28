@@ -24,7 +24,7 @@ function renderCards() {
     const ppg = ppgOf(ms), ppgCls = normal === null ? '' : ppg >= normal + 0.3 ? 'good' : ppg <= normal - 0.3 ? 'bad' : '';
     const tone = ppg >= 2 ? 'good' : ppg < 1 ? 'bad' : '';
     const team = avg(ms.flatMap(m => m.players.map(p => p.rating)).filter(v => v !== null));
-    const mvp = bestOfNight(ms), photo = mvp && PlayerCard.photo(mvp.n);
+    const mvp = bestOfNight(ms), photo = mvp && PlayerCard.portrait(mvp.n); // rondje: altijd het portret; rand en achtergrond volgen de vorm
     return `<a class="scard ${tone}" href="#${s.id}">
       <span class="scard-top">
         <span class="scard-head"><span class="scard-date">${CAL}${cap(longDate(ms[0].ts))}</span></span>

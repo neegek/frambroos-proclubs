@@ -379,7 +379,7 @@ normaal, rood bij ≥ 0,3 eronder) en de gemiddelde rating van het team. Daarond
 met de uitslag, het shirt van de tegenstander en de score. Onderaan de **speler van de sessie**: de hoogste gemiddelde
 rating onder wie minstens de helft van de wedstrijden speelde, met een kleine foto (zonder foto een icoon) in een
 rondje met de rand- en achtergrondkleur van de huidige vorm van die speler (goud, zwart-goud of blauw, §9c) en
-dezelfde foto als op de kaart (bij in vorm en topvorm de vormfoto), goals en
+altijd de portretfoto (geen vormfoto: in een klein rondje is een gezicht herkenbaarder), goals en
 assists. Geen duur van de avond: die zegt niets. Het kopvlak kleurt zacht mee met de avond: blauw bij ≥ 2 punten per wedstrijd, rood bij < 1. Een tik opent de
 sessie (`sessies.html#<id>`) met "Terug naar sessies".
 
