@@ -155,5 +155,6 @@ function render(name) {
 // tier(name): { tier, level, growth } voor sorteren en samenvattingen (coach-logica §9c). TIER_RANK: hoger is beter.
 const TIER_RANK = { top: 2, zwart: 1, goud: 0 };
 // tierOf(rows): de tier op een eerder moment (rows = [{ m, p }] tot dan, zoals in cardOf). photo(name): de foto die bij de huidige vorm hoort, of null.
-window.PlayerCard = { load: () => fetch(API.photos).then(r => r.json()).then(p => { PHOTOS = p || {}; }), render, html: name => cardOf(name).html, tier: name => cardOf(name).tier, tierOf, photo: name => photoOf(name, cardOf(name).tier.tier), TIER_RANK };
+// portrait(name): altijd de gewone portretfoto, voor rondjes (een gezicht is daar herkenbaarder dan een actiefoto).
+window.PlayerCard = { load: () => fetch(API.photos).then(r => r.json()).then(p => { PHOTOS = p || {}; }), render, html: name => cardOf(name).html, tier: name => cardOf(name).tier, tierOf, photo: name => photoOf(name, cardOf(name).tier.tier), portrait: name => PHOTOS[slugOf(name)] || null, TIER_RANK };
 })();
