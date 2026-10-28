@@ -24,7 +24,12 @@ Nieuw veld tonen: eerst hier kijken of het er al is, dan `src/data.js`.
 - **Clublogo's van tegenstanders.** EA geeft alleen een `crestAssetId` (bijv. 99161001 voor Frambroos). Acht bekende
   adresvormen van EA's beeldservers getest: allemaal 404 of 403. De logo's zitten in het spel, niet op het web.
   Ons eigen logo is daarom een eigen bestand (`public/crest.png`). Het id bewaren we wel (`club.crestAssetId`).
-- Formatie, exacte positie, attribuutpunten, AI-spelers, fans: zie coach-logica §2.
+- Formatie, exacte positie, attribuutpunten, fans: zie coach-logica §2.
+- **AI-spelers**: niets per speler (geen naam, positie, rating, assists of schoten); `aggregate` is de som van alleen
+  de mensen. Af te leiden en sinds 28 oktober 2026 per wedstrijd in `DATA` als `ai`: `players` (11 min het aantal
+  mensen), `goals` (clubscore min de goals van de mensen: doelpunten van AI óf eigen doelpunten van de tegenstander;
+  die twee zijn niet te scheiden), en hetzelfde voor de tegenstander (`opponentPlayers`, `opponentGoals`). Nog niet in
+  de app.
 - De skill rating van een tegenstander op de dag zelf: EA geeft alleen de huidige.
 
 ## Wat in `DATA` staat maar nog niet in de app

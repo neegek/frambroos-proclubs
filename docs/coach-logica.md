@@ -397,28 +397,47 @@ met een korte fade tevoorschijn, met tot die tijd een pulserend vlak; na twee se
 ook.
 
 **Sessies** begint met een kaart per avond, nieuwste eerst (geïnspireerd op de sessiekaart van FC Clubs): de datum,
-de uitslag groot als W-G-V, en drie cijfers: doelpunten, punten per wedstrijd (groen bij ≥ 0,3 boven het eigen
-normaal, rood bij ≥ 0,3 eronder) en de gemiddelde rating van het team. Daaronder de tijdlijn: per wedstrijd een rondje
+de uitslag groot als W-G-V, en twee cijfers: doelpunten en de gemiddelde rating van het team. Geen punten per
+wedstrijd: de W-G-V zegt het al. Daaronder de tijdlijn: per wedstrijd een rondje
 met de uitslag, het shirt van de tegenstander en de score. Onderaan de **speler van de sessie**: de hoogste gemiddelde
 rating onder wie minstens de helft van de wedstrijden speelde, met een kleine foto (zonder foto een icoon) in een
 rondje met de rand- en achtergrondkleur van de huidige vorm van die speler (goud, zwart-goud of blauw, §9c) en
 altijd de portretfoto (geen vormfoto: in een klein rondje is een gezicht herkenbaarder), goals en
 assists. Geen duur van de avond: die zegt niets. Het kopvlak kleurt zacht mee met de avond: blauw bij ≥ 2 punten per wedstrijd, rood bij < 1. Een tik opent de
-sessie (`sessies.html#<id>`) met "Terug naar sessies".
+sessie op een eigen pagina, `sessie.html?id=<id>` (een laag dieper), met "Terug naar sessies".
 
 **Wedstrijden** is één lijst van alle wedstrijden, nieuwste eerst, niet per avond verdeeld. Per wedstrijd: datum en
 tijd, uitslag, tegenstander, score en de beste speler van de wedstrijd (hoogste EA-rating, met een kroon als die ook man of
 the match was). Eerst de laatste twintig, de rest achter een knop.
 
 **Sessiekop**: elke speelavond toont dezelfde vijf cijfers, zodat avonden op dezelfde manier te vergelijken zijn:
-wedstrijden (met W-G-V en de badge punten per wedstrijd tegenover normaal), doelsaldo (met de badge tov verwachting), passnauwkeurigheid, conversie en clean sheets, elk met "normaal"
+wedstrijden (met W-G-V), doelsaldo (met de badge tov verwachting), passnauwkeurigheid, conversie en clean sheets, elk met "normaal"
 eronder (alle andere wedstrijden). Daarnaast de **top drie van de avond** als sessiekaarten (§9c) op rating over
 deze avond, als waaier: de beste vooraan en groot, nummer twee en drie erachter en iets lager, elk met plek en rating.
 Bij nul punten heet het "hield het best stand", maar de kaarten blijven hetzelfde. Man of the match staat als kroon
 bij de speler. *Spelers deze sessie* toont per speler, op rating: de sessiekaart klein, de naam, de gemiddelde rating met het
 verschil met normaal, en de reeks van de avond met per wedstrijd de rating (§9c). Geen vergelijkingen per maat. De deelkaart (afbeelding van
-1080×1080 in thuiskleuren) toont W-G-V, punten per wedstrijd, winstpercentage, doelsaldo, uitblinker, meeste goals
+1080×1080 in thuiskleuren) toont W-G-V, winstpercentage, doelsaldo, uitblinker, meeste goals
 plus assists en de eerste twee zinnen van de samenvatting.
+
+**Radar van de avond** (op de sessiepagina, na de kop): per speler één vlak over zes assen, zodat in één beeld te zien
+is wie op welk vlak goed speelde. Elke as is een **percentiel tegenover onze eigen avonden**: de waarde van de speler
+deze avond, vergeleken met alle avonden van al onze spelers (per speler per sessie, minstens 2 wedstrijden). 50 is
+een gewone avond voor ons, 100 de beste ooit. Zo betekent "groot" ook echt "goed gespeeld", niet alleen "beter dan
+de rest vanavond". De assen:
+
+| As | Maat over de avond |
+|---|---|
+| Rating | gemiddelde EA-rating |
+| Scoren | goals per wedstrijd |
+| Creëren | assists plus tweede assists per wedstrijd |
+| Passen | passnauwkeurigheid (minstens 10 passes) |
+| Balwinst | veroverde ballen per wedstrijd (events 108–110) |
+| Duels | gewonnen tackles van de pogingen (minstens 3) |
+
+Ontbreekt een maat (te weinig pogingen), dan staat de speler daar op 0 en zegt de regel eronder "te weinig". Elke
+speler heeft zijn vaste kleur. Eronder één knop per speler; een tik licht die speler uit (de rest wordt vaag) en
+toont de echte waarden in één regel. Spelers met één wedstrijd die avond doen niet mee: één pot zegt te weinig.
 
 **Tweede assist** (EA-code 115, `second_assists`, zekerheid *waarschijnlijk*): de pass vóór de assist. EA geeft alleen
 het aantal per speler per wedstrijd, niet bij welke goal. Alleen als we in een wedstrijd precies één keer scoren, is

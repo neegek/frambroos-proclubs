@@ -11,7 +11,7 @@ function articleFor(sess, latest) {
   const weekday = new Date(end * 1000).toLocaleDateString('nl-NL', { weekday: 'long' });
   const parts = [s.W ? `${numWord(s.W)} ${s.W === 1 ? 'zege' : 'zeges'}` : '', s.D ? `${numWord(s.D)} ${s.D === 1 ? 'gelijkspel' : 'gelijke spelen'}` : '', s.L ? `${numWord(s.L)} ${s.L === 1 ? 'nederlaag' : 'nederlagen'}` : ''].filter(Boolean);
   const nightLine = `${capFirst(joinAnd(parts))} op ${weekday}, doelsaldo ${signed(gd, 0)}.`;
-  const base = { ts: end, href: `sessies.html#${sess.id}` };
+  const base = { ts: end, href: `sessie.html?id=${sess.id}` };
   const rowsOf = (list, n) => list.map(m => ({ m, p: m.players.find(p => p.name === n) })).filter(r => r.p);
   const names = [...new Set(night.flatMap(m => m.players.map(p => p.name)))];
   const perfs = night.flatMap(m => m.players.map(p => ({ m, p })));
