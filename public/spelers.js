@@ -57,10 +57,11 @@ function playerSummary(name, rows, ms, players) {
   else did = `${g} ${g === 1 ? 'goal' : 'goals'} en ${a} ${a === 1 ? 'assist' : 'assists'} in ${wed}`;
   const parts = [`${nm} ${who}: ${did}.`];
   const t = window.PlayerCard.tier(name);
-  if (t.tier === 'top') parts.push('Zit in topvorm: de laatste vijf potten op hoog niveau, en het team won er de meeste van.');
-  else if (t.tier === 'zwart') parts.push(t.level >= 7.5 ? 'Zit in vorm: de laatste vijf potten op hoog niveau.' : 'Zit in vorm: de laatste vijf potten beter dan het eigen normaal, met winst erbij.');
-  else if (t.growth !== null && t.growth <= -0.3) parts.push('De laatste vijf potten vielen wat tegen vergeleken met het eigen normaal.');
-  else if (n >= 5) parts.push('De laatste vijf potten lagen op het eigen normale niveau.');
+  // Vorm per sessie (coach-logica §9c): de laatste speelavond met minstens drie eigen potten.
+  if (t.tier === 'top') parts.push('Zit in topvorm: de laatste speelavond op hoog niveau, en het team won er de meeste potten.');
+  else if (t.tier === 'zwart') parts.push(t.level >= 7.5 ? 'Zit in vorm: de laatste speelavond op hoog niveau.' : 'Zit in vorm: de laatste speelavond beter dan het eigen normaal, met winst erbij.');
+  else if (t.growth !== null && t.growth <= -0.3) parts.push('De laatste speelavond viel wat tegen vergeleken met het eigen normaal.');
+  else if (t.session !== null) parts.push('De laatste speelavond lag op het eigen normale niveau.');
   const best = bestOfTeam(name, ms, players);
   if (best) parts.push(best.phrase);
   return parts.join(' ');

@@ -62,19 +62,29 @@ function futFrame(photo, uid) {
   </svg>`;
 }
 
-// Tier van de kaart (coach-logica §9c): twee wegen naar "in vorm", niveau of groei (rating plus winst).
+// Tier van de kaart (coach-logica §9c), per sessie: twee wegen naar "in vorm", niveau of groei (rating plus winst).
+// tierAt: de tier over één sessie (r = de rijen met rating van de speler, normaal = alle andere wedstrijden).
 const PTS = { W: 3, D: 1, L: 0 };
-function tierOf(rows) {
-  const r = rows.filter(x => x.p.rating !== null), last5 = r.slice(-5), rest = r.slice(0, -5);
-  if (last5.length < 5) return { tier: 'goud', why: '', level: avg(last5.map(x => x.p.rating)), growth: null };
-  const level = avg(last5.map(x => x.p.rating)), wins = last5.filter(x => x.m.result === 'W').length;
+function tierAt(r, sid) {
+  const here = r.filter(x => x.m.session === sid), rest = r.filter(x => x.m.session !== sid);
+  const level = here.length ? avg(here.map(x => x.p.rating)) : null;
+  if (here.length < 3) return { tier: 'goud', why: '', level, growth: null, session: sid, rows: here };
+  const wins = here.filter(x => x.m.result === 'W').length;
   const growth = rest.length >= 3
-    ? (level - avg(rest.map(x => x.p.rating))) + 0.25 * (avg(last5.map(x => PTS[x.m.result])) - avg(rest.map(x => PTS[x.m.result])))
+    ? (level - avg(rest.map(x => x.p.rating))) + 0.25 * (avg(here.map(x => PTS[x.m.result])) - avg(rest.map(x => PTS[x.m.result])))
     : null;
-  const why = `laatste 5: rating ${level.toFixed(2)}, ${wins}× gewonnen${growth !== null ? `, groei ${growth >= 0 ? '+' : ''}${growth.toFixed(2)}` : ''}`;
-  if (level >= 8 && wins >= 3) return { tier: 'top', why, level, growth };
-  if (level >= 7.5 || (growth !== null && r.length >= 8 && growth >= 0.3)) return { tier: 'zwart', why, level, growth };
-  return { tier: 'goud', why, level, growth };
+  const why = `sessie van ${dayLabel(here[0].m.ts)}: rating ${level.toFixed(2)}, ${wins} van ${here.length} gewonnen${growth !== null ? `, groei ${growth >= 0 ? '+' : ''}${growth.toFixed(2)}` : ''}`;
+  const out = { why, level, growth, session: sid, rows: here };
+  if (level >= 8 && wins / here.length >= 0.6) return { tier: 'top', ...out };
+  if (level >= 7.5 || (growth !== null && r.length >= 8 && growth >= 0.3)) return { tier: 'zwart', ...out };
+  return { tier: 'goud', ...out };
+}
+// De vorm van nu (of op een eerder moment, met rows tot dan): de laatste sessie met minstens 3 eigen wedstrijden.
+function tierOf(rows) {
+  const r = rows.filter(x => x.p.rating !== null), count = new Map();
+  for (const x of r) count.set(x.m.session, (count.get(x.m.session) || 0) + 1);
+  const sid = [...count].filter(([, n]) => n >= 3).map(([id]) => id).pop();
+  return sid === undefined ? { tier: 'goud', why: '', level: null, growth: null, session: null, rows: [] } : tierAt(r, sid);
 }
 
 // Naam op de kaart: voorletter en achternaam van de pro (P. Selie), anders de accountnaam. Eén woord blijft heel.
@@ -92,27 +102,30 @@ function lastArch(rows) { const r = [...rows].reverse().find(x => x.p.archetypeI
 // Dezelfde regel voor de kaart en voor de rondjes elders (speler van de sessie).
 const photoOf = (name, tier) => (tier !== 'goud' && PHOTOS[`${slugOf(name)}-vorm`]) || PHOTOS[slugOf(name)] || null;
 
-function cardOf(name) {
-  const rows = DATA.matches.map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p);
+// Zonder session de kaart van nu (carrièrecijfers van EA, tier van de laatste sessie); met session de sessiekaart:
+// tier, foto en zes cijfers van die avond (coach-logica §9c). key maakt de SVG-ids uniek als een kaart vaker op een pagina staat.
+function cardOf(name, { session = null, key = '' } = {}) {
+  const all = DATA.matches.map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p);
+  const rows = session === null ? all : all.filter(r => r.m.session === session);
   const career = DATA.members.find(x => x.name === name);
   const arch = lastArch(rows), info = ARCHETYPE_INFO[arch];
   const build = window.BuildTab?.get?.(name);
   const s = summarize(rows.map(r => r.m));
   const rating = avg(rows.map(r => r.p.rating).filter(v => v !== null));
   const g = rows.reduce((a, r) => a + (r.p.goals || 0), 0), a = rows.reduce((x, r) => x + (r.p.assists || 0), 0), mom = rows.reduce((x, r) => x + (r.p.mom || 0), 0);
-  const tier = tierOf(rows), photo = photoOf(name, tier.tier);
+  const tier = session === null ? tierOf(all) : tierAt(all.filter(x => x.p.rating !== null), session), photo = photoOf(name, tier.tier);
 
   // Op de kaart: face stats van de ingevulde build (als die bij het laatste archetype hoort), anders seizoenscijfers.
-  const faces = build && (!build.archetype || Number(build.archetype) === arch) && ['pac', 'sho', 'pas', 'dri', 'def', 'phy'].every(k => build[k]);
+  const faces = session === null && build && (!build.archetype || Number(build.archetype) === arch) && ['pac', 'sho', 'pas', 'dri', 'def', 'phy'].every(k => build[k]);
   const stats = faces ? [['PAC', build.pac], ['SHO', build.sho], ['PAS', build.pas], ['DRI', build.dri], ['DEF', build.def], ['PHY', build.phy]]
-    : career ? [['WED', career.gamesPlayed], ['RAT', career.ratingAve === null || career.ratingAve === undefined ? '–' : Number(career.ratingAve).toFixed(1)], ['GLS', career.goals], ['ASS', career.assists], ['MOTM', career.mom], ['WIN', `${career.winRate ?? '–'}%`]] // totalen volgens EA
+    : session === null && career ? [['WED', career.gamesPlayed], ['RAT', career.ratingAve === null || career.ratingAve === undefined ? '–' : Number(career.ratingAve).toFixed(1)], ['GLS', career.goals], ['ASS', career.assists], ['MOTM', career.mom], ['WIN', `${career.winRate ?? '–'}%`]] // totalen volgens EA
     : [['WED', rows.length], ['RAT', rating === null ? '–' : rating.toFixed(1)], ['GLS', g], ['ASS', a], ['MOTM', mom], ['WIN', `${s.winPct ?? '–'}%`]];
 
   const tierNames = { goud: 'goud', zwart: 'zwart-goud, in vorm', top: 'topvorm' };
   const shown = cardName(career, name);
   const col = list => `<div class="fut-col">${list.map(([l, v]) => `<div><b>${v}</b><span>${l}</span></div>`).join('')}</div>`;
   const html = `<div class="fut${photo ? ' has-photo' : ''}" data-tier="${tier.tier}" role="img" title="Kaart: ${tierNames[tier.tier]}${tier.why ? ` (${tier.why})` : ''}" aria-label="Spelerskaart van ${esc(name)}: overall ${career?.proOverall ?? 'onbekend'}, ${info ? info.name : ''}, ${tierNames[tier.tier]}">
-      ${futFrame(photo, slugOf(name))}
+      ${futFrame(photo, `${slugOf(name)}${session === null ? '' : `-s${session}`}${key}`)}
       <div class="fut-inner">
         <div class="fut-top">
           <div class="fut-ovr"><b>${career?.proOverall ?? '–'}</b>${arch ? `<span class="fut-archicon" title="${esc(archName(arch))}">${archIcon(arch)}</span>` : ''}<img src="crest.png" alt="" width="34" height="34">${flag(career?.proNationality)}</div>
@@ -130,13 +143,12 @@ function cardOf(name) {
 
 function render(name) {
   const el = $('#player-hero'); if (!el || !DATA) return;
-  const { html, rows } = cardOf(name);
-  const last5 = rows.slice(-5).map(r => r.m);
+  const { html, tier } = cardOf(name);
 
-  // Onder de kaart alleen de vorm (laatste vijf uitslagen); de rest staat op de kaart of in de cijfers.
+  // Onder de kaart alleen de vorm: de reeks van de sessie die de vorm bepaalt, per wedstrijd de rating (§9c).
   el.innerHTML = `<div class="pc-wrap">
     ${html}
-    ${last5.length ? `<div class="pc-form" title="Laatste ${last5.length} wedstrijden">${pills(last5)}</div>` : ''}
+    ${tier.rows.length ? `<div class="pc-form"><span class="pc-form-date">${dayLabel(tier.rows[0].m.ts)}</span>${ratingDots(tier.rows)}</div>` : ''}
   </div>`;
   reveal(el);
 }
@@ -148,9 +160,10 @@ function reveal(root) {
   }
 }
 
-// tier(name): { tier, level, growth } voor sorteren en samenvattingen (coach-logica §9c). TIER_RANK: hoger is beter.
+// tier(name): { tier, level, growth, session, rows } voor sorteren en samenvattingen (coach-logica §9c). TIER_RANK: hoger is beter.
+// html(name, { session }): de kaart van nu, of met session de sessiekaart. sessionTier(name, id): de tier over die sessie.
 const TIER_RANK = { top: 2, zwart: 1, goud: 0 };
 // tierOf(rows): de tier op een eerder moment (rows = [{ m, p }] tot dan, zoals in cardOf). photo(name): de foto die bij de huidige vorm hoort, of null.
 // portrait(name): altijd de gewone portretfoto, voor rondjes (een gezicht is daar herkenbaarder dan een actiefoto).
-window.PlayerCard = { load: () => fetch(API.photos).then(r => r.json()).then(p => { PHOTOS = p || {}; }), render, reveal, html: name => cardOf(name).html, tier: name => cardOf(name).tier, tierOf, photo: name => photoOf(name, cardOf(name).tier.tier), portrait: name => PHOTOS[slugOf(name)] || null, TIER_RANK };
+window.PlayerCard = { load: () => fetch(API.photos).then(r => r.json()).then(p => { PHOTOS = p || {}; }), render, reveal, html: (name, opts) => cardOf(name, opts).html, tier: name => cardOf(name).tier, sessionTier: (name, id) => cardOf(name, { session: id }).tier, tierOf, photo: name => photoOf(name, cardOf(name).tier.tier), portrait: name => PHOTOS[slugOf(name)] || null, TIER_RANK };
 })();

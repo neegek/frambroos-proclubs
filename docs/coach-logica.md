@@ -299,7 +299,7 @@ Daarnaast *Positiespel en keuzes* en *Al sterk*.
      opleverde, in gewone woorden met hooguit twee getallen. Aanval en middenveld: goals en assists. Verdediging:
      veroverde ballen per wedstrijd en hoe vaak de nul werd gehouden. Keeper: reddingen en de nul.
      Voorbeeld: "Terry Yaki speelt als Magician in de aanval: 24 goals en 23 assists in 39 wedstrijden."
-  2. **Vorm** van de laatste vijf (§9c): in topvorm, in vorm, op het eigen niveau, of een mindere reeks.
+  2. **Vorm** van de laatste sessie (§9c): in topvorm, in vorm, op het eigen niveau, of een mindere avond.
   3. Alleen als het er echt uitspringt: het ene waarin deze speler **de beste van het team** is (plek 1, minstens
      25 % boven het teamgemiddelde), in gewone taal ("Niemand in het team speelt meer tegenstanders uit."). Anders
      geen derde zin. Nooit een zwak punt in de samenvatting: dat staat in de cijfers.
@@ -355,7 +355,7 @@ die sessie. De nieuwspagina toont alle artikelen, nieuwste eerst en groot.
 
 | Bericht | Wanneer | Voorbeeldkop |
 |---|---|---|
-| Topvorm | spelers die die avond de blauwe kaart kregen (§9c) en hem daarvoor niet hadden | *Neegek en KFH Guip 023 in topvorm* |
+| Topvorm | spelers die die avond de blauwe kaart kregen (§9c, dus topvorm over die sessie) en hem daarvoor niet hadden | *Neegek en KFH Guip 023 in topvorm* |
 | Uitschieter | hoogste rating van de avond, als die ≥ 9,0 is | *9.9 voor Neegek tegen X* |
 | Hattrick | 3+ goals van één speler in één wedstrijd die avond | *Hattrick voor Xero 023* |
 | Grote zege | winst met ≥ 4 verschil die avond (de grootste) | *7–1 tegen X* |
@@ -372,10 +372,11 @@ Geen reeksen: die staan al in de rondjes bovenaan.
   man of the match, passnauwkeurigheid, balwinst, duels gewonnen. Tellende stats per wedstrijd, met het totaal
   eronder. Voor percentages de minimale aantallen uit §4.
 - **Leden**: elk lid als spelerskaart (§9c), **gesorteerd op vorm**: eerst topvorm, dan in vorm, dan de rest; binnen
-  een tier op de rating van de laatste vijf, dan op aantal wedstrijden.
+  een tier op de rating van de laatste sessie, dan op aantal wedstrijden.
 
 **Spelerspagina** (sinds 28 oktober 2026, zonder tabbladen): één pagina, van boven naar beneden:
-1. De spelerskaart, met daaronder alleen de **vorm** als rondjes (laatste vijf uitslagen). Geen lijst met pro, taak,
+1. De spelerskaart, met daaronder alleen de **vorm**: de reeks van de sessie die de vorm bepaalt (§9c), per wedstrijd
+   de rating als rondje. Geen lijst met pro, taak,
    builds en signature meer: wat erop staat, staat op de kaart; de builds staan in de cijfers.
 2. De samenvatting (hierboven) met de **drie cijfers** over de gekozen periode (goals per wedstrijd, assists per
    wedstrijd, winstpercentage met deze speler erbij).
@@ -411,11 +412,11 @@ the match was). Eerst de laatste twintig, de rest achter een knop.
 
 **Sessiekop**: elke speelavond toont dezelfde vijf cijfers, zodat avonden op dezelfde manier te vergelijken zijn:
 wedstrijden (met W-G-V en de badge punten per wedstrijd tegenover normaal), doelsaldo (met de badge tov verwachting), passnauwkeurigheid, conversie en clean sheets, elk met "normaal"
-eronder (alle andere wedstrijden). Daarnaast de **top drie van de avond** als spelerskaarten (§9c) op rating over
+eronder (alle andere wedstrijden). Daarnaast de **top drie van de avond** als sessiekaarten (§9c) op rating over
 deze avond, als waaier: de beste vooraan en groot, nummer twee en drie erachter en iets lager, elk met plek en rating.
 Bij nul punten heet het "hield het best stand", maar de kaarten blijven hetzelfde. Man of the match staat als kroon
-bij de speler. *Spelers deze sessie* toont per speler alleen rating met het verschil met normaal, goals, assists en
-man of the match; geen vergelijkingen per maat meer. De deelkaart (afbeelding van
+bij de speler. *Spelers deze sessie* toont per speler, op rating: de sessiekaart klein, de naam, de gemiddelde rating met het
+verschil met normaal, en de reeks van de avond met per wedstrijd de rating (§9c). Geen vergelijkingen per maat. De deelkaart (afbeelding van
 1080×1080 in thuiskleuren) toont W-G-V, punten per wedstrijd, winstpercentage, doelsaldo, uitblinker, meeste goals
 plus assists en de eerste twee zinnen van de samenvatting.
 
@@ -472,19 +473,34 @@ face stats van de ingevulde build. Ernaast staan de cijfers uit de gevolgde weds
 tekst op de kaart: het icoon zegt het.
 Geen scheidingslijnen; de tier zie je aan de kaart zelf, zonder label.
 
-Vorm kijkt naar de **laatste 5 wedstrijden**, en er zijn twee wegen naar *in vorm*: een hoog niveau, of groei.
-Een vaste goede speler wordt zo niet gestraft omdat het eigen normaal al hoog ligt.
+Vorm wordt **per sessie** bepaald (sinds 28 oktober 2026; daarvoor de laatste vijf wedstrijden): een speelavond is
+een afgerond geheel, en zo betekent de kaart "hoe was je de laatste keer dat we speelden". De vorm van nu is die van
+de **laatste sessie waarin de speler minstens 3 wedstrijden speelde** (een avond van twee potten zegt te weinig en telt
+niet mee). Er zijn twee wegen naar *in vorm*: een hoog niveau, of groei. Een vaste goede speler wordt zo niet gestraft
+omdat het eigen normaal al hoog ligt.
 
-- **Niveau**: de gemiddelde EA-rating over de laatste 5.
-- **Groei** (vormscore): (rating laatste 5 − eigen normaal) + ¼ × (punten per wedstrijd laatste 5 − eigen normaal).
-  Eigen normaal = alle andere wedstrijden van die speler. Punten: winst 3, gelijk 1, verlies 0. Eén extra overwinning op
-  vijf wedstrijden telt ongeveer even zwaar als 0,15 ratingpunt.
+- **Niveau**: de gemiddelde EA-rating over die sessie.
+- **Groei** (vormscore): (rating in de sessie − eigen normaal) + ¼ × (punten per wedstrijd in de sessie − eigen
+  normaal). Eigen normaal = alle andere wedstrijden van die speler. Punten: winst 3, gelijk 1, verlies 0.
 
-| Tier | Voorwaarde | Uiterlijk |
+| Tier | Voorwaarde (over de sessie) | Uiterlijk |
 |---|---|---|
-| **Goud** | standaard | goud verloop met een zachte, schuine lichtere baan, donkere tekst |
-| **Zwart-goud** (in vorm) | minstens 5 wedstrijden, en niveau ≥ 7,5 **of** (minstens 8 wedstrijden en groei ≥ 0,3) | zwart met gouden rand en gouden cijfers |
-| **Topvorm** | niveau ≥ 8,0 **en** minstens 3 van de laatste 5 gewonnen | diepblauw met gouden stippen en gouden accenten |
+| **Goud** | standaard, of minder dan 3 wedstrijden in die sessie | goud verloop met een zachte, schuine lichtere baan, donkere tekst |
+| **Zwart-goud** (in vorm) | niveau ≥ 7,5 **of** (minstens 8 wedstrijden in totaal en groei ≥ 0,3) | zwart met gouden rand en gouden cijfers |
+| **Topvorm** | niveau ≥ 8,0 **en** minstens 60 % van de sessie gewonnen | diepblauw met gouden stippen en gouden accenten |
+
+Doorgerekend op 28 oktober 2026 (laatste sessie): KFH Guip 023 en Neegek topvorm, Xero 023 en Highnis 023 in vorm, de
+rest goud; dezelfde verdeling als met de laatste vijf.
+
+**Sessiekaart**: elke speler krijgt per sessie een eigen kaart, zoals een in-form-kaart in FC. Tier en foto volgen die
+sessie (minder dan 3 wedstrijden: goud), de zes cijfers zijn die van de avond: WED, RAT (gemiddeld), GLS | ASS, MOTM,
+WIN. De kaart van nu (spelerspagina, Selectie) blijft de carrièrecijfers van EA tonen, met de tier van de laatste
+sessie.
+
+**Reeks per sessie**: waar het over één speler gaat, staat de vorm als de wedstrijden van één sessie, elk als rondje met
+de kleur van de uitslag en de **rating die de speler in die wedstrijd kreeg** (een tik opent de wedstrijd). Onder de
+kaart op de spelerspagina: de sessie die de vorm bepaalt, met de datum. Bij een geopende sessie: per speler de
+sessiekaart en deze reeks. Alleen het Clubhouse houdt de laatste tien uitslagen van de club.
 
 Vlak en rustig: een lichte schaduw, geen gloed, geen strepen en geen bewegende glans; alleen een zachte, schuine
 lichtere baan in het verloop zelf (`--t-sheen`). Onder het clublogo staat de vlag van het land
@@ -498,8 +514,7 @@ stoere pose) als die er is; anders de gewone foto. Onderaan de kaart, onder de c
 Dezelfde kaart staat klein (56 %) in de ledenrij op het Clubhouse en in de top drie van een sessie op het Clubhouse, met de accountnaam eronder; cijfers en labels zijn
 daar iets groter gezet zodat ze klein leesbaar blijven. Eén functie (`PlayerCard.html`) maakt beide, met SVG-ids per speler.
 
-De tier staat ook als `title` op de kaart. Voorbeeld (25 okt 2026): GoodTimes 023 in vorm door groei (+0,47), Neegek door niveau (7,62) en groei (+0,32);
-niemand in topvorm.
+De tier staat ook als `title` op de kaart, met de sessie waarop hij rust.
 
 ## 9d. Verbanden: weggehaald, eerst naar de tekentafel
 

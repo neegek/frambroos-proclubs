@@ -426,6 +426,12 @@ function bestOfNight(night) {
     .map(x => ({ ...x, v: avg(x.r) })).sort((a, b) => b.v - a.v)[0] || null;
 }
 
+// Reeks van één speler (coach-logica §9c): per wedstrijd een rondje in de kleur van de uitslag met de rating die de
+// speler kreeg. rows = [{ m, p }]; met links opent een rondje de wedstrijd.
+const ratingDots = (rows, { links = true } = {}) => `<ol class="rdots">${rows.map(({ m, p }) => {
+  const v = p.rating === null ? '–' : p.rating >= 10 ? '10' : f1(p.rating), title = `${letter(m.result)} ${m.goals}–${m.goalsAgainst} tegen ${esc(m.opponent.name)}: rating ${p.rating ?? '–'}`;
+  return `<li>${links ? `<a class="tl-dot ${m.result}" href="wedstrijd.html?id=${m.matchId}" title="${title}">${v}</a>` : `<span class="tl-dot ${m.result}" title="${title}">${v}</span>`}</li>`;
+}).join('')}</ol>`;
 const formDots = (ms, { links = true } = {}) => `<ol class="form-dots">${ms.map((m, i) => {
   const cls = `dot ${m.result}${i === ms.length - 1 ? ' last' : ''}`, title = `${letter(m.result)} ${m.goals}–${m.goalsAgainst} tegen ${esc(m.opponent.name)}, ${dayLabel(m.ts)}`;
   return `<li>${links ? `<a class="${cls}" href="wedstrijd.html?id=${m.matchId}" title="${title}">` : `<span class="${cls}" title="${title}">`}${letter(m.result)}${links ? '</a>' : '</span>'}</li>`;
