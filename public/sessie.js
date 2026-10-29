@@ -135,10 +135,19 @@ function render() {
       <a class="fut-mini" href="spelers.html#${encodeURIComponent(r.name)}" aria-label="${esc(proName(r.name))}">${PlayerCard.html(r.name, { session: s.id, key: '-l' })}</a>
       <div class="sp-info"><div class="pcard-head"><a class="pcard-name" href="spelers.html#${encodeURIComponent(r.name)}">${esc(proName(r.name))}</a>${r.mom ? ' <span class="crown" title="Man of the match">♛</span>' : ''}</div>
         <div class="pcard-sub"><b class="sp-rating">${f2(r.rH)}</b> normaal ${f2(r.rT)} ${r.d === null ? '' : residCell(r.d)}</div>
-        ${ratingDots(rows)}</div></div>`;
+        ${ratingDots(rows)}
+        ${formLine(r.name, s.id, rows.length)}</div></div>`;
   }).join('')}</div>`;
   PlayerCard.reveal($('#s-players'));
   renderRadar(s, ms);
+}
+
+// Vormscore per speler over deze avond (coach-logica §9c): tier, niveau (rating) en groei tegenover het eigen normaal.
+const TIER_LABEL = { top: 'Topvorm', zwart: 'In vorm', goud: 'Goud' };
+function formLine(name, sid, n) {
+  const t = PlayerCard.sessionTier(name, sid);
+  const bits = [t.level === null ? '' : `niveau ${f2(t.level)}`, t.growth === null ? '' : `groei ${signed(t.growth, 2)}`, n < 3 ? 'minder dan 3 potten, telt niet' : ''].filter(Boolean);
+  return `<div class="sp-form" title="Vorm over deze avond: niveau is de gemiddelde rating, groei is het verschil met het eigen normaal (rating plus winst)"><span class="sp-tier ${t.tier}">${TIER_LABEL[t.tier]}</span>${bits.join(' · ')}</div>`;
 }
 
 // ---------- radar van de avond (coach-logica §9a) ----------

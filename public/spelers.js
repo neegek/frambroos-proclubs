@@ -59,7 +59,7 @@ function playerSummary(name, rows, ms, players) {
   const t = window.PlayerCard.tier(name);
   // Vorm per sessie (coach-logica §9c): de laatste speelavond met minstens drie eigen potten.
   if (t.tier === 'top') parts.push('Zit in topvorm: de laatste speelavond op hoog niveau, en het team won er de meeste potten.');
-  else if (t.tier === 'zwart') parts.push(t.level >= 7.5 ? 'Zit in vorm: de laatste speelavond op hoog niveau.' : 'Zit in vorm: de laatste speelavond beter dan het eigen normaal, met winst erbij.');
+  else if (t.tier === 'zwart') parts.push(t.level >= 7 ? 'Zit in vorm: de laatste speelavond op hoog niveau.' : 'Zit in vorm: de laatste speelavond beter dan het eigen normaal, met winst erbij.');
   else if (t.growth !== null && t.growth <= -0.3) parts.push('De laatste speelavond viel wat tegen vergeleken met het eigen normaal.');
   else if (t.session !== null) parts.push('De laatste speelavond lag op het eigen normale niveau.');
   const best = bestOfTeam(name, ms, players);

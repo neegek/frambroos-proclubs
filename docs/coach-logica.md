@@ -505,8 +505,11 @@ omdat het eigen normaal al hoog ligt.
 | Tier | Voorwaarde (over de sessie) | Uiterlijk |
 |---|---|---|
 | **Goud** | standaard, of minder dan 3 wedstrijden in die sessie | goud verloop met een zachte, schuine lichtere baan, donkere tekst |
-| **Zwart-goud** (in vorm) | niveau ≥ 7,5 **of** (minstens 8 wedstrijden in totaal en groei ≥ 0,3) | zwart met gouden rand en gouden cijfers |
+| **Zwart-goud** (in vorm) | niveau ≥ 7,0 (sinds 29 oktober 2026; daarvoor 7,5) **of** (minstens 8 wedstrijden in totaal en groei ≥ 0,3) | zwart met gouden rand en gouden cijfers |
 | **Topvorm** | niveau ≥ 8,0 **en** minstens 60 % van de sessie gewonnen | diepblauw met gouden stippen en gouden accenten |
+
+In de sessiedetails staat bij elke speler de **vormscore van die avond**: de tier als label, het niveau en de groei
+(sinds 29 oktober 2026), zodat je ziet waarom een kaart van kleur verandert.
 
 Doorgerekend op 28 oktober 2026 (laatste sessie): KFH Guip 023 en Neegek topvorm, Xero 023 en Highnis 023 in vorm, de
 rest goud; dezelfde verdeling als met de laatste vijf.

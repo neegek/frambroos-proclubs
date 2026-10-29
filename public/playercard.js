@@ -76,7 +76,7 @@ function tierAt(r, sid) {
   const why = `sessie van ${dayLabel(here[0].m.ts)}: rating ${level.toFixed(2)}, ${wins} van ${here.length} gewonnen${growth !== null ? `, groei ${growth >= 0 ? '+' : ''}${growth.toFixed(2)}` : ''}`;
   const out = { why, level, growth, session: sid, rows: here };
   if (level >= 8 && wins / here.length >= 0.6) return { tier: 'top', ...out };
-  if (level >= 7.5 || (growth !== null && r.length >= 8 && growth >= 0.3)) return { tier: 'zwart', ...out };
+  if (level >= 7 || (growth !== null && r.length >= 8 && growth >= 0.3)) return { tier: 'zwart', ...out };
   return { tier: 'goud', ...out };
 }
 // De vorm van nu (of op een eerder moment, met rows tot dan): de laatste sessie met minstens 3 eigen wedstrijden.
