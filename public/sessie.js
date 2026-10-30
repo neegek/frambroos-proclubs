@@ -126,13 +126,13 @@ function render() {
   // Top drie als sessiekaarten (tier, foto en cijfers van deze avond, coach-logica §9c), de beste vooraan.
   const top = prow.filter(r => r.rH !== null).slice(0, 3);
   $('#s-podium').innerHTML = top.map((r, i) => `<a class="podium-card p${i + 1}" href="spelers.html#${encodeURIComponent(r.name)}" title="${esc(proName(r.name))}: rating ${f2(r.rH)} deze avond">
-      <span class="podium-rank">${i + 1}</span><span class="fut-mini">${PlayerCard.html(r.name, { session: s.id, key: '-p' })}</span><span class="podium-rating">${f2(r.rH)}${r.mom ? ' <span class="crown" title="Man of the match">♛</span>' : ''}</span></a>`).join('');
+      <span class="podium-rank">${i + 1}</span><span class="fut-mini">${PlayerCard.html(r.name, { session: s.id, key: '-p', rank: i + 1 })}</span><span class="podium-rating">${f2(r.rH)}${r.mom ? ' <span class="crown" title="Man of the match">♛</span>' : ''}</span></a>`).join('');
   PlayerCard.reveal($('#s-podium'));
   // Per speler de sessiekaart, de rating van de avond tegenover normaal, en de reeks met per wedstrijd de rating.
-  $('#s-players').innerHTML = `<div class="splayers">${prow.map(r => {
+  $('#s-players').innerHTML = `<div class="splayers">${prow.map((r, i) => {
     const rows = ms.map(m => ({ m, p: m.players.find(p => p.name === r.name) })).filter(x => x.p);
     return `<div class="sp-item">
-      <a class="fut-mini" href="spelers.html#${encodeURIComponent(r.name)}" aria-label="${esc(proName(r.name))}">${PlayerCard.html(r.name, { session: s.id, key: '-l' })}</a>
+      <a class="fut-mini" href="spelers.html#${encodeURIComponent(r.name)}" aria-label="${esc(proName(r.name))}">${PlayerCard.html(r.name, { session: s.id, key: '-l', rank: r.rH === null ? null : i + 1 })}</a>
       <div class="sp-info"><div class="pcard-head"><a class="pcard-name" href="spelers.html#${encodeURIComponent(r.name)}">${esc(proName(r.name))}</a>${r.mom ? ' <span class="crown" title="Man of the match">♛</span>' : ''}</div>
         ${formLine(r.name, s.id, r.rH, rows.length)}
         ${ratingDots(rows)}</div></div>`;

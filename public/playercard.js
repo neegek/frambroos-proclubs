@@ -39,12 +39,19 @@ function flag(id) {
 // hoofd (zoals op een FC-kaart); onderaan loopt hij zacht weg. Geen glans of strepen: alleen een zachte, schuine lichtere baan in het verloop zelf (--t-sheen). Kleuren komen uit de tier-tokens in style.css.
 const FUT_SHAPE = 'M18 62Q150 -8 282 62L282 352C282 380 262 400 230 408C200 414 172 424 160 428L150 423L140 428C128 424 100 414 70 408C38 400 18 380 18 352Z';
 // uid maakt de SVG-ids per kaart uniek, zodat meerdere kaarten op één pagina elkaars verloop niet overnemen.
-function futFrame(photo, uid) {
+// Buitenste rand: goud, of bij een sessie de kleur van de plek op rating (coach-logica §9c). De binnenrand blijft goud.
+const RIMS = {
+  gold: ['#fff1bd', '#d9b04a', '#8d6c15', '#f1d27a'], silver: ['#ffffff', '#c3c9d0', '#737b85', '#e4e8ec'],
+  bronze: ['#f6d2ae', '#c27f45', '#74431c', '#e3a674'], iron: ['#a3a9b0', '#5f656d', '#2f3338', '#7d838b'],
+};
+const rimOf = rank => !rank ? 'gold' : rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : 'iron';
+function futFrame(photo, uid, rim = 'gold') {
   const id = k => `fut-${k}-${uid}`;
   const inset = (sx, sy) => `transform="translate(150 215) scale(${sx} ${sy}) translate(-150 -215)"`;
   return `<svg class="fut-frame" viewBox="0 0 300 430" aria-hidden="true">
     <defs>
       <linearGradient id="${id('gold')}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff1bd"/><stop offset=".35" stop-color="#d9b04a"/><stop offset=".7" stop-color="#8d6c15"/><stop offset="1" stop-color="#f1d27a"/></linearGradient>
+      <linearGradient id="${id('rim')}" x1="0" y1="0" x2="1" y2="1">${RIMS[rim].map((c, i) => `<stop offset="${[0, 0.35, 0.7, 1][i]}" stop-color="${c}"/>`).join('')}</linearGradient>
       <linearGradient id="${id('bg')}" x1="0" y1="0" x2="0.25" y2="1"><stop offset="0" style="stop-color:var(--t-bg1)"/><stop offset=".55" style="stop-color:var(--t-bg2)"/><stop offset="1" style="stop-color:var(--t-bg3)"/></linearGradient>
       <linearGradient id="${id('sheen')}" x1="0" y1="0" x2="1" y2="0.9"><stop offset=".2" stop-color="#fff" stop-opacity="0"/><stop offset=".45" style="stop-color:var(--t-sheen)"/><stop offset=".75" stop-color="#fff" stop-opacity="0"/></linearGradient>
       <pattern id="${id('dots')}" patternUnits="userSpaceOnUse" width="9" height="9"><circle cx="4" cy="4" r="1" style="fill:var(--t-dots)"/></pattern>
@@ -52,12 +59,12 @@ function futFrame(photo, uid) {
       <mask id="${id('photo-mask')}"><rect x="0" y="0" width="300" height="250" fill="url(#${id('fade')})"/></mask>
       <clipPath id="${id('clip')}"><path d="${FUT_SHAPE}" ${inset(0.952, 0.966)}/></clipPath>
     </defs>
-    <path d="${FUT_SHAPE}" fill="url(#${id('gold')})"/>
+    <path d="${FUT_SHAPE}" fill="url(#${id('rim')})"/>
     <path d="${FUT_SHAPE}" fill="#1a1408" ${inset(0.975, 0.982)}/>
     <path d="${FUT_SHAPE}" fill="url(#${id('bg')})" stroke="url(#${id('gold')})" stroke-width="2.2" ${inset(0.952, 0.966)}/>
     <g clip-path="url(#${id('clip')})">
       <rect width="300" height="430" fill="url(#${id('sheen')})"/><rect width="300" height="430" fill="url(#${id('dots')})"/>
-      ${photo ? `<g mask="url(#${id('photo-mask')})"><rect x="0" y="0" width="300" height="250" style="fill:var(--t-photo)"/><image class="fut-img" href="${photo}" x="34" y="52" width="240" height="198" preserveAspectRatio="xMaxYMin slice"/><rect class="fut-skel" x="74" y="60" width="190" height="180" rx="14"/></g>` : ''}
+      ${photo ? `<g mask="url(#${id('photo-mask')})"><rect x="0" y="0" width="300" height="250" style="fill:var(--t-photo)"/><image class="fut-img" href="${photo}" x="34" y="52" width="240" height="198" preserveAspectRatio="xMaxYMin slice"/></g>` : ''}
     </g>
   </svg>`;
 }
@@ -104,7 +111,7 @@ const photoOf = (name, tier) => (tier !== 'goud' && PHOTOS[`${slugOf(name)}-vorm
 
 // Zonder session de kaart van nu (carrièrecijfers van EA, tier van de laatste sessie); met session de sessiekaart:
 // tier, foto en zes cijfers van die avond (coach-logica §9c). key maakt de SVG-ids uniek als een kaart vaker op een pagina staat.
-function cardOf(name, { session = null, key = '' } = {}) {
+function cardOf(name, { session = null, key = '', rank = null } = {}) {
   const all = DATA.matches.map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p);
   const rows = session === null ? all : all.filter(r => r.m.session === session);
   const career = DATA.members.find(x => x.name === name);
@@ -125,7 +132,7 @@ function cardOf(name, { session = null, key = '' } = {}) {
   const shown = cardName(career, name);
   const col = list => `<div class="fut-col">${list.map(([l, v]) => `<div><b>${v}</b><span>${l}</span></div>`).join('')}</div>`;
   const html = `<div class="fut${photo ? ' has-photo' : ''}" data-tier="${tier.tier}" role="img" title="Kaart: ${tierNames[tier.tier]}${tier.why ? ` (${tier.why})` : ''}" aria-label="Spelerskaart van ${esc(name)}: overall ${career?.proOverall ?? 'onbekend'}, ${info ? info.name : ''}, ${tierNames[tier.tier]}">
-      ${futFrame(photo, `${slugOf(name)}${session === null ? '' : `-s${session}`}${key}`)}
+      ${futFrame(photo, `${slugOf(name)}${session === null ? '' : `-s${session}`}${key}`, rimOf(rank))}
       <div class="fut-inner">
         <div class="fut-top">
           <div class="fut-ovr"><b>${career?.proOverall ?? '–'}</b>${arch ? `<span class="fut-archicon" title="${esc(archName(arch))}">${archIcon(arch)}</span>` : ''}<img src="crest.png" alt="" width="34" height="34">${flag(career?.proNationality)}</div>
@@ -153,10 +160,12 @@ function render(name) {
   reveal(el);
 }
 
-// Foto's laten verschijnen zodra ze geladen zijn (fade); tot die tijd pulseert een vlak. Na 2 s komt een foto hoe dan ook (css).
+// Foto's verschijnen pas als ze geladen zijn, met een zachte fade van 0,3 s; geen laadanimatie ervoor. Ook voor de
+// portretten in rondjes (img.fade-img). Een foto die niet laadt, blijft weg.
 function reveal(root) {
-  for (const img of root.querySelectorAll('image.fut-img:not(.on)')) {
-    const i = new Image(); i.onload = i.onerror = () => img.classList.add('on'); i.src = img.getAttribute('href');
+  for (const img of root.querySelectorAll('image.fut-img:not(.on), img.fade-img:not(.on)')) {
+    const src = img.getAttribute('href') || img.getAttribute('src'), i = new Image();
+    i.onload = () => img.classList.add('on'); i.src = src;
   }
 }
 
