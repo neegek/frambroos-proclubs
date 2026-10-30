@@ -144,8 +144,10 @@ alleen in Cloudflare.
   Alleen de hero op het Clubhouse houdt de laatste tien uitslagen van de club.
 - Bij *Spelers deze sessie* per speler de plek op rating als medaille (`.medal`, goud/zilver/brons/ijzer als de rand van
   de kaart) met de groei; geen rating, tier-label of "normaal". De wedstrijdpagina toont de opstelling als één veld met
-  beide teams (`lineup(m)` in `public/wedstrijd.js`): per linie het aantal mensen met naam en rating, per team het aantal
-  AI-spelers (`m.ai`); liggend op een groot scherm, staand vanaf 900 px.
+  beide teams (`lineup(m)` in `public/wedstrijd.js`): elke speler een rondje (bij ons het portret via
+  `PlayerCard.portrait`, bij de tegenstander het archetype-icoon) met de rating eronder; per linie het aantal mensen,
+  per team het aantal AI-spelers (`m.ai`). Liggend op een groot scherm; vanaf 900 px de teams naast elkaar in vier
+  vlakken onder elkaar. `wedstrijd.html` laadt daarvoor `playercard.js`. AI per linie geeft EA niet.
 - Wedstrijden is alleen de lijst (eerst twintig, de rest achter een knop); een wedstrijd opent op `/wedstrijd.html?id=<matchId>` (een laag dieper) met
   "Terug naar wedstrijden" bovenaan. Link naar wedstrijden altijd via dat adres.
 

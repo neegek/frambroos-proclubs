@@ -805,34 +805,42 @@ a.fut-mini, .card td a { text-decoration: none; color: inherit; }
   .sp-info .rdots li { flex: none; }
 }
 
-/* Opstelling: één veld met beide teams (coach-logica §2). Vaste veldkleuren in beide thema's; tekst wit op donkergroen. */
+/* Opstelling: één veld met beide teams (coach-logica §9a). Vaste veldkleuren in beide thema's; tekst wit op donkergroen.
+   Groot scherm: acht kolommen, wij links (keeper → aanval), de tegenstander gespiegeld rechts. */
 .field-head { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
 .fh-team { display: grid; min-width: 0; }
 .fh-team:last-child { text-align: right; }
 .fh-team b { font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fh-team small { font-size: 12.5px; color: var(--ink-2); }
-.field { position: relative; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); border-radius: 14px; overflow: hidden; border: 2px solid rgba(255,255,255,0.55);
+.field { position: relative; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); grid-template-areas: "ug ud um ua ta tm td tg";
+  border-radius: 14px; overflow: hidden; border: 2px solid rgba(255,255,255,0.55);
   background: repeating-linear-gradient(90deg, #1f5a2c 0 12.5%, #236633 12.5% 25%); color: #fff; isolation: isolate; }
-.field::after { content: ""; position: absolute; left: 50%; top: 50%; width: 110px; height: 110px; transform: translate(-50%, -50%); border: 2px solid rgba(255,255,255,0.45); border-radius: 50%; z-index: -1; pointer-events: none; }
-.zone { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 14px 6px; min-height: 230px; min-width: 0; }
-.zone.them.z-forward { border-left: 2px solid rgba(255,255,255,0.55); }
+.field-mid { position: absolute; left: 50%; top: 0; bottom: 0; border-left: 2px solid rgba(255,255,255,0.55); pointer-events: none; }
+.field-mid::after { content: ""; position: absolute; left: 50%; top: 50%; width: 110px; height: 110px; transform: translate(-50%, -50%); border: 2px solid rgba(255,255,255,0.45); border-radius: 50%; }
+.zone { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 14px 6px; min-height: 230px; min-width: 0; }
 .zone-head { display: flex; align-items: center; gap: 6px; }
 .zone-label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.85); }
 .zone-count { min-width: 20px; height: 20px; padding: 0 6px; display: grid; place-items: center; border-radius: 999px; background: rgba(0,0,0,0.35); font: 700 11.5px/1 var(--num-font); }
-.zone-chips { display: flex; flex-direction: column; align-items: stretch; gap: 6px; width: 100%; }
-.fchip { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; padding: 6px 8px; border-radius: 8px; background: rgba(8,10,14,0.55); border: 1px solid rgba(255,255,255,0.25); color: #fff; text-decoration: none; font-size: 12.5px; min-width: 0; }
-.fchip.us { border-color: #ffd200; }
-.fchip b { font-weight: 620; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-.fchip span { font-family: var(--num-font); flex: none; }
-.fchip.ai { justify-content: center; color: rgba(255,255,255,0.75); border-style: dashed; background: rgba(8,10,14,0.25); }
-a.fchip:hover { background: rgba(8,10,14,0.75); }
-/* Smaller scherm: het veld staat rechtop, wij boven en de tegenstander onder. */
+.zone-toks { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 8px; }
+/* Speler: rondje (portret of archetype-icoon) met de rating en de naam eronder. */
+.ftok { width: 64px; display: grid; justify-items: center; gap: 3px; color: #fff; text-decoration: none; min-width: 0; }
+.ftok-c { position: relative; width: 44px; height: 44px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: rgba(8,10,14,0.6); border: 2px solid rgba(255,255,255,0.7); }
+.ftok.us .ftok-c { border-color: #ffd200; background: linear-gradient(160deg, #3a1a42, #14101a); }
+.ftok-c img { position: absolute; left: 50%; top: 16%; width: 92%; height: auto; transform: translateX(-50%); }
+.ftok-c .arch-icon { width: 26px; height: 26px; color: #fff; }
+.ftok b { font: 600 13px/1 var(--num-font); }
+.ftok b i { font-style: normal; color: #ffd200; margin-left: 2px; }
+.ftok small { max-width: 100%; font-size: 11px; color: rgba(255,255,255,0.85); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+a.ftok:hover .ftok-c { transform: translateY(-2px); }
+.ftok-ai { padding: 6px 12px; border-radius: 999px; border: 1px dashed rgba(255,255,255,0.5); font-size: 12px; color: rgba(255,255,255,0.8); }
+/* Telefoon en tablet: de teams naast elkaar, vier vlakken onder elkaar (aanval bovenaan); wij links, zij rechts. */
 @media (max-width: 900px) {
-  .field { grid-template-columns: minmax(0, 1fr); background: repeating-linear-gradient(180deg, #1f5a2c 0 12.5%, #236633 12.5% 25%); }
-  .field::after { width: 90px; height: 90px; }
-  .zone { flex-direction: row; justify-content: flex-start; align-items: center; min-height: 64px; padding: 10px 12px; gap: 10px; }
-  .zone-head { flex-direction: column; align-items: flex-start; gap: 4px; width: 82px; flex: none; }
-  .zone-chips { flex-direction: row; flex-wrap: wrap; align-items: center; }
-  .zone.them.z-forward { border-left: 0; border-top: 2px solid rgba(255,255,255,0.55); }
-  .fchip { flex: 0 1 auto; }
+  .field { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "ua ta" "um tm" "ud td" "ug tg";
+    background: repeating-linear-gradient(180deg, #1f5a2c 0 25%, #236633 25% 50%); }
+  .field-mid::after { display: none; } /* rechtop is de middenlijn genoeg; een halve cirkel bovenaan leest als een doel */
+  .zone { min-height: 0; padding: 10px 6px 12px; gap: 8px; }
+  .zone:not(.l-a) { border-top: 1px dashed rgba(255,255,255,0.18); }
+  .ftok { width: 50px; }
+  .ftok-c { width: 40px; height: 40px; }
+  .ftok small { display: none; }
 }

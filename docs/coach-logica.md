@@ -442,11 +442,14 @@ Ontbreekt een maat (te weinig pogingen), dan staat de speler daar op 0 en zegt d
 speler heeft zijn vaste kleur. Eronder één knop per speler; een tik licht die speler uit (de rest wordt vaag) en
 toont de echte waarden in één regel. Spelers met één wedstrijd die avond doen niet mee: één pot zegt te weinig.
 
-**Opstelling** (wedstrijdpagina, sinds 30 oktober 2026): één veld met beide teams, liggend op een groot scherm en
-staand op een telefoon. Links (of boven) wij, van keeper naar aanval; rechts (of onder) de tegenstander, gespiegeld,
-zodat de aanvallers elkaar in het midden treffen. Per linie (keeper, verdediging, middenveld, aanval) het aantal
-mensen en hun namen met rating; per team bovenaan het aantal mensen en het aantal AI-spelers (11 min de mensen).
-Hoeveel AI-spelers er per linie stonden geeft EA niet, dus dat tonen we niet; een linie zonder mensen heet "AI".
+**Opstelling** (wedstrijdpagina, sinds 30 oktober 2026): één veld met beide teams. Op een groot scherm liggend: links
+wij van keeper naar aanval, rechts de tegenstander gespiegeld, zodat de aanvallers elkaar in het midden treffen. Op een
+telefoon (vanaf 900 px) staan de teams **naast elkaar** in vier vlakken onder elkaar (aanval, middenveld, verdediging,
+keeper), wij links en de tegenstander rechts. Elke speler is een **rondje met de rating eronder**: bij ons het
+portret (zonder foto het archetype-icoon), bij de tegenstander het archetype-icoon van de gespeelde build; de naam
+staat erbij als het past en altijd in de tooltip. Per linie het aantal mensen; per team bovenaan het aantal mensen en
+het aantal AI-spelers (11 min de mensen). Hoeveel AI-spelers er per linie stonden geeft EA niet (geen formatie, geen
+posities van AI; gecontroleerd op 30 oktober 2026), dus dat tonen we niet; een linie zonder mensen heet "AI".
 
 **Tweede assist** (EA-code 115, `second_assists`, zekerheid *waarschijnlijk*): de pass vóór de assist. EA geeft alleen
 het aantal per speler per wedstrijd, niet bij welke goal. Alleen als we in een wedstrijd precies één keer scoren, is

@@ -43,26 +43,29 @@ function matchSummary(m) {
   return parts.join(' ');
 }
 
-// Opstelling (coach-logica §2, Opstelling): één veld met beide teams. Links (telefoon: boven) wij van keeper naar aanval,
-// rechts de tegenstander gespiegeld, zodat de aanvallers elkaar in het midden treffen. Per linie het aantal mensen met
-// naam en rating; per team het aantal AI-spelers. Per linie geeft EA geen AI, dus een lege linie heet "AI".
+// Opstelling (coach-logica §9a, Opstelling): één veld met beide teams. Groot scherm: liggend, wij links van keeper naar
+// aanval en de tegenstander gespiegeld rechts. Telefoon: de teams naast elkaar in vier vlakken onder elkaar (css).
+// Elke speler is een rondje met de rating eronder: bij ons het portret, bij de tegenstander het archetype-icoon.
+// Per linie het aantal mensen, per team het aantal AI; AI per linie geeft EA niet, dus een lege linie heet "AI".
+const LINE_KEY = { forward: 'a', midfielder: 'm', defender: 'd', goalkeeper: 'g' };
 function lineup(m) {
   const side = (players, us) => {
     const by = Object.fromEntries(LINES.map(([k]) => [k, []]));
     for (const p of players) (by[p.pos] || by.midfielder).push(p);
-    const chip = p => {
-      const inner = `<b>${esc(us ? proName(p.name) : p.name)}</b><span>${p.rating === null ? '–' : f1(p.rating)}${p.mom ? ' ★' : ''}</span>`;
-      return us ? `<a class="fchip us" href="spelers.html#${encodeURIComponent(p.name)}" title="${esc(archName(p.archetypeId))}">${inner}</a>` : `<span class="fchip" title="${esc(archName(p.archetypeId))}">${inner}</span>`;
+    const token = p => {
+      const photo = us && PlayerCard.portrait(p.name), name = us ? proName(p.name) : p.name;
+      const face = photo ? `<img class="fade-img" src="${photo}" alt="">` : archIcon(p.archetypeId);
+      const inner = `<span class="ftok-c">${face}</span><b>${p.rating === null ? '–' : f1(p.rating)}${p.mom ? '<i title="Man of the match">★</i>' : ''}</b><small>${esc(name)}</small>`;
+      const title = `${esc(name)} · ${esc(archName(p.archetypeId))} · rating ${p.rating ?? '–'}`;
+      return us ? `<a class="ftok us" href="spelers.html#${encodeURIComponent(p.name)}" title="${title}">${inner}</a>` : `<span class="ftok" title="${title}">${inner}</span>`;
     };
-    // Van eigen doel naar het midden: keeper, verdediging, middenveld, aanval.
-    return [...LINES].reverse().map(([k, label]) => `<div class="zone ${us ? 'us' : 'them'} z-${k}">
+    return LINES.map(([k, label]) => `<div class="zone ${us ? 'us' : 'them'} l-${LINE_KEY[k]}" style="grid-area:${us ? 'u' : 't'}${LINE_KEY[k]}">
       <span class="zone-head"><span class="zone-label">${label}</span><span class="zone-count" title="${by[k].length} ${by[k].length === 1 ? 'mens' : 'mensen'}">${by[k].length}</span></span>
-      <span class="zone-chips">${by[k].length ? by[k].map(chip).join('') : '<span class="fchip ai">AI</span>'}</span></div>`);
+      <span class="zone-toks">${by[k].length ? by[k].map(token).join('') : '<span class="ftok-ai">AI</span>'}</span></div>`).join('');
   };
   const head = (name, players, ai) => `<span class="fh-team"><b>${esc(name)}</b><small>${numWord(players.length)} ${players.length === 1 ? 'mens' : 'mensen'} · ${numWord(ai)} AI</small></span>`;
-  const us = side(m.players, true), them = side(m.opponentPlayers, false).reverse();
   return `<div class="field-head">${head('Frambroos', m.players, m.ai.players)}${head(m.opponent.name, m.opponentPlayers, m.ai.opponentPlayers ?? Math.max(0, 11 - m.opponentPlayers.length))}</div>
-    <div class="field">${us.join('')}${them.join('')}</div>`;
+    <div class="field">${side(m.players, true)}${side(m.opponentPlayers, false)}<span class="field-mid" aria-hidden="true"></span></div>`;
 }
 
 function h2h(m) {
@@ -147,6 +150,7 @@ function render() {
   $('#m-meta').textContent = `Tegenstander rating ${m.opponent.skillRating ?? 'onbekend'}${m.opponent.skillRating && own ? ` (jullie ${own})` : ''} · mensen: jullie ${m.players.length}, zij ${m.opponentPlayers.length}${m.winnerByDnf ? ' · tegenstander gaf op' : ''}`;
   $('#m-summary').innerHTML = matchSummary(m) + goalChain(m);
   $('#m-pitches').innerHTML = lineup(m);
+  PlayerCard.reveal($('#m-pitches'));
   $('#m-h2h').innerHTML = h2h(m);
   $('#m-theirs-title').textContent = m.opponent.name;
   playerTable($('#m-ours'), m.players, true);
@@ -157,4 +161,4 @@ function render() {
 $('#back-link').addEventListener('click', e => {
   try { if (document.referrer && new URL(document.referrer).pathname.endsWith('/wedstrijden.html') && history.length > 1) { e.preventDefault(); history.back(); } } catch {}
 });
-loadData().then(render).catch(showError);
+Promise.all([loadData(), PlayerCard.load().catch(() => {})]).then(render).catch(showError);
