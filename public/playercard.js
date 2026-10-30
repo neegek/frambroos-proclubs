@@ -161,11 +161,14 @@ function render(name) {
 }
 
 // Foto's verschijnen pas als ze geladen zijn, met een zachte fade van 0,3 s; geen laadanimatie ervoor. Ook voor de
-// portretten in rondjes (img.fade-img). Een foto die niet laadt, blijft weg.
+// portretten in rondjes (img.fade-img). Een foto die al eens geladen is, staat er bij opnieuw tekenen meteen (instant),
+// zonder opnieuw te faden. Een foto die niet laadt, blijft weg.
+const LOADED = new Set();
 function reveal(root) {
   for (const img of root.querySelectorAll('image.fut-img:not(.on), img.fade-img:not(.on)')) {
-    const src = img.getAttribute('href') || img.getAttribute('src'), i = new Image();
-    i.onload = () => img.classList.add('on'); i.src = src;
+    const src = img.getAttribute('href') || img.getAttribute('src');
+    if (LOADED.has(src)) { img.classList.add('instant', 'on'); continue; }
+    const i = new Image(); i.onload = () => { LOADED.add(src); img.classList.add('on'); }; i.src = src;
   }
 }
 

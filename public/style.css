@@ -283,7 +283,11 @@ td.split small, .split small { color: var(--muted); }
 .fut-col div { display: grid; grid-template-columns: 48px 1fr; align-items: baseline; gap: 6px; line-height: 1.25; }
 .fut-col b { font-size: 19px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; text-align: right; }
 .fut-col span { font-size: 12px; font-weight: 700; color: var(--t-muted); letter-spacing: 0.08em; }
-.pc-form { display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pc-form { display: grid; justify-items: center; gap: 6px; max-width: 100%; min-width: 0; }
+/* Reeks onder de kaart op één rij; past het niet, dan horizontaal scrollen (hooguit de wedstrijden van één sessie). */
+.pc-form .rdots { flex-wrap: nowrap; overflow-x: auto; max-width: 100%; scrollbar-width: none; padding: 2px 2px 4px; }
+.pc-form .rdots::-webkit-scrollbar { display: none; }
+.pc-form .rdots li { flex: none; }
 .pc-form-date { font-size: 12px; color: var(--muted); }
 /* Reeks van één speler: per wedstrijd de rating in een rondje in de kleur van de uitslag (coach-logica §9c). */
 .rdots { list-style: none; margin: 0; padding: 0; display: flex; gap: 6px; flex-wrap: wrap; }
@@ -312,13 +316,15 @@ html.loading body::before { content: ""; position: fixed; top: 0; left: 0; right
 /* Foto's: geen laadanimatie; zodra ze geladen zijn een zachte fade van 0,3 s (PlayerCard.reveal). */
 .fut-img, .fade-img { opacity: 0; transition: opacity 0.3s ease; }
 .fut-img.on, .fade-img.on { opacity: 1; }
+.fut-img.instant, .fade-img.instant { transition: none; }
 /* Cijfers van een speler: vier groepen, per regel label, totaal en per wedstrijd. */
 .stat-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 6px 28px; }
 .stat-group h3 { margin: 10px 0 4px; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
-.stat-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: baseline; padding: 6px 0; border-top: 1px solid var(--grid); font-size: 13.5px; }
+/* Cijfers in vaste kolommen (coach-logica §9a): label, per wedstrijd (of de breuk), en helemaal rechts het totaal. */
+.stat-row { display: grid; grid-template-columns: minmax(0, 1fr) 11ch 7ch; gap: 12px; align-items: baseline; padding: 6px 0; border-top: 1px solid var(--grid); font-size: 13.5px; }
 .stat-row span:first-child { color: var(--ink-2); }
 .stat-row b { font-family: var(--num-font); font-weight: 500; font-size: 16px; color: var(--ink); text-align: right; min-width: 3ch; }
-.stat-row small { color: var(--muted); font-variant-numeric: tabular-nums; min-width: 7ch; text-align: right; }
+.stat-row small { color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .stat-row.has-builds { grid-template-columns: 1fr; gap: 6px; }
 .stat-row .builds { display: flex; gap: 6px; flex-wrap: wrap; }
 .pc-details { margin: 0; display: grid; gap: 0; max-width: 560px; }
@@ -845,3 +851,12 @@ a.ftok:hover .ftok-c { transform: translateY(-2px); }
   .ftok-c { width: 40px; height: 40px; }
   .ftok small { display: none; }
 }
+
+/* Favoriet: ster op de spelerspagina (rechtsboven bij de kaart), en een kleine ster bij de naam elders. */
+.fav-btn { position: absolute; top: 12px; left: 12px; z-index: 2; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 6px 14px 6px 10px; border-radius: 999px;
+  border: 1px solid var(--border-strong); background: var(--surface); color: var(--ink-2); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.fav-btn svg { width: 18px; height: 18px; color: var(--muted); }
+.fav-btn[aria-pressed="true"] { color: var(--ink); border-color: var(--brand); background: var(--brand-soft); }
+.fav-btn[aria-pressed="true"] svg { color: var(--brand); }
+.fav-star { display: inline-block; width: 13px; height: 13px; margin-right: 4px; vertical-align: -1px; color: var(--brand); }
+.fav-star svg { width: 100%; height: 100%; display: block; }
