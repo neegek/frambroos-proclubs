@@ -298,11 +298,9 @@ html.loading body::before { content: ""; position: fixed; top: 0; left: 0; right
 .skel.card-row { height: 84px; }
 @keyframes skel { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .skel, html.loading body::before { animation: none; } }
-.fut-img { opacity: 0; transition: opacity 0.3s ease; animation: fut-show 0.01s linear 2s forwards; }
-.fut-img.on { opacity: 1; animation: none; }
-@keyframes fut-show { to { opacity: 1; } }
-.fut-skel { fill: var(--t-ink); opacity: 0.1; animation: skel 1.3s ease-in-out infinite; pointer-events: none; }
-.fut-img.on ~ .fut-skel { display: none; }
+/* Foto's: geen laadanimatie; zodra ze geladen zijn een zachte fade van 0,3 s (PlayerCard.reveal). */
+.fut-img, .fade-img { opacity: 0; transition: opacity 0.3s ease; }
+.fut-img.on, .fade-img.on { opacity: 1; }
 /* Cijfers van een speler: vier groepen, per regel label, totaal en per wedstrijd. */
 .stat-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 6px 28px; }
 .stat-group h3 { margin: 10px 0 4px; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
@@ -798,3 +796,15 @@ details.build-form-card[open] > summary { margin-bottom: 12px; }
 /* Geen onderstreping in kaartjes: kaarten en namen in tabellen die een link zijn, blijven gewone tekst. */
 a.fut-mini, .card td a { text-decoration: none; color: inherit; }
 .card td a:hover { color: var(--brand-text); }
+
+/* Telefoon: radarknoppen en de reeks per speler horizontaal scrollbaar (op een iPhone 16 Pro zo'n vijf à zes rondjes). */
+@media (max-width: 760px) {
+  .radar-chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 -4px; padding: 0 4px 2px; }
+  .radar-chips::-webkit-scrollbar { display: none; }
+  .radar-chip { flex: none; }
+}
+@media (max-width: 600px) {
+  .sp-info .rdots { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+  .sp-info .rdots::-webkit-scrollbar { display: none; }
+  .sp-info .rdots li { flex: none; }
+}

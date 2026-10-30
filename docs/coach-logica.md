@@ -518,7 +518,9 @@ rest goud; dezelfde verdeling als met de laatste vijf.
 
 **Sessiekaart**: elke speler krijgt per sessie een eigen kaart, zoals een in-form-kaart in FC. Tier en foto volgen die
 sessie (minder dan 3 wedstrijden: goud), de zes cijfers zijn die van de avond: WED, RAT (gemiddeld), GLS | ASS, MOTM,
-WIN. De kaart van nu (spelerspagina, Selectie) blijft de carrièrecijfers van EA tonen, met de tier van de laatste
+WIN. Bij een sessie (top drie en *Spelers deze sessie*) krijgt de **buitenste rand** de kleur van de plek op
+rating die avond: goud (1), zilver (2), brons (3), en ijzer (donkergrijs) voor de rest. De binnenste rand blijft goud,
+zodat de tier (het vlak) en de plek (de rand) los te lezen zijn. Elders (nieuws) blijft de buitenrand goud. De kaart van nu (spelerspagina, Selectie) blijft de carrièrecijfers van EA tonen, met de tier van de laatste
 sessie.
 
 **Reeks per sessie**: waar het over één speler gaat, staat de vorm als de wedstrijden van één sessie, elk als rondje met

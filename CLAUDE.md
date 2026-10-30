@@ -124,8 +124,8 @@ alleen in Cloudflare.
   wedstrijd); de laatste acht wedstrijden. Advies, *Aan de bal in context* en de vorm per sessie staan voorlopig niet
   op de pagina (code blijft in `builds.js`). Spelerstabellen zijn compact, met *Alle cijfers* achter een knop.
 - Laden: elke pagina heeft `.skel`-vlakken in de containers die de render vervangt, `html.loading` (gezet door
-  `loadData`) toont een lijntje bovenaan, en kaartfoto's faden in via `PlayerCard.reveal(container)` na elke render
-  die kaarten invoegt.
+  `loadData`) toont een lijntje bovenaan, en foto's (kaarten en rondjes, `img.fade-img`) faden pas in als ze geladen
+  zijn, in 0,3 s via `PlayerCard.reveal(container)` na elke render; geen laadanimatie voor foto's.
 - Spelerspagina begint met de spelerskaart (`public/playercard.js`): FC-vorm met een tier die met de vorm meebeweegt
   (goud, zwart-goud bij *in vorm*, topvorm; coach-logica §9c; kleuren los van het thema), met foto of
   silhouet, overall, vlag, ingestelde positie, laatst gespeelde build en zes cijfers (seizoen, of face stats uit de ingevulde
@@ -136,8 +136,8 @@ alleen in Cloudflare.
   wedstrijden, niet uit de laatste vijf. Dezelfde kaart staat klein in de ledenrij op het Clubhouse (`PlayerCard.html(naam)`
   in een `.fut-mini`); `index.html` en `sessies.html` laden daarvoor `playercard.js`. `PlayerCard.tier(naam)` geeft
   de tier voor sorteren en samenvattingen. Per sessie heeft elke speler een **sessiekaart**
-  (`PlayerCard.html(naam, { session })`: tier, foto en zes cijfers van die avond), in de top drie en bij *Spelers deze
-  sessie*. Waar het over één speler gaat, staat de vorm als **reeks van één sessie** met per wedstrijd de rating
+  (`PlayerCard.html(naam, { session, rank })`: tier, foto en zes cijfers van die avond; met rank een buitenrand in goud,
+  zilver, brons of ijzer naar de plek op rating, de binnenrand blijft goud), in de top drie en bij *Spelers deze sessie*. Waar het over één speler gaat, staat de vorm als **reeks van één sessie** met per wedstrijd de rating
   (`ratingDots(rows)` uit `public/common.js`): onder de kaart op de spelerspagina en per speler bij een geopende sessie.
   Alleen de hero op het Clubhouse houdt de laatste tien uitslagen van de club.
 - Wedstrijden is alleen de lijst (eerst twintig, de rest achter een knop); een wedstrijd opent op `/wedstrijd.html?id=<matchId>` (een laag dieper) met
