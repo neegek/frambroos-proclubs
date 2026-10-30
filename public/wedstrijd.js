@@ -1,4 +1,4 @@
-// Wedstrijdpagina (een laag onder Wedstrijden): verhaal, opstellingen, wij tegen hen en spelers van één wedstrijd.
+// Wedstrijdpagina (een laag onder Wedstrijden): verhaal, de opstelling van beide teams op één veld, wij tegen hen en spelers van één wedstrijd.
 // Adres: /wedstrijd.html?id=<matchId>. Logica van de samenvatting: docs/coach-logica.md §9.
 
 const fmtTime = ts => new Date(ts * 1000).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
@@ -43,15 +43,26 @@ function matchSummary(m) {
   return parts.join(' ');
 }
 
-function pitch(players, title, link) {
-  const byLine = Object.fromEntries(LINES.map(([k]) => [k, []]));
-  for (const p of players) (byLine[p.pos] || byLine.midfielder).push(p);
-  const chip = p => {
-    const inner = `<b>${esc(link ? proName(p.name) : p.name)}</b><small>${esc(archName(p.archetypeId))} · ${p.rating ?? '–'}${p.mom ? ' · ★' : ''}</small>`;
-    return link ? `<a class="pchip" href="spelers.html#${encodeURIComponent(p.name)}">${inner}</a>` : `<div class="pchip">${inner}</div>`;
+// Opstelling (coach-logica §2, Opstelling): één veld met beide teams. Links (telefoon: boven) wij van keeper naar aanval,
+// rechts de tegenstander gespiegeld, zodat de aanvallers elkaar in het midden treffen. Per linie het aantal mensen met
+// naam en rating; per team het aantal AI-spelers. Per linie geeft EA geen AI, dus een lege linie heet "AI".
+function lineup(m) {
+  const side = (players, us) => {
+    const by = Object.fromEntries(LINES.map(([k]) => [k, []]));
+    for (const p of players) (by[p.pos] || by.midfielder).push(p);
+    const chip = p => {
+      const inner = `<b>${esc(us ? proName(p.name) : p.name)}</b><span>${p.rating === null ? '–' : f1(p.rating)}${p.mom ? ' ★' : ''}</span>`;
+      return us ? `<a class="fchip us" href="spelers.html#${encodeURIComponent(p.name)}" title="${esc(archName(p.archetypeId))}">${inner}</a>` : `<span class="fchip" title="${esc(archName(p.archetypeId))}">${inner}</span>`;
+    };
+    // Van eigen doel naar het midden: keeper, verdediging, middenveld, aanval.
+    return [...LINES].reverse().map(([k, label]) => `<div class="zone ${us ? 'us' : 'them'} z-${k}">
+      <span class="zone-head"><span class="zone-label">${label}</span><span class="zone-count" title="${by[k].length} ${by[k].length === 1 ? 'mens' : 'mensen'}">${by[k].length}</span></span>
+      <span class="zone-chips">${by[k].length ? by[k].map(chip).join('') : '<span class="fchip ai">AI</span>'}</span></div>`);
   };
-  const ai = Math.max(0, 11 - players.length);
-  return `<div class="pitch-wrap"><h3>${esc(title)}</h3><div class="pitch">${LINES.map(([k, label]) => `<div class="pitch-line"><span class="line-label">${label}</span><div class="slots">${byLine[k].length ? byLine[k].map(chip).join('') : '<span class="slot-ai">AI</span>'}</div></div>`).join('')}</div><div class="ai-note">${numWord(players.length)} ${players.length === 1 ? 'mens' : 'mensen'}, ${numWord(ai)} AI</div></div>`;
+  const head = (name, players, ai) => `<span class="fh-team"><b>${esc(name)}</b><small>${numWord(players.length)} ${players.length === 1 ? 'mens' : 'mensen'} · ${numWord(ai)} AI</small></span>`;
+  const us = side(m.players, true), them = side(m.opponentPlayers, false).reverse();
+  return `<div class="field-head">${head('Frambroos', m.players, m.ai.players)}${head(m.opponent.name, m.opponentPlayers, m.ai.opponentPlayers ?? Math.max(0, 11 - m.opponentPlayers.length))}</div>
+    <div class="field">${us.join('')}${them.join('')}</div>`;
 }
 
 function h2h(m) {
@@ -135,7 +146,7 @@ function render() {
     <div class="sl-team">${kitShirt(m.opponent.kit, m.opponent.name)}<span>${esc(m.opponent.name)}</span></div>`;
   $('#m-meta').textContent = `Tegenstander rating ${m.opponent.skillRating ?? 'onbekend'}${m.opponent.skillRating && own ? ` (jullie ${own})` : ''} · mensen: jullie ${m.players.length}, zij ${m.opponentPlayers.length}${m.winnerByDnf ? ' · tegenstander gaf op' : ''}`;
   $('#m-summary').innerHTML = matchSummary(m) + goalChain(m);
-  $('#m-pitches').innerHTML = pitch(m.players, 'Frambroos', true) + pitch(m.opponentPlayers, m.opponent.name, false);
+  $('#m-pitches').innerHTML = lineup(m);
   $('#m-h2h').innerHTML = h2h(m);
   $('#m-theirs-title').textContent = m.opponent.name;
   playerTable($('#m-ours'), m.players, true);
