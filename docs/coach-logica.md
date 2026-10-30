@@ -533,7 +533,9 @@ sessie (minder dan 3 wedstrijden: goud), de zes cijfers zijn die van de avond: W
 WIN. Bij een sessie (top drie en *Spelers deze sessie*) krijgt de **buitenste rand** de kleur van de plek op
 rating die avond: goud (1), zilver (2), brons (3), en ijzer (donkergrijs) voor de rest. De binnenste rand blijft goud,
 zodat de tier (het vlak) en de plek (de rand) los te lezen zijn. Linksboven staat dan **de plek** in plaats van de
-overall van de pro (die zegt over één avond niets); de top drie heeft daardoor geen apart nummerbolletje meer. Elders (nieuws) blijft de buitenrand goud. De kaart van nu (spelerspagina, Selectie) blijft de carrièrecijfers van EA tonen, met de tier van de laatste
+overall van de pro (die zegt over één avond niets), in een medaille in de kleur van de buitenrand; de top drie heeft
+daardoor geen apart nummerbolletje meer. Op een telefoon vallen archetype, clublogo en vlag op die kaart weg (te klein);
+op een groter scherm blijven ze staan. Elders (nieuws) blijft de buitenrand goud. De kaart van nu (spelerspagina, Selectie) blijft de carrièrecijfers van EA tonen, met de tier van de laatste
 sessie.
 
 **Reeks per sessie**: waar het over één speler gaat, staat de vorm als de wedstrijden van één sessie, elk als rondje met

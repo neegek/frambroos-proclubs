@@ -265,6 +265,15 @@ td.split small, .split small { color: var(--muted); }
 .fut.has-photo .fut-archicon, .fut.has-photo .fut-ovr img, .fut.has-photo .fut-flag { filter: drop-shadow(0 1px 2px var(--t-halo)); }
 .fut-ovr img { margin-top: 8px; }
 .fut-flag { width: 30px; height: 20px; margin-top: 8px; border-radius: 3px; box-shadow: 0 0 0 1px rgba(0,0,0,0.18); }
+/* Sessiekaart met plek (coach-logica §9c): de plek in een medaille in de kleur van de buitenrand. */
+.fut-ovr b.fut-rank { width: 52px; height: 52px; display: grid; place-items: center; border-radius: 50%; font-size: 30px; letter-spacing: -0.02em; text-shadow: none; color: #2a1d05;
+  box-shadow: inset 0 0 0 3px rgba(255,255,255,0.4), 0 2px 5px rgba(0,0,0,0.4); }
+.fut[data-rim="gold"] .fut-rank { background: linear-gradient(135deg, #fff1bd, #d9b04a 45%, #8d6c15); }
+.fut[data-rim="silver"] .fut-rank { background: linear-gradient(135deg, #ffffff, #c3c9d0 45%, #737b85); }
+.fut[data-rim="bronze"] .fut-rank { background: linear-gradient(135deg, #f6d2ae, #c27f45 45%, #74431c); color: #2b1606; }
+.fut[data-rim="iron"] .fut-rank { background: linear-gradient(135deg, #a3a9b0, #5f656d 45%, #2f3338); color: #f2f2f2; }
+/* Op een telefoon is de sessiekaart klein: alleen de medaille linksboven, zonder archetype, clublogo en vlag. */
+@media (max-width: 600px) { .fut.ranked .fut-archicon, .fut.ranked .fut-ovr img, .fut.ranked .fut-flag { display: none; } }
 .fut-photo { position: relative; display: grid; place-items: end center; min-height: 0; overflow: hidden; color: var(--t-ink); margin-right: -8px; }
 .fut-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
 .fut-icon { width: 128px; height: 128px; color: var(--t-ink); opacity: 0.28; align-self: end; }

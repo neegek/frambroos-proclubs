@@ -131,7 +131,7 @@ function cardOf(name, { session = null, key = '', rank = null } = {}) {
   const tierNames = { goud: 'goud', zwart: 'zwart-goud, in vorm', top: 'topvorm' };
   const shown = cardName(career, name);
   const col = list => `<div class="fut-col">${list.map(([l, v]) => `<div><b>${v}</b><span>${l}</span></div>`).join('')}</div>`;
-  const html = `<div class="fut${photo ? ' has-photo' : ''}" data-tier="${tier.tier}" role="img" title="Kaart: ${tierNames[tier.tier]}${tier.why ? ` (${tier.why})` : ''}" aria-label="Spelerskaart van ${esc(name)}: overall ${career?.proOverall ?? 'onbekend'}, ${info ? info.name : ''}, ${tierNames[tier.tier]}">
+  const html = `<div class="fut${photo ? ' has-photo' : ''}${rank ? ' ranked' : ''}" data-tier="${tier.tier}"${rank ? ` data-rim="${rimOf(rank)}"` : ''} role="img" title="Kaart: ${tierNames[tier.tier]}${tier.why ? ` (${tier.why})` : ''}" aria-label="Spelerskaart van ${esc(name)}: overall ${career?.proOverall ?? 'onbekend'}, ${info ? info.name : ''}, ${tierNames[tier.tier]}">
       ${futFrame(photo, `${slugOf(name)}${session === null ? '' : `-s${session}`}${key}`, rimOf(rank))}
       <div class="fut-inner">
         <div class="fut-top">
