@@ -218,10 +218,12 @@ function render() {
   renderRanking(playerTotals(ms));
 
   // Selectie als spelerskaarten (playercard.js), gesorteerd op vorm: tier, dan de rating van de laatste sessie, dan wedstrijden.
+  // De favoriet van wie de app gebruikt vooraan (coach-logica §9a), daarna op vorm.
+  const fav = favorite();
   const members = DATA.members.map(m => ({ m, t: PlayerCard.tier(m.name) }))
-    .sort((a, b) => PlayerCard.TIER_RANK[b.t.tier] - PlayerCard.TIER_RANK[a.t.tier] || (b.t.level ?? 0) - (a.t.level ?? 0) || (b.m.gamesPlayed || 0) - (a.m.gamesPlayed || 0));
+    .sort((a, b) => (b.m.name === fav) - (a.m.name === fav) || PlayerCard.TIER_RANK[b.t.tier] - PlayerCard.TIER_RANK[a.t.tier] || (b.t.level ?? 0) - (a.t.level ?? 0) || (b.m.gamesPlayed || 0) - (a.m.gamesPlayed || 0));
   $('#members').innerHTML = members.map(({ m }) => `<a class="member" href="spelers.html#${encodeURIComponent(m.name)}">
-      <span class="fut-mini">${PlayerCard.html(m.name)}</span><span class="member-tag">${esc(proName(m.name))}</span></a>`).join('');
+      <span class="fut-mini">${PlayerCard.html(m.name)}</span><span class="member-tag">${m.name === fav ? `<span class="fav-star" title="Je favoriet">${STAR}</span>` : ''}${esc(proName(m.name))}</span></a>`).join('');
   PlayerCard.reveal($('#members'));
 }
 
@@ -235,6 +237,6 @@ $('#rank-more').addEventListener('click', e => {
   e.currentTarget.textContent = open ? 'Minder ranglijsten' : 'Alle ranglijsten';
 });
 
-addEventListener('resize', () => DATA && formChart($('#chart-form'), DATA.matches));
+onWidthChange(() => DATA && formChart($('#chart-form'), DATA.matches));
 window.rerender = () => render();
 Promise.all([loadData(), PlayerCard.load().catch(() => {})]).then(render).catch(showError);

@@ -379,12 +379,13 @@ Geen reeksen: die staan al in de rondjes bovenaan.
 
 **Spelerspagina** (sinds 28 oktober 2026, zonder tabbladen): één pagina, van boven naar beneden:
 1. De spelerskaart, met daaronder alleen de **vorm**: de reeks van de sessie die de vorm bepaalt (§9c), per wedstrijd
-   de rating als rondje. Geen lijst met pro, taak,
+   de rating als rondje, de datum erboven en de rondjes op **één rij** (past het niet, dan horizontaal scrollen; nooit
+   meer dan de wedstrijden van één sessie). Geen lijst met pro, taak,
    builds en signature meer: wat erop staat, staat op de kaart; de builds staan in de cijfers.
 2. De samenvatting (hierboven) met de **drie cijfers** over de gekozen periode (goals per wedstrijd, assists per
    wedstrijd, winstpercentage met deze speler erbij).
-3. **Cijfers**: één lijst met alles wat voor een speler telt, in vier groepen, elk als totaal met per wedstrijd
-   ernaast (percentages met de breuk). *Algemeen*: wedstrijden, minuten per wedstrijd, rating, Frambroos-index,
+3. **Cijfers**: één lijst met alles wat voor een speler telt, in vier groepen, in **vaste kolommen** zodat je
+   verticaal kunt lezen: het label, dan per wedstrijd (of de breuk bij een percentage), en helemaal rechts het totaal. *Algemeen*: wedstrijden, minuten per wedstrijd, rating, Frambroos-index,
    man of the match, builds gespeeld (met aantal, laatst gespeelde eerst). *Aanvallen*: goals, assists, tweede
    assists, schoten, conversie, dribbels, tegenstanders uitgespeeld. *Passen*: passes gelukt van pogingen,
    steekpasses, aandeel vooruit. *Verdedigen*: balwinst, onderscheppingen, tackles gewonnen van pogingen, de nul
@@ -393,6 +394,10 @@ Geen reeksen: die staan al in de rondjes bovenaan.
 4. De laatste acht wedstrijden, de rest achter een knop.
 Het advies (§8), *Aan de bal in context* (§4a), de vormgrafiek per sessie en het buildformulier staan voorlopig niet
 op de pagina; de code blijft, zodat ze terug kunnen als het eerste scherm klaar is.
+
+**Favoriet** (sinds 31 oktober 2026): wie de app gebruikt, kan één speler als favoriet kiezen met de ster op de
+spelerspagina (nog eens tikken haalt hem weg). Dat wordt per browser onthouden, niet gedeeld. De favoriet opent als je
+*Spelers* opent zonder naam, staat vooraan bij de namen en in de Selectie op het Clubhouse, met een ster.
 
 **Laden**: elke pagina toont meteen de opbouw met grijze, zacht pulserende vlakken op de plek van kaart, tekst en
 lijsten tot de data er is, en een dun bewegend lijntje bovenaan zolang er wordt geladen. Foto's op de kaart komen

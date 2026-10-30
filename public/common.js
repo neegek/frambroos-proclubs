@@ -53,6 +53,16 @@ function fillPlayerNav() {
 }
 addEventListener('hashchange', () => fillPlayerNav());
 
+// Alleen opnieuw tekenen als de breedte echt verandert: op een telefoon geeft het in- en uitklappen van de adresbalk bij
+// het scrollen ook een resize, en dan zouden kaarten en foto's opnieuw verschijnen.
+function onWidthChange(fn) { let w = innerWidth; addEventListener('resize', () => { if (innerWidth !== w) { w = innerWidth; fn(); } }); }
+
+// Favoriete speler van wie de app gebruikt (coach-logica §9a): er is er hooguit één, onthouden per browser.
+const FAV_KEY = 'favoritePlayer';
+const favorite = () => { try { return localStorage.getItem(FAV_KEY); } catch { return null; } };
+const setFavorite = name => { try { name ? localStorage.setItem(FAV_KEY, name) : localStorage.removeItem(FAV_KEY); } catch {} };
+const STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z" fill="currentColor"/></svg>';
+
 const showError = e => { const b = $('#club-box .club-meta'); if (b) b.textContent = `Kon data niet laden: ${e.message}`; console.error(e); };
 
 let DATA = null;

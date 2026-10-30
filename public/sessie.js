@@ -218,7 +218,7 @@ function renderRadar(sess, ms) {
   $('#s-radar-line').innerHTML = sel ? `<b>${esc(proName(sel.name))}</b>: ${RADAR_AXES.map(a => sel.st[a.key] === null ? `${a.label.toLowerCase()} te weinig` : a.fmt(sel.st[a.key])).join(' · ')}` : 'Tik op een naam voor de cijfers.';
 }
 
-addEventListener('resize', () => DATA && render());
+onWidthChange(() => DATA && render());
 window.rerender = () => render(); // thema wisselen: kaarten opnieuw in thuis- of uitkleuren
 Promise.all([loadData(), PlayerCard.load().catch(() => {})]).then(() => { sessions = sessionsOf(DATA.matches); render(); }).catch(showError);
 

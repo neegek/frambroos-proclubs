@@ -67,7 +67,8 @@ function playerSummary(name, rows, ms, players) {
   return parts.join(' ');
 }
 
-// Eén lijst met alles wat voor een speler telt (coach-logica §9a): per regel het totaal en per wedstrijd, percentages met de breuk.
+// Eén lijst met alles wat voor een speler telt (coach-logica §9a), in vaste kolommen: label, per wedstrijd (of de breuk bij
+// een percentage), en helemaal rechts het totaal.
 function statGroups(rows) {
   const n = rows.length, e = evRows(rows), ne = e.length;
   const t = f => sum(rows, r => f(r.p)), te = f => sum(e, r => f(r.p.ev));
@@ -104,24 +105,30 @@ function statGroups(rows) {
       ne ? count('Balverlies', te(v => v.possession_lost), ne) : null,
       ne ? ratio('Uit positie', te(v => v.out_of_position), te(v => v.out_of_position + v.in_position)) : null,
       ne ? count('Overtredingen', te(v => v.fouls_conceded_total), ne) : null,
-      plain('Kaarten', `${ne ? te(v => v.yellow_cards_total) : '–'} geel · ${t(p => p.redCards)} rood`),
+      ne ? plain('Kaarten', String(te(v => v.yellow_cards_total) + t(p => p.redCards)), `${te(v => v.yellow_cards_total)} geel · ${t(p => p.redCards)} rood`) : plain('Kaarten', String(t(p => p.redCards)), 'rood'),
     ]],
   ];
   return groups.map(([title, items]) => `<section class="stat-group"><h3>${title}</h3>${items.filter(Boolean).map(it => it.builds !== undefined
     ? `<div class="stat-row has-builds"><span>${it.label}</span><span class="builds">${it.builds || '–'}</span></div>`
-    : `<div class="stat-row"><span>${it.label}</span><b>${it.main}</b><small>${it.sub}</small></div>`).join('')}</section>`).join('');
+    : `<div class="stat-row"><span>${it.label}</span><small>${it.sub}</small><b>${it.main}</b></div>`).join('')}</section>`).join('');
 }
 
 function renderPlayer() {
   const ms = filtered(), players = DATA.players;
-  if (!selected || !players.includes(selected)) selected = players.includes('Neegek') ? 'Neegek' : players[0];
+  // Zonder naam in het adres: de favoriet van wie de app gebruikt, anders Neegek. De favoriet staat vooraan met een ster.
+  const fav = players.includes(favorite()) ? favorite() : null;
+  if (!selected || !players.includes(selected)) selected = fav || (players.includes('Neegek') ? 'Neegek' : players[0]);
   location.hash = encodeURIComponent(selected);
-  $('#chips').innerHTML = players.map(p => `<button type="button" class="chip ${p === selected ? 'active' : ''}" data-p="${esc(p)}">${esc(proName(p))}</button>`).join('');
+  const order = fav ? [fav, ...players.filter(p => p !== fav)] : players;
+  $('#chips').innerHTML = order.map(p => `<button type="button" class="chip ${p === selected ? 'active' : ''}" data-p="${esc(p)}">${p === fav ? `<span class="fav-star">${STAR}</span>` : ''}${esc(proName(p))}</button>`).join('');
   for (const b of $('#chips').querySelectorAll('.chip')) b.addEventListener('click', () => { selected = b.dataset.p; renderPlayer(); });
 
   const rows = rowsFor(ms, selected), s = summarize(rows.map(r => r.m));
   const n = rows.length || 1, g = sum(rows, r => r.p.goals), as = sum(rows, r => r.p.assists);
   window.PlayerCard.render(selected);
+  const on = fav === selected;
+  $('#player-hero').insertAdjacentHTML('afterbegin', `<button type="button" class="fav-btn" aria-pressed="${on}" title="${on ? 'Favoriet: tik om weg te halen' : 'Maak deze speler je favoriet (er kan er één zijn)'}">${STAR}${on ? 'Favoriet' : 'Favoriet maken'}</button>`);
+  $('#player-hero .fav-btn').addEventListener('click', () => { setFavorite(on ? null : selected); renderPlayer(); });
   document.title = `${proName(selected)} · Frambroos Coach`;
   $('#p-summary').innerHTML = playerSummary(selected, rows, ms, players);
   // Drie cijfers over de gekozen periode (coach-logica §9a).
@@ -149,7 +156,7 @@ function renderPlayer() {
 const PM_SHOWN = 8;
 
 for (const id of ['#range', '#type']) $(id).addEventListener('change', () => DATA && renderPlayer());
-addEventListener('resize', () => DATA && renderPlayer());
+onWidthChange(() => DATA && renderPlayer());
 // Andere speler in het menu: meteen tekenen als de data er is, anders onthouden voor zodra die geladen is.
 addEventListener('hashchange', () => { const n = decodeURIComponent(location.hash.slice(1)); if (n && n !== selected) { selected = n; if (DATA) renderPlayer(); } });
 selected = decodeURIComponent(location.hash.slice(1)) || null;

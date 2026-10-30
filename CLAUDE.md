@@ -148,6 +148,9 @@ alleen in Cloudflare.
   `PlayerCard.portrait`, bij de tegenstander het archetype-icoon) met de rating eronder; per linie het aantal mensen,
   per team het aantal AI-spelers (`m.ai`). Liggend op een groot scherm; vanaf 900 px de teams naast elkaar in vier
   vlakken onder elkaar. `wedstrijd.html` laadt daarvoor `playercard.js`. AI per linie geeft EA niet.
+- Favoriet: één speler per browser (`favorite()`/`setFavorite()` in `public/common.js`, localStorage), te kiezen met de
+  ster op de spelerspagina; opent standaard bij *Spelers*, staat vooraan bij de namen en in de Selectie. Opnieuw tekenen
+  bij een andere breedte gaat via `onWidthChange(fn)`, nooit via een kale resize (adresbalk op telefoon).
 - Wedstrijden is alleen de lijst (eerst twintig, de rest achter een knop); een wedstrijd opent op `/wedstrijd.html?id=<matchId>` (een laag dieper) met
   "Terug naar wedstrijden" bovenaan. Link naar wedstrijden altijd via dat adres.
 
