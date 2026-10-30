@@ -418,8 +418,8 @@ wedstrijden (met W-G-V), doelsaldo (met de badge tov verwachting), passnauwkeuri
 eronder (alle andere wedstrijden). Daarnaast de **top drie van de avond** als sessiekaarten (§9c) op rating over
 deze avond, als waaier: de beste vooraan en groot, nummer twee en drie erachter en iets lager, elk met plek en rating.
 Bij nul punten heet het "hield het best stand", maar de kaarten blijven hetzelfde. Man of the match staat als kroon
-bij de speler. *Spelers deze sessie* toont per speler, op rating: de sessiekaart klein, de naam, de plek als medaille met de
-groei (§9c), en de reeks van de avond met per wedstrijd de rating (§9c). Geen vergelijkingen per maat. De deelkaart (afbeelding van
+bij de speler. *Spelers deze sessie* toont per speler, op rating: de sessiekaart klein (met de plek), de naam, de rating van de
+avond met de groei (§9c), en de reeks van de avond met per wedstrijd de rating (§9c). Geen vergelijkingen per maat. De deelkaart (afbeelding van
 1080×1080 in thuiskleuren) toont W-G-V, winstpercentage, doelsaldo, uitblinker, meeste goals
 plus assists en de eerste twee zinnen van de samenvatting.
 
@@ -520,9 +520,9 @@ omdat het eigen normaal al hoog ligt.
 | **Zwart-goud** (in vorm) | niveau ≥ 7,0 (sinds 29 oktober 2026; daarvoor 7,5) **of** (minstens 8 wedstrijden in totaal en groei ≥ 0,3) | zwart met gouden rand en gouden cijfers |
 | **Topvorm** | niveau ≥ 8,0 **en** minstens 60 % van de sessie gewonnen | diepblauw met gouden stippen en gouden accenten |
 
-In de sessiedetails staat bij elke speler de **plek op rating** die avond als medaille in de kleur van de rand (goud,
-zilver, brons, ijzer) met de groei ernaast, zonder het woord *groei* (sinds 30 oktober 2026). Geen rating (de kaart
-toont RAT al), geen tier-label (de kaart zegt het al) en geen "normaal": de groei zegt al of het beter of slechter was. Speelde iemand minder dan 3 potten,
+In de sessiedetails staat bij elke speler de **rating van de avond** met de groei ernaast, zonder het woord *groei*
+(sinds 30 oktober 2026). Geen tier-label (de kaart zegt het al) en geen "normaal": de groei zegt al of het beter of
+slechter was. De **plek op rating** staat op de sessiekaart zelf, op de plek van de overall (zie Sessiekaart). Speelde iemand minder dan 3 potten,
 dan staat er dat het niet telt voor de vorm.
 
 Doorgerekend op 28 oktober 2026 (laatste sessie): KFH Guip 023 en Neegek topvorm, Xero 023 en Highnis 023 in vorm, de
@@ -532,7 +532,8 @@ rest goud; dezelfde verdeling als met de laatste vijf.
 sessie (minder dan 3 wedstrijden: goud), de zes cijfers zijn die van de avond: WED, RAT (gemiddeld), GLS | ASS, MOTM,
 WIN. Bij een sessie (top drie en *Spelers deze sessie*) krijgt de **buitenste rand** de kleur van de plek op
 rating die avond: goud (1), zilver (2), brons (3), en ijzer (donkergrijs) voor de rest. De binnenste rand blijft goud,
-zodat de tier (het vlak) en de plek (de rand) los te lezen zijn. Elders (nieuws) blijft de buitenrand goud. De kaart van nu (spelerspagina, Selectie) blijft de carrièrecijfers van EA tonen, met de tier van de laatste
+zodat de tier (het vlak) en de plek (de rand) los te lezen zijn. Linksboven staat dan **de plek** in plaats van de
+overall van de pro (die zegt over één avond niets); de top drie heeft daardoor geen apart nummerbolletje meer. Elders (nieuws) blijft de buitenrand goud. De kaart van nu (spelerspagina, Selectie) blijft de carrièrecijfers van EA tonen, met de tier van de laatste
 sessie.
 
 **Reeks per sessie**: waar het over één speler gaat, staat de vorm als de wedstrijden van één sessie, elk als rondje met

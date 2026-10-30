@@ -126,7 +126,7 @@ function render() {
   // Top drie als sessiekaarten (tier, foto en cijfers van deze avond, coach-logica §9c), de beste vooraan.
   const top = prow.filter(r => r.rH !== null).slice(0, 3);
   $('#s-podium').innerHTML = top.map((r, i) => `<a class="podium-card p${i + 1}" href="spelers.html#${encodeURIComponent(r.name)}" title="${esc(proName(r.name))}: rating ${f1(r.rH)} deze avond">
-      <span class="podium-rank">${i + 1}</span><span class="fut-mini">${PlayerCard.html(r.name, { session: s.id, key: '-p', rank: i + 1 })}</span><span class="podium-rating">${f1(r.rH)}${r.mom ? ' <span class="crown" title="Man of the match">♛</span>' : ''}</span></a>`).join('');
+      <span class="fut-mini">${PlayerCard.html(r.name, { session: s.id, key: '-p', rank: i + 1 })}</span><span class="podium-rating">${f1(r.rH)}${r.mom ? ' <span class="crown" title="Man of the match">♛</span>' : ''}</span></a>`).join('');
   PlayerCard.reveal($('#s-podium'));
   // Per speler de sessiekaart, de rating van de avond tegenover normaal, en de reeks met per wedstrijd de rating.
   $('#s-players').innerHTML = `<div class="splayers">${prow.map((r, i) => {
@@ -134,21 +134,19 @@ function render() {
     return `<div class="sp-item">
       <a class="fut-mini" href="spelers.html#${encodeURIComponent(r.name)}" aria-label="${esc(proName(r.name))}">${PlayerCard.html(r.name, { session: s.id, key: '-l', rank: r.rH === null ? null : i + 1 })}</a>
       <div class="sp-info"><div class="pcard-head"><a class="pcard-name" href="spelers.html#${encodeURIComponent(r.name)}">${esc(proName(r.name))}</a>${r.mom ? ' <span class="crown" title="Man of the match">♛</span>' : ''}</div>
-        ${formLine(r.name, s.id, r.rH === null ? null : i + 1, rows.length)}
+        ${formLine(r.name, s.id, r.rH, rows.length)}
         ${ratingDots(rows)}</div></div>`;
   }).join('')}</div>`;
   PlayerCard.reveal($('#s-players'));
   renderRadar(s, ms);
 }
 
-// Per speler over deze avond (coach-logica §9c), één keer: de plek op rating als medaille in de kleur van de rand van de
-// kaart, met de groei ernaast (zonder het woord). Geen rating (RAT staat op de kaart), geen tier-label, geen "normaal".
-const MEDAL = rank => rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : 'iron';
-function formLine(name, sid, rank, n) {
+// Per speler over deze avond (coach-logica §9c), één keer: de rating van de avond met de groei ernaast (zonder het
+// woord). De plek staat op de kaart zelf; geen tier-label (de kaart zegt het al) en geen "normaal" (de groei zegt het al).
+function formLine(name, sid, rating, n) {
   const t = PlayerCard.sessionTier(name, sid);
-  const medal = rank ? `<span class="medal ${MEDAL(rank)}" title="Plek ${rank} op rating deze avond">${rank}</span>` : '';
   const extra = n < 3 ? '<span class="sp-note">minder dan 3 potten, telt niet voor de vorm</span>' : t.growth === null ? '' : `<span class="sp-growth" title="Groei: verschil met het eigen normaal, rating plus winst">${growthCell(t.growth)}</span>`;
-  return `<div class="pcard-sub sp-line">${medal}${extra}</div>`;
+  return `<div class="pcard-sub sp-line"><b class="sp-rating">${f1(rating)}</b>${extra}</div>`;
 }
 
 // ---------- radar van de avond (coach-logica §9a) ----------

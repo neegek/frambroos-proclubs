@@ -110,7 +110,7 @@ function lastArch(rows) { const r = [...rows].reverse().find(x => x.p.archetypeI
 const photoOf = (name, tier) => (tier !== 'goud' && PHOTOS[`${slugOf(name)}-vorm`]) || PHOTOS[slugOf(name)] || null;
 
 // Zonder session de kaart van nu (carrièrecijfers van EA, tier van de laatste sessie); met session de sessiekaart:
-// tier, foto en zes cijfers van die avond (coach-logica §9c). key maakt de SVG-ids uniek als een kaart vaker op een pagina staat.
+// tier, foto en zes cijfers van die avond (coach-logica §9c); met rank linksboven de plek op rating in plaats van de overall. key maakt de SVG-ids uniek als een kaart vaker op een pagina staat.
 function cardOf(name, { session = null, key = '', rank = null } = {}) {
   const all = DATA.matches.map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p);
   const rows = session === null ? all : all.filter(r => r.m.session === session);
@@ -135,7 +135,7 @@ function cardOf(name, { session = null, key = '', rank = null } = {}) {
       ${futFrame(photo, `${slugOf(name)}${session === null ? '' : `-s${session}`}${key}`, rimOf(rank))}
       <div class="fut-inner">
         <div class="fut-top">
-          <div class="fut-ovr"><b>${career?.proOverall ?? '–'}</b>${arch ? `<span class="fut-archicon" title="${esc(archName(arch))}">${archIcon(arch)}</span>` : ''}<img src="crest.png" alt="" width="34" height="34">${flag(career?.proNationality)}</div>
+          <div class="fut-ovr">${rank ? `<b class="fut-rank" title="Plek ${rank} op rating deze avond">${rank}</b>` : `<b>${career?.proOverall ?? '–'}</b>`}${arch ? `<span class="fut-archicon" title="${esc(archName(arch))}">${archIcon(arch)}</span>` : ''}<img src="crest.png" alt="" width="34" height="34">${flag(career?.proNationality)}</div>
           <div class="fut-photo">${photo ? '' : personIcon()}</div>
         </div>
         <div class="fut-bottom">
