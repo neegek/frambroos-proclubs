@@ -415,8 +415,8 @@ wedstrijden (met W-G-V), doelsaldo (met de badge tov verwachting), passnauwkeuri
 eronder (alle andere wedstrijden). Daarnaast de **top drie van de avond** als sessiekaarten (§9c) op rating over
 deze avond, als waaier: de beste vooraan en groot, nummer twee en drie erachter en iets lager, elk met plek en rating.
 Bij nul punten heet het "hield het best stand", maar de kaarten blijven hetzelfde. Man of the match staat als kroon
-bij de speler. *Spelers deze sessie* toont per speler, op rating: de sessiekaart klein, de naam, de gemiddelde rating met het
-verschil met normaal, en de reeks van de avond met per wedstrijd de rating (§9c). Geen vergelijkingen per maat. De deelkaart (afbeelding van
+bij de speler. *Spelers deze sessie* toont per speler, op rating: de sessiekaart klein, de naam, de gemiddelde rating met de
+groei (§9c), en de reeks van de avond met per wedstrijd de rating (§9c). Geen vergelijkingen per maat. De deelkaart (afbeelding van
 1080×1080 in thuiskleuren) toont W-G-V, winstpercentage, doelsaldo, uitblinker, meeste goals
 plus assists en de eerste twee zinnen van de samenvatting.
 
@@ -508,8 +508,10 @@ omdat het eigen normaal al hoog ligt.
 | **Zwart-goud** (in vorm) | niveau ≥ 7,0 (sinds 29 oktober 2026; daarvoor 7,5) **of** (minstens 8 wedstrijden in totaal en groei ≥ 0,3) | zwart met gouden rand en gouden cijfers |
 | **Topvorm** | niveau ≥ 8,0 **en** minstens 60 % van de sessie gewonnen | diepblauw met gouden stippen en gouden accenten |
 
-In de sessiedetails staat bij elke speler de **vormscore van die avond**: de tier als label, het niveau en de groei
-(sinds 29 oktober 2026), zodat je ziet waarom een kaart van kleur verandert.
+In de sessiedetails staat bij elke speler de **vormscore van die avond**, één keer: de gemiddelde rating (het niveau)
+met de groei ernaast (sinds 30 oktober 2026). Geen tier-label (de kaart zegt het al), geen tweede regel met hetzelfde
+niveau en geen "normaal": de groei zegt al of het beter of slechter was dan normaal. Speelde iemand minder dan 3 potten,
+dan staat er dat het niet telt voor de vorm.
 
 Doorgerekend op 28 oktober 2026 (laatste sessie): KFH Guip 023 en Neegek topvorm, Xero 023 en Highnis 023 in vorm, de
 rest goud; dezelfde verdeling als met de laatste vijf.
