@@ -72,6 +72,8 @@ alleen in Cloudflare.
 - Over spelers geen *hij* of *zij*. Waar de app over onze spelers praat of ze noemt (samenvattingen, nieuws, ranglijsten,
   menu, knoppen), staat de **naam van de pro** (Terry Yaki), niet de accountnaam (Neegek): `proName(naam)` uit
   `public/common.js`. Links en hashes houden de accountnaam; tegenstanders houden hun EA-naam.
+- Getallen overal met **één decimaal** (`f1`); sorteren op het exacte getal. Groei via `fmtGrowth`/`growthCell`: één
+  decimaal, zonder ",0" bij een heel getal, zonder het woord *groei* (coach-logica §9).
 - Attribuutnamen in het Engels zoals in het spel (Ball Control, Short Passing, ...); de rest van de app in het Nederlands.
 - Stijl: donker thuistenue (standaard) en licht uittenue; tokens staan bovenaan `public/style.css`. Nieuwe kleuren eerst
   op contrast controleren: tekst ≥ 4,5:1, grafische elementen ≥ 3:1. Datakleuren (winst blauw, verlies rood) niet aanpassen.
@@ -140,6 +142,10 @@ alleen in Cloudflare.
   zilver, brons of ijzer naar de plek op rating, de binnenrand blijft goud), in de top drie en bij *Spelers deze sessie*. Waar het over één speler gaat, staat de vorm als **reeks van één sessie** met per wedstrijd de rating
   (`ratingDots(rows)` uit `public/common.js`): onder de kaart op de spelerspagina en per speler bij een geopende sessie.
   Alleen de hero op het Clubhouse houdt de laatste tien uitslagen van de club.
+- Bij *Spelers deze sessie* per speler de plek op rating als medaille (`.medal`, goud/zilver/brons/ijzer als de rand van
+  de kaart) met de groei; geen rating, tier-label of "normaal". De wedstrijdpagina toont de opstelling als één veld met
+  beide teams (`lineup(m)` in `public/wedstrijd.js`): per linie het aantal mensen met naam en rating, per team het aantal
+  AI-spelers (`m.ai`); liggend op een groot scherm, staand vanaf 900 px.
 - Wedstrijden is alleen de lijst (eerst twintig, de rest achter een knop); een wedstrijd opent op `/wedstrijd.html?id=<matchId>` (een laag dieper) met
   "Terug naar wedstrijden" bovenaan. Link naar wedstrijden altijd via dat adres.
 

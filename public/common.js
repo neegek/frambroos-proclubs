@@ -246,8 +246,11 @@ const summarize = list => {
 const lineupOf = m => m.players.map(p => proName(p.name)).sort().join(' · ');
 const deltaCell = (d, unit = ' pt', digits = 0) => d === null || d === undefined ? '–' : `<span class="${d > 0.005 ? 'delta-pos' : d < -0.005 ? 'delta-neg' : ''}">${d > 0 ? '+' : ''}${(+d).toFixed(digits)}${unit}</span>`;
 const avg = xs => xs.length ? xs.reduce((x, y) => x + y, 0) / xs.length : null;
-const residCell = v => deltaCell(v, '', 2);
-const f1 = v => v === null || v === undefined ? '–' : (+v).toFixed(1), f2 = v => v === null || v === undefined ? '–' : (+v).toFixed(2);
+const residCell = v => deltaCell(v, '', 1);
+// Groei (coach-logica §9c): één decimaal, zonder ",0" bij een heel getal (+1, -0.4); groen boven nul, rood eronder.
+const fmtGrowth = v => { const r = Math.round(v * 10) / 10; return `${r > 0 ? '+' : ''}${Number.isInteger(r) ? r : r.toFixed(1)}`; };
+const growthCell = v => v === null || v === undefined ? '' : `<span class="${v >= 0.05 ? 'delta-pos' : v <= -0.05 ? 'delta-neg' : ''}">${fmtGrowth(v)}</span>`;
+const f1 = v => v === null || v === undefined ? '–' : (+v).toFixed(1);
 const splitCell = (w, r, fmt = v => v) => (w === null || w === undefined) && (r === null || r === undefined) ? '–' : `<span class="split"><span class="res-W">${fmt(w)}</span> <small>/</small> <span class="res-L">${fmt(r)}</span></span>`;
 // Correlatie waarbij positief slecht nieuws is (meer gemiste tackles, meer schoten tegen): rood boven 0,3.
 const corrCell = v => v === null || v === undefined ? '–' : `<span class="${v >= 0.3 ? 'delta-neg' : v <= -0.3 ? 'delta-pos' : ''}">${v.toFixed(2)}</span>`;

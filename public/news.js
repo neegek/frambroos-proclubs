@@ -21,7 +21,7 @@ function articleFor(sess, latest) {
   const top = names.map(n => ({ n, now: PlayerCard.tierOf(rowsOf(upTo, n)), was: PlayerCard.tierOf(rowsOf(before, n)) }))
     .filter(x => x.now.tier === 'top' && x.was.tier !== 'top').sort((a, b) => b.now.level - a.now.level);
   if (top.length) c.push({ tag: 'Topvorm', title: `${joinAnd(top.map(x => esc(proName(x.n))))} in topvorm`,
-    body: `${joinAnd(top.map(x => `${esc(proName(x.n))} ${f2(x.now.level)}`))} gemiddeld deze avond, en het team won er het grootste deel van.`,
+    body: `${joinAnd(top.map(x => `${esc(proName(x.n))} ${f1(x.now.level)}`))} gemiddeld deze avond, en het team won er het grootste deel van.`,
     visual: `<div class="news-cards">${top.slice(0, 3).map(x => `<span class="fut-mini">${PlayerCard.html(x.n, { session: sess.id })}</span>`).join('')}</div>` });
 
   // Uitschieter: de hoogste rating van de avond, vanaf 9,0.
@@ -64,7 +64,7 @@ function articleFor(sess, latest) {
   // Een avond met minder dan één punt per wedstrijd is zelf het nieuws; een uitblinker verandert dat niet.
   if (c.length && s.ppg >= 1) return { ...base, ...c[0], body: `${c[0].body} ${nightLine}` };
   return { ...base, tag: 'Speelavond', title: capFirst(joinAnd(parts)), visual: formDots(night, { links: false }),
-    body: `${plural(night.length, 'wedstrijd', 'wedstrijden')} op ${weekday}, doelsaldo ${signed(gd, 0)}.${best ? ` Beste speler: ${esc(proName(best.n))} met gemiddeld ${f2(best.v)}.` : ''}` };
+    body: `${plural(night.length, 'wedstrijd', 'wedstrijden')} op ${weekday}, doelsaldo ${signed(gd, 0)}.${best ? ` Beste speler: ${esc(proName(best.n))} met gemiddeld ${f1(best.v)}.` : ''}` };
 }
 
 // Alle artikelen, nieuwste eerst: één per sessie van minstens twee wedstrijden.

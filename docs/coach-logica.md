@@ -258,6 +258,9 @@ Daarnaast *Positiespel en keuzes* en *Al sterk*.
 
 ## 9. Schrijfregels
 
+- **Getallen** (sinds 30 oktober 2026): overal **één decimaal** (8.4, 0.6 per wedstrijd). Sorteren en rangschikken
+  gebeurt op het exacte getal, zodat twee gelijk afgeronde scores toch een vaste volgorde hebben. De **groei** (§9c)
+  ook met één decimaal en zonder ",0" als het een heel getal is (+1, −0.4); het woord *groei* staat er niet bij.
 - Nederlands. Over spelers geen *hij* of *zij*: gebruik de naam, *deze speler* of *je*. De naam is die van de pro
   (Terry Yaki, Petra Selie), niet de accountnaam; dat houdt de roleplay heel (sinds 27 oktober 2026).
 - Samenvattingen zijn **één korte alinea van drie of vier zinnen** die vertelt wat er gebeurde, **zonder cijfers op te
@@ -415,7 +418,7 @@ wedstrijden (met W-G-V), doelsaldo (met de badge tov verwachting), passnauwkeuri
 eronder (alle andere wedstrijden). Daarnaast de **top drie van de avond** als sessiekaarten (§9c) op rating over
 deze avond, als waaier: de beste vooraan en groot, nummer twee en drie erachter en iets lager, elk met plek en rating.
 Bij nul punten heet het "hield het best stand", maar de kaarten blijven hetzelfde. Man of the match staat als kroon
-bij de speler. *Spelers deze sessie* toont per speler, op rating: de sessiekaart klein, de naam, de gemiddelde rating met de
+bij de speler. *Spelers deze sessie* toont per speler, op rating: de sessiekaart klein, de naam, de plek als medaille met de
 groei (§9c), en de reeks van de avond met per wedstrijd de rating (§9c). Geen vergelijkingen per maat. De deelkaart (afbeelding van
 1080×1080 in thuiskleuren) toont W-G-V, winstpercentage, doelsaldo, uitblinker, meeste goals
 plus assists en de eerste twee zinnen van de samenvatting.
@@ -438,6 +441,12 @@ de rest vanavond". De assen:
 Ontbreekt een maat (te weinig pogingen), dan staat de speler daar op 0 en zegt de regel eronder "te weinig". Elke
 speler heeft zijn vaste kleur. Eronder één knop per speler; een tik licht die speler uit (de rest wordt vaag) en
 toont de echte waarden in één regel. Spelers met één wedstrijd die avond doen niet mee: één pot zegt te weinig.
+
+**Opstelling** (wedstrijdpagina, sinds 30 oktober 2026): één veld met beide teams, liggend op een groot scherm en
+staand op een telefoon. Links (of boven) wij, van keeper naar aanval; rechts (of onder) de tegenstander, gespiegeld,
+zodat de aanvallers elkaar in het midden treffen. Per linie (keeper, verdediging, middenveld, aanval) het aantal
+mensen en hun namen met rating; per team bovenaan het aantal mensen en het aantal AI-spelers (11 min de mensen).
+Hoeveel AI-spelers er per linie stonden geeft EA niet, dus dat tonen we niet; een linie zonder mensen heet "AI".
 
 **Tweede assist** (EA-code 115, `second_assists`, zekerheid *waarschijnlijk*): de pass vóór de assist. EA geeft alleen
 het aantal per speler per wedstrijd, niet bij welke goal. Alleen als we in een wedstrijd precies één keer scoren, is
@@ -508,9 +517,9 @@ omdat het eigen normaal al hoog ligt.
 | **Zwart-goud** (in vorm) | niveau ≥ 7,0 (sinds 29 oktober 2026; daarvoor 7,5) **of** (minstens 8 wedstrijden in totaal en groei ≥ 0,3) | zwart met gouden rand en gouden cijfers |
 | **Topvorm** | niveau ≥ 8,0 **en** minstens 60 % van de sessie gewonnen | diepblauw met gouden stippen en gouden accenten |
 
-In de sessiedetails staat bij elke speler de **vormscore van die avond**, één keer: de gemiddelde rating (het niveau)
-met de groei ernaast (sinds 30 oktober 2026). Geen tier-label (de kaart zegt het al), geen tweede regel met hetzelfde
-niveau en geen "normaal": de groei zegt al of het beter of slechter was dan normaal. Speelde iemand minder dan 3 potten,
+In de sessiedetails staat bij elke speler de **plek op rating** die avond als medaille in de kleur van de rand (goud,
+zilver, brons, ijzer) met de groei ernaast, zonder het woord *groei* (sinds 30 oktober 2026). Geen rating (de kaart
+toont RAT al), geen tier-label (de kaart zegt het al) en geen "normaal": de groei zegt al of het beter of slechter was. Speelde iemand minder dan 3 potten,
 dan staat er dat het niet telt voor de vorm.
 
 Doorgerekend op 28 oktober 2026 (laatste sessie): KFH Guip 023 en Neegek topvorm, Xero 023 en Highnis 023 in vorm, de

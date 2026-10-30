@@ -71,7 +71,7 @@ function playerSummary(name, rows, ms, players) {
 function statGroups(rows) {
   const n = rows.length, e = evRows(rows), ne = e.length;
   const t = f => sum(rows, r => f(r.p)), te = f => sum(e, r => f(r.p.ev));
-  const count = (label, total, games = n) => ({ label, main: String(total), sub: games ? `${(total / games).toFixed(2)} p/w` : '' });
+  const count = (label, total, games = n) => ({ label, main: String(total), sub: games ? `${(total / games).toFixed(1)} p/w` : '' });
   const ratio = (label, num, den) => ({ label, main: den ? fmtPct(pct(num, den)) : '–', sub: `${num} van ${den}` });
   const plain = (label, main, sub = '') => ({ label, main, sub });
   const ratings = rows.map(r => r.p.rating).filter(v => v !== null), fi = fiForRows(rows.map(r => r.p).filter(p => p.fi !== null));
@@ -82,7 +82,7 @@ function statGroups(rows) {
   const groups = [
     ['Algemeen', [
       plain('Wedstrijden', String(n)), plain('Minuten per wedstrijd', n ? f0(minutes(rows) / n) : '–'),
-      plain('Rating', ratings.length ? f2(avg(ratings)) : '–', 'gemiddeld'), plain('Frambroos-index', fiFmt(fi.score), fi.score === null ? 'minstens 3 wedstrijden' : fiLabel(fi.score)),
+      plain('Rating', ratings.length ? f1(avg(ratings)) : '–', 'gemiddeld'), plain('Frambroos-index', fiFmt(fi.score), fi.score === null ? 'minstens 3 wedstrijden' : fiLabel(fi.score)),
       count('Man of the match', t(p => p.mom)),
       { label: 'Builds gespeeld', builds: builds.map(([id, k]) => `<span class="pc-badge ${Number(id) === last ? 'on' : ''}">${esc(archName(id))} <small>${k}×</small></span>`).join('') },
     ]],
@@ -127,8 +127,8 @@ function renderPlayer() {
   // Drie cijfers over de gekozen periode (coach-logica §9a).
   const three = (label, value, sub) => `<div class="sfig"><span class="sfig-label">${label}</span><span class="sfig-value">${value}</span><span class="sfig-sub">${sub}</span></div>`;
   $('#p-three').innerHTML = rows.length ? [
-    three('Goals per wedstrijd', f2(g / n), `${g} in ${rows.length} wedstrijden`),
-    three('Assists per wedstrijd', f2(as / n), `${as} in ${rows.length} wedstrijden`),
+    three('Goals per wedstrijd', f1(g / n), `${g} in ${rows.length} wedstrijden`),
+    three('Assists per wedstrijd', f1(as / n), `${as} in ${rows.length} wedstrijden`),
     three('Gewonnen', fmtPct(s.winPct), `${s.W}-${s.D}-${s.L} met deze speler`),
   ].join('') : '';
   $('#p-stats').innerHTML = rows.length ? statGroups(rows) : '<p class="empty">Nog geen wedstrijden in de gekozen periode.</p>';

@@ -80,7 +80,7 @@ function tierAt(r, sid) {
   const growth = rest.length >= 3
     ? (level - avg(rest.map(x => x.p.rating))) + 0.25 * (avg(here.map(x => PTS[x.m.result])) - avg(rest.map(x => PTS[x.m.result])))
     : null;
-  const why = `sessie van ${dayLabel(here[0].m.ts)}: rating ${level.toFixed(2)}, ${wins} van ${here.length} gewonnen${growth !== null ? `, groei ${growth >= 0 ? '+' : ''}${growth.toFixed(2)}` : ''}`;
+  const why = `sessie van ${dayLabel(here[0].m.ts)}: rating ${level.toFixed(1)}, ${wins} van ${here.length} gewonnen${growth !== null ? `, groei ${fmtGrowth(growth)}` : ''}`;
   const out = { why, level, growth, session: sid, rows: here };
   if (level >= 8 && wins / here.length >= 0.6) return { tier: 'top', ...out };
   if (level >= 7 || (growth !== null && r.length >= 8 && growth >= 0.3)) return { tier: 'zwart', ...out };

@@ -160,7 +160,7 @@ function playerTotals(ms) {
 
 // Ranglijst: negen stats die iedereen snapt (coach-logica §9a). v = waarde om op te sorteren, main = wat er staat,
 // sub = het totaal eronder. null = niet genoeg data.
-const per = (x, n) => n ? (x / n).toFixed(2) : '–';
+const per = (x, n) => n ? (x / n).toFixed(1) : '–'; // sorteren gebeurt op het exacte getal (v)
 const count = (key, label, total, games, { about, who = 'Minstens 3 wedstrijden.' }) => ({ key, label, about, who, v: t => games(t) ? total(t) / games(t) : null, main: t => per(total(t), games(t)), sub: t => `${total(t)} in ${games(t)}` });
 // about: waar de score op gebaseerd is; who: wie meetelt. Staat in het uitlegscherm van elke ranglijst.
 const BASE = 'Alleen de wedstrijden die deze app volgt, niet de hele EA-carrière.';
@@ -168,7 +168,7 @@ const RANKS = [
   { key: 'index', label: 'Frambroos-index', v: t => DATA.fi[t.name]?.score ?? null, main: t => fiFmt(DATA.fi[t.name].score), sub: t => fiLabel(DATA.fi[t.name].score),
     about: 'Wat iemand zelf bijdraagt, los van de uitslag. Per wedstrijd vier onderdelen: afronden, creëren, aan de bal en verdedigen. Elk cijfer wordt vergeleken met alle spelers op dezelfde positie die we tegenkwamen, tegenstanders inbegrepen, en de onderdelen tellen mee naar de build van die wedstrijd. 50 is gemiddeld voor de rol; bij weinig wedstrijden wordt de score naar 50 getrokken.',
     who: 'Minstens 3 wedstrijden van 45 minuten of langer.' },
-  { key: 'rating', label: 'Rating', v: t => t.rating, main: t => f2(t.rating), sub: t => `${t.n} wedstrijden`,
+  { key: 'rating', label: 'Rating', v: t => t.rating, main: t => f1(t.rating), sub: t => `${t.n} wedstrijden`,
     about: 'Het gemiddelde van de matchrating die EA na elke wedstrijd geeft (0 tot 10). EA laat daarin ook de uitslag meetellen: winnen trekt de rating omhoog.',
     who: 'Minstens 3 wedstrijden.' },
   count('goals', 'Goals per wedstrijd', t => t.g, t => t.n, { about: 'Doelpunten gedeeld door het aantal gespeelde wedstrijden.' }),
