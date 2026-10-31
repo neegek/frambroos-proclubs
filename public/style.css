@@ -683,10 +683,9 @@ button.rank-card:hover .rank-more { color: var(--brand-text); border-color: var(
 .podium-card.p2 .fut, .podium-card.p3 .fut { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.22)) brightness(0.92); }
 .podium-rating { font-family: var(--num-font); font-size: 15px; color: var(--ink); }
 .podium-rating small { color: var(--ink-2); font-family: inherit; font-size: 12px; margin-left: 4px; }
-.sess-body { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px 28px; align-items: start; margin-top: 10px; }
 .cruijff { margin: 10px 0 0; font-style: italic; color: var(--ink-2); font-size: 14px; }
 .cruijff small { font-style: normal; color: var(--muted); }
-@media (max-width: 700px) { .sess-body { grid-template-columns: 1fr; } .podium { --s: 0.42; --step: 94px; } }
+@media (max-width: 700px) { .podium { --s: 0.42; --step: 94px; } }
 .member-tag { font-size: 12px; color: var(--ink-2); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .goal-chain { display: block; margin: 10px 0 0; font-size: 14px; color: var(--ink); }
 .goal-chain .adv-label { display: block; margin-bottom: 2px; }
@@ -736,7 +735,6 @@ details.build-form-card[open] > summary { margin-bottom: 12px; }
 }
 
 /* sessiekop: zes vaste cijfers */
-.sess-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
 .btn-ghost { font: inherit; font-size: 13px; font-weight: 560; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--ink); cursor: pointer; min-height: 40px; display: inline-flex; align-items: center; gap: 6px; }
 .btn-ghost:hover { border-color: var(--brand); color: var(--brand-text); }
 .sess-figs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 16px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--grid); }
@@ -781,11 +779,14 @@ details.build-form-card[open] > summary { margin-bottom: 12px; }
 .crown { color: var(--brand-text); font-size: 13px; margin-left: 4px; }
 
 /* Radar van de avond (sessie.html, coach-logica §9a): per speler een vlak in de vaste spelerskleur. */
-.radar-wrap { display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 12px 24px; align-items: center; }
+.radar-wrap { display: grid; grid-template-columns: minmax(0, 560px) minmax(0, 1fr); gap: 12px 24px; align-items: center; }
 .radar-svg { width: 100%; height: auto; display: block; overflow: visible; font: 12px system-ui, -apple-system, "Segoe UI", sans-serif; }
 .radar-ring { fill: none; stroke: var(--grid); stroke-width: 1; }
 .radar-axis { stroke: var(--grid); stroke-width: 1; }
-.radar-label { fill: var(--ink-2); font-weight: 560; }
+.radar-label { fill: var(--ink); font-size: 15px; font-weight: 650; }
+.radar-value { fill: var(--ink-2); font: 500 14px var(--num-font); }
+.radar-value.sel { fill: var(--pc); font-weight: 700; }
+:root[data-theme="light"] .radar-value.sel { fill: var(--ink); } /* spelerskleuren zijn op wit te licht als tekst */
 .radar-shape { fill-opacity: 0.08; stroke-width: 2; stroke-linejoin: round; transition: fill-opacity .15s, stroke-opacity .15s; }
 .radar-shape.on { fill-opacity: 0.3; stroke-width: 3; }
 .radar-shape.dim { fill-opacity: 0.02; stroke-opacity: 0.25; }
@@ -793,7 +794,6 @@ details.build-form-card[open] > summary { margin-bottom: 12px; }
 .radar-chip { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--ink); font: inherit; font-size: 13.5px; cursor: pointer; }
 .radar-chip i { width: 10px; height: 10px; border-radius: 50%; flex: none; }
 .radar-chip.on { border-color: var(--brand); background: var(--brand-soft); font-weight: 600; }
-.radar-line { margin: 12px 0 0; font-size: 13.5px; color: var(--ink-2); }
 @media (max-width: 760px) { .radar-wrap { grid-template-columns: minmax(0, 1fr); } .radar { max-width: 420px; justify-self: center; width: 100%; } }
 
 /* Geen onderstreping in kaartjes: kaarten en namen in tabellen die een link zijn, blijven gewone tekst. */
@@ -860,3 +860,38 @@ a.ftok:hover .ftok-c { transform: translateY(-2px); }
 .fav-btn[aria-pressed="true"] svg { color: var(--brand); }
 .fav-star { display: inline-block; width: 13px; height: 13px; margin-right: 4px; vertical-align: -1px; color: var(--brand); }
 .fav-star svg { width: 100%; height: 100%; display: block; }
+
+/* Sessiekop als scorebord (coach-logica §9a): uitslag groot, tijdlijn, vijf cijfers met een balkje tegenover normaal. */
+.sess-hero { padding: 20px 22px; display: grid; gap: 16px; background: linear-gradient(160deg, var(--surface-2), var(--panel) 70%); }
+.sess-hero.good { background: linear-gradient(160deg, color-mix(in srgb, var(--pos) 20%, var(--panel)), var(--panel) 70%); }
+.sess-hero.bad { background: linear-gradient(160deg, color-mix(in srgb, var(--neg) 20%, var(--panel)), var(--panel) 70%); }
+.sh-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.sh-title { margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+.sh-type { font-size: 13px; color: var(--ink-2); }
+.sh-main { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px 28px; align-items: center; }
+.sh-score { display: grid; gap: 10px; min-width: 0; }
+.sh-record { display: grid; justify-items: start; }
+.sh-rec { font-family: var(--num-font); font-size: 72px; font-weight: 600; letter-spacing: -0.05em; line-height: 0.95; }
+.sh-rec b { font-weight: 600; } .sh-rec b.W { color: var(--pos-text); } .sh-rec b.L { color: var(--neg-text); } .sh-rec b.D { color: var(--ink-2); }
+.sh-rec i { font-style: normal; color: var(--muted); margin: 0 2px; }
+.sh-record small { font-size: 12px; color: var(--ink-2); letter-spacing: 0.06em; }
+.sh-line { padding: 0; }
+.sh-line .tl-item { text-decoration: none; color: inherit; }
+.sh-stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; padding-top: 14px; border-top: 1px solid var(--grid); }
+.sh-stat { display: grid; gap: 4px; align-content: start; min-width: 0; }
+.sh-label { font-size: 11.5px; font-weight: 650; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.sh-value { display: flex; align-items: center; gap: 8px; font-family: var(--num-font); font-size: 30px; font-weight: 500; letter-spacing: -0.04em; line-height: 1.1; }
+.sh-sub { font-size: 12.5px; color: var(--ink-2); }
+/* Balkje: gevuld tot deze avond, het streepje is ons normaal. */
+.sh-bar { position: relative; display: block; height: 6px; margin: 4px 0 2px; border-radius: 3px; background: var(--grid); }
+.sh-bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; background: var(--brand); }
+.sh-bar u { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: var(--ink); border-radius: 1px; }
+.sh-story { margin: 0; font-size: 14.5px; color: var(--ink); max-width: 90ch; }
+.sh-story .cruijff { display: block; margin-top: 4px; }
+@media (max-width: 900px) { .sh-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 700px) {
+  .sh-main { grid-template-columns: minmax(0, 1fr); }
+  .sh-rec { font-size: 56px; }
+  .sh-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sh-value { font-size: 24px; }
+}

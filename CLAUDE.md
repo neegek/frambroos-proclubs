@@ -91,9 +91,11 @@ alleen in Cloudflare.
   Wedstrijden: die is één lijst van `matchRow`-regels, nieuwste eerst, met de beste speler per wedstrijd. Sessies
   begint met een `.scard` per avond (datum, W-G-V, goals, team rating, tijdlijn met
   uitslagen en shirts, speler van de sessie met de portretfoto (`PlayerCard.portrait`, ook bij in vorm) of een icoon in een rondje in de kleuren van de vorm; nergens de duur van een avond); een tik opent
-  `sessie.html?id=<id>` (eigen pagina, een laag dieper) met "Terug naar sessies". Een sessie begint met één kop
-  met vijf vaste cijfers (`.sess-figs`, coach-logica §9a) en een deelknop, dan het radardiagram van de avond
-  (`radarChart` in `public/sessie.js`: per speler een vlak, assen als percentiel tegenover onze eigen avonden); de spelerspagina heeft drie kaartjes
+  `sessie.html?id=<id>` (eigen pagina, een laag dieper) met "Terug naar sessies". Een sessie begint met een scorebord
+  (`.sess-hero`, coach-logica §9a): W-G-V groot, de tijdlijn, de top drie, vijf vaste cijfers met een balkje tegenover
+  normaal, één zin anekdote met de Cruijff-quote en een deelknop; dan het radardiagram van de avond (`renderRadar` in
+  `public/sessie.js`: per speler een vlak, assen als percentiel tegenover onze eigen avonden, onder elke astitel het
+  gemiddelde van iedereen of de waarde van de uitgelichte speler); de spelerspagina heeft drie kaartjes
   (Highlights met per wedstrijd en precisie naast elkaar, Frambroos-index met balkjes, Resultaat met deze speler); de ranglijst op het Clubhouse
   (*Topspelers*) is een raster van `.rank-card`-kaartjes met per stat **alle** spelers, vier open en de rest achter een
   knop; een tik op een kaartje opent geen speler maar het uitlegscherm van die ranglijst (`#rank-dialog`: waar de score
