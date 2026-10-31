@@ -148,6 +148,17 @@ function cardOf(name, { session = null, key = '', rank = null } = {}) {
   return { html, rows, career, arch, rating, g, a, tier };
 }
 
+// Minikaartje (coach-logica §9a): de kaartvorm met foto, linksboven de plek als medaille en onderin één cijfer (bij een
+// sessie de rating van de avond). Tier en foto van de sessie, buitenrand in de kleur van de plek. Voor de top drie en
+// boven de kolommen van *Per wedstrijd*.
+function tinyOf(name, { session, rank, value, key = '-t' }) {
+  const all = DATA.matches.map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p);
+  const tier = tierAt(all.filter(x => x.p.rating !== null), session), photo = photoOf(name, tier.tier), rim = rimOf(rank);
+  return `<span class="fut-tiny" data-tier="${tier.tier}" data-rim="${rim}" role="img" aria-label="${esc(proName(name))}: plek ${rank}, rating ${value}">
+    ${futFrame(photo, `${slugOf(name)}-s${session}${key}`, rim)}${photo ? '' : `<span class="ft-icon">${personIcon()}</span>`}
+    <span class="ft-rank metal-${rim}">${rank}</span><span class="ft-val">${value}</span></span>`;
+}
+
 function render(name) {
   const el = $('#player-hero'); if (!el || !DATA) return;
   const { html, tier } = cardOf(name);
@@ -177,5 +188,5 @@ function reveal(root) {
 const TIER_RANK = { top: 2, zwart: 1, goud: 0 };
 // tierOf(rows): de tier op een eerder moment (rows = [{ m, p }] tot dan, zoals in cardOf). photo(name): de foto die bij de huidige vorm hoort, of null.
 // portrait(name): altijd de gewone portretfoto, voor rondjes (een gezicht is daar herkenbaarder dan een actiefoto).
-window.PlayerCard = { load: () => fetch(API.photos).then(r => r.json()).then(p => { PHOTOS = p || {}; }), render, reveal, html: (name, opts) => cardOf(name, opts).html, tier: name => cardOf(name).tier, sessionTier: (name, id) => cardOf(name, { session: id }).tier, tierOf, photo: name => photoOf(name, cardOf(name).tier.tier), portrait: name => PHOTOS[slugOf(name)] || null, TIER_RANK };
+window.PlayerCard = { load: () => fetch(API.photos).then(r => r.json()).then(p => { PHOTOS = p || {}; }), render, reveal, html: (name, opts) => cardOf(name, opts).html, tiny: tinyOf, tier: name => cardOf(name).tier, sessionTier: (name, id) => cardOf(name, { session: id }).tier, tierOf, photo: name => photoOf(name, cardOf(name).tier.tier), portrait: name => PHOTOS[slugOf(name)] || null, TIER_RANK };
 })();

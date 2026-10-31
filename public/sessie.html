@@ -21,24 +21,19 @@
           <button type="button" class="btn-ghost" id="s-share" title="Deel deze avond als afbeelding">Delen</button>
         </div>
         <div class="sh-main">
-          <div class="sh-score"><div class="sh-record" id="s-record"></div><div class="scard-line sh-line" id="s-line"></div></div>
-          <div class="podium" id="s-podium" aria-label="Top drie van de avond"></div>
+          <div class="sh-record" id="s-record"></div>
+          <div class="sh-top3" id="s-podium" role="group" aria-label="Top drie van de avond"></div>
         </div>
-        <div class="sh-stats" id="s-figs"></div>
+        <div class="match-cards sh-matches" id="s-matches"></div>
         <p class="sh-story"><span id="s-summary"></span> <span class="cruijff" id="s-quote"></span></p>
       </section>
       <section class="card">
-        <div class="card-head"><div><h2>Radar van de avond</h2><p class="hint">Per speler: hoe goed deze avond was tegenover al onze eigen avonden. Het midden is slecht, de rand de beste avond ooit.</p></div></div>
-        <div class="radar-wrap"><div id="s-radar" class="radar"></div><div class="radar-chips" id="s-radar-chips" role="group" aria-label="Speler uitlichten"></div></div>
+        <div class="card-head"><div><h2>Zo speelden we</h2><p class="hint">Standaard het team, tik een naam voor één speler: per as tegenover al onze eigen avonden; de gestippelde ring is een gewone avond.</p></div></div>
+        <div class="radar-wrap"><div id="s-radar" class="radar"></div><div class="radar-chips" id="s-radar-chips" role="group" aria-label="Team of speler uitlichten"></div></div>
       </section>
-      <section class="card">
-        <h2>Wedstrijden</h2>
-        <p class="hint">Op volgorde van spelen. Tik op een wedstrijd voor het verhaal en de spelers.</p>
-        <div class="match-cards" id="s-matches"></div>
-      </section>
-      <section class="card">
+      <section class="card" id="per-wedstrijd">
         <h2>Per wedstrijd</h2>
-        <p class="hint">Per speler de rating per wedstrijd; bovenaan het gemiddelde van de avond, dat de plek bepaalt. De kleur is de plek in die wedstrijd.</p>
+        <p class="hint">Per speler de rating per wedstrijd; op het kaartje het gemiddelde van de avond, dat de plek bepaalt. De kleur is de plek in die wedstrijd.</p>
         <div class="rmatrix-wrap" id="s-matrix"></div>
       </section>
     </div>

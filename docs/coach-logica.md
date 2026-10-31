@@ -419,35 +419,33 @@ sessie op een eigen pagina, `sessie.html?id=<id>` (een laag dieper), met "Terug 
 tijd, uitslag, tegenstander, score en de beste speler van de wedstrijd (hoogste EA-rating, met een kroon als die ook man of
 the match was). Eerst de laatste twintig, de rest achter een knop.
 
-**Sessiekop** (sinds 31 oktober 2026: minder tekst, de scores voorop): een scorebord dat meekleurt met de avond (blauw bij
-≥ 2 punten per wedstrijd, rood bij < 1). Bovenaan de datum, het type en het aantal spelers. Groot de uitslag als W-G-V
-in de uitslagkleuren, met daaronder de tijdlijn (rondje met uitslag en score per wedstrijd). Dan dezelfde vijf cijfers
-op elke avond: doelsaldo (met de badge tov verwachting en voor–tegen), passnauwkeurigheid, conversie, clean sheets
-en team rating. Elk cijfer met een balkje: gevuld tot de waarde van deze avond, met een streepje op ons normaal (alle
-andere wedstrijden), zodat je in één oogopslag ziet of het boven of onder normaal was. Van de samenvatting blijft
-alleen de anekdote in één zin met de Cruijff-quote; de lijst met namen staat al bij de spelers. Daarnaast de **top drie van de avond** als sessiekaarten (§9c) op rating over
-deze avond, als waaier: de beste vooraan en groot, nummer twee en drie erachter en iets lager, elk met plek en rating.
+**Sessiekop** (sinds 31 oktober 2026): het scorebord vertelt de **uitslag**, de radar eronder **hoe we speelden**;
+geen cijfers dubbel. Het scorebord kleurt mee met de avond (blauw bij ≥ 2 punten per wedstrijd, rood bij < 1):
+bovenaan datum, type en aantal spelers; groot de uitslag als W-G-V in de uitslagkleuren met ernaast het doelsaldo
+(voor–tegen) en hoe vaak de nul; daaronder de **wedstrijden als scrollbare rij kaartjes** (een tik opent de wedstrijd);
+de **top drie als minikaartjes** (foto, plek, rating en naam in de kaartvorm), een tik scrollt naar *Per wedstrijd*;
+en één zin anekdote met de Cruijff-quote. De **top drie van de avond** staat op rating over deze avond.
 Bij nul punten heet het "hield het best stand", maar de kaarten blijven hetzelfde. Man of the match staat als kroon
 bij de speler. Daarna *Per wedstrijd* (hieronder); *Spelers deze sessie* is weg (dubbel). De deelkaart (afbeelding van
 1080×1080 in thuiskleuren) toont W-G-V, winstpercentage, doelsaldo, uitblinker, meeste goals
 plus assists en de eerste twee zinnen van de samenvatting.
 
 **Per wedstrijd** (sinds 31 oktober 2026, vervangt *Spelers deze sessie*): een raster met per speler een kolom en
-per wedstrijd een rij (uitslag, shirt, score). Bovenaan per speler het portret met de naam, daaronder **gecentreerd de
-plek** als medaille, en direct daaronder het **gemiddelde van de avond**: dat bepaalt de plek, dus het staat bovenaan.
+per wedstrijd een rij (uitslag, shirt, score). Bovenaan per speler een **minikaartje**: foto, de plek als medaille,
+het gemiddelde van de avond (dat bepaalt de plek) en de naam, in de kaartvorm met de rand in de kleur van de plek.
 Elke cel kleurt naar de plek in die rij: goud, zilver en brons voor de beste drie, ijzer voor de rest (gelijke ratings
-delen een plek); het gemiddelde naar de plek op de avond. Man of the match met een kroon. Op telefoon horizontaal
-scrollen met de wedstrijden vast links.
+delen een plek). Man of the match met een kroon. Geen oplichten bij aanraken: aanklikken van een rij of kolom voor
+meer details is een latere stap. Op telefoon horizontaal scrollen met de wedstrijden vast links.
+**Metaalkleuren** (medailles, cellen): vlak met een heel zachte glans bovenaan, geen felle verlopen.
 
 **FUT-pack (idee, nog niet gebouwd)**: de sessiekaarten van alle spelers (wat eerst *Spelers deze sessie* was) als
 een pack dat je per sessie kunt openen, kaart voor kaart, van ijzer naar goud. De code voor de kaarten met plek staat
 er al (`PlayerCard.html(naam, { session, rank })`).
 
-**Radar van de avond** (op de sessiepagina, na de kop): per speler één vlak over zes assen, zodat in één beeld te zien
-is wie op welk vlak goed speelde. Elke as is een **percentiel tegenover onze eigen avonden**: de waarde van de speler
-deze avond, vergeleken met alle avonden van al onze spelers (per speler per sessie, minstens 2 wedstrijden). 50 is
-een gewone avond voor ons, 100 de beste ooit. Zo betekent "groot" ook echt "goed gespeeld", niet alleen "beter dan
-de rest vanavond". De assen:
+**Radar van de avond** (op de sessiepagina, na de kop): **hoe we speelden**, standaard als team en per speler uit te
+lichten. Zes assen; elke as is een **percentiel tegenover onze eigen avonden**. Het teamvlak (standaard) vergelijkt
+het team deze avond met alle avonden van het team (minstens 2 wedstrijden); een spelersvlak vergelijkt die speler
+met alle avonden van al onze spelers. 50 is een gewone avond (de gestippelde ring), 100 de beste ooit. De assen:
 
 | As | Maat over de avond |
 |---|---|
@@ -458,9 +456,9 @@ de rest vanavond". De assen:
 | Balwinst | veroverde ballen per wedstrijd (events 108–110) |
 | Duels | gewonnen tackles van de pogingen (minstens 3) |
 
-Ontbreekt een maat (te weinig pogingen), dan staat de speler daar op 0. Elke speler heeft zijn vaste kleur. Onder
-elke **astitel staat het cijfer**: standaard het gemiddelde van iedereen die avond, en na een tik op een naam (één
-knop per speler; de rest wordt vaag) de echte waarde van die speler, in diens kleur. Geen aparte regel met cijfers. Spelers met één wedstrijd die avond doen niet mee: één pot zegt te weinig.
+Ontbreekt een maat (te weinig pogingen), dan staat de speler daar op 0. Elke speler heeft zijn vaste kleur, het team
+de clubkleur. Onder elke **astitel staat het cijfer** van wat is uitgelicht (standaard het team) met daaronder klein
+ons normaal. Knoppen: *Team* en één per speler; de rest wordt vaag. Spelers met één wedstrijd die avond doen niet mee: één pot zegt te weinig.
 
 **Opstelling** (wedstrijdpagina, sinds 30 oktober 2026): één veld met beide teams. Op een groot scherm liggend: links
 wij van keeper naar aanval, rechts de tegenstander gespiegeld, zodat de aanvallers elkaar in het midden treffen. Op een
