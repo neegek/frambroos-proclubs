@@ -127,10 +127,12 @@ alleen in Cloudflare.
   eerst *In het kort* (`.kort`: drie regels in woorden, coach-logica §9a), dan de totalen zonder badges
   (`.totals-band`) en de vormgrafiek (staafjes per wedstrijd plus één lijn: doelsaldo over vijf), met twee kerncijfers
   via `figsHtml` in de kop. Geen "verwacht" of "tov ons" op de startpagina. Geen aparte analysepagina. De app is bewust eenvoudig: liever één duidelijke kaart dan drie tabellen.
-- Spelerspagina (coach-logica §9a, sinds 28 oktober 2026 zonder tabbladen): kaart met alleen de vorm eronder;
-  samenvatting met drie cijfers (`#p-three`); *Cijfers*: vijf losse kaarten, één per groep (`.stat-groups` met
-  `.stat-group`-kaarten; kolommen per wedstrijd en totaal rechts); de laatste acht wedstrijden. Advies, *Aan de bal in context* en de vorm per sessie staan voorlopig niet
-  op de pagina (code blijft in `builds.js`). Spelerstabellen zijn compact, met *Alle cijfers* achter een knop.
+- Spelerspagina (coach-logica §9a): zonder tabbladen, filters, samenvatting en *Algemeen* (dat staat op de kaart);
+  altijd over alle gevolgde wedstrijden. Kaart met alleen de vorm eronder; *Cijfers* in vier losse kaarten
+  (`.stat-groups`: Aanvallen, Passen, Verdedigen, Discipline) met per regel de speler (kop: pro-naam) en de club, elk
+  groot het totaal en klein per wedstrijd; de speler groen als beter dan de club, rood als slechter; de laatste acht
+  wedstrijden. Advies, *Aan de bal in context* en het buildformulier staan voorlopig niet op de pagina (code blijft in
+  `builds.js`).
 - Laden: elke pagina heeft `.skel`-vlakken in de containers die de render vervangt, `html.loading` (gezet door
   `loadData`) toont een lijntje bovenaan, en foto's (kaarten en rondjes, `img.fade-img`) faden pas in als ze geladen
   zijn, in 0,3 s via `PlayerCard.reveal(container)` na elke render; geen laadanimatie voor foto's.
