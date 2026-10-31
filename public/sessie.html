@@ -15,20 +15,21 @@
   <main class="content">
     <div class="session-detail" id="session-detail">
       <a class="back-link" href="sessies.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Terug naar sessies</a>
-      <section class="card sess-head">
-        <div class="sess-top">
-          <div><h2 id="s-title">…</h2><div class="meta" id="s-meta"></div></div>
+      <section class="card sess-head sess-hero" id="s-hero">
+        <div class="sh-top">
+          <div><h1 class="sh-title" id="s-title">…</h1><span class="sh-type" id="s-meta"></span></div>
           <button type="button" class="btn-ghost" id="s-share" title="Deel deze avond als afbeelding">Delen</button>
         </div>
-        <div class="sess-body">
+        <div class="sh-main">
+          <div class="sh-score"><div class="sh-record" id="s-record"></div><div class="scard-line sh-line" id="s-line"></div></div>
           <div class="podium" id="s-podium" aria-label="Top drie van de avond"></div>
-          <div><p class="summary" id="s-summary"></p><p class="cruijff" id="s-quote"></p></div>
         </div>
-        <div class="sess-figs" id="s-figs"></div>
+        <div class="sh-stats" id="s-figs"></div>
+        <p class="sh-story"><span id="s-summary"></span> <span class="cruijff" id="s-quote"></span></p>
       </section>
       <section class="card">
         <div class="card-head"><div><h2>Radar van de avond</h2><p class="hint">Per speler: hoe goed deze avond was tegenover al onze eigen avonden. Het midden is slecht, de rand de beste avond ooit.</p></div></div>
-        <div class="radar-wrap"><div id="s-radar" class="radar"></div><div><div class="radar-chips" id="s-radar-chips" role="group" aria-label="Speler uitlichten"></div><p class="radar-line" id="s-radar-line"></p></div></div>
+        <div class="radar-wrap"><div id="s-radar" class="radar"></div><div class="radar-chips" id="s-radar-chips" role="group" aria-label="Speler uitlichten"></div></div>
       </section>
       <section class="card">
         <h2>Wedstrijden</h2>

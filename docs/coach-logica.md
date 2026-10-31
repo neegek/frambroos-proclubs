@@ -418,9 +418,13 @@ sessie op een eigen pagina, `sessie.html?id=<id>` (een laag dieper), met "Terug 
 tijd, uitslag, tegenstander, score en de beste speler van de wedstrijd (hoogste EA-rating, met een kroon als die ook man of
 the match was). Eerst de laatste twintig, de rest achter een knop.
 
-**Sessiekop**: elke speelavond toont dezelfde vijf cijfers, zodat avonden op dezelfde manier te vergelijken zijn:
-wedstrijden (met W-G-V), doelsaldo (met de badge tov verwachting), passnauwkeurigheid, conversie en clean sheets, elk met "normaal"
-eronder (alle andere wedstrijden). Daarnaast de **top drie van de avond** als sessiekaarten (§9c) op rating over
+**Sessiekop** (sinds 31 oktober 2026: minder tekst, de scores voorop): een scorebord dat meekleurt met de avond (blauw bij
+≥ 2 punten per wedstrijd, rood bij < 1). Bovenaan de datum, het type en het aantal spelers. Groot de uitslag als W-G-V
+in de uitslagkleuren, met daaronder de tijdlijn (rondje met uitslag en score per wedstrijd). Dan dezelfde vijf cijfers
+op elke avond: doelsaldo (met de badge tov verwachting en voor–tegen), passnauwkeurigheid, conversie, clean sheets
+en team rating. Elk cijfer met een balkje: gevuld tot de waarde van deze avond, met een streepje op ons normaal (alle
+andere wedstrijden), zodat je in één oogopslag ziet of het boven of onder normaal was. Van de samenvatting blijft
+alleen de anekdote in één zin met de Cruijff-quote; de lijst met namen staat al bij de spelers. Daarnaast de **top drie van de avond** als sessiekaarten (§9c) op rating over
 deze avond, als waaier: de beste vooraan en groot, nummer twee en drie erachter en iets lager, elk met plek en rating.
 Bij nul punten heet het "hield het best stand", maar de kaarten blijven hetzelfde. Man of the match staat als kroon
 bij de speler. *Spelers deze sessie* toont per speler, op rating: de sessiekaart klein (met de plek), de naam, de rating van de
@@ -443,9 +447,9 @@ de rest vanavond". De assen:
 | Balwinst | veroverde ballen per wedstrijd (events 108–110) |
 | Duels | gewonnen tackles van de pogingen (minstens 3) |
 
-Ontbreekt een maat (te weinig pogingen), dan staat de speler daar op 0 en zegt de regel eronder "te weinig". Elke
-speler heeft zijn vaste kleur. Eronder één knop per speler; een tik licht die speler uit (de rest wordt vaag) en
-toont de echte waarden in één regel. Spelers met één wedstrijd die avond doen niet mee: één pot zegt te weinig.
+Ontbreekt een maat (te weinig pogingen), dan staat de speler daar op 0. Elke speler heeft zijn vaste kleur. Onder
+elke **astitel staat het cijfer**: standaard het gemiddelde van iedereen die avond, en na een tik op een naam (één
+knop per speler; de rest wordt vaag) de echte waarde van die speler, in diens kleur. Geen aparte regel met cijfers. Spelers met één wedstrijd die avond doen niet mee: één pot zegt te weinig.
 
 **Opstelling** (wedstrijdpagina, sinds 30 oktober 2026): één veld met beide teams. Op een groot scherm liggend: links
 wij van keeper naar aanval, rechts de tegenstander gespiegeld, zodat de aanvallers elkaar in het midden treffen. Op een
