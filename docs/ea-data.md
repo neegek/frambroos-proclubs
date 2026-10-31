@@ -25,6 +25,10 @@ Nieuw veld tonen: eerst hier kijken of het er al is, dan `src/data.js`.
   adresvormen van EA's beeldservers getest: allemaal 404 of 403. De logo's zitten in het spel, niet op het web.
   Ons eigen logo is daarom een eigen bestand (`public/crest.png`). Het id bewaren we wel (`club.crestAssetId`).
 - Formatie, exacte positie, attribuutpunten, fans: zie coach-logica §2.
+- **PlayStyles**: niet per speler, ook niet die van faciliteiten. Per wedstrijd geeft EA alleen het archetype
+  (`archetypeid`); `vproattr` (attributen) is altijd `NH` en `proStyle` bij de leden altijd 0 (gecontroleerd op
+  31 oktober 2026). Wat we wel weten: de signature PlayStyle per archetype (`docs/archetypes.md`). Eigen PlayStyles
+  kunnen spelers alleen zelf invullen in het buildformulier (lokale app, `data/builds.json`).
 - **AI-spelers**: niets per speler (geen naam, positie, rating, assists of schoten); `aggregate` is de som van alleen
   de mensen. Af te leiden en sinds 28 oktober 2026 per wedstrijd in `DATA` als `ai`: `players` (11 min het aantal
   mensen), `goals` (clubscore min de goals van de mensen: doelpunten van AI óf eigen doelpunten van de tegenstander;
