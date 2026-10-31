@@ -9,18 +9,26 @@ let selected = null;
 
 function rowsFor(ms, name) { return ms.map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p); }
 
-// De cijfers per groep (coach-logica §9a): per regel de speler en de club, elk met groot het totaal en klein per
-// wedstrijd (bij een percentage de breuk). De club is iedereen van ons; per wedstrijd is daar het gemiddelde per speler
-// per wedstrijd. De speler kleurt groen als die beter zit dan de club, rood als slechter (lower: lager is beter).
-function statGroups(rows, club, name) {
+// De cijfers per groep (coach-logica §9a): per regel de plek onder onze spelers, de speler en de club, elk met groot
+// het totaal en klein het getal per wedstrijd (bij een percentage de breuk). De club is iedereen van ons; per wedstrijd
+// is daar het gemiddelde per speler per wedstrijd. De speler kleurt groen als die beter zit dan de club, rood als
+// slechter (lower: lager is beter). Een tik op een regel opent de ranglijst van die maat (openStat).
+let statItems = [];
+const MIN_N = 3, MIN_DEN = 10; // meedoen in de ranglijst: minstens 3 wedstrijden, bij een percentage 10 pogingen
+const RIM = rank => rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : 'iron';
+
+function statGroups(rows, club, name, everyone) {
   const gk = rows.some(r => r.p.pos === 'goalkeeper');
-  // Een maat: van een set rijen het totaal, en per wedstrijd (aantal) of de verhouding (ratio).
+  // Een maat: van een set rijen het totaal, en per wedstrijd (aantal) of de verhouding (ratio). key: het getal zoals
+  // het er staat (één decimaal, percentage afgerond), waarop spelers een plek delen.
   const count = (label, f, { ev = false, lower = false, cmp = true } = {}) => ({ label, lower, cmp, of: list => {
-    const src = ev ? evRows(list) : list, total = sum(src, r => f(ev ? r.p.ev : r.p, r));
-    return src.length ? { main: String(total), sub: `${(total / src.length).toFixed(1)} per wedstrijd`, v: total / src.length } : null; } });
-  const ratio = (label, num, den, { ev = false, lower = false } = {}) => ({ label, lower, cmp: true, of: list => {
+    const src = ev ? evRows(list) : list, total = sum(src, r => f(ev ? r.p.ev : r.p, r)), v = src.length ? total / src.length : 0;
+    return src.length ? { main: String(total), sub: f1(v), v, key: Math.round(10 * v), n: src.length, ok: src.length >= MIN_N,
+      big: f1(v), small: `${total} in ${plural(src.length, 'wedstrijd', 'wedstrijden')}` } : null; } });
+  const ratio = (label, num, den, { ev = false, lower = false } = {}) => ({ label, lower, cmp: true, pctPts: true, of: list => {
     const src = ev ? evRows(list) : list, a = sum(src, r => num(ev ? r.p.ev : r.p)), b = sum(src, r => den(ev ? r.p.ev : r.p));
-    return b ? { main: fmtPct(pct(a, b)), sub: `${a} van ${b}`, v: 100 * a / b, pctPts: true } : null; } });
+    return b ? { main: fmtPct(pct(a, b)), sub: `${a} van ${b}`, v: 100 * a / b, key: pct(a, b), n: src.length, ok: src.length >= MIN_N && b >= MIN_DEN,
+      big: fmtPct(pct(a, b)), small: `${a} van ${b}`, pctPts: true } : null; } });
   const groups = [
     ['Aanvallen', [
       count('Goals', p => p.goals), count('Assists', p => p.assists), count('Tweede assists', v => v.second_assists, { ev: true }),
@@ -48,10 +56,35 @@ function statGroups(rows, club, name) {
     const d = me.v - us.v, same = me.pctPts ? Math.abs(d) <= 2 : Math.abs(d) <= 0.05 * Math.max(Math.abs(us.v), 0.01);
     return same ? 'same' : (d > 0) !== it.lower ? 'better' : 'worse'; };
   const cell = (x, cls = '') => x ? `<span class="sv ${cls}"><b>${x.main}</b><small>${x.sub}</small></span>` : '<span class="sv"><b>–</b></span>';
+  // De ranglijst van een maat: wie meedoet, gesorteerd op het exacte getal; een plek gedeeld bij hetzelfde getal zoals
+  // het er staat (1, 1, 2).
+  const ranking = it => {
+    const list = everyone.map(e => ({ name: e.name, x: it.of(e.rows) })).filter(e => e.x && e.x.ok)
+      .sort((a, b) => it.lower ? a.x.v - b.x.v : b.x.v - a.x.v);
+    const keys = [...new Set(list.map(e => e.x.key))];
+    return list.map(e => ({ ...e, rank: 1 + keys.indexOf(e.x.key) }));
+  };
+  statItems = [];
   return groups.map(([title, items]) => `<section class="card stat-group"><h2>${title}</h2>
-    <div class="stat-head" aria-hidden="true"><span></span><span>${esc(proName(name))}</span><span>Club</span></div>
+    <div class="stat-head" aria-hidden="true"><span></span><span></span><span>${esc(proName(name))}</span><span>Club</span></div>
     ${items.filter(Boolean).map(it => { const me = it.of(rows), us = it.of(club);
-      return `<div class="stat-row"><span>${it.label}</span>${cell(me, verdict(me, us, it))}${cell(us)}</div>`; }).join('')}</section>`).join('');
+      const list = it.cmp ? ranking(it) : null, mine = list?.find(e => e.name === name);
+      const i = statItems.push({ it, list, us }) - 1;
+      const dot = mine ? `<span class="rank-dot metal-${RIM(mine.rank)}" title="Plek ${mine.rank} van ${list.length}">${mine.rank}</span>` : '<span></span>';
+      const inner = `<span>${it.label}</span>${dot}${cell(me, verdict(me, us, it))}${cell(us)}`;
+      return list ? `<button type="button" class="stat-row" data-i="${i}" aria-haspopup="dialog" aria-label="${it.label}: ranglijst">${inner}</button>`
+        : `<div class="stat-row">${inner}</div>`; }).join('')}</section>`).join('');
+}
+
+// De ranglijst van één maat (coach-logica §9a): plek, speler, groot per wedstrijd of percentage, klein totaal of breuk.
+function openStat(i) {
+  const { it, list, us } = statItems[i], d = $('#rank-dialog');
+  const what = list[0]?.x.pctPts ? 'Het percentage' : 'Het gemiddelde per wedstrijd';
+  d.querySelector('.rd-body').innerHTML = `<h2 id="rd-title">${it.label}</h2>
+    <p>${what}${it.lower ? ', lager is beter' : ''}. Mee doet wie minstens ${MIN_N} wedstrijden heeft${list[0]?.x.pctPts ? ` en ${MIN_DEN} pogingen` : ''}.</p>
+    <ol class="rd-list">${list.map(e => `<li class="${e.name === selected ? 'me' : ''}"><span class="rank-dot metal-${RIM(e.rank)}">${e.rank}</span><span>${esc(proName(e.name))}</span><b>${e.x.big}</b><small>${esc(e.x.small)}</small></li>`).join('') || '<li class="empty">Nog te weinig wedstrijden.</li>'}
+    ${us ? `<li class="rd-club"><span></span><span>Club</span><b>${us.big}</b><small>${us.pctPts ? esc(us.small) : 'per speler per wedstrijd'}</small></li>` : ''}</ol>`;
+  d.showModal();
 }
 
 function renderPlayer() {
@@ -70,8 +103,9 @@ function renderPlayer() {
   $('#player-hero').insertAdjacentHTML('afterbegin', `<button type="button" class="fav-btn" aria-pressed="${on}" aria-label="${on ? 'Favoriet, tik om weg te halen' : 'Maak favoriet'}" title="${on ? 'Favoriet: tik om weg te halen' : 'Maak deze speler je favoriet (er kan er één zijn)'}">${STAR}<span>${on ? 'Favoriet' : 'Favoriet maken'}</span></button>`);
   $('#player-hero .fav-btn').addEventListener('click', () => { setFavorite(on ? null : selected); renderPlayer(); });
   document.title = `${proName(selected)} · Frambroos Coach`;
-  const club = players.flatMap(n => rowsFor(ms, n));
-  $('#p-stats').innerHTML = rows.length ? statGroups(rows, club, selected) : '<p class="empty">Nog geen wedstrijden.</p>';
+  const everyone = players.map(n => ({ name: n, rows: rowsFor(ms, n) })), club = everyone.flatMap(e => e.rows);
+  $('#p-stats').innerHTML = rows.length ? statGroups(rows, club, selected, everyone) : '<p class="empty">Nog geen wedstrijden.</p>';
+  for (const b of $('#p-stats').querySelectorAll('button.stat-row')) b.addEventListener('click', () => openStat(+b.dataset.i));
 
   table($('#tbl-player-matches'), [
     { label: 'Datum', render: r => fmtDateTime(r.m.ts) }, { label: 'Tegenstander', render: r => `<a href="wedstrijd.html?id=${r.m.matchId}">${esc(r.m.opponent.name)}</a>` },
@@ -89,6 +123,7 @@ function renderPlayer() {
 const PM_SHOWN = 8;
 
 onWidthChange(() => DATA && renderPlayer());
+$('#rank-dialog').addEventListener('click', e => { if (e.target === e.currentTarget || e.target.closest('.rd-close')) e.currentTarget.close(); });
 // Andere speler in het menu: meteen tekenen als de data er is, anders onthouden voor zodra die geladen is.
 addEventListener('hashchange', () => { const n = decodeURIComponent(location.hash.slice(1)); if (n && n !== selected) { selected = n; if (DATA) renderPlayer(); } });
 selected = decodeURIComponent(location.hash.slice(1)) || null;

@@ -130,7 +130,9 @@ alleen in Cloudflare.
 - Spelerspagina (coach-logica §9a): zonder tabbladen, filters, samenvatting en *Algemeen* (dat staat op de kaart);
   altijd over alle gevolgde wedstrijden. Kaart met alleen de vorm eronder; *Cijfers* in vier losse kaarten
   (`.stat-groups`: Aanvallen, Passen, Verdedigen, Discipline) met per regel de speler (kop: pro-naam) en de club, elk
-  groot het totaal en klein per wedstrijd; de speler groen als beter dan de club, rood als slechter; de laatste acht
+  groot het totaal en klein het getal per wedstrijd (zonder die woorden); ervoor een rondje met de plek onder onze
+  spelers (`.rank-dot` in metaalkleur, per wedstrijd, gedeelde plek bij gelijk getal); een tik op een regel opent de
+  ranglijst van die maat in `#rank-dialog`; de speler groen als beter dan de club, rood als slechter; de laatste acht
   wedstrijden. Advies, *Aan de bal in context* en het buildformulier staan voorlopig niet op de pagina (code blijft in
   `builds.js`).
 - Laden: elke pagina heeft `.skel`-vlakken in de containers die de render vervangt, `html.loading` (gezet door

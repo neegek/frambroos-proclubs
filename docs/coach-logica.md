@@ -383,8 +383,8 @@ Geen reeksen: die staan al in de rondjes bovenaan.
    de rating als rondje, de datum erboven en de rondjes op **één rij** (past het niet, dan horizontaal scrollen; nooit
    meer dan de wedstrijden van één sessie).
 2. **Cijfers** in losse kaarten per groep (Aanvallen, Passen, Verdedigen, Discipline), elk met **twee kolommen**: de
-   speler (kop: de naam van de pro) en **de club**. In elke kolom groot het totaal en klein daaronder per wedstrijd
-   (bij een percentage de breuk). De club is iedereen van ons over alle gevolgde wedstrijden; *per wedstrijd* is daar
+   speler (kop: de naam van de pro) en **de club**. In elke kolom groot het totaal en klein daaronder het getal per
+   wedstrijd, zonder de woorden *per wedstrijd* (bij een percentage de breuk). De club is iedereen van ons over alle gevolgde wedstrijden; *per wedstrijd* is daar
    het gemiddelde per speler per wedstrijd, zodat het naast de speler te leggen is. De speler kleurt **groen** als die
    per wedstrijd beter zit dan de club, **rood** als slechter, gewoon als het gelijk is (binnen 5 % van elkaar; bij
    percentages binnen 2 punten). Bij balverlies, uit positie, overtredingen en kaarten is lager beter. Reddingen
@@ -392,6 +392,15 @@ Geen reeksen: die staan al in de rondjes bovenaan.
    tegenstanders uitgespeeld. *Passen*: passes gelukt van pogingen, passes, steekpasses, aandeel vooruit.
    *Verdedigen*: balwinst, onderscheppingen, tackles gewonnen van pogingen, de nul gehouden, reddingen (keepers).
    *Discipline*: balverlies, uit positie, overtredingen, kaarten. Alleen wat EA telt (§2 en docs/event-codes.md).
+   Vóór de speler staat per regel een **rondje met de plek** van de speler onder onze spelers (sinds 31 oktober 2026),
+   in goud, zilver, brons of ijzer zoals bij de sessies. De plek gaat op het getal per wedstrijd (bij een percentage
+   het percentage), niet op het totaal: wie meer speelt, telt anders vanzelf meer. Wie hetzelfde getal heeft zoals het
+   er staat (één decimaal, percentage afgerond), deelt de plek; de volgende plek telt door (1, 1, 2). Lager is beter
+   bij balverlies, uit positie, overtredingen en kaarten. Mee doet wie minstens **3 wedstrijden** heeft voor die maat
+   (bij gebeurtenissen van EA: 3 wedstrijden met gebeurtenissen); bij een percentage ook minstens **10 pogingen**, anders
+   zegt één schot of tackle te veel. Wie daar niet aan voldoet, krijgt geen rondje. Reddingen hebben geen plek (alleen
+   keepers). **Een tik op een regel** opent de ranglijst van die maat: alle spelers die meedoen, met plek, getal per
+   wedstrijd (of percentage) en klein het totaal (of de breuk), de gekozen speler gemarkeerd, en onderaan de club.
 3. De laatste acht wedstrijden, de rest achter een knop.
 Het advies (§8), *Aan de bal in context* (§4a), de vormgrafiek per sessie en het buildformulier staan voorlopig niet
 op de pagina; de code blijft, zodat ze terug kunnen als het eerste scherm klaar is.
