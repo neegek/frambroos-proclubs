@@ -136,8 +136,14 @@ function render() {
   $('#s-podium').innerHTML = top.map((r, i) => `<a class="podium-card p${i + 1}" href="spelers.html#${encodeURIComponent(r.name)}" title="${esc(proName(r.name))}: rating ${f1(r.rH)} deze avond">
       <span class="fut-mini">${PlayerCard.html(r.name, { session: s.id, key: '-p', rank: i + 1 })}</span><span class="podium-rating">${f1(r.rH)}${r.mom ? ' <span class="crown" title="Man of the match">♛</span>' : ''}</span></a>`).join('');
   PlayerCard.reveal($('#s-podium'));
-  // Per speler de sessiekaart, de rating van de avond tegenover normaal, en de reeks met per wedstrijd de rating.
-  $('#s-players').innerHTML = `<div class="splayers">${prow.map((r, i) => {
+  renderMatrix(ms, prow);
+  renderRadar(s, ms);
+}
+
+// Sessiekaarten van alle spelers met plek, rating, groei en reeks (wat eerst *Spelers deze sessie* was). Nu niet op de
+// pagina (dubbel met *Per wedstrijd*); bewaard voor het FUT-pack per sessie (coach-logica §9a, idee).
+function sessionCardsHtml(s, ms, prow) {
+  return `<div class="splayers">${prow.map((r, i) => {
     const rows = ms.map(m => ({ m, p: m.players.find(p => p.name === r.name) })).filter(x => x.p);
     return `<div class="sp-item">
       <a class="fut-mini" href="spelers.html#${encodeURIComponent(r.name)}" aria-label="${esc(proName(r.name))}">${PlayerCard.html(r.name, { session: s.id, key: '-l', rank: r.rH === null ? null : i + 1 })}</a>
@@ -145,9 +151,6 @@ function render() {
         ${formLine(r.name, s.id, r.rH, rows.length)}
         ${ratingDots(rows)}</div></div>`;
   }).join('')}</div>`;
-  PlayerCard.reveal($('#s-players'));
-  renderMatrix(ms, prow);
-  renderRadar(s, ms);
 }
 
 // Per speler over deze avond (coach-logica §9c), één keer: de rating van de avond met de groei ernaast (zonder het
@@ -158,20 +161,26 @@ function formLine(name, sid, rating, n) {
   return `<div class="pcard-sub sp-line"><b class="sp-rating">${f1(rating)}</b>${extra}</div>`;
 }
 
-// ---------- per wedstrijd: rijen zijn wedstrijden, kolommen spelers (op plek), cellen de rating ----------
-// Proefversie (optie 4) om te vergelijken met de kaarten erboven. De kleur van een cel loopt mee met de rating
-// (5,5 en lager licht, 9 en hoger vol); de beste van een wedstrijd staat vet, man of the match met een kroon.
+// ---------- per wedstrijd (coach-logica §9a): kolommen spelers, rijen wedstrijden, cellen de rating ----------
+// Bovenaan per speler het portret, de plek als medaille en het gemiddelde van de avond (dat bepaalt de plek). Elke cel
+// kleurt naar de plek in die rij: goud, zilver, brons, ijzer voor de rest; gelijke ratings delen een plek.
+const RIM = rank => rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : 'iron';
+const rankIn = (v, list) => 1 + [...new Set(list.filter(x => x > v))].length;
 function renderMatrix(ms, prow) {
-  const cols = prow.filter(r => r.rH !== null);
-  const head = cols.map((r, i) => { const photo = PlayerCard.portrait(r.name);
-    return `<th scope="col"><a class="rm-player" href="spelers.html#${encodeURIComponent(r.name)}" title="${esc(proName(r.name))}"><span class="rm-face">${photo ? `<img class="fade-img" src="${photo}" alt="">` : ''}<span class="rm-rank rim-${i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : 'iron'}">${i + 1}</span></span><span class="rm-name">${esc(proName(r.name))}</span></a></th>`; }).join('');
-  const cell = (p, best) => { if (!p || p.rating === null) return '<td class="rm-none">–</td>';
-    const t = Math.max(0, Math.min(1, (p.rating - 5.5) / 3.5));
-    return `<td class="${p.rating === best ? 'rm-best' : ''}" style="--t:${t.toFixed(2)}" title="${esc(proName(p.name))}: ${p.rating}${p.goals ? ` · ${p.goals} G` : ''}${p.assists ? ` · ${p.assists} A` : ''}">${f1(p.rating)}${p.mom ? '<i title="Man of the match">♛</i>' : ''}</td>`; };
-  const rows = ms.map(m => { const ps = cols.map(r => m.players.find(p => p.name === r.name)), best = Math.max(...ps.filter(p => p && p.rating !== null).map(p => p.rating));
-    return `<tr><th scope="row"><a class="rm-match" href="wedstrijd.html?id=${m.matchId}" title="${esc(m.opponent.name)}"><span class="tl-dot ${m.result}">${letter(m.result)}</span>${kitShirt(m.opponent.kit, m.opponent.name)}<b>${m.goals}-${m.goalsAgainst}</b></a></th>${ps.map(p => cell(p, best)).join('')}</tr>`; }).join('');
-  $('#s-matrix').innerHTML = `<table class="rmatrix"><thead><tr><th></th>${head}</tr></thead><tbody>${rows}</tbody>
-    <tfoot><tr><th scope="row">Gem.</th>${cols.map(r => `<td>${f1(r.rH)}</td>`).join('')}</tr></tfoot></table>`;
+  const cols = prow.filter(r => r.rH !== null), avgs = cols.map(r => r.rH);
+  const face = r => { const photo = PlayerCard.portrait(r.name);
+    return `<a class="rm-player" href="spelers.html#${encodeURIComponent(r.name)}" title="${esc(proName(r.name))}"><span class="rm-face">${photo ? `<img class="fade-img" src="${photo}" alt="">` : ''}</span><span class="rm-name">${esc(proName(r.name))}</span></a>`; };
+  const head = cols.map(r => `<th scope="col">${face(r)}</th>`).join('');
+  const medals = cols.map(r => { const k = rankIn(r.rH, avgs); return `<th scope="col"><span class="rm-medal rim-${RIM(k)}" title="Plek ${k} op rating deze avond">${k}</span></th>`; }).join('');
+  const top = cols.map(r => `<td class="rm-avg rim-${RIM(rankIn(r.rH, avgs))}">${f1(r.rH)}</td>`).join('');
+  const rows = ms.map(m => {
+    const ps = cols.map(r => m.players.find(p => p.name === r.name)), vals = ps.filter(p => p && p.rating !== null).map(p => p.rating);
+    const cell = p => !p || p.rating === null ? '<td class="rm-none">–</td>'
+      : `<td class="rim-${RIM(rankIn(p.rating, vals))}" title="${esc(proName(p.name))}: ${p.rating}${p.goals ? ` · ${p.goals} G` : ''}${p.assists ? ` · ${p.assists} A` : ''}">${f1(p.rating)}${p.mom ? '<i title="Man of the match">♛</i>' : ''}</td>`;
+    return `<tr><th scope="row"><a class="rm-match" href="wedstrijd.html?id=${m.matchId}" title="${esc(m.opponent.name)}"><span class="tl-dot ${m.result}">${letter(m.result)}</span>${kitShirt(m.opponent.kit, m.opponent.name)}<b>${m.goals}-${m.goalsAgainst}</b></a></th>${ps.map(cell).join('')}</tr>`;
+  }).join('');
+  $('#s-matrix').innerHTML = `<table class="rmatrix"><thead><tr><th></th>${head}</tr><tr class="rm-medals"><th></th>${medals}</tr>
+    <tr class="rm-top"><th scope="row">Gem.</th>${top}</tr></thead><tbody>${rows}</tbody></table>`;
   PlayerCard.reveal($('#s-matrix'));
 }
 

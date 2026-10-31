@@ -93,7 +93,9 @@ alleen in Cloudflare.
   uitslagen en shirts, speler van de sessie met de portretfoto (`PlayerCard.portrait`, ook bij in vorm) of een icoon in een rondje in de kleuren van de vorm; nergens de duur van een avond); een tik opent
   `sessie.html?id=<id>` (eigen pagina, een laag dieper) met "Terug naar sessies". Een sessie begint met een scorebord
   (`.sess-hero`, coach-logica §9a): W-G-V groot, de tijdlijn, de top drie, vijf vaste cijfers met een balkje tegenover
-  normaal, één zin anekdote met de Cruijff-quote en een deelknop; dan het radardiagram van de avond (`renderRadar` in
+  normaal, één zin anekdote met de Cruijff-quote en een deelknop; dan *Per wedstrijd* (`renderMatrix`: kolommen spelers met portret, plek als medaille en het gemiddelde bovenaan, rijen
+  wedstrijden, cellen in goud/zilver/brons/ijzer naar de plek in die rij; *Spelers deze sessie* is weg, de kaarten
+  bewaard in `sessionCardsHtml` voor een later FUT-pack), en het radardiagram van de avond (`renderRadar` in
   `public/sessie.js`: per speler een vlak, assen als percentiel tegenover onze eigen avonden, onder elke astitel het
   gemiddelde van iedereen of de waarde van de uitgelichte speler); de spelerspagina heeft drie kaartjes
   (Highlights met per wedstrijd en precisie naast elkaar, Frambroos-index met balkjes, Resultaat met deze speler); de ranglijst op het Clubhouse
@@ -124,8 +126,8 @@ alleen in Cloudflare.
   (`.totals-band`) en de vormgrafiek (staafjes per wedstrijd plus één lijn: doelsaldo over vijf), met twee kerncijfers
   via `figsHtml` in de kop. Geen "verwacht" of "tov ons" op de startpagina. Geen aparte analysepagina. De app is bewust eenvoudig: liever één duidelijke kaart dan drie tabellen.
 - Spelerspagina (coach-logica §9a, sinds 28 oktober 2026 zonder tabbladen): kaart met alleen de vorm eronder;
-  samenvatting met drie cijfers (`#p-three`); *Cijfers*: één lijst in vijf groepen (`.stat-groups`, totaal en per
-  wedstrijd); de laatste acht wedstrijden. Advies, *Aan de bal in context* en de vorm per sessie staan voorlopig niet
+  samenvatting met drie cijfers (`#p-three`); *Cijfers*: vijf losse kaarten, één per groep (`.stat-groups` met
+  `.stat-group`-kaarten; kolommen per wedstrijd en totaal rechts); de laatste acht wedstrijden. Advies, *Aan de bal in context* en de vorm per sessie staan voorlopig niet
   op de pagina (code blijft in `builds.js`). Spelerstabellen zijn compact, met *Alle cijfers* achter een knop.
 - Laden: elke pagina heeft `.skel`-vlakken in de containers die de render vervangt, `html.loading` (gezet door
   `loadData`) toont een lijntje bovenaan, en foto's (kaarten en rondjes, `img.fade-img`) faden pas in als ze geladen
@@ -141,17 +143,17 @@ alleen in Cloudflare.
   in een `.fut-mini`); `index.html` en `sessies.html` laden daarvoor `playercard.js`. `PlayerCard.tier(naam)` geeft
   de tier voor sorteren en samenvattingen. Per sessie heeft elke speler een **sessiekaart**
   (`PlayerCard.html(naam, { session, rank })`: tier, foto en zes cijfers van die avond; met rank een buitenrand in goud,
-  zilver, brons of ijzer naar de plek op rating, de binnenrand blijft goud), in de top drie en bij *Spelers deze sessie*. Waar het over één speler gaat, staat de vorm als **reeks van één sessie** met per wedstrijd de rating
-  (`ratingDots(rows)` uit `public/common.js`): onder de kaart op de spelerspagina en per speler bij een geopende sessie.
+  zilver, brons of ijzer naar de plek op rating, de binnenrand blijft goud), in de top drie (en later het FUT-pack). Waar het over één speler gaat, staat de vorm als **reeks van één sessie** met per wedstrijd de rating
+  (`ratingDots(rows)` uit `public/common.js`): onder de kaart op de spelerspagina.
   Alleen de hero op het Clubhouse houdt de laatste tien uitslagen van de club.
 - Bij een sessie staat op de sessiekaart linksboven de plek op rating in een medaille in de kleur van de
-  buitenrand in plaats van de overall (`rank` in `PlayerCard.html`; op telefoon zonder archetype, logo en vlag); bij *Spelers deze sessie* ernaast de rating van de avond met de groei; geen tier-label of "normaal". De wedstrijdpagina toont de opstelling als één veld met
+  buitenrand in plaats van de overall (`rank` in `PlayerCard.html`; op telefoon zonder archetype, logo en vlag). De wedstrijdpagina toont de opstelling als één veld met
   beide teams (`lineup(m)` in `public/wedstrijd.js`): elke speler een rondje (bij ons het portret via
   `PlayerCard.portrait`, bij de tegenstander het archetype-icoon) met de rating eronder; per linie het aantal mensen,
   per team het aantal AI-spelers (`m.ai`). Liggend op een groot scherm; vanaf 900 px de teams naast elkaar in vier
   vlakken onder elkaar. `wedstrijd.html` laadt daarvoor `playercard.js`. AI per linie geeft EA niet.
 - Favoriet: één speler per browser (`favorite()`/`setFavorite()` in `public/common.js`, localStorage), te kiezen met de
-  ster op de spelerspagina; opent standaard bij *Spelers*, staat vooraan bij de namen en in de Selectie. Opnieuw tekenen
+  ster rechtsboven in het vlak van de spelerskaart; opent standaard bij *Spelers*, staat vooraan bij de namen en in de Selectie. Opnieuw tekenen
   bij een andere breedte gaat via `onWidthChange(fn)`, nooit via een kale resize (adresbalk op telefoon).
 - Wedstrijden is alleen de lijst (eerst twintig, de rest achter een knop); een wedstrijd opent op `/wedstrijd.html?id=<matchId>` (een laag dieper) met
   "Terug naar wedstrijden" bovenaan. Link naar wedstrijden altijd via dat adres.

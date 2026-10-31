@@ -67,12 +67,12 @@ function playerSummary(name, rows, ms, players) {
   return parts.join(' ');
 }
 
-// Eén lijst met alles wat voor een speler telt (coach-logica §9a), in vaste kolommen: label, per wedstrijd (of de breuk bij
+// Alles wat voor een speler telt (coach-logica §9a), als losse kaart per groep, in vaste kolommen: label, per wedstrijd (of de breuk bij
 // een percentage), en helemaal rechts het totaal.
 function statGroups(rows) {
   const n = rows.length, e = evRows(rows), ne = e.length;
   const t = f => sum(rows, r => f(r.p)), te = f => sum(e, r => f(r.p.ev));
-  const count = (label, total, games = n) => ({ label, main: String(total), sub: games ? `${(total / games).toFixed(1)} p/w` : '' });
+  const count = (label, total, games = n) => ({ label, main: String(total), sub: games ? (total / games).toFixed(1) : '' /* de kolomkop zegt al: per wedstrijd */ });
   const ratio = (label, num, den) => ({ label, main: den ? fmtPct(pct(num, den)) : '–', sub: `${num} van ${den}` });
   const plain = (label, main, sub = '') => ({ label, main, sub });
   const ratings = rows.map(r => r.p.rating).filter(v => v !== null), fi = fiForRows(rows.map(r => r.p).filter(p => p.fi !== null));
@@ -108,7 +108,7 @@ function statGroups(rows) {
       ne ? plain('Kaarten', String(te(v => v.yellow_cards_total) + t(p => p.redCards)), `${te(v => v.yellow_cards_total)} geel · ${t(p => p.redCards)} rood`) : plain('Kaarten', String(t(p => p.redCards)), 'rood'),
     ]],
   ];
-  return groups.map(([title, items]) => `<section class="stat-group"><h3>${title}</h3>${items.filter(Boolean).map(it => it.builds !== undefined
+  return groups.map(([title, items]) => `<section class="card stat-group"><h2>${title}</h2><div class="stat-head" aria-hidden="true"><span></span><span>per wedstrijd</span><span>totaal</span></div>${items.filter(Boolean).map(it => it.builds !== undefined
     ? `<div class="stat-row has-builds"><span>${it.label}</span><span class="builds">${it.builds || '–'}</span></div>`
     : `<div class="stat-row"><span>${it.label}</span><small>${it.sub}</small><b>${it.main}</b></div>`).join('')}</section>`).join('');
 }
@@ -127,7 +127,7 @@ function renderPlayer() {
   const n = rows.length || 1, g = sum(rows, r => r.p.goals), as = sum(rows, r => r.p.assists);
   window.PlayerCard.render(selected);
   const on = fav === selected;
-  $('#player-hero').insertAdjacentHTML('afterbegin', `<button type="button" class="fav-btn" aria-pressed="${on}" title="${on ? 'Favoriet: tik om weg te halen' : 'Maak deze speler je favoriet (er kan er één zijn)'}">${STAR}${on ? 'Favoriet' : 'Favoriet maken'}</button>`);
+  $('#player-hero').insertAdjacentHTML('afterbegin', `<button type="button" class="fav-btn" aria-pressed="${on}" aria-label="${on ? 'Favoriet, tik om weg te halen' : 'Maak favoriet'}" title="${on ? 'Favoriet: tik om weg te halen' : 'Maak deze speler je favoriet (er kan er één zijn)'}">${STAR}<span>${on ? 'Favoriet' : 'Favoriet maken'}</span></button>`);
   $('#player-hero .fav-btn').addEventListener('click', () => { setFavorite(on ? null : selected); renderPlayer(); });
   document.title = `${proName(selected)} · Frambroos Coach`;
   $('#p-summary').innerHTML = playerSummary(selected, rows, ms, players);
