@@ -146,6 +146,7 @@ function render() {
         ${ratingDots(rows)}</div></div>`;
   }).join('')}</div>`;
   PlayerCard.reveal($('#s-players'));
+  renderMatrix(ms, prow);
   renderRadar(s, ms);
 }
 
@@ -155,6 +156,23 @@ function formLine(name, sid, rating, n) {
   const t = PlayerCard.sessionTier(name, sid);
   const extra = n < 3 ? '<span class="sp-note">minder dan 3 potten, telt niet voor de vorm</span>' : t.growth === null ? '' : `<span class="sp-growth" title="Groei: verschil met het eigen normaal, rating plus winst">${growthCell(t.growth)}</span>`;
   return `<div class="pcard-sub sp-line"><b class="sp-rating">${f1(rating)}</b>${extra}</div>`;
+}
+
+// ---------- per wedstrijd: rijen zijn wedstrijden, kolommen spelers (op plek), cellen de rating ----------
+// Proefversie (optie 4) om te vergelijken met de kaarten erboven. De kleur van een cel loopt mee met de rating
+// (5,5 en lager licht, 9 en hoger vol); de beste van een wedstrijd staat vet, man of the match met een kroon.
+function renderMatrix(ms, prow) {
+  const cols = prow.filter(r => r.rH !== null);
+  const head = cols.map((r, i) => { const photo = PlayerCard.portrait(r.name);
+    return `<th scope="col"><a class="rm-player" href="spelers.html#${encodeURIComponent(r.name)}" title="${esc(proName(r.name))}"><span class="rm-face">${photo ? `<img class="fade-img" src="${photo}" alt="">` : ''}<span class="rm-rank rim-${i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : 'iron'}">${i + 1}</span></span><span class="rm-name">${esc(proName(r.name))}</span></a></th>`; }).join('');
+  const cell = (p, best) => { if (!p || p.rating === null) return '<td class="rm-none">–</td>';
+    const t = Math.max(0, Math.min(1, (p.rating - 5.5) / 3.5));
+    return `<td class="${p.rating === best ? 'rm-best' : ''}" style="--t:${t.toFixed(2)}" title="${esc(proName(p.name))}: ${p.rating}${p.goals ? ` · ${p.goals} G` : ''}${p.assists ? ` · ${p.assists} A` : ''}">${f1(p.rating)}${p.mom ? '<i title="Man of the match">♛</i>' : ''}</td>`; };
+  const rows = ms.map(m => { const ps = cols.map(r => m.players.find(p => p.name === r.name)), best = Math.max(...ps.filter(p => p && p.rating !== null).map(p => p.rating));
+    return `<tr><th scope="row"><a class="rm-match" href="wedstrijd.html?id=${m.matchId}" title="${esc(m.opponent.name)}"><span class="tl-dot ${m.result}">${letter(m.result)}</span>${kitShirt(m.opponent.kit, m.opponent.name)}<b>${m.goals}-${m.goalsAgainst}</b></a></th>${ps.map(p => cell(p, best)).join('')}</tr>`; }).join('');
+  $('#s-matrix').innerHTML = `<table class="rmatrix"><thead><tr><th></th>${head}</tr></thead><tbody>${rows}</tbody>
+    <tfoot><tr><th scope="row">Gem.</th>${cols.map(r => `<td>${f1(r.rH)}</td>`).join('')}</tr></tfoot></table>`;
+  PlayerCard.reveal($('#s-matrix'));
 }
 
 // ---------- radar van de avond (coach-logica §9a) ----------

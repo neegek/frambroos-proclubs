@@ -432,6 +432,12 @@ avond met de groei (§9c), en de reeks van de avond met per wedstrijd de rating 
 1080×1080 in thuiskleuren) toont W-G-V, winstpercentage, doelsaldo, uitblinker, meeste goals
 plus assists en de eerste twee zinnen van de samenvatting.
 
+**Per wedstrijd** (proef sinds 31 oktober 2026, om te vergelijken met *Spelers deze sessie*): een raster met per
+wedstrijd een rij (uitslag, shirt, score) en per speler een kolom (portret met de plek), in de cellen de rating. De
+cel kleurt mee met de rating (5,5 en lager licht, 9 en hoger vol); de beste van een wedstrijd heeft een rand, man of
+the match een kroon; onderaan het gemiddelde. Op telefoon horizontaal scrollen met de wedstrijden vast links. Na de
+keuze blijft één van de twee over.
+
 **Radar van de avond** (op de sessiepagina, na de kop): per speler één vlak over zes assen, zodat in één beeld te zien
 is wie op welk vlak goed speelde. Elke as is een **percentiel tegenover onze eigen avonden**: de waarde van de speler
 deze avond, vergeleken met alle avonden van al onze spelers (per speler per sessie, minstens 2 wedstrijden). 50 is
