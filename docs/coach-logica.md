@@ -384,7 +384,8 @@ Geen reeksen: die staan al in de rondjes bovenaan.
    builds en signature meer: wat erop staat, staat op de kaart; de builds staan in de cijfers.
 2. De samenvatting (hierboven) met de **drie cijfers** over de gekozen periode (goals per wedstrijd, assists per
    wedstrijd, winstpercentage met deze speler erbij).
-3. **Cijfers**: één lijst met alles wat voor een speler telt, in vier groepen, in **vaste kolommen** zodat je
+3. **Cijfers**: alles wat voor een speler telt, in **losse kaarten per groep** (Algemeen, Aanvallen, Passen,
+   Verdedigen, Discipline), in een raster; in elke kaart **vaste kolommen** zodat je
    verticaal kunt lezen: het label, dan per wedstrijd (of de breuk bij een percentage), en helemaal rechts het totaal. *Algemeen*: wedstrijden, minuten per wedstrijd, rating, Frambroos-index,
    man of the match, builds gespeeld (met aantal, laatst gespeelde eerst). *Aanvallen*: goals, assists, tweede
    assists, schoten, conversie, dribbels, tegenstanders uitgespeeld. *Passen*: passes gelukt van pogingen,
@@ -395,8 +396,8 @@ Geen reeksen: die staan al in de rondjes bovenaan.
 Het advies (§8), *Aan de bal in context* (§4a), de vormgrafiek per sessie en het buildformulier staan voorlopig niet
 op de pagina; de code blijft, zodat ze terug kunnen als het eerste scherm klaar is.
 
-**Favoriet** (sinds 31 oktober 2026): wie de app gebruikt, kan één speler als favoriet kiezen met de ster op de
-spelerspagina (nog eens tikken haalt hem weg). Dat wordt per browser onthouden, niet gedeeld. De favoriet opent als je
+**Favoriet** (sinds 31 oktober 2026): wie de app gebruikt, kan één speler als favoriet kiezen met de ster rechtsboven
+in het vlak van de spelerskaart (nog eens tikken haalt hem weg). Dat wordt per browser onthouden, niet gedeeld. De favoriet opent als je
 *Spelers* opent zonder naam, staat vooraan bij de namen en in de Selectie op het Clubhouse, met een ster.
 
 **Laden**: elke pagina toont meteen de opbouw met grijze, zacht pulserende vlakken op de plek van kaart, tekst en
@@ -427,16 +428,20 @@ andere wedstrijden), zodat je in één oogopslag ziet of het boven of onder norm
 alleen de anekdote in één zin met de Cruijff-quote; de lijst met namen staat al bij de spelers. Daarnaast de **top drie van de avond** als sessiekaarten (§9c) op rating over
 deze avond, als waaier: de beste vooraan en groot, nummer twee en drie erachter en iets lager, elk met plek en rating.
 Bij nul punten heet het "hield het best stand", maar de kaarten blijven hetzelfde. Man of the match staat als kroon
-bij de speler. *Spelers deze sessie* toont per speler, op rating: de sessiekaart klein (met de plek), de naam, de rating van de
-avond met de groei (§9c), en de reeks van de avond met per wedstrijd de rating (§9c). Geen vergelijkingen per maat. De deelkaart (afbeelding van
+bij de speler. Daarna *Per wedstrijd* (hieronder); *Spelers deze sessie* is weg (dubbel). De deelkaart (afbeelding van
 1080×1080 in thuiskleuren) toont W-G-V, winstpercentage, doelsaldo, uitblinker, meeste goals
 plus assists en de eerste twee zinnen van de samenvatting.
 
-**Per wedstrijd** (proef sinds 31 oktober 2026, om te vergelijken met *Spelers deze sessie*): een raster met per
-wedstrijd een rij (uitslag, shirt, score) en per speler een kolom (portret met de plek), in de cellen de rating. De
-cel kleurt mee met de rating (5,5 en lager licht, 9 en hoger vol); de beste van een wedstrijd heeft een rand, man of
-the match een kroon; onderaan het gemiddelde. Op telefoon horizontaal scrollen met de wedstrijden vast links. Na de
-keuze blijft één van de twee over.
+**Per wedstrijd** (sinds 31 oktober 2026, vervangt *Spelers deze sessie*): een raster met per speler een kolom en
+per wedstrijd een rij (uitslag, shirt, score). Bovenaan per speler het portret met de naam, daaronder **gecentreerd de
+plek** als medaille, en direct daaronder het **gemiddelde van de avond**: dat bepaalt de plek, dus het staat bovenaan.
+Elke cel kleurt naar de plek in die rij: goud, zilver en brons voor de beste drie, ijzer voor de rest (gelijke ratings
+delen een plek); het gemiddelde naar de plek op de avond. Man of the match met een kroon. Op telefoon horizontaal
+scrollen met de wedstrijden vast links.
+
+**FUT-pack (idee, nog niet gebouwd)**: de sessiekaarten van alle spelers (wat eerst *Spelers deze sessie* was) als
+een pack dat je per sessie kunt openen, kaart voor kaart, van ijzer naar goud. De code voor de kaarten met plek staat
+er al (`PlayerCard.html(naam, { session, rank })`).
 
 **Radar van de avond** (op de sessiepagina, na de kop): per speler één vlak over zes assen, zodat in één beeld te zien
 is wie op welk vlak goed speelde. Elke as is een **percentiel tegenover onze eigen avonden**: de waarde van de speler
@@ -545,7 +550,7 @@ rest goud; dezelfde verdeling als met de laatste vijf.
 
 **Sessiekaart**: elke speler krijgt per sessie een eigen kaart, zoals een in-form-kaart in FC. Tier en foto volgen die
 sessie (minder dan 3 wedstrijden: goud), de zes cijfers zijn die van de avond: WED, RAT (gemiddeld), GLS | ASS, MOTM,
-WIN. Bij een sessie (top drie en *Spelers deze sessie*) krijgt de **buitenste rand** de kleur van de plek op
+WIN. Bij een sessie (top drie, en later het FUT-pack) krijgt de **buitenste rand** de kleur van de plek op
 rating die avond: goud (1), zilver (2), brons (3), en ijzer (donkergrijs) voor de rest. De binnenste rand blijft goud,
 zodat de tier (het vlak) en de plek (de rand) los te lezen zijn. Linksboven staat dan **de plek** in plaats van de
 overall van de pro (die zegt over één avond niets), in een medaille in de kleur van de buitenrand; de top drie heeft
