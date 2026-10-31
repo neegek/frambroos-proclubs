@@ -377,22 +377,22 @@ Geen reeksen: die staan al in de rondjes bovenaan.
 - **Leden**: elk lid als spelerskaart (§9c), **gesorteerd op vorm**: eerst topvorm, dan in vorm, dan de rest; binnen
   een tier op de rating van de laatste sessie, dan op aantal wedstrijden.
 
-**Spelerspagina** (sinds 28 oktober 2026, zonder tabbladen): één pagina, van boven naar beneden:
+**Spelerspagina** (sinds 28 oktober 2026, zonder tabbladen; sinds 1 november 2026 zonder filters, samenvatting en
+*Algemeen*: wat daar stond, staat op de kaart): één pagina, van boven naar beneden, altijd over alle gevolgde wedstrijden:
 1. De spelerskaart, met daaronder alleen de **vorm**: de reeks van de sessie die de vorm bepaalt (§9c), per wedstrijd
    de rating als rondje, de datum erboven en de rondjes op **één rij** (past het niet, dan horizontaal scrollen; nooit
-   meer dan de wedstrijden van één sessie). Geen lijst met pro, taak,
-   builds en signature meer: wat erop staat, staat op de kaart; de builds staan in de cijfers.
-2. De samenvatting (hierboven) met de **drie cijfers** over de gekozen periode (goals per wedstrijd, assists per
-   wedstrijd, winstpercentage met deze speler erbij).
-3. **Cijfers**: alles wat voor een speler telt, in **losse kaarten per groep** (Algemeen, Aanvallen, Passen,
-   Verdedigen, Discipline), in een raster; in elke kaart **vaste kolommen** zodat je
-   verticaal kunt lezen: het label, dan per wedstrijd (of de breuk bij een percentage), en helemaal rechts het totaal. *Algemeen*: wedstrijden, minuten per wedstrijd, rating, Frambroos-index,
-   man of the match, builds gespeeld (met aantal, laatst gespeelde eerst). *Aanvallen*: goals, assists, tweede
-   assists, schoten, conversie, dribbels, tegenstanders uitgespeeld. *Passen*: passes gelukt van pogingen,
-   steekpasses, aandeel vooruit. *Verdedigen*: balwinst, onderscheppingen, tackles gewonnen van pogingen, de nul
-   gehouden; voor keepers ook reddingen. *Discipline*: balverlies, uit positie, overtredingen, kaarten. Geen oordeel
-   erbij; alleen wat EA telt (§2 en docs/event-codes.md).
-4. De laatste acht wedstrijden, de rest achter een knop.
+   meer dan de wedstrijden van één sessie).
+2. **Cijfers** in losse kaarten per groep (Aanvallen, Passen, Verdedigen, Discipline), elk met **twee kolommen**: de
+   speler (kop: de naam van de pro) en **de club**. In elke kolom groot het totaal en klein daaronder per wedstrijd
+   (bij een percentage de breuk). De club is iedereen van ons over alle gevolgde wedstrijden; *per wedstrijd* is daar
+   het gemiddelde per speler per wedstrijd, zodat het naast de speler te leggen is. De speler kleurt **groen** als die
+   per wedstrijd beter zit dan de club, **rood** als slechter, gewoon als het gelijk is (binnen 5 % van elkaar; bij
+   percentages binnen 2 punten). Bij balverlies, uit positie, overtredingen en kaarten is lager beter. Reddingen
+   (alleen keepers) kleuren niet. *Aanvallen*: goals, assists, tweede assists, schoten, conversie, dribbels,
+   tegenstanders uitgespeeld. *Passen*: passes gelukt van pogingen, passes, steekpasses, aandeel vooruit.
+   *Verdedigen*: balwinst, onderscheppingen, tackles gewonnen van pogingen, de nul gehouden, reddingen (keepers).
+   *Discipline*: balverlies, uit positie, overtredingen, kaarten. Alleen wat EA telt (§2 en docs/event-codes.md).
+3. De laatste acht wedstrijden, de rest achter een knop.
 Het advies (§8), *Aan de bal in context* (§4a), de vormgrafiek per sessie en het buildformulier staan voorlopig niet
 op de pagina; de code blijft, zodat ze terug kunnen als het eerste scherm klaar is.
 
