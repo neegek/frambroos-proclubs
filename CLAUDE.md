@@ -102,7 +102,7 @@ alleen in Cloudflare.
   Wedstrijden: die is één lijst van `matchRow`-regels, nieuwste eerst, met de beste speler per wedstrijd. Sessies
   begint met een `.scard` per avond (datum, W-G-V, goals, team rating, tijdlijn met
   uitslagen en shirts, speler van de sessie met de portretfoto (`PlayerCard.portrait`, ook bij in vorm) of een icoon in een rondje in de kleuren van de vorm; nergens de duur van een avond); een tik opent
-  `sessie.html?id=<id>` (eigen pagina, een laag dieper, zonder terugknop; *Sessies* is daar niet actief in het menu).
+  `sessie.html?id=<datum>` (bijv. `?id=2026-11-01`, via `sessionHref(s)`; eigen pagina, een laag dieper, zonder terugknop; *Sessies* is daar niet actief in het menu).
   Een sessie begint met één kaart met een split (`.sess-stage`, coach-logica §9a): boven het beeld (`.ss-visual`) op
   het stadion (`stadiumSvg()` in `common.js`, vaste kleuren) met gele regel, naam van de sessie, de quote van de beste
   speler (`sessionQuote`: per sessie nieuw, over de statistiek die uitstak, uit `personas.js`) en de top drie als `PlayerCard.tiny` naast elkaar (geen podium; één in het midden, groter;
@@ -180,8 +180,8 @@ alleen in Cloudflare.
 - Favoriet: één speler per browser (`favorite()`/`setFavorite()` in `public/common.js`, localStorage), te kiezen met de
   ster rechtsboven in het vlak van de spelerskaart; opent standaard bij *Spelers*, staat vooraan bij de namen en in de Selectie. Opnieuw tekenen
   bij een andere breedte gaat via `onWidthChange(fn)`, nooit via een kale resize (adresbalk op telefoon).
-- Wedstrijden is alleen de lijst (eerst twintig, de rest achter een knop); een wedstrijd opent op `/wedstrijd.html?id=<matchId>` (een laag dieper) met
-  "Terug naar wedstrijden" bovenaan. Link naar wedstrijden altijd via dat adres.
+- Wedstrijden is alleen de lijst (eerst twintig, de rest achter een knop); een wedstrijd opent op `wedstrijd.html?id=<datum>-<tegenstander>` (bijv. `2026-11-01-war-team`, altijd via `matchHref(m)`; een laag dieper) met
+  "Terug naar wedstrijden" bovenaan. Link naar wedstrijden en sessies altijd via `matchHref`/`sessionHref` (leesbare adressen; oude nummers worden omgezet).
 
 ## Controleren na een wijziging
 

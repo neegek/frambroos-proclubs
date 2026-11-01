@@ -1,5 +1,5 @@
 // Wedstrijdpagina (een laag onder Wedstrijden): verhaal, de opstelling van beide teams op één veld, wij tegen hen en spelers van één wedstrijd.
-// Adres: /wedstrijd.html?id=<matchId>. Logica van de samenvatting: docs/coach-logica.md §9.
+// Adres: wedstrijd.html?id=<datum>-<tegenstander>. Logica van de samenvatting: docs/coach-logica.md §9.
 
 const fmtTime = ts => new Date(ts * 1000).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
 const fmtDayLong = ts => new Date(ts * 1000).toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -134,16 +134,18 @@ const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 
 function render() {
   const id = new URLSearchParams(location.search).get('id');
-  const idx = DATA.matches.findIndex(x => x.matchId === id);
+  // Adres: wedstrijd.html?id=2026-11-01-war-team (datum en tegenstander); een oud adres met het EA-nummer werkt ook nog.
+  const idx = DATA.matches.findIndex(x => x.slug === id || x.matchId === id);
   if (idx < 0) { $('#page-title').textContent = 'Wedstrijd niet gevonden'; $('#page-sub').textContent = 'Deze wedstrijd staat niet (meer) in de data.'; $('#m-detail').hidden = true; return; }
   const m = DATA.matches[idx];
+  if (id !== m.slug) history.replaceState(null, '', matchHref(m)); // altijd het leesbare adres
   const own = DATA.snapshot?.skillRating, kits = DATA.club.kits;
   document.title = `Frambroos tegen ${m.opponent.name} · Frambroos Coach`;
   $('#page-title').textContent = `Tegen ${m.opponent.name}`;
   $('#page-sub').textContent = `${cap(fmtDayLong(m.ts))}, ${fmtTime(m.ts)} · ${m.matchType === 'playoffMatch' ? 'playoff' : 'league'}`;
   // vorige en volgende wedstrijd, in volgorde van spelen
   const prev = DATA.matches[idx - 1], next = DATA.matches[idx + 1];
-  $('#m-nav').innerHTML = `${prev ? `<a class="more-link" href="wedstrijd.html?id=${prev.matchId}">← Vorige: ${esc(prev.opponent.name)}</a>` : '<span></span>'}${next ? `<a class="more-link" href="wedstrijd.html?id=${next.matchId}">Volgende: ${esc(next.opponent.name)} →</a>` : '<span></span>'}`;
+  $('#m-nav').innerHTML = `${prev ? `<a class="more-link" href="${matchHref(prev)}">← Vorige: ${esc(prev.opponent.name)}</a>` : '<span></span>'}${next ? `<a class="more-link" href="${matchHref(next)}">Volgende: ${esc(next.opponent.name)} →</a>` : '<span></span>'}`;
   $('#m-score').innerHTML = `<div class="sl-team"><img class="own-crest" src="crest.png" alt="Frambroos" width="64" height="64"><span>Frambroos</span></div>
     <div class="sl-score"><span>${m.goals}–${m.goalsAgainst}</span><span class="pill ${m.result}">${m.result === 'W' ? 'Gewonnen' : m.result === 'L' ? 'Verloren' : 'Gelijk'}</span></div>
     <div class="sl-team">${oppBadge(m.opponent)}<span>${esc(m.opponent.name)}</span></div>`;

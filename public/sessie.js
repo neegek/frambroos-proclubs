@@ -1,4 +1,4 @@
-// Pagina van één sessie (sessie.html?id=<id>, een laag onder Sessies): uitslagen, de top drie als sessiekaarten, een
+// Pagina van één sessie (sessie.html?id=<datum>, een laag onder Sessies): uitslagen, de top drie als sessiekaarten, een
 // verhaaltje met een quote van de beste speler, het radardiagram van de avond en de spelers.
 // Een sessie is een reeks wedstrijden met minder dan 3 uur ertussen (SESSION_GAP in common.js).
 // Samenvatting: docs/coach-logica.md §9 (Sessie).
@@ -10,7 +10,9 @@ const typeLabel = list => { const t = new Set(list.map(m => m.matchType)); retur
 const strengthLabel = d => d === null ? '' : d >= 250 ? 'veel sterker' : d >= 100 ? 'sterker' : d <= -100 ? 'zwakker' : 'gelijkwaardig';
 const pSum = (rows, f) => rows.reduce((a, r) => a + (f(r.p) || 0), 0);
 
-let sessions = [], selectedId = Number(new URLSearchParams(location.search).get('id')) || null;
+// Adres: sessie.html?id=2026-11-01 (datum van de avond); een oud adres met een volgnummer werkt ook nog.
+const ID_PARAM = new URLSearchParams(location.search).get('id');
+let sessions = [], selectedId = null;
 
 // De anekdote van de avond (coach-logica §9): het ene moment of de ene speler die de avond kenmerkte, met het thema
 // (q) voor de quote van de beste speler (personas.js). Kandidaten krijgen een kracht; de sterkste wint, bij gelijke kracht de laatste.
@@ -99,6 +101,7 @@ function render() {
   if (!sessions.some(s => s.id === selectedId)) selectedId = sessions.at(-1)?.id ?? null;
   if (selectedId === null) { $('#s-title').textContent = 'Nog geen sessies'; return; }
   const s = sessions.find(x => x.id === selectedId), ms = s.matches, sm = summarize(ms);
+  if (new URLSearchParams(location.search).get('id') !== s.key) history.replaceState(null, '', sessionHref(s)); // altijd het leesbare adres
   const others = DATA.matches.filter(m => m.session !== s.id);
   const own = DATA.snapshot?.skillRating;
   const names = [...new Set(ms.flatMap(m => m.players.map(p => p.name)))];
@@ -109,7 +112,7 @@ function render() {
   if (!$('#s-visual .hh-stadium')) $('#s-visual').insertAdjacentHTML('afterbegin', stadiumSvg());
   // Vorige en volgende sessie (op telefoon): alleen een knop als die sessie bestaat.
   // Op telefoon naast de titel; een lege plek houdt de titel in het midden als er geen vorige of volgende is.
-  const at = sessions.indexOf(s), nav = (to, cls, label, d) => to ? `<a class="ss-nav ${cls}" href="sessie.html?id=${to.id}" aria-label="${label}: ${esc(cap(longDate(to.matches[0].ts)))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg></a>` : `<span class="ss-nav ${cls} empty" aria-hidden="true"></span>`;
+  const at = sessions.indexOf(s), nav = (to, cls, label, d) => to ? `<a class="ss-nav ${cls}" href="${sessionHref(to)}" aria-label="${label}: ${esc(cap(longDate(to.matches[0].ts)))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg></a>` : `<span class="ss-nav ${cls} empty" aria-hidden="true"></span>`;
   $('#s-titlebar').querySelectorAll('.ss-nav').forEach(a => a.remove());
   $('#s-title').insertAdjacentHTML('beforebegin', nav(sessions[at - 1], 'prev', 'Vorige sessie', 'M15 18l-6-6 6-6'));
   $('#s-title').insertAdjacentHTML('afterend', nav(sessions[at + 1], 'next', 'Volgende sessie', 'M9 18l6-6-6-6'));
@@ -199,7 +202,7 @@ function renderMatrix(ms, prow) {
     const ps = cols.map(r => m.players.find(p => p.name === r.name)), vals = ps.filter(p => p && p.rating !== null).map(p => p.rating);
     const cell = p => !p || p.rating === null ? '<td class="rm-none">–</td>'
       : `<td class="rim-${RIM(rankIn(p.rating, vals))}"><button type="button" class="rm-cell" data-m="${m.matchId}" data-n="${esc(p.name)}" aria-haspopup="dialog" aria-label="${esc(proName(p.name))} tegen ${esc(m.opponent.name)}: ${f1(p.rating)}, details">${f1(p.rating)}${p.mom ? '<i title="Man of the match">♛</i>' : ''}</button></td>`;
-    return `<tr><th scope="row"><a class="rm-match" href="wedstrijd.html?id=${m.matchId}" title="${esc(m.opponent.name)}"><span class="tl-dot ${m.result}">${letter(m.result)}</span>${oppBadge(m.opponent)}<b>${m.goals}-${m.goalsAgainst}</b></a></th>${ps.map(cell).join('')}</tr>`;
+    return `<tr><th scope="row"><a class="rm-match" href="${matchHref(m)}" title="${esc(m.opponent.name)}"><span class="tl-dot ${m.result}">${letter(m.result)}</span>${oppBadge(m.opponent)}<b>${m.goals}-${m.goalsAgainst}</b></a></th>${ps.map(cell).join('')}</tr>`;
   }).join('');
   $('#s-matrix').innerHTML = `<table class="rmatrix"><thead><tr><th></th>${head}</tr></thead><tbody>${rows}</tbody></table>`;
   for (const a of $('#s-matrix').querySelectorAll('.rm-player')) a.addEventListener('click', e => { e.preventDefault(); openPlayer(a.dataset.n); });
@@ -224,7 +227,7 @@ function openCell(m, name) {
     <p><span class="tl-dot ${m.result}">${letter(m.result)}</span> ${m.goals}–${m.goalsAgainst} tegen ${esc(m.opponent.name)} · ${time}</p>
     <dl class="cd-grid">${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>
     <p class="cd-note">EA zegt niet hoe de rating berekend wordt; dit is wat de speler in deze wedstrijd deed.</p>`;
-  dialogFoot(d, `wedstrijd.html?id=${m.matchId}`, 'Naar de wedstrijd');
+  dialogFoot(d, matchHref(m), 'Naar de wedstrijd');
   d.showModal();
 }
 $('#cell-dialog').addEventListener('click', e => { if (e.target === e.currentTarget || e.target.closest('.rd-close')) e.currentTarget.close(); });
@@ -363,7 +366,7 @@ $('#player-dialog').addEventListener('click', e => { if (e.target === e.currentT
 
 onWidthChange(() => DATA && render());
 window.rerender = () => render(); // thema wisselen: kaarten opnieuw in thuis- of uitkleuren
-Promise.all([loadData(), PlayerCard.load().catch(() => {})]).then(() => { sessions = sessionsOf(DATA.matches); render(); }).catch(showError);
+Promise.all([loadData(), PlayerCard.load().catch(() => {})]).then(() => { sessions = sessionsOf(DATA.matches); selectedId = (sessions.find(x => x.key === ID_PARAM) || (/^\d+$/.test(ID_PARAM || '') ? sessions.find(x => x.id === Number(ID_PARAM)) : null))?.id ?? null; render(); }).catch(showError);
 
 // ---------- deelkaart ----------
 // Een avond als afbeelding (1080×1080) voor de groepsapp: uitslag, kerncijfers, uitblinker, de eerste zin van de
@@ -374,7 +377,7 @@ const toast = msg => { let t = $('#toast'); if (!t) { t = document.createElement
   t.textContent = msg; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 2200); };
 // Het adres van deze sessie op de gedeelde site (ook vanuit de lokale app), zodat een link altijd werkt.
 const SITE = 'https://neegek.github.io/frambroos-proclubs/';
-const sessionUrl = ({ ms }) => `${SITE}sessie.html?id=${ms[0].session}`;
+const sessionUrl = ({ ms }) => `${SITE}sessie.html?id=${ms[0].sessionKey}`;
 const fileName = ms => `frambroos-${new Date(ms[0].ts * 1000).toISOString().slice(0, 10)}.png`;
 // De avond als tekst: plakklaar in een chat of spreadsheet (kolommen gescheiden door tabs).
 function sessionText({ ms, sm, quote, prow, meta }) {

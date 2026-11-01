@@ -468,7 +468,10 @@ rating onder wie minstens de helft van de wedstrijden speelde, met een kleine fo
 rondje met de rand- en achtergrondkleur van de huidige vorm van die speler (goud, zwart-goud of blauw, §9c) en
 altijd de portretfoto (geen vormfoto: in een klein rondje is een gezicht herkenbaarder), goals en
 assists. Geen duur van de avond: die zegt niets. Het kopvlak kleurt zacht mee met de avond: blauw bij ≥ 2 punten per wedstrijd, rood bij < 1. Een tik opent de
-sessie op een eigen pagina, `sessie.html?id=<id>` (een laag dieper), zonder terugknop: *Sessies* in het menu is daar
+sessie op een eigen pagina, `sessie.html?id=<datum>` (een laag dieper; sinds 1 november 2026 een leesbaar adres:
+`sessie.html?id=2026-11-01`, een tweede avond op dezelfde dag `-2`; een wedstrijd `wedstrijd.html?id=2026-11-01-war-team`,
+datum en tegenstander, bij een tweede keer dezelfde tegenstander die dag `-2`; datums in Nederlandse tijd; oude adressen
+met een volgnummer of het EA-nummer werken nog en worden omgezet), zonder terugknop: *Sessies* in het menu is daar
 niet actief, zodat een tik erop terug naar de lijst gaat (sinds 1 november 2026).
 
 **Wedstrijden** is één lijst van alle wedstrijden, nieuwste eerst, niet per avond verdeeld. Per wedstrijd: datum en
