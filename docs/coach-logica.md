@@ -271,6 +271,8 @@ Daarnaast *Positiespel en keuzes* en *Al sterk*.
 - **Getallen** (sinds 30 oktober 2026): overal **één decimaal** (8.4, 0.6 per wedstrijd). Sorteren en rangschikken
   gebeurt op het exacte getal, zodat twee gelijk afgeronde scores toch een vaste volgorde hebben. De **groei** (§9c)
   ook met één decimaal en zonder ",0" als het een heel getal is (+1, −0.4); het woord *groei* staat er niet bij.
+- **Namen** overal voluit zoals EA ze geeft (Petra Selie, niet P. Selie); alleen een naam die in het spel al met een
+  voorletter is ingevuld (M. Van der Kamp) blijft zo. Past een naam niet, dan afkappen met …, nooit zelf afkorten.
 - Nederlands. Over spelers geen *hij* of *zij*: gebruik de naam, *deze speler* of *je*. De naam is die van de pro
   (Terry Yaki, Petra Selie), niet de accountnaam; dat houdt de roleplay heel (sinds 27 oktober 2026).
 - Samenvattingen zijn **één korte alinea van drie of vier zinnen** die vertelt wat er gebeurde, **zonder cijfers op te
@@ -459,17 +461,23 @@ the match was). Eerst de laatste twintig, de rest achter een knop.
 - **Boven: het beeld** op het stadion van het Clubhouse (vaste kleuren, los van het thema): klein en geel type, aantal
   wedstrijden en aantal spelers; groot de **naam van de sessie** (de datum); daaronder de **quote van de beste
   speler** (§9, Sessie) met de naam erachter op dezelfde regel; en de **top drie op een podium**: de nummer één in het
-  midden, groter en hoger, twee links, drie rechts, met naam en kroon bij man of the match. De treden **eindigen op de
-  rand van het beeld**: daar is het podium afgesneden. Een lange naam wordt afgekapt met … zodat de kaartjes even breed
-  blijven; een tik scrollt naar *Per wedstrijd*. Op een groot scherm de tekst links en het podium rechts, op telefoon
+  midden, groter en hoger, twee links, drie rechts. De **naam staat in het kaartje** onder de rating (past hij niet,
+  dan afgekapt met …, zodat de kaartjes even breed blijven); geen kroon voor man of the match. De **plek staat op de
+  trede** (1, 2, 3) in plaats van als medaille op de kaart; de rand van het kaartje houdt de kleur van de plek. De
+  treden zijn hoog genoeg om als podium te lezen en **eindigen op de rand van het beeld**: daar is het podium
+  afgesneden; een tik scrollt naar *Per wedstrijd*. Op een groot scherm de tekst links en het podium rechts, op telefoon
   alles onder elkaar en gecentreerd.
 - **Onder: een paneel** in de kleuren van het thema (donker of licht): de uitslag in drie getallen, **W-G-V** in de
-  uitslagkleuren, **Goals** en **Tegengoals** (geen doelsaldo, geen *de nul*), met op dezelfde regel rechts de
-  **deelknop** als rond geel icoon zonder label; daaronder de **wedstrijden als scrollbare rij kaartjes** (een tik
+  uitslagkleuren, **Goals** en **Tegengoals** (geen doelsaldo, geen *de nul*), met op dezelfde regel rechts een
+  ingetogen **deelknop** (rond icoon met een dunne rand, zonder label). Die opent een klein menu: *Afbeelding delen*
+  (of downloaden waar delen niet kan), *Afbeelding kopiëren* (naar het klembord) en *Gegevens kopiëren* (de avond als
+  tekst: datum, uitslag, alle wedstrijden met tijd, uitslag, score en tegenstander, en per speler wedstrijden, rating,
+  goals, assists en man of the match; plakklaar in een chat of spreadsheet). Een korte melding bevestigt het kopiëren; daaronder de **wedstrijden als scrollbare rij kaartjes** (een tik
   opent de wedstrijd). Geen anekdote als tekst: die bepaalt alleen het thema van de quote.
 De radar eronder vertelt **hoe we speelden**; geen cijfers dubbel. De top drie staat op rating over deze avond.
 **Deelkaart** (afbeelding van 1080×1080): dezelfde kop als op de pagina: stadion, type, naam van de sessie, de quote,
-de top drie als kaartjes op het podium (foto, plek, rating, naam) en W-G-V, Goals en Tegengoals.
+de top drie als kaartjes op het podium (foto, rating en naam in het kaartje, de plek op de trede) en W-G-V, Goals en
+Tegengoals.
 
 **Per wedstrijd** (sinds 31 oktober 2026, vervangt *Spelers deze sessie*): een raster met per speler een kolom en
 per wedstrijd een rij (uitslag, shirt, score). Bovenaan per speler een **minikaartje**: foto, het gemiddelde van de
@@ -568,8 +576,8 @@ ertussen, punt met inkeping, dubbele gouden rand) en een tier die met de vorm me
 (`ARCHETYPE_ICON` in `public/archetypes.js`, eigen lijniconen), logo en foto; de foto staat rechts van rating en iconen, met wat lucht boven het hoofd.
 Eén verloop over de hele kaart; alleen een foto krijgt een eigen vlak (`--t-photo`) dat zacht overloopt in het
 verloop, met een gloed achter de overall. Zonder foto een gevuld, licht transparant silhouet in de tekstkleur (donker op
-goud, licht op zwart en blauw). Onderste helft: voorletter en achternaam van de pro (uit `proName`,
-bijvoorbeeld P. Selie; één woord blijft heel) en zes cijfers in twee kolommen: de carrièretotalen volgens EA (WED, RAT, GLS | ASS, MOTM, WIN), of de
+goud, licht op zwart en blauw). Onderste helft: de naam van de pro voluit zoals in FC
+(uit `proName`, bijvoorbeeld Petra Selie; sinds 1 november 2026, daarvoor afgekort tot P. Selie) en zes cijfers in twee kolommen: de carrièretotalen volgens EA (WED, RAT, GLS | ASS, MOTM, WIN), of de
 face stats van de ingevulde build. Ernaast staan de cijfers uit de gevolgde wedstrijden (*Gevolgd*). Geen archetype-
 tekst op de kaart: het icoon zegt het.
 Geen scheidingslijnen; de tier zie je aan de kaart zelf, zonder label.
