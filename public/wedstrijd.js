@@ -144,9 +144,9 @@ function render() {
   // vorige en volgende wedstrijd, in volgorde van spelen
   const prev = DATA.matches[idx - 1], next = DATA.matches[idx + 1];
   $('#m-nav').innerHTML = `${prev ? `<a class="more-link" href="wedstrijd.html?id=${prev.matchId}">← Vorige: ${esc(prev.opponent.name)}</a>` : '<span></span>'}${next ? `<a class="more-link" href="wedstrijd.html?id=${next.matchId}">Volgende: ${esc(next.opponent.name)} →</a>` : '<span></span>'}`;
-  $('#m-score').innerHTML = `<div class="sl-team">${kitShirt(kits?.home, 'Frambroos')}<span>Frambroos</span></div>
+  $('#m-score').innerHTML = `<div class="sl-team"><img class="own-crest" src="crest.png" alt="Frambroos" width="64" height="64"><span>Frambroos</span></div>
     <div class="sl-score"><span>${m.goals}–${m.goalsAgainst}</span><span class="pill ${m.result}">${m.result === 'W' ? 'Gewonnen' : m.result === 'L' ? 'Verloren' : 'Gelijk'}</span></div>
-    <div class="sl-team">${kitShirt(m.opponent.kit, m.opponent.name)}<span>${esc(m.opponent.name)}</span></div>`;
+    <div class="sl-team">${oppBadge(m.opponent)}<span>${esc(m.opponent.name)}</span></div>`;
   $('#m-meta').textContent = `Tegenstander rating ${m.opponent.skillRating ?? 'onbekend'}${m.opponent.skillRating && own ? ` (jullie ${own})` : ''} · mensen: jullie ${m.players.length}, zij ${m.opponentPlayers.length}${m.winnerByDnf ? ' · tegenstander gaf op' : ''}`;
   $('#m-summary').innerHTML = matchSummary(m) + goalChain(m);
   $('#m-pitches').innerHTML = lineup(m);

@@ -21,9 +21,13 @@ Nieuw veld tonen: eerst hier kijken of het er al is, dan `src/data.js`.
 
 ## Wat er niet is
 
-- **Clublogo's van tegenstanders.** EA geeft alleen een `crestAssetId` (bijv. 99161001 voor Frambroos). Acht bekende
-  adresvormen van EA's beeldservers getest: allemaal 404 of 403. De logo's zitten in het spel, niet op het web.
-  Ons eigen logo is daarom een eigen bestand (`public/crest.png`). Het id bewaren we wel (`club.crestAssetId`).
+- **Clublogo's van tegenstanders** (bijgewerkt 1 november 2026). EA geeft een `crestAssetId` (eigen logo, bijv. 99161001
+  voor Frambroos) en een `teamId` (echt clublogo). Op 27 oktober gaven acht geteste adresvormen 404 of 403. Volgens
+  community-onderzoek (github.com/Interactive-63/eafc-pro-clubs-api-research) staan ze wel op EA's CDN:
+  `https://eafc24.content.easports.com/fifa/fltOnlineAssets/24B23FDE-7835-41C2-87A2-F453DFDB2E82/2024/fcweb/crests/256x256/l<id>.png`,
+  met eerst `crestAssetId` en anders `teamId`. Vanuit de bouwomgeving niet te controleren (geen toegang tot dat
+  domein); de app probeert het in de browser (`oppBadge` in `common.js`) en valt terug op het shirt als het niet laadt.
+  Ons eigen logo blijft een eigen bestand (`public/crest.png`).
 - Formatie, exacte positie, attribuutpunten, fans: zie coach-logica §2.
 - **PlayStyles**: niet per speler, ook niet die van faciliteiten. Per wedstrijd geeft EA alleen het archetype
   (`archetypeid`); `vproattr` (attributen) is altijd `NH` en `proStyle` bij de leden altijd 0 (gecontroleerd op
