@@ -53,6 +53,29 @@ function anecdote(ms, sm, prow) {
   return c.reduce((best, x) => x.w >= best.w ? x : best);
 }
 
+// De quote van een avond (coach-logica §9, Sessie): de beste speler (hoogste gemiddelde rating) over de statistiek die
+// die avond het meest uitstak, in de eigen stem (personas.js). Elke sessie een nieuwe: komt dezelfde speler met dezelfde
+// maat terug, dan de volgende variant.
+const QUOTES = new Map();
+function sessionQuote(sess) {
+  if (QUOTES.has(sess.id)) return QUOTES.get(sess.id);
+  const used = new Map();
+  for (const x of sessions) {
+    const names = [...new Set(x.matches.flatMap(m => m.players.map(p => p.name)))];
+    const rowsOf = (list, n) => list.map(m => ({ m, p: m.players.find(p => p.name === n) })).filter(r => r.p);
+    const best = names.map(n => ({ n, r: avg(rowsOf(x.matches, n).map(r => r.p.rating).filter(v => v !== null)) }))
+      .filter(b => b.r !== null).sort((a, b) => b.r - a.r)[0];
+    let q = null;
+    if (best) {
+      const stat = standoutStat(rowsOf(x.matches, best.n), rowsOf(DATA.matches.filter(m => m.session !== x.id), best.n));
+      const k = `${best.n}|${stat.key}`, i = used.get(k) || 0; used.set(k, i + 1);
+      q = { text: quoteFor(best.n, stat, i), who: proName(best.n), stat: stat.key };
+    }
+    QUOTES.set(x.id, q);
+  }
+  return QUOTES.get(sess.id);
+}
+
 function sessionSummary(ms, sm, opp, own, prow) {
   const parts = [];
   // 1. Karakter van de avond en tegenstand
@@ -96,7 +119,7 @@ function render() {
   // Sessiekop (coach-logica §9a): het podium als blikvanger, met de naam van de sessie en de uitslag in drie getallen
   // (W-G-V, goals, tegengoals). Hoe we speelden staat in de radar eronder.
   $('#s-record').innerHTML = `<span class="ss-fig"><b class="ss-rec"><span class="W">${sm.W}</span>-<span class="D">${sm.D}</span>-<span class="L">${sm.L}</span></b><small>W-G-V</small></span>
-    <span class="ss-fig"><b>${sm.gf}</b><small>Goals</small></span><span class="ss-fig"><b>${sm.ga}</b><small>Tegengoals</small></span>`;
+    <span class="ss-fig"><b>${sm.gf}</b><small>Goals</small></span><span class="ss-fig"><b>${sm.ga}</b><small>Tegen</small></span>`;
   $('#s-matches').innerHTML = ms.map(m => matchCard(m, { own })).join('');
 
   // Spelers: rating deze avond tegenover het eigen normaal (alle andere wedstrijden), goals, assists, man of the match.
@@ -108,7 +131,7 @@ function render() {
   }).sort((x, y) => (y.rH ?? 0) - (x.rH ?? 0));
   const sum = sessionSummary(ms, sm, opp, own, prow);
   // De quote: een cruijffiaanse uitspraak van de beste speler van de avond, in de eigen stem (personas.js).
-  const best = prow.find(r => r.rH !== null), quote = best ? { text: personaQuote(best.name, sum.theme), who: proName(best.name) } : null;
+  const quote = sessionQuote(s);
   $('#s-quote').innerHTML = quote ? `<p>„${esc(quote.text)}” <cite>— ${esc(quote.who)}</cite></p>` : '';
   SHARE = { ms, sm, quote, prow, meta };
   // Top drie naast elkaar: één in het midden en groter, twee links, drie rechts. Plek als medaille en naam in het kaartje,
@@ -185,8 +208,8 @@ function openCell(m, name) {
   d.querySelector('.rd-body').innerHTML = `<h2 id="cd-title">${esc(proName(name))} <span class="cd-rating">${f1(p.rating)}</span></h2>
     <p><span class="tl-dot ${m.result}">${letter(m.result)}</span> ${m.goals}–${m.goalsAgainst} tegen ${esc(m.opponent.name)} · ${time}</p>
     <dl class="cd-grid">${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>
-    <p class="cd-note">EA zegt niet hoe de rating berekend wordt; dit is wat de speler in deze wedstrijd deed.</p>
-    <a class="cd-link" href="wedstrijd.html?id=${m.matchId}">Naar de wedstrijd</a>`;
+    <p class="cd-note">EA zegt niet hoe de rating berekend wordt; dit is wat de speler in deze wedstrijd deed.</p>`;
+  dialogFoot(d, `wedstrijd.html?id=${m.matchId}`, 'Naar de wedstrijd');
   d.showModal();
 }
 $('#cell-dialog').addEventListener('click', e => { if (e.target === e.currentTarget || e.target.closest('.rd-close')) e.currentTarget.close(); });
@@ -271,15 +294,18 @@ const radarColor = name => name === null ? 'var(--brand)' : `var(${SERIES[(playe
 const radarShow = (a, v, n) => v === null ? null : a.count ? String(Math.round(v * n)) : a.fmt(v);
 const radarShowNorm = (a, v, n) => a.count ? f1(v * n) : a.fmt(v);
 function radarSvg(sel, others, sid, label) {
+  // Op telefoon grotere teksten (de radar wordt daar kleiner getekend): ruimte en afstanden schalen mee (z).
+  const z = matchMedia('(max-width: 600px)').matches ? 1.6 : 1;
   const S = 360, c = S / 2, R = 118, k = RADAR_AXES.length;
   const pt = (i, v) => { const t = -Math.PI / 2 + i * 2 * Math.PI / k; return [c + Math.cos(t) * R * v / 100, c + Math.sin(t) * R * v / 100]; };
   const ring = v => RADAR_AXES.map((_, i) => pt(i, v).map(n => n.toFixed(1)).join(',')).join(' ');
   const axes = RADAR_AXES.map((a, i) => { const [x, y] = pt(i, 100), [lx, ly0] = pt(i, 128);
-    const anchor = Math.abs(lx - c) < 4 ? 'middle' : lx > c ? 'start' : 'end', ly = ly0 < c - 20 ? ly0 - 28 : ly0 + (ly0 > c + 20 ? 12 : -6);
+    const anchor = Math.abs(lx - c) < 4 ? 'middle' : lx > c ? 'start' : 'end', ly = ly0 < c - 20 ? ly0 - 30 * z : ly0 + (ly0 > c + 20 ? 12 * z : -6 * z);
     const v = sel.st[a.key], norm = normalOf(a.key, sel.name === null ? 'team' : sel.name, sid);
-    return `<line x1="${c}" y1="${c}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" class="radar-axis"/><text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}" class="radar-label">${a.label}<tspan x="${lx.toFixed(1)}" dy="17" class="radar-value sel" style="--pc:${radarColor(sel.name)}">${v === null ? 'te weinig' : radarShow(a, v, sel.n)}</tspan>${norm === null ? '' : `<tspan x="${lx.toFixed(1)}" dy="14" class="radar-norm">normaal ${radarShowNorm(a, norm, sel.n)}</tspan>`}</text>`; }).join('');
+    return `<line x1="${c}" y1="${c}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" class="radar-axis"/><text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}" class="radar-label">${a.label}<tspan x="${lx.toFixed(1)}" class="radar-value sel" style="--pc:${radarColor(sel.name)}" dy="${17 * z}">${v === null ? 'te weinig' : radarShow(a, v, sel.n)}</tspan>${norm === null ? '' : `<tspan x="${lx.toFixed(1)}" dy="${14 * z}" class="radar-norm">normaal ${radarShowNorm(a, norm, sel.n)}</tspan>`}</text>`; }).join('');
   const shape = (x, cls) => `<polygon points="${RADAR_AXES.map((a, i) => pt(i, x.pc[a.key] ?? 0).map(n => n.toFixed(1)).join(',')).join(' ')}" style="stroke:${radarColor(x.name)};fill:${radarColor(x.name)}" class="radar-shape ${cls}"><title>${x.name === null ? 'Team' : esc(proName(x.name))}</title></polygon>`;
-  return `<svg viewBox="-90 -50 ${S + 180} ${S + 100}" class="radar-svg" role="img" aria-label="${label}">
+  const mx = 90 * z, my = 50 * z;
+  return `<svg viewBox="${-mx} ${-my} ${S + 2 * mx} ${S + 2 * my}" class="radar-svg" role="img" aria-label="${label}">
     ${[25, 75, 100].map(v => `<polygon points="${ring(v)}" class="radar-ring"/>`).join('')}<polygon points="${ring(50)}" class="radar-ring radar-normal"/>${axes}
     ${others.map(x => shape(x, 'dim')).join('')}${shape(sel, 'on')}</svg>`;
 }
@@ -289,8 +315,9 @@ function renderRadar(sess, ms) {
   const sel = radarOn === null ? team : players.find(x => x.name === radarOn);
   // Alle vlakken altijd zichtbaar: het uitgelichte (standaard het team) fel bovenop, de rest vaag.
   $('#s-radar').innerHTML = radarSvg(sel, [team, ...players].filter(x => x !== sel), sess.id, `Zo speelden we: zes assen als percentiel tegenover onze eigen avonden, ${sel.name === null ? 'het team' : esc(proName(sel.name))} uitgelicht`);
-  $('#s-radar-chips').innerHTML = players.map(x => `<button type="button" class="radar-chip${sel === x ? ' on' : ''}" aria-pressed="${sel === x}" data-n="${esc(x.name)}"><i style="background:${radarColor(x.name)}"></i>${esc(proName(x.name))}</button>`).join('');
-  for (const b of $('#s-radar-chips').querySelectorAll('.radar-chip')) b.addEventListener('click', () => { radarOn = radarOn === b.dataset.n ? null : b.dataset.n; renderRadar(sess, ms); });
+  // Eerst Team, dan de spelers. Nog een tik op een gekozen speler gaat terug naar het team.
+  $('#s-radar-chips').innerHTML = [team, ...players].map(x => `<button type="button" class="radar-chip${sel === x ? ' on' : ''}" aria-pressed="${sel === x}" data-n="${x.name === null ? '' : esc(x.name)}"><i style="background:${radarColor(x.name)}"></i>${x.name === null ? 'Team' : esc(proName(x.name))}</button>`).join('');
+  for (const b of $('#s-radar-chips').querySelectorAll('.radar-chip')) b.addEventListener('click', () => { const n = b.dataset.n || null; radarOn = n === null || radarOn === n ? null : n; renderRadar(sess, ms); });
 }
 
 // Eén speler over de hele avond (coach-logica §9a): de radar van die speler met het team vaag erachter, dezelfde zes
@@ -309,7 +336,8 @@ function openPlayer(name) {
     <dl class="pd-facts">${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>
     ${ratingDots(rows)}
     ${me ? `<div class="pd-radar">${radarSvg(me, [team], SESSION_ID, `${esc(proName(name))} deze avond, het team vaag erachter`)}</div>${table}` : '<p class="cd-note">Eén wedstrijd: te weinig voor de radar.</p>'}
-    <a class="cd-link" href="spelers.html#${encodeURIComponent(name)}">Naar de spelerspagina</a>`;
+`;
+  dialogFoot(d, `spelers.html#${encodeURIComponent(name)}`, 'Naar de spelerspagina');
   d.showModal();
 }
 $('#player-dialog').addEventListener('click', e => { if (e.target === e.currentTarget || e.target.closest('.rd-close')) e.currentTarget.close(); });
@@ -329,7 +357,7 @@ const fileName = ms => `frambroos-${new Date(ms[0].ts * 1000).toISOString().slic
 // De avond als tekst: plakklaar in een chat of spreadsheet (kolommen gescheiden door tabs).
 function sessionText({ ms, sm, quote, prow, meta }) {
   const t = ts => new Date(ts * 1000).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
-  const lines = [`Frambroos · ${cap(longDate(ms[0].ts))}`, meta, `W-G-V ${sm.W}-${sm.D}-${sm.L} · Goals ${sm.gf} · Tegengoals ${sm.ga}`];
+  const lines = [`Frambroos · ${cap(longDate(ms[0].ts))}`, meta, `W-G-V ${sm.W}-${sm.D}-${sm.L} · Goals ${sm.gf} · Tegen ${sm.ga}`];
   if (quote) lines.push(`„${quote.text}” — ${quote.who}`);
   lines.push('', ['Tijd', 'Uitslag', 'Score', 'Tegenstander'].join('\t'), ...ms.map(m => [t(m.ts), letter(m.result), `${m.goals}-${m.goalsAgainst}`, m.opponent.name].join('\t')));
   lines.push('', ['Speler', 'Wedstrijden', 'Rating', 'Goals', 'Assists', 'Man of the match'].join('\t'),
@@ -418,7 +446,7 @@ async function shareImage({ ms, sm, quote }) {
     g.restore();
   }
   // Uitslag: W-G-V, goals en tegengoals.
-  const figs = [[`${sm.W}-${sm.D}-${sm.L}`, 'W-G-V'], [String(sm.gf), 'Goals'], [String(sm.ga), 'Tegengoals']];
+  const figs = [[`${sm.W}-${sm.D}-${sm.L}`, 'W-G-V'], [String(sm.gf), 'Goals'], [String(sm.ga), 'Tegen']];
   figs.forEach(([val, label], i) => {
     const x = W / 2 + (i - 1) * 280;
     if (i === 0) { mono(68, 700); const parts = [[String(sm.W), '#6aa8f5'], ['-', '#9a95a3'], [String(sm.D), '#c9c4d1'], ['-', '#9a95a3'], [String(sm.L), '#f58a8a']];

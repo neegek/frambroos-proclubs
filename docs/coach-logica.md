@@ -273,7 +273,11 @@ Daarnaast *Positiespel en keuzes* en *Al sterk*.
   ook met één decimaal en zonder ",0" als het een heel getal is (+1, −0.4); het woord *groei* staat er niet bij.
 - **Horizontaal scrollen in een kaart**: de rij loopt door tot de rand van de kaart en wordt daar afgesneden, niet
   door de binnenruimte; aan het begin en het eind staat dezelfde ruimte als de kaart heeft (sinds 1 november 2026).
-  Een vaste eerste kolom (*Per wedstrijd*) dekt ook de ruimte ernaast af, zodat er niets tussendoor schemert.
+  Een vaste eerste kolom (*Per wedstrijd*) dekt ook de ruimte ernaast af, zodat er niets tussendoor schemert; de
+  hoek erboven is niet vast, zodat de spelerskaartjes bij het scrollen tot de linkerrand zichtbaar blijven.
+- **Dialogen**: de sluitknop blijft rechtsboven staan en een knop naar een andere pagina (*Naar de spelerspagina*,
+  *Naar de wedstrijd*) staat vast onderaan; alleen de inhoud ertussen scrolt.
+- **Radar op telefoon**: grotere teksten bij de assen.
 - **Logo's van tegenstanders**: waar een tegenstander staat, het clublogo van EA's CDN (docs/ea-data.md); laadt dat
   niet, dan het shirt in de clubkleuren. Ons eigen logo is `crest.png`.
 - **Naam bij een kaart**: staat een naam naast of onder een spelerskaart(je), dan hoort hij **in** het kaartje
@@ -297,9 +301,13 @@ Daarnaast *Positiespel en keuzes* en *Al sterk*.
   (2) **De anekdote**: het ene moment of de ene speler die de avond kenmerkte, als een verhaaltje en niet als cijfer
   ("Konijnenlover22 schoot er in één pot drie in", "na twee verloren potten draaide het team de avond om").
   (3) **Een quote van de beste speler van de avond** (sinds 1 november 2026; daarvoor een echte Cruijff-quote): een
-  cruijffiaanse uitspraak bij het thema van de anekdote, maar in de stem van die speler, met de pro-naam erbij.
-  Achtergrond en stem per speler staan in `public/personas.js` (de bron; nieuwe eigenschappen daar toevoegen). Per
-  speler één uitspraak per thema; spelers zonder achtergrond krijgen een neutrale cruijffiaanse zin.
+  cruijffiaanse uitspraak in de stem van die speler, met de pro-naam erbij, **geïnspireerd door één statistiek van
+  die speler die avond**: de maat die het meest boven het eigen normaal uitstak (goals of assists vanaf twee, man of
+  the match vanaf twee keer, passnauwkeurigheid vanaf twintig passes, gewonnen tackles vanaf drie, balwinst vanaf vier,
+  veel schoten met hooguit één goal), met het getal erin; steekt niets uit, dan de rating. **Elke sessie een nieuwe
+  quote**: komt dezelfde speler met dezelfde maat terug, dan de volgende variant. Karakter (achtergrond, stem,
+  eigenschappen, woorden, beelden) en de uitspraken per maat staan in `public/personas.js`, de verzamelplek om verder
+  op te bouwen. Spelers zonder achtergrond krijgen een neutrale cruijffiaanse zin.
   Wie de beste was staat niet in de tekst: dat laat de top drie als kaarten zien (§9a).
   Anekdotes, in volgorde van kracht (de sterkste wint; bij gelijke kracht de meest recente):
   hattrick of meer in één pot; iemand scoorde in elke wedstrijd; iemand was elke wedstrijd man of the match;
@@ -483,7 +491,7 @@ the match was). Eerst de laatste twintig, de rest achter een knop.
   **Medaille in het kaartje**: iets van de hoek af (naar rechts en omlaag), zodat er kaart omheen zichtbaar blijft.
   Op telefoon staan W-G-V links en Goals en Tegengoals rechts, direct links van de deelknop.
 - **Onder: een paneel** in de kleuren van het thema (donker of licht): de uitslag in drie getallen, **W-G-V** in de
-  uitslagkleuren, **Goals** en **Tegengoals** (geen doelsaldo, geen *de nul*), met op dezelfde regel rechts een
+  uitslagkleuren, **Goals** en **Tegen** (rechts uitgelijnd; geen doelsaldo, geen *de nul*), met op dezelfde regel rechts een
   ingetogen **deelknop** (rond icoon met een dunne rand, zonder label). Die opent een klein menu: *Afbeelding delen*
   (of downloaden waar delen niet kan), *Afbeelding kopiëren* (naar het klembord) en *Gegevens kopiëren* (de avond als
   tekst: datum, uitslag, alle wedstrijden met tijd, uitslag, score en tegenstander, en per speler wedstrijden, rating,
@@ -514,7 +522,8 @@ er al (`PlayerCard.html(naam, { session, rank })`).
 
 **Radar van de avond** (op de sessiepagina, na de kop): **hoe we speelden**, standaard als team; een tik op een naam
 licht die speler uit, nog een tik op dezelfde naam zet hem uit en toont weer het team (sinds 1 november 2026; daarvoor
-een aparte knop *Team*). **Alle vlakken zijn altijd zichtbaar**: zonder keuze is het team het felst en de spelers vaag,
+een aparte knop *Team*). Knoppen: eerst *Team*, dan de spelers; uitzetten van een speler gaat terug naar Team.
+**Alle vlakken zijn altijd zichtbaar**: zonder keuze is het team het felst en de spelers vaag,
 met een naam gekozen is die speler het felst en de rest (het team ook) vaag. Zes assen; elke as is een **percentiel tegenover onze eigen avonden**. Het teamvlak (standaard) vergelijkt
 het team deze avond met alle avonden van het team (minstens 2 wedstrijden); een spelersvlak vergelijkt die speler
 met alle avonden van al onze spelers. 50 is een gewone avond (de gestippelde ring), 100 de beste ooit. De assen:
@@ -630,7 +639,8 @@ zodat de tier (het vlak) en de plek (de rand) los te lezen zijn.
 
 **Kleur van de plek** (sinds 1 november 2026): waar kaartjes een plek hebben (top drie en *Per wedstrijd* op de
 sessiepagina), volgen de **rand** én, bij een gewone kaart (tier goud, dus niet in vorm), ook het **vlak** de plek:
-goud voor één, zilver voor twee, brons voor drie, en **leigrijs** (koel blauwgrijs, met lichte tekst) voor de rest:
+goud voor één, zilver voor twee, brons voor drie (de gewone gouden kaart is iets lichter, zodat de gouden medaille
+erop uitkomt), en **leigrijs** (koel blauwgrijs, met lichte tekst) voor de rest:
 duidelijk buiten de prijzen en niet te verwarren met het zwart van *in vorm*. Zo is een gouden kaart altijd de
 nummer één en niet "geen vorm". Een kaart in vorm of topvorm houdt het eigen vlak; alleen de rand toont de plek.
 Hetzelfde leigrijs voor de cellen en medailles buiten de top drie (vroeger ijzer). Linksboven staat dan **de plek** in plaats van de
