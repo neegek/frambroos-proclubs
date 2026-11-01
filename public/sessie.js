@@ -106,7 +106,7 @@ function render() {
   // de trede (de rand houdt de kleur van de plek). Een tik scrollt naar Per wedstrijd.
   const top = prow.filter(r => r.rH !== null).slice(0, 3);
   const pick = (r, i) => `<a class="ss-pick p${i + 1}" href="#per-wedstrijd" title="${esc(proName(r.name))}: rating ${f1(r.rH)} deze avond">
-      ${PlayerCard.tiny(r.name, { session: s.id, rank: i + 1, medal: false, label: proName(r.name), value: f1(r.rH), key: '-p' })}<span class="ss-step" aria-hidden="true">${i + 1}</span></a>`;
+      ${PlayerCard.tiny(r.name, { session: s.id, rank: i + 1, medal: false, label: proName(r.name), value: f1(r.rH), key: '-p' })}<span class="ss-step" aria-hidden="true"><b class="metal-${RIM(i + 1)}">${i + 1}</b></span></a>`;
   $('#s-podium').innerHTML = [1, 0, 2].filter(i => top[i]).map(i => pick(top[i], i)).join('');
   for (const a of $('#s-podium').querySelectorAll('a')) a.addEventListener('click', e => { e.preventDefault(); $('#per-wedstrijd').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
   PlayerCard.reveal($('#s-podium'));
@@ -145,20 +145,39 @@ const RIM = rank => rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? '
 const rankIn = (v, list) => 1 + [...new Set(list.filter(x => x > v))].length;
 function renderMatrix(ms, prow) {
   const cols = prow.filter(r => r.rH !== null);
-  // Normaal = de gemiddelde rating in alle andere gevolgde wedstrijden (rT); het teken vergelijkt alleen die twee.
-  const head = cols.map(r => { const g = r.nT >= 3 && r.rT !== null ? r.rH - r.rT : null;
-    const trend = g === null ? null : g >= 0.3 ? 'up' : g <= -0.3 ? 'down' : 'same';
-    const word = { up: 'sterker dan normaal', down: 'zwakker dan normaal', same: 'gelijk aan normaal' }[trend];
-    return `<th scope="col"><a class="rm-player" href="spelers.html#${encodeURIComponent(r.name)}" title="${esc(proName(r.name))}: ${f1(r.rH)} deze avond${word ? `, ${word} (${f1(r.rT)})` : ''}">${PlayerCard.tiny(r.name, { session: SESSION_ID, trend, value: f1(r.rH), key: '-m' })}<span class="rm-name">${esc(proName(r.name))}</span>${g === null ? '' : `<span class="rm-norm">normaal ${f1(r.rT)}</span>`}</a></th>`; }).join('');
+  const head = cols.map(r => `<th scope="col"><a class="rm-player" href="spelers.html#${encodeURIComponent(r.name)}" title="${esc(proName(r.name))}: ${f1(r.rH)} deze avond">${PlayerCard.tiny(r.name, { session: SESSION_ID, value: f1(r.rH), label: proName(r.name), key: '-m' })}</a></th>`).join('');
   const rows = ms.map(m => {
     const ps = cols.map(r => m.players.find(p => p.name === r.name)), vals = ps.filter(p => p && p.rating !== null).map(p => p.rating);
     const cell = p => !p || p.rating === null ? '<td class="rm-none">–</td>'
-      : `<td class="rim-${RIM(rankIn(p.rating, vals))}" title="${esc(proName(p.name))}: ${p.rating}${p.goals ? ` · ${p.goals} G` : ''}${p.assists ? ` · ${p.assists} A` : ''}">${f1(p.rating)}${p.mom ? '<i title="Man of the match">♛</i>' : ''}</td>`;
+      : `<td class="rim-${RIM(rankIn(p.rating, vals))}"><button type="button" class="rm-cell" data-m="${m.matchId}" data-n="${esc(p.name)}" aria-haspopup="dialog" aria-label="${esc(proName(p.name))} tegen ${esc(m.opponent.name)}: ${f1(p.rating)}, details">${f1(p.rating)}${p.mom ? '<i title="Man of the match">♛</i>' : ''}</button></td>`;
     return `<tr><th scope="row"><a class="rm-match" href="wedstrijd.html?id=${m.matchId}" title="${esc(m.opponent.name)}"><span class="tl-dot ${m.result}">${letter(m.result)}</span>${kitShirt(m.opponent.kit, m.opponent.name)}<b>${m.goals}-${m.goalsAgainst}</b></a></th>${ps.map(cell).join('')}</tr>`;
   }).join('');
   $('#s-matrix').innerHTML = `<table class="rmatrix"><thead><tr><th></th>${head}</tr></thead><tbody>${rows}</tbody></table>`;
+  for (const b of $('#s-matrix').querySelectorAll('.rm-cell')) b.addEventListener('click', () => openCell(ms.find(m => m.matchId == b.dataset.m), b.dataset.n));
   PlayerCard.reveal($('#s-matrix'));
 }
+
+// Eén cijfer in Per wedstrijd (coach-logica §9a): wat de speler in die wedstrijd deed. EA geeft de formule van de
+// rating niet; dit is wat erachter zit.
+function openCell(m, name) {
+  const p = m?.players.find(x => x.name === name); if (!p) return;
+  const d = $('#cell-dialog'), ev = p.ev, frac = (a, b) => b ? `${a} van ${b} (${Math.round(100 * a / b)}%)` : '–';
+  const rows = [
+    ['Goals', p.goals], ['Assists', p.assists], ['Schoten', p.shots],
+    ['Passes gelukt', frac(p.passesMade, p.passAttempts)], ['Tackles gewonnen', frac(p.tacklesMade, p.tackleAttempts)],
+    ev ? ['Balwinst', ev.possession_won ?? 0] : null, ev ? ['Balverlies', ev.possession_lost ?? 0] : null,
+    p.pos === 'goalkeeper' ? ['Reddingen', p.saves ?? 0] : null,
+    ['Man of the match', p.mom ? 'ja' : 'nee'], ['Archetype', esc(archName(p.archetypeId))],
+  ].filter(Boolean);
+  const time = new Date(m.ts * 1000).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+  d.querySelector('.rd-body').innerHTML = `<h2 id="cd-title">${esc(proName(name))} <span class="cd-rating">${f1(p.rating)}</span></h2>
+    <p><span class="tl-dot ${m.result}">${letter(m.result)}</span> ${m.goals}–${m.goalsAgainst} tegen ${esc(m.opponent.name)} · ${time}</p>
+    <dl class="cd-grid">${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>
+    <p class="cd-note">EA zegt niet hoe de rating berekend wordt; dit is wat de speler in deze wedstrijd deed.</p>
+    <a class="cd-link" href="wedstrijd.html?id=${m.matchId}">Naar de wedstrijd</a>`;
+  d.showModal();
+}
+$('#cell-dialog').addEventListener('click', e => { if (e.target === e.currentTarget || e.target.closest('.rd-close')) e.currentTarget.close(); });
 
 // ---------- radar van de avond (coach-logica §9a) ----------
 // Zes assen; elke as is een percentiel tegenover al onze eigen avonden (per speler per sessie, minstens 2 wedstrijden),
@@ -247,8 +266,8 @@ function renderRadar(sess, ms) {
     const v = sel.st[a.key], norm = normalOf(a.key, sel.name === null ? 'team' : sel.name, sess.id);
     return `<line x1="${c}" y1="${c}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" class="radar-axis"/><text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}" class="radar-label">${a.label}<tspan x="${lx.toFixed(1)}" dy="17" class="radar-value sel" style="--pc:${color(sel.name)}">${v === null ? 'te weinig' : show(a, v)}</tspan>${norm === null ? '' : `<tspan x="${lx.toFixed(1)}" dy="14" class="radar-norm">normaal ${showNorm(a, norm)}</tspan>`}</text>`; }).join('');
   const shape = (x, cls) => `<polygon points="${RADAR_AXES.map((a, i) => pt(i, x.pc[a.key] ?? 0).map(n => n.toFixed(1)).join(',')).join(' ')}" style="stroke:${color(x.name)};fill:${color(x.name)}" class="radar-shape ${cls}"><title>${x.name === null ? 'Team' : esc(proName(x.name))}</title></polygon>`;
-  // Standaard alleen het team; met een speler uitgelicht dat vlak bovenop en het team vaag erachter.
-  const others = sel === team ? [] : [team];
+  // Alle vlakken altijd zichtbaar: het uitgelichte (standaard het team) fel bovenop, de rest vaag.
+  const others = [team, ...players].filter(x => x !== sel);
   $('#s-radar').innerHTML = `<svg viewBox="-90 -50 ${S + 180} ${S + 100}" class="radar-svg" role="img" aria-label="Zo speelden we: zes assen als percentiel tegenover onze eigen avonden, ${sel.name === null ? 'het team' : esc(proName(sel.name))} uitgelicht">
     ${[25, 75, 100].map(v => `<polygon points="${ring(v)}" class="radar-ring"/>`).join('')}<polygon points="${ring(50)}" class="radar-ring radar-normal"/>${axes}
     ${others.map(x => shape(x, 'dim')).join('')}${shape(sel, 'on')}</svg>`;
@@ -327,7 +346,7 @@ async function shareImage({ ms, sm, quote }) {
   }
   // Podium: dezelfde kaartjes als op de pagina, met foto, plek en rating; nummer één in het midden.
   const picks = [...document.querySelectorAll('#s-podium .ss-pick')];
-  const base = 836, STEP = { p1: 96, p2: 64, p3: 42 };
+  const base = 836, STEP = { p1: 104, p2: 72, p3: 48 };
   const spec = { p1: { w: 250, x: W / 2 }, p2: { w: 196, x: W / 2 - 250 }, p3: { w: 196, x: W / 2 + 250 } };
   for (const a of picks) {
     const k = ['p1', 'p2', 'p3'].find(x => a.classList.contains(x)), { w, x } = spec[k], h = w * 430 / 300;
@@ -337,9 +356,12 @@ async function shareImage({ ms, sm, quote }) {
     const s = w / 300, x0 = x - w / 2, y0 = Math.max(y + 24, base - STEP[k] - h - 10);
     // De trede met de plek erop.
     const sx = x - w / 2 - 12, sw = w + 24, sy = base - STEP[k];
-    let sg = g.createLinearGradient(0, sy, 0, base); sg.addColorStop(0, k === 'p1' ? 'rgba(255,210,0,0.55)' : 'rgba(255,255,255,0.3)'); sg.addColorStop(1, k === 'p1' ? 'rgba(255,210,0,0.12)' : 'rgba(255,255,255,0.06)');
+    // Trede in de kleur van de plek; de plek als medaille, bij alle drie op dezelfde hoogte.
+    const [mc, mi] = { p1: ['201,165,72', '#2a1d05'], p2: ['185,192,199', '#1d2228'], p3: ['184,121,74', '#241205'] }[k];
+    let sg = g.createLinearGradient(0, sy, 0, base); sg.addColorStop(0, `rgba(${mc},0.62)`); sg.addColorStop(1, `rgba(${mc},0.1)`);
     g.fillStyle = sg; g.beginPath(); g.roundRect(sx, sy, sw, STEP[k], [12, 12, 0, 0]); g.fill();
-    g.fillStyle = '#fff'; mono(k === 'p1' ? 52 : 40, 800); g.textAlign = 'center'; g.fillText(k.slice(1), x, sy + Math.min(STEP[k] - 8, k === 'p1' ? 66 : 46));
+    g.fillStyle = `rgb(${mc})`; g.beginPath(); g.arc(x, base - 30, 24, 0, 7); g.fill();
+    g.fillStyle = mi; mono(28, 800); g.textAlign = 'center'; g.fillText(k.slice(1), x, base - 20);
     g.save(); g.translate(x0, y0); g.scale(s, s);
     const shape = new Path2D(PlayerCard.shape), inset = (sx, sy) => { g.translate(150, 215); g.scale(sx, sy); g.translate(-150, -215); };
     g.shadowColor = 'rgba(0,0,0,0.45)'; g.shadowBlur = 24 / s; g.shadowOffsetY = 8 / s;
@@ -359,7 +381,7 @@ async function shareImage({ ms, sm, quote }) {
     // Rating en naam in het kaartje; de naam afgekapt op de breedte van de kaart.
     g.fillStyle = v('--t-ink') || '#f6e6b8'; g.textAlign = 'center'; mono(88, 800); g.fillText(a.querySelector('.ft-val')?.textContent || '', 150, 318);
     font(30, 700); let nm = a.querySelector('.ft-name')?.textContent.trim() || '';
-    while (nm.length > 1 && g.measureText(nm).width > 220) nm = nm.slice(0, -2).trimEnd() + '…';
+    while (nm.length > 1 && g.measureText(nm).width > 190) nm = nm.slice(0, -2).trimEnd() + '…';
     g.fillText(nm, 150, 366);
     g.restore();
   }
