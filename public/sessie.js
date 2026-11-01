@@ -1,5 +1,5 @@
 // Pagina van één sessie (sessie.html?id=<id>, een laag onder Sessies): uitslagen, de top drie als sessiekaarten, een
-// verhaaltje met een Cruijff-quote, het radardiagram van de avond en de spelers.
+// verhaaltje met een quote van de beste speler, het radardiagram van de avond en de spelers.
 // Een sessie is een reeks wedstrijden met minder dan 3 uur ertussen (SESSION_GAP in common.js).
 // Samenvatting: docs/coach-logica.md §9 (Sessie).
 
@@ -12,19 +12,8 @@ const pSum = (rows, f) => rows.reduce((a, r) => a + (f(r.p) || 0), 0);
 
 let sessions = [], selectedId = Number(new URLSearchParams(location.search).get('id')) || null;
 
-// De anekdote van de avond (coach-logica §9): het ene moment of de ene speler die de avond kenmerkte, met de
-// Cruijff-quote die erbij hoort. Kandidaten krijgen een kracht; de sterkste wint, bij gelijke kracht de laatste.
-const QUOTE = {
-  schieten: 'Je moet schieten, anders kun je niet scoren.',
-  doorhebben: 'Je gaat het pas zien als je het doorhebt.',
-  nadeel: 'Elk nadeel heb z\'n voordeel.',
-  nietVerliezen: 'Als je niet kunt winnen, moet je zorgen dat je niet verliest.',
-  simpel: 'Voetbal is simpel, maar het moeilijkste wat er is, is simpel voetballen.',
-  fout: 'Voordat ik een fout maak, maak ik die fout niet.',
-  bal: 'Als wij de bal hebben, kunnen zij niet scoren.',
-  italianen: 'Italianen kunnen niet van je winnen, maar je kan wel van ze verliezen.',
-  toeval: 'Toeval is logisch.',
-};
+// De anekdote van de avond (coach-logica §9): het ene moment of de ene speler die de avond kenmerkte, met het thema
+// (q) voor de quote van de beste speler (personas.js). Kandidaten krijgen een kracht; de sterkste wint, bij gelijke kracht de laatste.
 function anecdote(ms, sm, prow) {
   const c = [], nm = n => `<b>${esc(proName(n))}</b>`, res = ms.map(m => m.result), n = ms.length;
   const pot = i => ['de eerste pot', 'de tweede pot', 'de derde pot', 'de vierde pot', 'de vijfde pot'][i] || `pot ${i + 1}`;
@@ -79,7 +68,7 @@ function sessionSummary(ms, sm, opp, own, prow) {
   // 2. De anekdote
   const a = anecdote(ms, sm, prow);
   if (a.text) parts.push(a.text);
-  return { html: parts.join(' '), lead: parts[0], story: a.text || parts[0], quote: QUOTE[a.q] };
+  return { html: parts.join(' '), lead: parts[0], story: a.text || parts[0], theme: a.q };
 }
 
 function render() {
@@ -110,8 +99,10 @@ function render() {
   }).sort((x, y) => (y.rH ?? 0) - (x.rH ?? 0));
   const sum = sessionSummary(ms, sm, opp, own, prow);
   $('#s-summary').innerHTML = sum.story; // van de samenvatting alleen de anekdote; de cijfers staan erboven
-  $('#s-quote').innerHTML = `„${sum.quote}” <small>— Johan Cruijff</small>`;
-  $('#s-share').onclick = () => shareSession(ms, sm, prow, sum.html.replace(/<[^>]+>/g, ''));
+  // De quote: een cruijffiaanse uitspraak van de beste speler van de avond, in de eigen stem (personas.js).
+  const best = prow.find(r => r.rH !== null), quote = best ? { text: personaQuote(best.name, sum.theme), who: proName(best.name) } : null;
+  $('#s-quote').innerHTML = quote ? `<p>„${esc(quote.text)}”</p><footer>— ${esc(quote.who)}</footer>` : '';
+  $('#s-share').onclick = () => shareSession(ms, sm, quote);
   // Top drie op een podium: één in het midden, groter en hoger; twee links, drie rechts. Een tik scrollt naar Per wedstrijd.
   const top = prow.filter(r => r.rH !== null).slice(0, 3);
   const pick = (r, i) => `<a class="ss-pick p${i + 1}" href="#per-wedstrijd" title="${esc(proName(r.name))}: rating ${f1(r.rH)} deze avond">
@@ -147,17 +138,18 @@ function formLine(name, sid, rating, n) {
 
 // ---------- per wedstrijd (coach-logica §9a): kolommen spelers, rijen wedstrijden, cellen de rating ----------
 // Bovenaan per speler een minikaartje met foto, het gemiddelde van de avond en of de speler sterker, zwakker of gelijk
-// speelde dan normaal (groei van §9c, grens 0,3); de kolommen staan op volgorde van dat gemiddelde. Elke cel
+// speelde dan normaal (rating, grens 0,3); de kolommen staan op volgorde van dat gemiddelde. Elke cel
 // kleurt naar de plek in die rij: goud, zilver, brons, ijzer voor de rest; gelijke ratings delen een plek.
 let SESSION_ID = null; // de geopende sessie, voor de minikaartjes in Per wedstrijd
 const RIM = rank => rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : 'iron';
 const rankIn = (v, list) => 1 + [...new Set(list.filter(x => x > v))].length;
 function renderMatrix(ms, prow) {
   const cols = prow.filter(r => r.rH !== null);
-  const head = cols.map(r => { const g = PlayerCard.sessionTier(r.name, SESSION_ID).growth;
+  // Normaal = de gemiddelde rating in alle andere gevolgde wedstrijden (rT); het teken vergelijkt alleen die twee.
+  const head = cols.map(r => { const g = r.nT >= 3 && r.rT !== null ? r.rH - r.rT : null;
     const trend = g === null ? null : g >= 0.3 ? 'up' : g <= -0.3 ? 'down' : 'same';
     const word = { up: 'sterker dan normaal', down: 'zwakker dan normaal', same: 'gelijk aan normaal' }[trend];
-    return `<th scope="col"><a class="rm-player" href="spelers.html#${encodeURIComponent(r.name)}" title="${esc(proName(r.name))}: gemiddeld ${f1(r.rH)}${word ? `, ${word} (${fmtGrowth(g)})` : ''}">${PlayerCard.tiny(r.name, { session: SESSION_ID, trend, value: f1(r.rH), key: '-m' })}<span class="rm-name">${esc(proName(r.name))}</span></a></th>`; }).join('');
+    return `<th scope="col"><a class="rm-player" href="spelers.html#${encodeURIComponent(r.name)}" title="${esc(proName(r.name))}: ${f1(r.rH)} deze avond${word ? `, ${word} (${f1(r.rT)})` : ''}">${PlayerCard.tiny(r.name, { session: SESSION_ID, trend, value: f1(r.rH), key: '-m' })}<span class="rm-name">${esc(proName(r.name))}</span>${g === null ? '' : `<span class="rm-norm">normaal ${f1(r.rT)}</span>`}</a></th>`; }).join('');
   const rows = ms.map(m => {
     const ps = cols.map(r => m.players.find(p => p.name === r.name)), vals = ps.filter(p => p && p.rating !== null).map(p => p.rating);
     const cell = p => !p || p.rating === null ? '<td class="rm-none">–</td>'
@@ -267,36 +259,79 @@ Promise.all([loadData(), PlayerCard.load().catch(() => {})]).then(() => { sessio
 // ---------- deelkaart ----------
 // Een avond als afbeelding (1080×1080) voor de groepsapp: uitslag, kerncijfers, uitblinker, de eerste zin van de
 // samenvatting. Kleuren van het thuistenue. Deelt via het deelmenu van de telefoon, anders als download.
-async function shareSession(ms, sm, prow, summaryText) {
-  const k = DATA.club.kits?.home || ['#090b0d', '#ffd200', '#582063', '#ffd200'];
-  const [ink, accent, purple] = ['#f2f2f2', k[1], k[2]];
-  const c = document.createElement('canvas'); c.width = 1080; c.height = 1080; const g = c.getContext('2d');
-  const grad = g.createLinearGradient(0, 0, 1080, 1080); grad.addColorStop(0, purple); grad.addColorStop(1, '#17141b');
-  g.fillStyle = grad; g.fillRect(0, 0, 1080, 1080);
-  const font = (size, weight = 500, family = 'system-ui, -apple-system, "Segoe UI", sans-serif') => { g.font = `${weight} ${size}px ${family}`; };
-  const mono = (size, weight = 500) => font(size, weight, 'ui-monospace, "SF Mono", Menlo, monospace');
-  const wrap = (text, x, y, maxW, lh) => { const words = text.split(' '); let line = '', yy = y; for (const w of words) { const test = line ? `${line} ${w}` : w; if (g.measureText(test).width > maxW && line) { g.fillText(line, x, yy); line = w; yy += lh; } else line = test; } if (line) g.fillText(line, x, yy); return yy + lh; };
-  const crest = await new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = 'crest.png'; });
-  if (crest) g.drawImage(crest, 72, 64, 120, 120);
-  g.fillStyle = ink; font(54, 700); g.fillText('Frambroos', 216, 118);
-  g.fillStyle = '#cfc3d4'; font(30); g.fillText(cap(longDate(ms[0].ts)), 216, 164);
-  // uitslag
-  g.fillStyle = 'rgba(255,255,255,0.06)'; g.beginPath(); g.roundRect(72, 230, 936, 250, 28); g.fill();
-  mono(132, 600); let x = 108; const y = 365;
-  for (const [n, col] of [[sm.W, '#5b9cf0'], [sm.D, '#9a9da3'], [sm.L, '#f07c7c']]) { g.fillStyle = col; g.fillText(String(n), x, y); x += g.measureText(String(n)).width; g.fillStyle = '#6f6e68'; if (col !== '#f07c7c') { g.fillText('-', x, y); x += g.measureText('-').width; } }
-  g.fillStyle = '#cfc3d4'; font(26); g.fillText('W – G – V', 112, 430);
-  let px = 560; for (const txt of [`winst ${fmtPct(sm.winPct)}`, `${signed(sm.gf - sm.ga, 0)} doelsaldo`]) { font(26, 600); const wdt = g.measureText(txt).width + 40; g.fillStyle = 'rgba(255,210,0,0.14)'; g.beginPath(); g.roundRect(px, 300, wdt, 52, 26); g.fill(); g.fillStyle = accent; g.fillText(txt, px + 20, 336); px += wdt + 14; }
-  mono(64, 500); g.fillStyle = ink; g.textAlign = 'right'; g.fillText(`${sm.gf}–${sm.ga}`, 976, 440); g.textAlign = 'left';
-  // uitblinker en betrokken bij goals
-  const best = prow[0], inv = [...prow].sort((a, b) => (b.g + b.a) - (a.g + a.a))[0];
-  const box = (bx, label, name, val) => { g.fillStyle = 'rgba(255,255,255,0.06)'; g.beginPath(); g.roundRect(bx, 512, 452, 200, 28); g.fill(); g.fillStyle = accent; font(24, 600); g.fillText(label.toUpperCase(), bx + 32, 562); g.fillStyle = ink; font(40, 700); g.fillText(name, bx + 32, 622); mono(56, 500); g.textAlign = 'right'; g.fillText(val, bx + 420, 688); g.textAlign = 'left'; };
-  if (best) box(72, 'Uitblinker', proName(best.name), f1(best.rH));
-  if (inv) box(556, 'Goals + assists', proName(inv.name), String(inv.g + inv.a));
-  // samenvatting (eerste twee zinnen)
-  g.fillStyle = ink; font(32, 400);
-  const sentences = summaryText.replace(/\s+/g, ' ').match(/[^.!?]+[.!?]/g) || [summaryText];
-  wrap(sentences.slice(0, 2).join(' ').trim(), 72, 790, 936, 46);
-  g.fillStyle = '#cfc3d4'; font(24); g.fillText('Frambroos Coach · neegek.github.io/frambroos-proclubs', 72, 1016);
+// Deelkaart (coach-logica §9a): dezelfde kop als op de pagina, als afbeelding van 1080×1080: stadion, type, naam van
+// de sessie, de quote, de top drie als kaartjes op het podium en W-G-V, goals en tegengoals.
+const loadImg = src => new Promise(res => { if (!src) return res(null); const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
+const SHARE_RIM = { gold: ['#fff1bd', '#d9b04a', '#8d6c15', '#f1d27a'], silver: ['#ffffff', '#c3c9d0', '#737b85', '#e4e8ec'], bronze: ['#f6d2ae', '#c27f45', '#74431c', '#e3a674'] };
+const SHARE_MEDAL = { gold: ['#c9a548', '#2a1d05'], silver: ['#b9c0c7', '#1d2228'], bronze: ['#b8794a', '#241205'] };
+async function shareSession(ms, sm, quote) {
+  const W = 1080, c = document.createElement('canvas'); c.width = W; c.height = W; const g = c.getContext('2d');
+  const font = (size, weight = 500, style = '') => { g.font = `${style} ${weight} ${size}px system-ui, -apple-system, "Segoe UI", sans-serif`; };
+  const mono = (size, weight = 600) => { g.font = `${weight} ${size}px ui-monospace, "SF Mono", Menlo, monospace`; };
+  const lines = (text, maxW) => { const out = []; let line = ''; for (const w of text.split(' ')) { const t = line ? `${line} ${w}` : w; if (g.measureText(t).width > maxW && line) { out.push(line); line = w; } else line = t; } if (line) out.push(line); return out; };
+  // Stadion op de hele achtergrond, met een donkere overloop zodat tekst en kaarten leesbaar blijven.
+  const svg = stadiumSvg().replace('<svg ', `<svg xmlns="http://www.w3.org/2000/svg" width="${Math.round(W * 1200 / 420)}" height="${W}" `);
+  const stadium = await loadImg(URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' })));
+  g.fillStyle = '#07050d'; g.fillRect(0, 0, W, W);
+  if (stadium) g.drawImage(stadium, (W - stadium.width) / 2, 0);
+  let grad = g.createLinearGradient(0, 0, 0, W); grad.addColorStop(0, 'rgba(7,5,13,0.55)'); grad.addColorStop(0.45, 'rgba(7,5,13,0.35)'); grad.addColorStop(1, 'rgba(7,5,13,0.92)');
+  g.fillStyle = grad; g.fillRect(0, 0, W, W);
+  // Kop: type en aantallen, naam van de sessie, quote.
+  g.textAlign = 'center'; g.fillStyle = '#ffd200'; font(26, 700);
+  g.fillText($('#s-meta').textContent.toUpperCase().split('').join(' '), W / 2, 92);
+  g.fillStyle = '#fff'; font(72, 800); g.fillText(cap(longDate(ms[0].ts)), W / 2, 170);
+  let y = 222;
+  if (quote) {
+    g.fillStyle = '#efeaf3'; font(30, 500, 'italic');
+    for (const l of lines(`„${quote.text}”`, 900).slice(0, 3)) { g.fillText(l, W / 2, y); y += 40; }
+    g.fillStyle = '#d9d4e0'; font(24, 600); g.fillText(`— ${quote.who}`, W / 2, y + 2); y += 30;
+  }
+  // Podium: dezelfde kaartjes als op de pagina, met foto, plek en rating; nummer één in het midden.
+  const picks = [...document.querySelectorAll('#s-podium .ss-pick')];
+  const top = Math.max(y + 40, 360), base = 800;
+  const spec = { p1: { w: 250, x: W / 2 }, p2: { w: 196, x: W / 2 - 250 }, p3: { w: 196, x: W / 2 + 250 } };
+  for (const a of picks) {
+    const k = ['p1', 'p2', 'p3'].find(x => a.classList.contains(x)), { w, x } = spec[k], h = w * 430 / 300;
+    const bottom = k === 'p1' ? base - 30 : k === 'p2' ? base - 14 : base;
+    const tiny = a.querySelector('.fut-tiny'), cs = getComputedStyle(tiny), v = n => cs.getPropertyValue(n).trim();
+    const rim = { p1: 'gold', p2: 'silver', p3: 'bronze' }[k];
+    const photo = await loadImg(a.querySelector('image')?.getAttribute('href'));
+    const s = w / 300, x0 = x - w / 2, y0 = Math.max(top, bottom - h - 40) ;
+    g.save(); g.translate(x0, y0); g.scale(s, s);
+    const shape = new Path2D(PlayerCard.shape), inset = (sx, sy) => { g.translate(150, 215); g.scale(sx, sy); g.translate(-150, -215); };
+    g.shadowColor = 'rgba(0,0,0,0.45)'; g.shadowBlur = 24 / s; g.shadowOffsetY = 8 / s;
+    let gr = g.createLinearGradient(0, 0, 300, 430); SHARE_RIM[rim].forEach((col, i) => gr.addColorStop([0, 0.35, 0.7, 1][i], col));
+    g.fillStyle = gr; g.fill(shape); g.shadowColor = 'transparent';
+    g.save(); inset(0.952, 0.966);
+    gr = g.createLinearGradient(0, 0, 110, 430); gr.addColorStop(0, v('--t-bg1') || '#241c0e'); gr.addColorStop(0.55, v('--t-bg2') || '#0e0c09'); gr.addColorStop(1, v('--t-bg3') || '#050403');
+    g.fillStyle = gr; g.fill(shape); g.clip(shape); g.restore();
+    g.save(); inset(0.952, 0.966); g.clip(shape); inset(1 / 0.952, 1 / 0.966);
+    if (photo) {
+      const bw = 240, bh = 198, r = Math.max(bw / photo.width, bh / photo.height), sw = bw / r, sh = bh / r;
+      g.drawImage(photo, photo.width - sw, 0, sw, sh, 34, 52, bw, bh); // rechtsboven bijgesneden, zoals op de kaart
+      gr = g.createLinearGradient(0, 190, 0, 252); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, v('--t-bg2') || '#0e0c09');
+      g.fillStyle = gr; g.fillRect(0, 188, 300, 66);
+    }
+    g.restore();
+    const [mBg, mInk] = SHARE_MEDAL[rim];
+    g.fillStyle = mBg; g.beginPath(); g.arc(72, 76, 40, 0, 7); g.fill();
+    g.fillStyle = mInk; mono(46, 800); g.textAlign = 'center'; g.fillText(k.slice(1), 72, 92);
+    g.fillStyle = v('--t-ink') || '#f6e6b8'; mono(96, 800); g.fillText(a.querySelector('.ft-val')?.textContent || '', 150, 352);
+    g.restore();
+    g.fillStyle = '#fff'; font(k === 'p1' ? 30 : 26, 700); g.textAlign = 'center';
+    g.fillText(a.querySelector('.ss-pick-name')?.textContent.trim() || '', x, y0 + h + 40);
+  }
+  // Uitslag: W-G-V, goals en tegengoals.
+  const figs = [[`${sm.W}-${sm.D}-${sm.L}`, 'W-G-V'], [String(sm.gf), 'Goals'], [String(sm.ga), 'Tegengoals']];
+  figs.forEach(([val, label], i) => {
+    const x = W / 2 + (i - 1) * 280;
+    if (i === 0) { mono(68, 700); const parts = [[String(sm.W), '#6aa8f5'], ['-', '#9a95a3'], [String(sm.D), '#c9c4d1'], ['-', '#9a95a3'], [String(sm.L), '#f58a8a']];
+      const tw = parts.reduce((a, [t]) => a + g.measureText(t).width, 0); let px = x - tw / 2; g.textAlign = 'left';
+      for (const [t, col] of parts) { g.fillStyle = col; g.fillText(t, px, 940); px += g.measureText(t).width; } g.textAlign = 'center'; }
+    else { g.fillStyle = '#fff'; mono(68, 700); g.fillText(val, x, 940); }
+    g.fillStyle = '#d9d4e0'; font(24, 600); g.fillText(label, x, 978);
+  });
+  g.fillStyle = '#a9a2b3'; font(22); g.fillText('Frambroos Coach · neegek.github.io/frambroos-proclubs', W / 2, 1042);
   const blob = await new Promise(r => c.toBlob(r, 'image/png'));
   const file = new File([blob], `frambroos-${new Date(ms[0].ts * 1000).toISOString().slice(0, 10)}.png`, { type: 'image/png' });
   if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'Frambroos' }); return; } catch { /* geannuleerd: dan downloaden */ } }
