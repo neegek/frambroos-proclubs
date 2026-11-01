@@ -68,7 +68,7 @@ function formChart(container, ms) {
   // Na een tik stuurt de browser soms meteen mouseleave; dan blijft de tooltip staan tot een tik ernaast (common.js).
   hit.addEventListener('mouseleave', () => { if (pointer !== 'mouse') return; if (on !== null) bars[on].setAttribute('fill-opacity', 0.5); on = null; hideTip(); });
   // Muis: een klik opent de wedstrijd. Telefoon: een tik toont alleen de tooltip (common.js); naar de wedstrijd via de rondjes.
-  hit.addEventListener('click', e => pointer === 'mouse' && (location.href = `wedstrijd.html?id=${ms[Math.max(0, Math.min(n - 1, Math.floor(((e.clientX - svg.getBoundingClientRect().left) * width / svg.getBoundingClientRect().width - inner.x) / step)))].matchId}`));
+  hit.addEventListener('click', e => pointer === 'mouse' && (location.href = matchHref(ms[Math.max(0, Math.min(n - 1, Math.floor(((e.clientX - svg.getBoundingClientRect().left) * width / svg.getBoundingClientRect().width - inner.x) / step)))])));
 }
 
 // Kerncijfers in de kop: de laatste tien tegenover de wedstrijden daarvoor.
