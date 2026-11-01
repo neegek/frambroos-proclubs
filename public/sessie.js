@@ -80,7 +80,7 @@ function render() {
   const own = DATA.snapshot?.skillRating;
   const names = [...new Set(ms.flatMap(m => m.players.map(p => p.name)))];
   $('#s-title').textContent = cap(longDate(ms[0].ts));
-  if (!$('#s-hero .hh-stadium')) $('#s-hero').insertAdjacentHTML('afterbegin', stadiumSvg());
+  if (!$('#s-visual .hh-stadium')) $('#s-visual').insertAdjacentHTML('afterbegin', stadiumSvg());
   $('#s-meta').textContent = `${typeLabel(ms)} · ${plural(ms.length, 'wedstrijd', 'wedstrijden')} · ${names.length} spelers`;
 
   const opp = avg(ms.map(m => m.opponent.skillRating).filter(Boolean));
@@ -164,10 +164,10 @@ function renderMatrix(ms, prow) {
 // zodat "groot" ook echt "goed gespeeld" betekent. null = te weinig om te meten.
 const RADAR_AXES = [
   { key: 'rating', label: 'Rating', fmt: v => f1(v) },
-  { key: 'goals', label: 'Scoren', fmt: v => `${f1(v)} p/w` },
-  { key: 'create', label: 'Creëren', fmt: v => `${f1(v)} p/w` },
+  { key: 'goals', label: 'Scoren', count: true },
+  { key: 'create', label: 'Creëren', count: true },
   { key: 'pass', label: 'Passen', fmt: v => `${Math.round(100 * v)}%` },
-  { key: 'won', label: 'Balwinst', fmt: v => `${f1(v)} p/w` },
+  { key: 'won', label: 'Balwinst', count: true },
   { key: 'duels', label: 'Duels', fmt: v => `${Math.round(100 * v)}%` },
 ];
 function nightStats(rows) {
@@ -182,13 +182,14 @@ function nightStats(rows) {
     duels: ta >= 3 ? sum(p => p.tacklesMade) / ta : null,
   };
 }
-// Het team over een avond: dezelfde zes maten, maar per wedstrijd van het hele team (goals, creëren en balwinst per
-// wedstrijd; pass en duels over alle pogingen; rating als gemiddelde van alle spelers).
+// Het team over een avond: dezelfde zes maten, maar per wedstrijd van het hele team (goals uit de uitslag, creëren en
+// balwinst per wedstrijd; pass en duels over alle pogingen; rating als gemiddelde van alle spelers).
 function teamStats(ms) {
   const rows = ms.flatMap(m => m.players.map(p => ({ m, p }))), n = ms.length;
   const st = nightStats(rows);
   const ev = rows.filter(r => r.p.ev), evMatches = new Set(ev.map(r => r.m)).size;
-  return { ...st, goals: st.goals * rows.length / n, create: st.create * rows.length / n,
+  // Scoren van het team: alle goals van de uitslag (ook die van AI), zodat het klopt met de kop.
+  return { ...st, goals: ms.reduce((a, m) => a + m.goals, 0) / n, create: st.create * rows.length / n,
     won: evMatches ? ev.reduce((a, r) => a + (r.p.ev.possession_won || 0), 0) / evMatches : null };
 }
 // Referentie, één keer berekend: per as alle waarden van onze avonden, voor het team en voor de spelers, en per
@@ -219,11 +220,11 @@ function normalOf(key, who, sid) {
   return vals.length ? avg(vals) : null;
 }
 
-let radarOn = null; // uitgelichte speler; null = het team
+let radarOn = null; // uitgelichte speler; null = het team (standaard). Nog een tik op dezelfde naam: terug naar het team.
 function renderRadar(sess, ms) {
   const ref = radarReference();
   const pcOf = (pool, st) => Object.fromEntries(RADAR_AXES.map(a => [a.key, percentile(pool[a.key], st[a.key])]));
-  const team = { name: null, st: teamStats(ms) }; team.pc = pcOf(ref.team, team.st);
+  const team = { name: null, n: ms.length, st: teamStats(ms) }; team.pc = pcOf(ref.team, team.st);
   const players = [...new Set(ms.flatMap(m => m.players.map(p => p.name)))].map(name => {
     const rows = ms.map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p);
     const st = nightStats(rows);
@@ -233,22 +234,25 @@ function renderRadar(sess, ms) {
   if (!players.some(x => x.name === radarOn)) radarOn = null;
   const sel = radarOn === null ? team : players.find(x => x.name === radarOn);
 
-  // Onder elke astitel het cijfer van wat is uitgelicht, met klein ons normaal (coach-logica §9a).
+  // Onder elke astitel het cijfer van wat is uitgelicht, met klein het normaal (coach-logica §9a). Aantallen als totaal
+  // van de avond; het normaal dan per wedstrijd van de andere avonden × het aantal wedstrijden van deze avond.
+  const show = (a, v) => v === null ? null : a.count ? String(Math.round(v * sel.n)) : a.fmt(v);
+  const showNorm = (a, v) => a.count ? f1(v * sel.n) : a.fmt(v);
   const S = 360, c = S / 2, R = 118, k = RADAR_AXES.length;
   const pt = (i, v) => { const t = -Math.PI / 2 + i * 2 * Math.PI / k; return [c + Math.cos(t) * R * v / 100, c + Math.sin(t) * R * v / 100]; };
   const ring = v => RADAR_AXES.map((_, i) => pt(i, v).map(n => n.toFixed(1)).join(',')).join(' ');
   const axes = RADAR_AXES.map((a, i) => { const [x, y] = pt(i, 100), [lx, ly0] = pt(i, 128);
     const anchor = Math.abs(lx - c) < 4 ? 'middle' : lx > c ? 'start' : 'end', ly = ly0 < c - 20 ? ly0 - 28 : ly0 + (ly0 > c + 20 ? 12 : -6);
     const v = sel.st[a.key], norm = normalOf(a.key, sel.name === null ? 'team' : sel.name, sess.id);
-    return `<line x1="${c}" y1="${c}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" class="radar-axis"/><text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}" class="radar-label">${a.label}<tspan x="${lx.toFixed(1)}" dy="17" class="radar-value sel" style="--pc:${color(sel.name)}">${v === null ? 'te weinig' : a.fmt(v)}</tspan>${norm === null ? '' : `<tspan x="${lx.toFixed(1)}" dy="14" class="radar-norm">normaal ${a.fmt(norm)}</tspan>`}</text>`; }).join('');
+    return `<line x1="${c}" y1="${c}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" class="radar-axis"/><text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}" class="radar-label">${a.label}<tspan x="${lx.toFixed(1)}" dy="17" class="radar-value sel" style="--pc:${color(sel.name)}">${v === null ? 'te weinig' : show(a, v)}</tspan>${norm === null ? '' : `<tspan x="${lx.toFixed(1)}" dy="14" class="radar-norm">normaal ${showNorm(a, norm)}</tspan>`}</text>`; }).join('');
   const shape = (x, cls) => `<polygon points="${RADAR_AXES.map((a, i) => pt(i, x.pc[a.key] ?? 0).map(n => n.toFixed(1)).join(',')).join(' ')}" style="stroke:${color(x.name)};fill:${color(x.name)}" class="radar-shape ${cls}"><title>${x.name === null ? 'Team' : esc(proName(x.name))}</title></polygon>`;
-  // Het uitgelichte vlak bovenop; de rest vaag.
-  const others = [team, ...players].filter(x => x !== sel);
+  // Standaard alleen het team; met een speler uitgelicht dat vlak bovenop en het team vaag erachter.
+  const others = sel === team ? [] : [team];
   $('#s-radar').innerHTML = `<svg viewBox="-90 -50 ${S + 180} ${S + 100}" class="radar-svg" role="img" aria-label="Zo speelden we: zes assen als percentiel tegenover onze eigen avonden, ${sel.name === null ? 'het team' : esc(proName(sel.name))} uitgelicht">
     ${[25, 75, 100].map(v => `<polygon points="${ring(v)}" class="radar-ring"/>`).join('')}<polygon points="${ring(50)}" class="radar-ring radar-normal"/>${axes}
     ${others.map(x => shape(x, 'dim')).join('')}${shape(sel, 'on')}</svg>`;
-  $('#s-radar-chips').innerHTML = [team, ...players].map(x => `<button type="button" class="radar-chip${sel === x ? ' on' : ''}" aria-pressed="${sel === x}" data-n="${x.name === null ? '' : esc(x.name)}"><i style="background:${color(x.name)}"></i>${x.name === null ? 'Team' : esc(proName(x.name))}</button>`).join('');
-  for (const b of $('#s-radar-chips').querySelectorAll('.radar-chip')) b.addEventListener('click', () => { radarOn = b.dataset.n || null; renderRadar(sess, ms); });
+  $('#s-radar-chips').innerHTML = players.map(x => `<button type="button" class="radar-chip${sel === x ? ' on' : ''}" aria-pressed="${sel === x}" data-n="${esc(x.name)}"><i style="background:${color(x.name)}"></i>${esc(proName(x.name))}</button>`).join('');
+  for (const b of $('#s-radar-chips').querySelectorAll('.radar-chip')) b.addEventListener('click', () => { radarOn = radarOn === b.dataset.n ? null : b.dataset.n; renderRadar(sess, ms); });
 }
 
 onWidthChange(() => DATA && render());
