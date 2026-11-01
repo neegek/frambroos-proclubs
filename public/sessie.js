@@ -337,8 +337,12 @@ function openPlayer(name) {
     ${ratingDots(rows)}
     ${me ? `<div class="pd-radar">${radarSvg(me, [team], SESSION_ID, `${esc(proName(name))} deze avond, het team vaag erachter`)}</div>${table}` : '<p class="cd-note">Eén wedstrijd: te weinig voor de radar.</p>'}
 `;
-  dialogFoot(d, `spelers.html#${encodeURIComponent(name)}`, 'Naar de spelerspagina');
-  d.showModal();
+  // Vorige en volgende speler in de volgorde van Per wedstrijd (gemiddelde van de avond).
+  const order = (SHARE?.prow || []).filter(r => r.rH !== null).map(r => r.name), at = order.indexOf(name);
+  const face = n => { const src = PlayerCard.portrait(n); return src ? `<img src="${src}" alt="">` : `<span class="rd-face-icon">${esc(proName(n).charAt(0))}</span>`; };
+  const step = n => n ? { label: proName(n), face: face(n), go: () => { d.querySelector('.rd-body').scrollTop = 0; openPlayer(n); } } : null;
+  dialogFoot(d, `spelers.html#${encodeURIComponent(name)}`, 'Naar de spelerspagina', { prev: step(order[at - 1]), next: step(order[at + 1]) });
+  if (!d.open) d.showModal();
 }
 $('#player-dialog').addEventListener('click', e => { if (e.target === e.currentTarget || e.target.closest('.rd-close')) e.currentTarget.close(); });
 

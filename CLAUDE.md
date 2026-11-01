@@ -75,7 +75,8 @@ alleen in Cloudflare.
   vlak de plek: goud, zilver, brons, leigrijs voor de rest (`faceOf` in `playercard.js`); in vorm en topvorm houden hun vlak.
 - Horizontaal scrollen in een kaart: de rij loopt tot de rand van de kaart (negatieve marge en binnenruimte van `--px`),
   niet afgesneden door de binnenruimte. Tegenstanders met logo via `oppBadge(m.opponent)` (terugval: shirt).
-- Dialogen: sluitknop vast rechtsboven, een knop naar een andere pagina vast onderaan (`dialogFoot` in `common.js`).
+- Dialogen: sluitknop vast rechtsboven, onderaan een vaste balk met een rustige knop naar een andere pagina en eventueel
+  vorige/volgende met portret (`dialogFoot(d, href, label, { prev, next })` in `common.js`).
 - Een naam bij een spelerskaart(je) staat ín het kaartje (`label` bij `PlayerCard.tiny`), niet eronder.
 - Namen voluit zoals EA ze geeft (Petra Selie, niet P. Selie); te lang: afkappen met …, nooit zelf afkorten.
 - Over spelers geen *hij* of *zij*. Waar de app over onze spelers praat of ze noemt (samenvattingen, nieuws, ranglijsten,
