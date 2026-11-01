@@ -457,12 +457,15 @@ the match was). Eerst de laatste twintig, de rest achter een knop.
 **Sessiekop** (sinds 1 november 2026; daarvoor een scorebord zonder duidelijk middelpunt): één **podium** als
 blikvanger. Een donker vlak met het stadion van het Clubhouse (vaste kleuren, los van het thema), linksboven klein
 type, aantal wedstrijden en aantal spelers, daaronder groot de **naam van de sessie** (de datum) en direct eronder de
-**quote van de beste speler** (§9, Sessie). Dan de uitslag in drie getallen: **W-G-V** in de uitslagkleuren,
-**Goals** en **Tegengoals** (geen doelsaldo, geen *de nul*), met rechts ernaast de **deelknop** (daar valt hij op).
+**quote van de beste speler** (§9, Sessie), met de naam erachter op dezelfde regel. Dan de uitslag in drie getallen: **W-G-V** in de uitslagkleuren,
+**Goals** en **Tegengoals** (geen doelsaldo, geen *de nul*), met op dezelfde regel rechts de **deelknop** als
+rond geel icoon zonder label.
 Rechts de **top drie** als kaartjes op een podium: de nummer één in het midden, groter en hoger, twee links, drie
-rechts, met naam en kroon bij man of the match; een tik scrollt naar *Per wedstrijd*. Onder de uitslag, over de hele
-breedte, de **anekdote** als één regel en de **wedstrijden als scrollbare rij kaartjes** (een tik opent de wedstrijd).
-Op telefoon alles onder elkaar, gecentreerd: naam, quote, podium, uitslag met deelknop, anekdote, wedstrijden.
+rechts, met naam en kroon bij man of the match; een lange naam wordt afgekapt met … zodat de kaartjes even breed
+blijven; een tik scrollt naar *Per wedstrijd*. Onder de uitslag, over de hele
+breedte, de **wedstrijden als scrollbare rij kaartjes** (een tik opent de wedstrijd), zonder tekst erboven: de
+anekdote bepaalt alleen nog het thema van de quote.
+Op telefoon alles onder elkaar, gecentreerd: naam, quote, podium, uitslag met deelknop, wedstrijden.
 De radar eronder vertelt **hoe we speelden**; geen cijfers dubbel. De top drie staat op rating over deze avond.
 **Deelkaart** (afbeelding van 1080×1080): dezelfde kop als op de pagina: stadion, type, naam van de sessie, de quote,
 de top drie als kaartjes op het podium (foto, plek, rating, naam) en W-G-V, Goals en Tegengoals.
