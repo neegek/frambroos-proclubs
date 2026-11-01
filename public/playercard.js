@@ -85,8 +85,10 @@ function tierAt(r, sid) {
     : null;
   const why = `sessie van ${dayLabel(here[0].m.ts)}: rating ${level.toFixed(1)}, ${wins} van ${here.length} gewonnen${growth !== null ? `, groei ${fmtGrowth(growth)}` : ''}`;
   const out = { why, level, growth, session: sid, rows: here };
-  if (level >= 8 && wins / here.length >= 0.6) return { tier: 'top', ...out };
-  if (level >= 7 || (growth !== null && r.length >= 8 && growth >= 0.3)) return { tier: 'zwart', ...out };
+  // Op het getal zoals het er staat: 6,95 telt als 7,0 (coach-logica §9c).
+  const shown = Math.round(level * 10) / 10;
+  if (shown >= 8 && wins / here.length >= 0.6) return { tier: 'top', ...out };
+  if (shown >= 7 || (growth !== null && r.length >= 8 && growth >= 0.3)) return { tier: 'zwart', ...out };
   return { tier: 'goud', ...out };
 }
 // De vorm van nu (of op een eerder moment, met rows tot dan): de laatste sessie met minstens 3 eigen wedstrijden.
