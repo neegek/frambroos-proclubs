@@ -476,11 +476,17 @@ function oppBadge(opp) {
   if (!id) return kitShirt(opp?.kit, opp?.name || '');
   return `<span class="opp-badge"><img src="${CREST_URL(id)}" alt="${esc(opp.name)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add('no-crest')">${kitShirt(opp.kit, opp.name)}</span>`;
 }
-// Dialoog met een vaste knop onderaan (blijft staan bij scrollen); zonder href geen knop.
-function dialogFoot(d, href, label) {
+// Dialoog met een vaste balk onderaan (blijft staan bij scrollen): in het midden een rustige knop naar een andere pagina,
+// links en rechts eventueel kleine knoppen naar de vorige en volgende (nav.prev/next: { label, face, go }).
+function dialogFoot(d, href, label, nav = {}) {
   let f = d.querySelector('.rd-foot');
   if (!f) { f = document.createElement('div'); f.className = 'rd-foot'; d.append(f); }
-  f.hidden = !href; f.innerHTML = href ? `<a class="rd-foot-btn" href="${href}">${label}</a>` : '';
+  const arrow = dir => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${dir === 'prev' ? 'M15 18l-6-6 6-6' : 'M9 18l6-6-6-6'}"/></svg>`;
+  const side = dir => { const x = nav[dir]; return x ? `<button type="button" class="rd-foot-nav ${dir}" aria-label="${dir === 'prev' ? 'Vorige' : 'Volgende'}: ${esc(x.label)}" title="${esc(x.label)}">${dir === 'prev' ? arrow(dir) : ''}<span class="rd-face">${x.face}</span>${dir === 'next' ? arrow(dir) : ''}</button>` : `<span class="rd-foot-nav ${dir} empty" aria-hidden="true"></span>`; };
+  const any = href || nav.prev || nav.next;
+  f.hidden = !any;
+  f.innerHTML = any ? `${side('prev')}${href ? `<a class="rd-foot-btn" href="${href}">${label}</a>` : '<span></span>'}${side('next')}` : '';
+  for (const dir of ['prev', 'next']) f.querySelector(`button.${dir}`)?.addEventListener('click', () => nav[dir].go());
 }
 function kitShirt(c, label) {
   const [c1, c2, c3] = c || ['#888888', '#666666', '#444444'];

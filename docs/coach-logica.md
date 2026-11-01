@@ -276,7 +276,9 @@ Daarnaast *Positiespel en keuzes* en *Al sterk*.
   Een vaste eerste kolom (*Per wedstrijd*) dekt ook de ruimte ernaast af, zodat er niets tussendoor schemert; de
   hoek erboven is niet vast, zodat de spelerskaartjes bij het scrollen tot de linkerrand zichtbaar blijven.
 - **Dialogen**: de sluitknop blijft rechtsboven staan en een knop naar een andere pagina (*Naar de spelerspagina*,
-  *Naar de wedstrijd*) staat vast onderaan; alleen de inhoud ertussen scrolt.
+  *Naar de wedstrijd*) staat vast onderaan; alleen de inhoud ertussen scrolt. Die knop is rustig (alleen tekst, een
+  achtergrond pas bij aanwijzen of indrukken). Bij een speler van een sessie staan links en rechts ervan kleine knoppen
+  met de portretfoto en een pijltje naar de vorige en volgende speler (volgorde van *Per wedstrijd*).
 - **Radar op telefoon**: grotere teksten bij de assen.
 - **Logo's van tegenstanders**: waar een tegenstander staat, het clublogo van EA's CDN (docs/ea-data.md); laadt dat
   niet, dan het shirt in de clubkleuren. Ons eigen logo is `crest.png`.
@@ -304,7 +306,9 @@ Daarnaast *Positiespel en keuzes* en *Al sterk*.
   cruijffiaanse uitspraak in de stem van die speler, met de pro-naam erbij, **geïnspireerd door één statistiek van
   die speler die avond**: de maat die het meest boven het eigen normaal uitstak (goals of assists vanaf twee, man of
   the match vanaf twee keer, passnauwkeurigheid vanaf twintig passes, gewonnen tackles vanaf drie, balwinst vanaf vier,
-  veel schoten met hooguit één goal), met het getal erin; steekt niets uit, dan de rating. **Elke sessie een nieuwe
+  veel schoten met hooguit één goal); de maat inspireert de zin, maar er staan **geen letterlijke getallen of
+  percentages** in ("ik pass graag, iedereen is mijn vriend" in plaats van "75 procent passes"); steekt niets uit,
+  dan de rating. Terry Yaki praat als honkballer Munenori Kawasaki: vol energie, stelt zich voor, bedankt iedereen. **Elke sessie een nieuwe
   quote**: komt dezelfde speler met dezelfde maat terug, dan de volgende variant. Karakter (achtergrond, stem,
   eigenschappen, woorden, beelden) en de uitspraken per maat staan in `public/personas.js`, de verzamelplek om verder
   op te bouwen. Spelers zonder achtergrond krijgen een neutrale cruijffiaanse zin.

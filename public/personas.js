@@ -9,9 +9,9 @@
 //   eigenschappen losse kenmerken om op te bouwen (karakter, gewoontes, verhaallijnen)
 //   woorden       typische woorden en uitdrukkingen
 //   beelden       waar de speler het mee vergelijkt
-//   stats         cruijffiaanse uitspraken per statistiek van de avond (zie quoteFor), twee of meer per maat.
-//                 Plekhouders: {n} het getal, {w} het getal in woorden, {r} rating (één decimaal), {pct} percentage,
-//                 {jp} het getal zoals Terry het zegt, {g2} het aantal goals erbij in woorden (geen goals, één goal).
+//   stats         cruijffiaanse uitspraken per statistiek van de avond (zie quoteFor), twee of meer per maat. De
+//                 statistiek inspireert de zin, maar er staan geen letterlijke getallen of percentages in (sinds
+//                 1 november 2026). Plekhouders blijven mogelijk ({w}, {g2}), maar liever niet gebruiken.
 // Maten: goals, assists, mom (man of the match), passes (percentage gelukt), duels (gewonnen tackles), balwinst,
 // schoten (veel schoten, weinig goals), rating (terugval).
 
@@ -19,20 +19,23 @@ const PERSONAS = {
   Neegek: {
     pro: 'Terry Yaki',
     achtergrond: 'Japanner die geen woord Nederlands of Engels spreekt.',
-    stem: 'Alles komt eruit als verbasterd Nederlands of Engels zoals het in katakana klinkt, in romaji geschreven '
-      + '(gōruden gēto burijji = golden gate bridge). Korte zinnen, lange klinkers met een streep.',
-    eigenschappen: ['spreekt alleen klanken na', 'beleefd, buigt na een goal', 'begrijpt het spel beter dan de taal'],
-    woorden: ['beri', 'rojikku', 'simpuru', 'sō', 'hai'],
-    beelden: ['sushi', 'de trein die op tijd rijdt', 'karaoke'],
+    stem: 'Verbasterd Engels (en een beetje Nederlands) zoals het in katakana klinkt, in romaji geschreven '
+      + '(gōruden gēto burijji = golden gate bridge). Inspiratie: honkballer Munenori Kawasaki: vol energie, '
+      + 'stelt zich steeds opnieuw voor, bedankt iedereen, iedereen is een vriend, geeft nooit op, lacht om het '
+      + 'eigen Engels. Korte zinnen, uitroepen, lange klinkers met een streep. Geen cijfers of percentages.',
+    eigenschappen: ['spreekt alleen klanken na', 'altijd vrolijk en dankbaar', 'stelt zich voor alsof niemand hem kent',
+      'iedereen is een vriend', 'nooit opgeven', 'begrijpt het spel beter dan de taal', 'buigt na een goal'],
+    woorden: ['Ai amu Japanīzu', 'Sankyū', 'Arigatō', 'Nebā gibu appu', 'Ōh iē', 'evuribadi', 'mai furendo', 'beri'],
+    beelden: ['sushi', 'de trein die op tijd rijdt', 'karaoke', 'buigen'],
     stats: {
-      goals: ['{jp} gōru. Shūto, gōru. Shūto, gōru. Beri simpuru.', 'Wan gōru iz rakkī. {jp} gōru iz rojikku.'],
-      assists: ['{jp} pasu, {jp} gōru. Ai nō shūto, ai mēku shūto.', 'Gōru iz nō mai. Pasu iz mai. Hai.'],
-      mom: ['Man obu za matchi… {jp} taimu. Ai bau. Arigatō.', 'Beri gūdo. Bātto tomorō, sēmu. Sō.'],
-      passes: ['{pct} pāsento pasu. Bōru iz mai furendo.', 'Shōto pasu, shōto pasu. Rongu pasu iz rongu misutēku.'],
-      duels: ['{jp} takkuru. Ai nō rubu bōru. Ai teiku bōru.', 'Wen zei habu bōru, ai habu probrem. Ai fikkusu.'],
-      balwinst: ['{jp} bōru bakku. Wī habu bōru, zei habu nō gōru.', 'Bōru kamu hōmu. Okaeri, bōru.'],
-      schoten: ['{jp} shūto… Shūto iz nō gōru. Bātto nō shūto iz nō gōru tsū.', 'Gōru iz shai. Ai shūto agen.'],
-      rating: ['{r}. Beri gūdo nambā. Ai nō andāsutando, bātto ai happī.', 'Futtobōru iz simpuru. Simpuru futtobōru iz beri hādo.'],
+      goals: ['Mai nēmu izu Terī. Ai amu Japanīzu. Ai raiku gōru!', 'Ōh iē! Gōru! Sankyū bōru, sankyū gōru, sankyū evuribadi!'],
+      assists: ['Ai raiku pasu. Yū raiku gōru. Wī ā furendo!', 'Ai nō gōru, nō purobrem. Mai furendo gōru, ai happī.'],
+      mom: ['Man obu za matchi? Mī? Sorī fō mai Ingurisshu. Sankyū beri matchi!', 'Ai amu Japanīzu. Ai amu man obu za matchi. Ai bau. Arigatō!'],
+      passes: ['Ai raiku tsū pasu. Evuribadi izu mai furendo!', 'Pasu, pasu, pasu. Bōru izu happī, ai amu happī.'],
+      duels: ['Ai rabu bōru. Bōru kamu bakku tsū mī. Nebā gibu appu!', 'Bigu man, ai amu sumōru. Bātto ai amu Japanīzu. Nebā gibu appu!'],
+      balwinst: ['Bōru, kamu hōmu! Okaeri! Ai mīsu yū.', 'Zei habu bōru. Ai sei: sorī, mai bōru. Sankyū!'],
+      schoten: ['Shūto, shūto, shūto. Nō gōru. Nebā gibu appu! Tomorō, gōru!', 'Gōru izu shai. Ai sei harō. Gōru sei nō. Okē!'],
+      rating: ['Ai don andāsutando nambā. Bātto ai amu happī. Ōh iē!', 'Mai nēmu izu Terī Yaki. Ai purei futtobōru. Sankyū evuribadi!'],
     },
   },
   'Highnis 023': {
@@ -44,14 +47,14 @@ const PERSONAS = {
     woorden: ['broer', 'alhamdulillah', 'inshallah', 'wallah'],
     beelden: ['witwassen', 'de recherche', 'de cel', 'boekhouden'],
     stats: {
-      goals: ['{w} goals, broer. Vroeger telde ik briefjes, nu tel ik ballen. Alhamdulillah.', 'Die ballen gingen er schoon in. Echt schoon, niet zoals vroeger.'],
-      assists: ['{w} assists. Ik regel het, een ander zet zijn naam eronder. Dat kennen we.', 'Ik geef de bal weg. Dat had ik vroeger met geld moeten doen.'],
+      goals: ['Vroeger telde ik briefjes, nu tel ik ballen. Alhamdulillah.', 'Die ballen gingen er schoon in. Echt schoon, niet zoals vroeger.'],
+      assists: ['Ik regel het, een ander zet zijn naam eronder. Dat kennen we.', 'Ik geef de bal weg. Dat had ik vroeger met geld moeten doen.'],
       mom: ['Man of the match. Eerste keer dat ik zonder advocaat in de krant kom.', 'Ze noemen mijn naam. Vroeger was dat slecht nieuws, broer.'],
-      passes: ['{pct} procent aangekomen. Dat noem ik een sluitende boekhouding.', 'Elke pass moet ergens landen. Net als geld, anders vallen ze je lastig.'],
-      duels: ['{w} duels gewonnen. Ik weet hoe het voelt als ze je komen halen.', 'Ik pak de bal af zonder dat iemand iets kan bewijzen.'],
-      balwinst: ['{w} keer de bal teruggehaald. Wat van ons is, komt terug, inshallah.', 'Hun bal, onze bal. Vroeger heette dat iets anders.'],
-      schoten: ['{w} schoten, {g2}. Sommige dingen kun je niet witwassen.', 'Ik bleef schieten. Geduld, broer. Alles staat geschreven.'],
-      rating: ['{r}. Netjes, en alles op de bon.', 'Geen gedoe, geen vragen. Gewoon {r}, broer.'],
+      passes: ['Alles kwam aan. Dat noem ik een sluitende boekhouding.', 'Elke pass moet ergens landen. Net als geld, anders vallen ze je lastig.'],
+      duels: ['Ik weet hoe het voelt als ze je komen halen. Nu ben ik degene die haalt.', 'Ik pak de bal af zonder dat iemand iets kan bewijzen.'],
+      balwinst: ['Wat van ons is, komt terug, inshallah.', 'Hun bal, onze bal. Vroeger heette dat iets anders.'],
+      schoten: ['Veel geschoten, weinig binnen. Sommige dingen kun je niet witwassen.', 'Ik bleef schieten. Geduld, broer. Alles staat geschreven.'],
+      rating: ['Netjes, en alles op de bon.', 'Geen gedoe, geen vragen. Gewoon voetballen, broer.'],
     },
   },
   'GoodTimes 023': {
@@ -63,14 +66,14 @@ const PERSONAS = {
     woorden: ['pelan-pelan', 'santai', 'enak'],
     beelden: ['rijst koken', 'sambal', 'het verkeer in Jakarta', 'zijn moeder'],
     stats: {
-      goals: ['{w} goals. Mijn moeder zegt: niet te veel sambal. Ik luisterde niet.', 'Goals zijn als rijst: één korrel tegelijk, pelan-pelan.'],
-      assists: ['{w} assists. Ik kook, een ander eet. Zo hoort het in de familie.', 'Goed geven is beter dan goed nemen. Enak.'],
+      goals: ['Mijn moeder zegt: niet te veel sambal. Ik luisterde niet.', 'Goals zijn als rijst: één korrel tegelijk, pelan-pelan.'],
+      assists: ['Ik kook, een ander eet. Zo hoort het in de familie.', 'Goed geven is beter dan goed nemen. Enak.'],
       mom: ['Man of the match. Morgen gewoon weer rijst koken.', 'Ik krijg de prijs, maar de hele familie heeft gekookt.'],
-      passes: ['{pct} procent goed. Zonder haast, zoals een scooter in Jakarta: je komt er altijd.', 'Kort, kort, kort. Lange passes zijn voor mensen met haast.'],
-      duels: ['{w} duels gewonnen. In de file leer je wie eerst gaat.', 'Rustig blijven en dan pakken. Santai.'],
-      balwinst: ['{w} keer de bal terug. Wat je uitleent, komt bij ons altijd terug.', 'Geduld. De bal komt vanzelf weer langs, net als de bus.'],
-      schoten: ['{w} schoten, {g2}. Rijst die niet gaar is, kook je gewoon langer.', 'Het doel stond stil, ik niet. Volgende keer.'],
-      rating: ['{r}. Niet te pittig, niet te flauw. Enak.', 'Een gewone avond is ook een goede avond.'],
+      passes: ['Zonder haast, zoals een scooter in Jakarta: je komt er altijd.', 'Kort, kort, kort. Lange passes zijn voor mensen met haast.'],
+      duels: ['In de file leer je wie eerst gaat.', 'Rustig blijven en dan pakken. Santai.'],
+      balwinst: ['Wat je uitleent, komt bij ons altijd terug.', 'Geduld. De bal komt vanzelf weer langs, net als de bus.'],
+      schoten: ['Rijst die niet gaar is, kook je gewoon langer.', 'Het doel stond stil, ik niet. Volgende keer.'],
+      rating: ['Niet te pittig, niet te flauw. Enak.', 'Een gewone avond is ook een goede avond.'],
     },
   },
   'Xero 023': {
@@ -81,14 +84,14 @@ const PERSONAS = {
     woorden: ['mijn broer', 'eigenlijk', 'toch'],
     beelden: ['de broer', 'een spiegel', 'een eerste keer'],
     stats: {
-      goals: ['{w} goals. Mijn broer heeft er meer. Maar deze zijn van mij.', 'Ik dacht: wat zou mijn broer doen? Toen deed ik het zelf.'],
-      assists: ['{w} assists. Ik hoef niet te scoren om er te zijn.', 'Mijn broer zoekt het doel. Ik zoek de ander. Ook een kunst.'],
+      goals: ['Mijn broer heeft er meer. Maar deze zijn van mij.', 'Ik dacht: wat zou mijn broer doen? Toen deed ik het zelf.'],
+      assists: ['Ik hoef niet te scoren om er te zijn.', 'Mijn broer zoekt het doel. Ik zoek de ander. Ook een kunst.'],
       mom: ['Man of the match. Ik heb het mijn broer nog niet verteld. Misschien morgen.', 'Ze noemden mijn naam. Niet die van mijn broer. Gek gevoel.'],
-      passes: ['{pct} procent van mijn passes kwam aan. Ik twijfelde minder, dus de bal ook.', 'Simpel spelen. Mijn broer kan het, en ik blijkbaar ook.'],
-      duels: ['{w} duels gewonnen. Tegen mijn broer verloor ik er altijd. Vanavond niet.', 'Eerst twijfel je, dan stap je erin. Ik stap er nu eerder in.'],
-      balwinst: ['{w} keer de bal veroverd. Ik pak wat ik vroeger liet liggen.', 'De bal kwam terug. Ik ook, eigenlijk.'],
-      schoten: ['{w} schoten, {g2}. Mijn broer zou zeggen: blijf schieten. Hij heeft gelijk, deze keer.', 'Raak of niet, ik durfde. Dat is nieuw.'],
-      rating: ['{r}. Niet het cijfer van mijn broer. Het mijne.', 'Een gewone avond. Vroeger was dat voor mij al heel wat.'],
+      passes: ['Ik twijfelde minder, dus de bal ook.', 'Simpel spelen. Mijn broer kan het, en ik blijkbaar ook.'],
+      duels: ['Tegen mijn broer verloor ik ze altijd. Vanavond niet.', 'Eerst twijfel je, dan stap je erin. Ik stap er nu eerder in.'],
+      balwinst: ['Ik pak wat ik vroeger liet liggen.', 'De bal kwam terug. Ik ook, eigenlijk.'],
+      schoten: ['Mijn broer zou zeggen: blijf schieten. Deze keer heeft mijn broer gelijk.', 'Raak of niet, ik durfde. Dat is nieuw.'],
+      rating: ['Niet het cijfer van mijn broer. Het mijne.', 'Een gewone avond. Vroeger was dat voor mij al heel wat.'],
     },
   },
   // Nog zonder achtergrond: neutrale cruijffiaanse zinnen (PERSONA_GENERIC) tot Jamal er een geeft.
@@ -97,14 +100,14 @@ const PERSONAS = {
 };
 
 const PERSONA_GENERIC = {
-  goals: ['{w} goals. Als je de bal er niet in schiet, gaat hij er ook niet in.', 'Scoren is simpel. Je moet alleen op het goede moment op de goede plek staan.'],
-  assists: ['{w} assists. De beste pass is de pass die niemand ziet aankomen.', 'Wie geeft, scoort ook. Alleen staat het niet op het bord.'],
+  goals: ['Als je de bal er niet in schiet, gaat hij er ook niet in.', 'Scoren is simpel. Je moet alleen op het goede moment op de goede plek staan.'],
+  assists: ['De beste pass is de pass die niemand ziet aankomen.', 'Wie geeft, scoort ook. Alleen staat het niet op het bord.'],
   mom: ['Man of the match. Het gaat niet om wie het beste speelt, maar wie het minst fout doet.', 'Je bent pas de beste als de anderen het zien.'],
-  passes: ['{pct} procent aangekomen. Als wij de bal hebben, kunnen zij niet scoren.', 'Snel spelen is iets anders dan haasten.'],
-  duels: ['{w} duels gewonnen. Wie de bal heeft, hoeft niet te verdedigen.', 'Verdedigen begint met de bal winnen. Logisch.'],
-  balwinst: ['{w} keer de bal terug. Als zij hem niet hebben, kunnen ze niks.', 'Balbezit is geen kwestie van hebben, maar van terugpakken.'],
-  schoten: ['{w} schoten, {g2}. Toeval is logisch.', 'Je moet schieten, anders kun je niet scoren. Ook als het niet lukt.'],
-  rating: ['{r}. Voetbal is simpel, maar het moeilijkste wat er is, is simpel voetballen.', 'Elk nadeel heb z\'n voordeel.'],
+  passes: ['Als wij de bal hebben, kunnen zij niet scoren.', 'Snel spelen is iets anders dan haasten.'],
+  duels: ['Wie de bal heeft, hoeft niet te verdedigen.', 'Verdedigen begint met de bal winnen. Logisch.'],
+  balwinst: ['Als zij hem niet hebben, kunnen ze niks.', 'Balbezit is geen kwestie van hebben, maar van terugpakken.'],
+  schoten: ['Toeval is logisch.', 'Je moet schieten, anders kun je niet scoren. Ook als het niet lukt.'],
+  rating: ['Voetbal is simpel, maar het moeilijkste wat er is, is simpel voetballen.', 'Elk nadeel heb z\'n voordeel.'],
 };
 
 const JP_NUM = ['zero', 'wan', 'tsū', 'surī', 'fō', 'faibu', 'shikkusu', 'sebun', 'ēto', 'nain', 'ten'];

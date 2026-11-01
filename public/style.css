@@ -640,10 +640,18 @@ button.rank-card:hover .rank-more { color: var(--brand-text); border-color: var(
 /* Dialogen: de sluitknop en de knop onderaan blijven staan, alleen de inhoud scrolt. */
 .rank-dialog[open] { display: flex; flex-direction: column; }
 .rank-dialog .rd-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 20px 22px 22px; overscroll-behavior: contain; }
-.rd-foot { flex: none; padding: 12px 22px calc(14px + env(safe-area-inset-bottom)); border-top: 1px solid var(--panel-border); background: var(--panel); }
+.rd-foot { flex: none; display: grid; grid-template-columns: 64px minmax(0, 1fr) 64px; align-items: center; gap: 8px; padding: 8px 14px calc(10px + env(safe-area-inset-bottom)); border-top: 1px solid var(--panel-border); background: var(--panel); }
 .rd-foot[hidden] { display: none; }
-.rd-foot-btn { display: flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 12px; background: var(--brand); color: var(--brand-ink, #1a1205); font-weight: 700; text-decoration: none; }
-.rd-foot-btn:hover { filter: brightness(1.06); }
+/* Rustige knop: pas een achtergrond bij aanwijzen of indrukken. */
+.rd-foot-btn { display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 8px; white-space: nowrap; border-radius: 12px; color: var(--brand-text); font-weight: 650; text-decoration: none; text-align: center; }
+.rd-foot-btn:hover, .rd-foot-btn:active, .rd-foot-btn:focus-visible { background: var(--surface-2); outline: none; }
+.rd-foot-nav { display: inline-flex; align-items: center; justify-content: center; gap: 2px; height: 44px; padding: 0 4px; border: 0; border-radius: 12px; background: none; color: var(--ink-2); cursor: pointer; }
+.rd-foot-nav.next { justify-self: end; } .rd-foot-nav.empty { visibility: hidden; }
+.rd-foot-nav:hover, .rd-foot-nav:active, .rd-foot-nav:focus-visible { background: var(--surface-2); color: var(--ink); outline: none; }
+.rd-foot-nav svg { width: 16px; height: 16px; flex: none; }
+.rd-face { width: 34px; height: 34px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: var(--surface-2); border: 1px solid var(--border-strong); }
+.rd-face img { width: 100%; height: 100%; object-fit: cover; object-position: center 20%; }
+.rd-face-icon { font-weight: 700; font-size: 14px; color: var(--ink-2); }
 .rd-body h2 { margin: 0 48px 6px 0; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
 .rd-body h3 { margin: 16px 0 4px; font-size: 11.5px; font-weight: 650; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
 .rd-body p { margin: 0; font-size: 14px; color: var(--ink-2); max-width: 62ch; }
