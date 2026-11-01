@@ -185,8 +185,8 @@ function render() {
   const fav = favorite();
   const members = DATA.members.map(m => ({ m, t: PlayerCard.tier(m.name) }))
     .sort((a, b) => (b.m.name === fav) - (a.m.name === fav) || PlayerCard.TIER_RANK[b.t.tier] - PlayerCard.TIER_RANK[a.t.tier] || (b.t.level ?? 0) - (a.t.level ?? 0) || (b.m.gamesPlayed || 0) - (a.m.gamesPlayed || 0));
-  $('#members').innerHTML = members.map(({ m }) => `<a class="member" href="spelers.html#${encodeURIComponent(m.name)}">
-      <span class="fut-mini">${PlayerCard.html(m.name)}</span><span class="member-tag">${m.name === fav ? `<span class="fav-star" title="Je favoriet">${STAR}</span>` : ''}${esc(proName(m.name))}</span></a>`).join('');
+  $('#members').innerHTML = members.map(({ m }) => `<a class="member" href="spelers.html#${encodeURIComponent(m.name)}" aria-label="${esc(proName(m.name))}">
+      <span class="fut-mini">${PlayerCard.html(m.name)}</span>${m.name === fav ? `<span class="member-tag"><span class="fav-star" title="Je favoriet">${STAR}</span></span>` : ''}</a>`).join('');
   PlayerCard.reveal($('#members'));
 }
 

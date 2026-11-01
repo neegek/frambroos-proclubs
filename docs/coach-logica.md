@@ -271,6 +271,8 @@ Daarnaast *Positiespel en keuzes* en *Al sterk*.
 - **Getallen** (sinds 30 oktober 2026): overal **één decimaal** (8.4, 0.6 per wedstrijd). Sorteren en rangschikken
   gebeurt op het exacte getal, zodat twee gelijk afgeronde scores toch een vaste volgorde hebben. De **groei** (§9c)
   ook met één decimaal en zonder ",0" als het een heel getal is (+1, −0.4); het woord *groei* staat er niet bij.
+- **Naam bij een kaart**: staat een naam naast of onder een spelerskaart(je), dan hoort hij **in** het kaartje
+  (sinds 1 november 2026); geen losse naam eronder.
 - **Namen** overal voluit zoals EA ze geeft (Petra Selie, niet P. Selie); alleen een naam die in het spel al met een
   voorletter is ingevuld (M. Van der Kamp) blijft zo. Past een naam niet, dan afkappen met …, nooit zelf afkorten.
 - Nederlands. Over spelers geen *hij* of *zij*: gebruik de naam, *deze speler* of *je*. De naam is die van de pro
@@ -463,8 +465,9 @@ the match was). Eerst de laatste twintig, de rest achter een knop.
   speler** (§9, Sessie) met de naam erachter op dezelfde regel; en de **top drie op een podium**: de nummer één in het
   midden, groter en hoger, twee links, drie rechts. De **naam staat in het kaartje** onder de rating (past hij niet,
   dan afgekapt met …, zodat de kaartjes even breed blijven); geen kroon voor man of the match. De **plek staat op de
-  trede** (1, 2, 3) in plaats van als medaille op de kaart; de rand van het kaartje houdt de kleur van de plek. De
-  treden zijn hoog genoeg om als podium te lezen en **eindigen op de rand van het beeld**: daar is het podium
+  trede** (1, 2, 3) in een medaillerondje in goud, zilver of brons, alle drie **op dezelfde hoogte** (rust in het
+  beeld), in plaats van op de kaart; elke trede heeft zelf een zachte tint van die kleur en de rand van het kaartje
+  ook. De naam in het kaartje houdt ruim afstand tot de rand. De treden zijn hoog genoeg om als podium te lezen en **eindigen op de rand van het beeld**: daar is het podium
   afgesneden; een tik scrollt naar *Per wedstrijd*. Op een groot scherm de tekst links en het podium rechts, op telefoon
   alles onder elkaar en gecentreerd.
 - **Onder: een paneel** in de kleuren van het thema (donker of licht): de uitslag in drie getallen, **W-G-V** in de
@@ -480,14 +483,13 @@ de top drie als kaartjes op het podium (foto, rating en naam in het kaartje, de 
 Tegengoals.
 
 **Per wedstrijd** (sinds 31 oktober 2026, vervangt *Spelers deze sessie*): een raster met per speler een kolom en
-per wedstrijd een rij (uitslag, shirt, score). Bovenaan per speler een **minikaartje**: foto, het gemiddelde van de
-avond en de naam, en linksboven in plaats van een plek of de speler **sterker, zwakker of gelijk** speelde dan normaal
-(sinds 1 november 2026). **Normaal** is de gemiddelde rating van die speler in alle andere gevolgde wedstrijden;
-dat getal staat klein onder de naam (*normaal 7.3*), zodat het teken uit zichzelf te lezen is. Rating van de avond
-minstens 0,3 boven normaal is sterker (groen pijltje omhoog), minstens 0,3 eronder zwakker (rood omlaag), daartussen
-gelijk (grijs streepje). Alleen de rating, geen punten erbij: dan klopt het met de twee getallen op het scherm.
-Zonder normaal (minder dan 3 andere wedstrijden): geen teken. De rand blijft goud; de kolommen staan op volgorde van
-het gemiddelde.
+per wedstrijd een rij (uitslag, shirt, score). Bovenaan per speler een **minikaartje** met foto, het gemiddelde van de
+avond en de **naam in het kaartje**; geen plek en geen vergelijking met normaal (sinds 1 november 2026 weggehaald:
+te ingewikkeld voor wat het zei). De kolommen staan op volgorde van het gemiddelde.
+**Een tik op een cijfer** opent wat die speler in die wedstrijd deed (sinds 1 november 2026): de rating, en waar die
+op rust: goals, assists, schoten, passes gelukt van pogingen, tackles gewonnen van pogingen, balwinst en balverlies
+(uit de events), reddingen bij een keeper, man of the match, en het archetype. EA zegt niet hoe de rating berekend
+wordt; dit is wat erachter zit, niet de formule. Met een link naar de wedstrijd.
 Elke cel kleurt naar de plek in die rij: goud, zilver en brons voor de beste drie, ijzer voor de rest (gelijke ratings
 delen een plek). Man of the match met een kroon. Geen oplichten bij aanraken: aanklikken van een rij of kolom voor
 meer details is een latere stap. Op telefoon horizontaal scrollen met de wedstrijden vast links.
@@ -499,7 +501,8 @@ er al (`PlayerCard.html(naam, { session, rank })`).
 
 **Radar van de avond** (op de sessiepagina, na de kop): **hoe we speelden**, standaard als team; een tik op een naam
 licht die speler uit, nog een tik op dezelfde naam zet hem uit en toont weer het team (sinds 1 november 2026; daarvoor
-een aparte knop *Team* en alle spelers vaag op de achtergrond). Zes assen; elke as is een **percentiel tegenover onze eigen avonden**. Het teamvlak (standaard) vergelijkt
+een aparte knop *Team*). **Alle vlakken zijn altijd zichtbaar**: zonder keuze is het team het felst en de spelers vaag,
+met een naam gekozen is die speler het felst en de rest (het team ook) vaag. Zes assen; elke as is een **percentiel tegenover onze eigen avonden**. Het teamvlak (standaard) vergelijkt
 het team deze avond met alle avonden van het team (minstens 2 wedstrijden); een spelersvlak vergelijkt die speler
 met alle avonden van al onze spelers. 50 is een gewone avond (de gestippelde ring), 100 de beste ooit. De assen:
 
@@ -517,8 +520,8 @@ de clubkleur. Onder elke **astitel staat het cijfer** van wat is uitgelicht, met
 aantallen (scoren, creëren, balwinst) is dat cijfer het **totaal van de avond** (20 goals), niet het gemiddelde; het
 normaal is dan het gemiddelde per wedstrijd van de andere avonden × het aantal wedstrijden van deze avond, zodat een
 lange en een korte avond eerlijk te vergelijken zijn. Rating is altijd een gemiddelde, passen en duels een
-percentage. De vorm van het vlak blijft per wedstrijd gerekend (anders wint een lange avond altijd). Standaard alleen
-het teamvlak; met een speler uitgelicht dat spelersvlak in de eigen kleur en het team vaag erachter. Spelers met één wedstrijd die avond doen niet mee: één pot zegt te weinig.
+percentage. De vorm van het vlak blijft per wedstrijd gerekend (anders wint een lange avond altijd). Standaard het
+teamvlak fel en de spelers vaag; met een speler uitgelicht dat spelersvlak fel en de rest vaag. Spelers met één wedstrijd die avond doen niet mee: één pot zegt te weinig.
 
 **Opstelling** (wedstrijdpagina, sinds 30 oktober 2026): één veld met beide teams. Op een groot scherm liggend: links
 wij van keeper naar aanval, rechts de tegenstander gespiegeld, zodat de aanvallers elkaar in het midden treffen. Op een
