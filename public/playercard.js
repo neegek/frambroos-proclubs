@@ -148,15 +148,18 @@ function cardOf(name, { session = null, key = '', rank = null } = {}) {
   return { html, rows, career, arch, rating, g, a, tier };
 }
 
-// Minikaartje (coach-logica §9a): de kaartvorm met foto, linksboven de plek als medaille en onderin één cijfer (bij een
-// sessie de rating van de avond). Tier en foto van de sessie, buitenrand in de kleur van de plek. Voor de top drie en
-// boven de kolommen van *Per wedstrijd*.
-function tinyOf(name, { session, rank, value, key = '-t' }) {
+// Minikaartje (coach-logica §9a): de kaartvorm met foto en onderin één cijfer (bij een sessie de rating van de avond).
+// Linksboven de plek als medaille (rank; buitenrand in de kleur van de plek), of met trend ('up', 'down', 'same') een
+// teken of de speler sterker, zwakker of gelijk speelde dan normaal (rand goud). Tier en foto van de sessie.
+const TREND = { up: ['▲', 'sterker dan normaal'], down: ['▼', 'zwakker dan normaal'], same: ['–', 'gelijk aan normaal'] };
+function tinyOf(name, { session, rank = null, trend = null, value, key = '-t' }) {
   const all = DATA.matches.map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p);
   const tier = tierAt(all.filter(x => x.p.rating !== null), session), photo = photoOf(name, tier.tier), rim = rimOf(rank);
-  return `<span class="fut-tiny" data-tier="${tier.tier}" data-rim="${rim}" role="img" aria-label="${esc(proName(name))}: plek ${rank}, rating ${value}">
+  const badge = rank ? `<span class="ft-rank metal-${rim}">${rank}</span>` : trend ? `<span class="ft-rank ft-trend ${trend}">${TREND[trend][0]}</span>` : '';
+  const label = rank ? `plek ${rank}` : trend ? TREND[trend][1] : '';
+  return `<span class="fut-tiny" data-tier="${tier.tier}" data-rim="${rim}" role="img" aria-label="${esc(proName(name))}: ${label ? `${label}, ` : ''}rating ${value}">
     ${futFrame(photo, `${slugOf(name)}-s${session}${key}`, rim)}${photo ? '' : `<span class="ft-icon">${personIcon()}</span>`}
-    <span class="ft-rank metal-${rim}">${rank}</span><span class="ft-val">${value}</span></span>`;
+    ${badge}<span class="ft-val">${value}</span></span>`;
 }
 
 function render(name) {

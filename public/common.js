@@ -38,7 +38,8 @@ const NAV = [
 ];
 (function mountShell() {
   const side = $('#sidebar'); if (!side) return;
-  const path = { 'wedstrijd.html': 'wedstrijden.html', 'sessie.html': 'sessies.html', 'nieuws.html': 'index.html' }[PAGE] || PAGE; // een laag dieper: het tabblad erboven
+  // Een laag dieper: het tabblad erboven. Een sessie niet: daar is Sessies niet actief, zodat een tik terug naar de lijst gaat.
+  const path = { 'wedstrijd.html': 'wedstrijden.html', 'nieuws.html': 'index.html' }[PAGE] || PAGE;
   side.innerHTML = `<a class="brand" href="index.html">${LOGO}<span>Frambroos<b>Coach</b></span></a>
     <nav class="side-nav" aria-label="Hoofdmenu">${NAV.map(n => n.group ? `<div class="nav-group" id="nav-group-players"><a href="${n.href}" class="nav-group-head ${n.href === path ? 'in-group' : ''}" aria-controls="player-nav" aria-expanded="true">${ICONS[n.icon]}<span>${n.label}</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><div class="sub-nav" id="player-nav" aria-label="Spelers"></div></div>` : `<a href="${n.href}" class="${n.href === path ? 'active' : ''}"${n.href === path ? ' aria-current="page"' : ''}>${ICONS[n.icon]}<span>${n.label}</span></a>`).join('')}</nav>
     <div class="side-foot"><div class="club" id="club-box"><div class="club-meta">Data laden…</div></div>
@@ -357,7 +358,7 @@ async function loadDataInner() {
   if (L?.newMatches) {
     const note = document.createElement('p'); note.className = 'live-note'; note.setAttribute('role', 'status');
     note.textContent = `${capFirst(numWord(L.newMatches))} ${L.newMatches === 1 ? 'wedstrijd is' : 'wedstrijden zijn'} net live bij EA opgehaald en ${L.newMatches === 1 ? 'telt' : 'tellen'} al mee. Opslaan gebeurt bij de volgende verzamelrun.`;
-    $('.page-head, .home-hero, .back-link, .player-hero')?.insertAdjacentElement('afterend', note);
+    $('.page-head, .home-hero, .back-link, .player-hero, .sess-stage')?.insertAdjacentElement('afterend', note);
   }
   liveTrigger(); // site: op de achtergrond, de pagina wacht er niet op
   return DATA;
@@ -383,7 +384,7 @@ async function liveTrigger() {
   const since = res.started ? res.at - 5 : res.run.createdAt;
   const note = document.createElement('p'); note.className = 'live-note'; note.setAttribute('role', 'status');
   note.textContent = 'Nieuwe wedstrijden worden bij EA opgehaald, dat duurt ongeveer twee minuten.';
-  $('.page-head, .home-hero, .back-link, .player-hero')?.insertAdjacentElement('afterend', note);
+  $('.page-head, .home-hero, .back-link, .player-hero, .sess-stage')?.insertAdjacentElement('afterend', note);
   for (let i = 0; i < 24; i++) { // hooguit zes minuten volgen
     await wait(15000);
     const run = (await call('GET').catch(() => ({}))).run;
@@ -545,3 +546,43 @@ function deltaOf(a, b, { digits = 1, unit = '', hib = true, min = 0.05, title = 
     btn.addEventListener('click', () => { hint.hidden = !hint.hidden; btn.setAttribute('aria-expanded', String(!hint.hidden)); });
   }
 })();
+
+// ---------- stadion bij avond (Clubhouse-hero en sessiekop) ----------
+// Eigen tekening met vaste kleuren, los van het thema (zoals de spelerskaart): lucht, vier lichtmasten, tribune met
+// publiek in clubkleuren en een gemaaid veld in perspectief. Bijgesneden vanaf de bovenkant, zodat de lichtmasten
+// altijd in beeld zijn. De tekst erop staat op een donkere overloop.
+function stadiumSvg() {
+  const masts = [110, 400, 800, 1090].map(x => `
+    <circle cx="${x}" cy="46" r="130" fill="url(#hh-glow)"/>
+    <path d="M${x} 52 V220" stroke="#2a2335" stroke-width="5"/>
+    <rect x="${x - 26}" y="34" width="52" height="18" rx="3" fill="#fff7d6"/>
+    <path d="M${x - 26} 43 H${x + 26} M${x - 9} 34 V52 M${x + 9} 34 V52" stroke="#d9cc8c" stroke-width="1.5"/>`).join('');
+  const stripes = Array.from({ length: 12 }, (_, i) => {
+    const t0 = i / 12, t1 = (i + 1) / 12, xa = 600 + (t0 - 0.5) * 1000, xb = 600 + (t1 - 0.5) * 1000, xc = 600 + (t1 - 0.5) * 2400, xd = 600 + (t0 - 0.5) * 2400;
+    return `<path d="M${xa} 262 L${xb} 262 L${xc} 420 L${xd} 420 Z" fill="${i % 2 ? '#1d5a2b' : '#226833'}"/>`;
+  }).join('');
+  return `<svg class="hh-stadium" viewBox="0 0 1200 420" preserveAspectRatio="xMidYMin slice" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="hh-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#07050d"/><stop offset="1" stop-color="#241233"/></linearGradient>
+      <radialGradient id="hh-glow"><stop offset="0" stop-color="#fff3c4" stop-opacity="0.55"/><stop offset="0.35" stop-color="#ffd76a" stop-opacity="0.16"/><stop offset="1" stop-color="#ffd76a" stop-opacity="0"/></radialGradient>
+      <pattern id="hh-crowd" width="18" height="11" patternUnits="userSpaceOnUse">
+        <circle cx="3" cy="4" r="2.2" fill="#ffd200" fill-opacity="0.32"/><circle cx="9" cy="7" r="2.2" fill="#b07ac0" fill-opacity="0.30"/><circle cx="15" cy="3.5" r="2.2" fill="#f2f2f2" fill-opacity="0.18"/>
+      </pattern>
+      <linearGradient id="hh-pitch-fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0.45"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient>
+    </defs>
+    <rect width="1200" height="420" fill="url(#hh-sky)"/>
+    ${masts}
+    <path d="M-20 120 Q600 92 1220 120 L1220 268 L-20 268 Z" fill="#150f1d"/>
+    <path d="M-20 132 Q600 104 1220 132 L1220 266 L-20 266 Z" fill="url(#hh-crowd)"/>
+    <path d="M-20 112 Q600 82 1220 112 L1220 128 Q600 98 -20 128 Z" fill="#2b2236"/>
+    <path d="M-20 196 Q600 178 1220 196" stroke="#2b2236" stroke-width="5" fill="none"/>
+    <rect x="-20" y="250" width="1240" height="14" fill="#582063"/>
+    <path d="M-20 252 H1220" stroke="#ffd200" stroke-opacity="0.6" stroke-width="2"/>
+    ${stripes}
+    <rect x="0" y="262" width="1200" height="158" fill="url(#hh-pitch-fade)"/>
+    <g stroke="#ffffff" stroke-opacity="0.3" stroke-width="2.5" fill="none">
+      <path d="M100 272 H1100"/><path d="M600 272 V420"/><ellipse cx="600" cy="352" rx="150" ry="44"/>
+    </g>
+  </svg>`;
+}
+

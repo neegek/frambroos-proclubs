@@ -91,16 +91,14 @@ function render() {
   const own = DATA.snapshot?.skillRating;
   const names = [...new Set(ms.flatMap(m => m.players.map(p => p.name)))];
   $('#s-title').textContent = cap(longDate(ms[0].ts));
-  $('#s-meta').textContent = `${typeLabel(ms)} · ${names.length} spelers`;
+  if (!$('#s-hero .hh-stadium')) $('#s-hero').insertAdjacentHTML('afterbegin', stadiumSvg());
+  $('#s-meta').textContent = `${typeLabel(ms)} · ${plural(ms.length, 'wedstrijd', 'wedstrijden')} · ${names.length} spelers`;
 
   const opp = avg(ms.map(m => m.opponent.skillRating).filter(Boolean));
-  const no = summarize(others), TN = 'Deze avond tegenover normaal (alle andere wedstrijden)';
-  // Scorebord (coach-logica §9a, Sessiekop): de uitslag. W-G-V groot met het doelsaldo en de nul, de wedstrijden als
-  // scrollbare kaartjes, de top drie als minikaartjes. Hoe we speelden staat in de radar eronder. Kleurt mee met de avond.
-  $('#s-hero').classList.toggle('good', sm.ppg >= 2); $('#s-hero').classList.toggle('bad', sm.ppg < 1);
-  const cs = ms.filter(m => m.goalsAgainst === 0).length, res = others.length >= 3 ? deltaOf(sm.resid, no.resid, { digits: 1, title: `${TN}: doelsaldo tov verwachting` }) : null;
-  $('#s-record').innerHTML = `<span class="sh-rec"><b class="W">${sm.W}</b><i>-</i><b class="D">${sm.D}</b><i>-</i><b class="L">${sm.L}</b></span>
-    <span class="sh-facts"><span><b>${signed(sm.gf - sm.ga, 0)}${res ? `<span class="kpi-badge ${res.good === true ? 'up' : res.good === false ? 'down' : ''}" title="${esc(res.title)}">${res.txt}</span>` : ''}</b><small>doelsaldo · ${sm.gf}–${sm.ga}</small></span><span><b>${cs}×</b><small>de nul</small></span></span>`;
+  // Sessiekop (coach-logica §9a): het podium als blikvanger, met de naam van de sessie en de uitslag in drie getallen
+  // (W-G-V, goals, tegengoals). Hoe we speelden staat in de radar eronder.
+  $('#s-record').innerHTML = `<span class="ss-fig"><b class="ss-rec"><span class="W">${sm.W}</span>-<span class="D">${sm.D}</span>-<span class="L">${sm.L}</span></b><small>W-G-V</small></span>
+    <span class="ss-fig"><b>${sm.gf}</b><small>Goals</small></span><span class="ss-fig"><b>${sm.ga}</b><small>Tegengoals</small></span>`;
   $('#s-matches').innerHTML = ms.map(m => matchCard(m, { own })).join('');
 
   // Spelers: rating deze avond tegenover het eigen normaal (alle andere wedstrijden), goals, assists, man of the match.
@@ -114,10 +112,11 @@ function render() {
   $('#s-summary').innerHTML = sum.story; // van de samenvatting alleen de anekdote; de cijfers staan erboven
   $('#s-quote').innerHTML = `„${sum.quote}” <small>— Johan Cruijff</small>`;
   $('#s-share').onclick = () => shareSession(ms, sm, prow, sum.html.replace(/<[^>]+>/g, ''));
-  // Top drie als minikaartjes (foto, plek, rating van de avond, naam); een tik scrollt naar Per wedstrijd.
+  // Top drie op een podium: één in het midden, groter en hoger; twee links, drie rechts. Een tik scrollt naar Per wedstrijd.
   const top = prow.filter(r => r.rH !== null).slice(0, 3);
-  $('#s-podium').innerHTML = top.map((r, i) => `<a class="sh-pick p${i + 1}" href="#per-wedstrijd" title="${esc(proName(r.name))}: rating ${f1(r.rH)} deze avond">
-      ${PlayerCard.tiny(r.name, { session: s.id, rank: i + 1, value: f1(r.rH), key: '-p' })}<span class="sh-pick-name">${esc(proName(r.name))}${r.mom ? ' <span class="crown" title="Man of the match">♛</span>' : ''}</span></a>`).join('');
+  const pick = (r, i) => `<a class="ss-pick p${i + 1}" href="#per-wedstrijd" title="${esc(proName(r.name))}: rating ${f1(r.rH)} deze avond">
+      ${PlayerCard.tiny(r.name, { session: s.id, rank: i + 1, value: f1(r.rH), key: '-p' })}<span class="ss-pick-name">${esc(proName(r.name))}${r.mom ? ' <span class="crown" title="Man of the match">♛</span>' : ''}</span><span class="ss-step" aria-hidden="true"></span></a>`;
+  $('#s-podium').innerHTML = [1, 0, 2].filter(i => top[i]).map(i => pick(top[i], i)).join('');
   for (const a of $('#s-podium').querySelectorAll('a')) a.addEventListener('click', e => { e.preventDefault(); $('#per-wedstrijd').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
   PlayerCard.reveal($('#s-podium'));
   SESSION_ID = s.id;
@@ -147,15 +146,18 @@ function formLine(name, sid, rating, n) {
 }
 
 // ---------- per wedstrijd (coach-logica §9a): kolommen spelers, rijen wedstrijden, cellen de rating ----------
-// Bovenaan per speler een minikaartje met foto, plek en het gemiddelde van de avond (dat bepaalt de plek). Elke cel
+// Bovenaan per speler een minikaartje met foto, het gemiddelde van de avond en of de speler sterker, zwakker of gelijk
+// speelde dan normaal (groei van §9c, grens 0,3); de kolommen staan op volgorde van dat gemiddelde. Elke cel
 // kleurt naar de plek in die rij: goud, zilver, brons, ijzer voor de rest; gelijke ratings delen een plek.
 let SESSION_ID = null; // de geopende sessie, voor de minikaartjes in Per wedstrijd
 const RIM = rank => rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : 'iron';
 const rankIn = (v, list) => 1 + [...new Set(list.filter(x => x > v))].length;
 function renderMatrix(ms, prow) {
-  const cols = prow.filter(r => r.rH !== null), avgs = cols.map(r => r.rH);
-  const head = cols.map(r => { const k = rankIn(r.rH, avgs);
-    return `<th scope="col"><a class="rm-player" href="spelers.html#${encodeURIComponent(r.name)}" title="${esc(proName(r.name))}: plek ${k}, gemiddeld ${f1(r.rH)}">${PlayerCard.tiny(r.name, { session: SESSION_ID, rank: k, value: f1(r.rH), key: '-m' })}<span class="rm-name">${esc(proName(r.name))}</span></a></th>`; }).join('');
+  const cols = prow.filter(r => r.rH !== null);
+  const head = cols.map(r => { const g = PlayerCard.sessionTier(r.name, SESSION_ID).growth;
+    const trend = g === null ? null : g >= 0.3 ? 'up' : g <= -0.3 ? 'down' : 'same';
+    const word = { up: 'sterker dan normaal', down: 'zwakker dan normaal', same: 'gelijk aan normaal' }[trend];
+    return `<th scope="col"><a class="rm-player" href="spelers.html#${encodeURIComponent(r.name)}" title="${esc(proName(r.name))}: gemiddeld ${f1(r.rH)}${word ? `, ${word} (${fmtGrowth(g)})` : ''}">${PlayerCard.tiny(r.name, { session: SESSION_ID, trend, value: f1(r.rH), key: '-m' })}<span class="rm-name">${esc(proName(r.name))}</span></a></th>`; }).join('');
   const rows = ms.map(m => {
     const ps = cols.map(r => m.players.find(p => p.name === r.name)), vals = ps.filter(p => p && p.rating !== null).map(p => p.rating);
     const cell = p => !p || p.rating === null ? '<td class="rm-none">–</td>'

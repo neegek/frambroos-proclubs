@@ -325,6 +325,10 @@ button.stat-row { width: 100%; min-height: 44px; margin: 0; background: none; bo
 button.stat-row:hover > span:first-child { color: var(--ink); }
 .stat-group .stat-row > span:first-child { min-width: 0; overflow-wrap: anywhere; hyphens: auto; }
 button.stat-row:focus-visible { outline: 2px solid var(--brand-text); outline-offset: -2px; border-radius: 6px; }
+.growth .stat-head, .growth .stat-row { grid-template-columns: minmax(0, 1fr) 11ch 11ch; }
+.growth-row small { font-size: 11px; color: var(--muted); }
+.growth-verdict { margin: 4px 0 10px; font-size: 14px; font-weight: 600; }
+.growth-verdict.better { color: var(--good-text); } .growth-verdict.worse { color: var(--neg-text); }
 .rank-dot { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; font-family: var(--num-font); font-size: 12px; font-weight: 650; line-height: 1; }
 .sv { display: grid; justify-items: end; gap: 1px; min-width: 0; }
 .sv b { font-family: var(--num-font); font-weight: 600; font-size: 16px; color: var(--ink); }
@@ -880,18 +884,8 @@ a.ftok:hover .ftok-c { transform: translateY(-2px); }
 .fav-star svg { width: 100%; height: 100%; display: block; }
 
 /* Sessiekop als scorebord (coach-logica §9a): uitslag groot, tijdlijn, vijf cijfers met een balkje tegenover normaal. */
-.sess-hero { padding: 20px 22px; display: grid; gap: 16px; background: linear-gradient(160deg, var(--surface-2), var(--panel) 70%); }
-.sess-hero.good { background: linear-gradient(160deg, color-mix(in srgb, var(--pos) 20%, var(--panel)), var(--panel) 70%); }
-.sess-hero.bad { background: linear-gradient(160deg, color-mix(in srgb, var(--neg) 20%, var(--panel)), var(--panel) 70%); }
-.sh-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-.sh-title { margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
-.sh-type { font-size: 13px; color: var(--ink-2); }
-.sh-rec { font-family: var(--num-font); font-size: 72px; font-weight: 600; letter-spacing: -0.05em; line-height: 0.95; }
-.sh-rec b { font-weight: 600; } .sh-rec b.W { color: var(--pos-text); } .sh-rec b.L { color: var(--neg-text); } .sh-rec b.D { color: var(--ink-2); }
-.sh-rec i { font-style: normal; color: var(--muted); margin: 0 2px; }
 .sh-story { margin: 0; font-size: 14.5px; color: var(--ink); max-width: 90ch; }
 .sh-story .cruijff { display: block; margin-top: 4px; }
-@media (max-width: 700px) { .sh-rec { font-size: 56px; } }
 
 /* Per wedstrijd (coach-logica §9a): kolommen spelers, rijen wedstrijden. Cellen in de kleur van de plek (goud, zilver,
    brons, ijzer), zoals de randen van de sessiekaarten. Eerste kolom blijft staan bij horizontaal scrollen. */
@@ -933,22 +927,46 @@ a.ftok:hover .ftok-c { transform: translateY(-2px); }
 .ft-rank { position: absolute; left: 9%; top: 9%; width: 30%; aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; font: 800 calc(var(--w) * 0.15)/1 var(--num-font); box-shadow: 0 1px 2px rgba(0,0,0,0.35); }
 .ft-val { position: absolute; left: 0; right: 0; bottom: 17%; text-align: center; font: 800 calc(var(--w) * 0.24)/1 var(--num-font); letter-spacing: -0.03em; color: var(--t-ink); }
 
-/* Scorebord: de uitslag (coach-logica §9a). W-G-V met doelsaldo en de nul, rechts de top drie als minikaartjes,
-   daaronder de wedstrijden als scrollbare rij kaartjes. */
-.sh-main { display: flex; justify-content: space-between; align-items: center; gap: 16px 28px; flex-wrap: wrap; }
-.sh-record { display: flex; align-items: flex-end; gap: 18px 28px; flex-wrap: wrap; }
-.sh-facts { display: flex; gap: 24px; padding-bottom: 6px; }
-.sh-facts > span { display: grid; gap: 2px; }
-.sh-facts b { display: inline-flex; align-items: center; gap: 8px; font-family: var(--num-font); font-size: 26px; font-weight: 500; letter-spacing: -0.03em; line-height: 1; }
-.sh-facts .kpi-badge { font-size: 11.5px; letter-spacing: 0; }
-.sh-facts small { font-size: 12px; color: var(--ink-2); }
-.sh-top3 { display: flex; gap: 10px; align-items: flex-end; }
-.sh-pick { display: grid; justify-items: center; gap: 4px; text-decoration: none; color: inherit; }
-.sh-pick .fut-tiny { --w: 70px; }
-.sh-pick.p1 .fut-tiny { --w: 84px; }
-.sh-pick-name { font-size: 12px; font-weight: 600; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.sh-pick:hover .fut-tiny { transform: translateY(-2px); }
+/* Sessiekop (coach-logica §9a): podium als blikvanger op het stadion, vaste kleuren los van het thema. */
+.sess-stage { position: relative; overflow: hidden; border-radius: 20px; background: #07050d; color: #fff; box-shadow: var(--float); isolation: isolate; }
+.sess-stage .hh-stadium { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -2; }
+.sess-stage::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgba(7,5,13,0.88) 0%, rgba(7,5,13,0.5) 50%, rgba(7,5,13,0.15) 100%), linear-gradient(0deg, rgba(7,5,13,0.75) 0%, rgba(7,5,13,0) 55%); }
+.ss-body { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 20px 32px; padding: 40px 36px 0; }
+.ss-id { padding-bottom: 28px; min-width: 0; }
+.ss-kicker { margin: 0; font-size: 12.5px; font-weight: 650; letter-spacing: 0.1em; text-transform: uppercase; color: #ffd200; }
+.ss-title { margin: 4px 0 0; font-size: clamp(30px, 5vw, 52px); font-weight: 800; letter-spacing: -0.035em; line-height: 1; color: #fff; }
+.ss-score { display: flex; gap: 28px; margin-top: 22px; flex-wrap: wrap; }
+.ss-fig { display: grid; gap: 4px; }
+.ss-fig b { font-family: var(--num-font); font-size: 34px; font-weight: 600; letter-spacing: -0.04em; line-height: 1; color: #fff; }
+.ss-fig small { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: #d9d4e0; }
+.ss-rec .W { color: #6aa8f5; } .ss-rec .D { color: #c9c4d1; } .ss-rec .L { color: #f58a8a; }
+.ss-podium { display: flex; align-items: flex-end; gap: 10px; }
+.ss-pick { display: grid; justify-items: center; gap: 6px; text-decoration: none; color: #fff; }
+.ss-pick .fut-tiny { --w: 104px; transition: transform .15s; }
+.ss-pick.p1 .fut-tiny { --w: 140px; }
+.ss-pick:hover .fut-tiny { transform: translateY(-3px); }
+.ss-pick-name { font-size: 13px; font-weight: 650; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
+.ss-pick .crown { color: #ffd200; }
+.ss-step { width: 100%; min-width: 112px; height: 14px; border-radius: 8px 8px 0 0; background: linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0.06)); }
+.ss-pick.p1 .ss-step { height: 34px; min-width: 148px; background: linear-gradient(180deg, rgba(255,210,0,0.45), rgba(255,210,0,0.1)); }
+.ss-pick.p2 .ss-step { height: 22px; }
+.ss-share { position: absolute; top: 16px; right: 16px; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.28); background: rgba(7,5,13,0.45); color: #fff; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; backdrop-filter: blur(4px); }
+.ss-share svg { width: 16px; height: 16px; }
+.ss-share:hover { background: rgba(255,255,255,0.12); }
+.sess-story { display: grid; gap: 14px; }
+@media (max-width: 760px) {
+  .ss-body { grid-template-columns: 1fr; justify-items: center; text-align: center; padding: 56px 16px 0; gap: 18px; }
+  .ss-id { display: contents; }
+  .ss-kicker { order: 1; } .ss-title { order: 2; margin: 0; } .ss-podium { order: 3; } .ss-score { order: 4; justify-content: center; margin: 0 0 22px; gap: 22px; }
+  .sess-stage::before { background: linear-gradient(0deg, rgba(7,5,13,0.92) 0%, rgba(7,5,13,0.55) 60%, rgba(7,5,13,0.3) 100%); }
+  .ss-pick .fut-tiny { --w: 76px; } .ss-pick.p1 .fut-tiny { --w: 98px; }
+  .ss-step { min-width: 84px; } .ss-pick.p1 .ss-step { min-width: 104px; }
+  .ss-fig b { font-size: 28px; }
+  .ss-share span { display: none; } .ss-share { padding: 0; width: 40px; justify-content: center; }
+}
+/* Teken op het minikaartje bij Per wedstrijd: sterker, zwakker of gelijk dan normaal. */
+.ft-trend { width: 34%; font-size: calc(var(--w) * 0.17); color: #fff; }
+.ft-trend.up { background: #2f8a4a; } .ft-trend.down { background: #c0443f; } .ft-trend.same { background: #6b6f76; }
 .sh-matches { grid-auto-flow: column; grid-template-columns: none; grid-auto-columns: minmax(210px, 230px); overflow-x: auto; scroll-snap-type: x proximity; padding-bottom: 4px; scrollbar-width: thin; }
 .sh-matches .mcard { scroll-snap-align: start; }
 .rm-player .fut-tiny { --w: 62px; }
-@media (max-width: 600px) { .sh-main { flex-direction: column; align-items: stretch; } .sh-top3 { justify-content: center; } .sh-facts b { font-size: 22px; } }

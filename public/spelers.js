@@ -21,27 +21,28 @@ function statGroups(rows, club, name, everyone) {
   const gk = rows.some(r => r.p.pos === 'goalkeeper');
   // Een maat: van een set rijen het totaal, en per wedstrijd (aantal) of de verhouding (ratio). key: het getal zoals
   // het er staat (één decimaal, percentage afgerond), waarop spelers een plek delen.
-  const count = (label, f, { ev = false, lower = false, cmp = true } = {}) => ({ label, lower, cmp, of: list => {
+  // career: het veld met het carrièretotaal bij EA (DATA.members), dat bij een gelijk getal per wedstrijd beslist.
+  const count = (label, f, { ev = false, lower = false, cmp = true, career = null } = {}) => ({ label, lower, cmp, career, of: list => {
     const src = ev ? evRows(list) : list, total = sum(src, r => f(ev ? r.p.ev : r.p, r)), v = src.length ? total / src.length : 0;
-    return src.length ? { main: String(total), sub: f1(v), v, key: Math.round(10 * v), n: src.length, ok: src.length >= MIN_N,
+    return src.length ? { main: String(total), sub: f1(v), v, key: Math.round(10 * v), n: src.length, ok: src.length >= MIN_N, total,
       big: f1(v), small: `${total} in ${plural(src.length, 'wedstrijd', 'wedstrijden')}` } : null; } });
-  const ratio = (label, num, den, { ev = false, lower = false } = {}) => ({ label, lower, cmp: true, pctPts: true, of: list => {
+  const ratio = (label, num, den, { ev = false, lower = false, career = null } = {}) => ({ label, lower, cmp: true, pctPts: true, career, of: list => {
     const src = ev ? evRows(list) : list, a = sum(src, r => num(ev ? r.p.ev : r.p)), b = sum(src, r => den(ev ? r.p.ev : r.p));
-    return b ? { main: fmtPct(pct(a, b)), sub: `${a} van ${b}`, v: 100 * a / b, key: pct(a, b), n: src.length, ok: src.length >= MIN_N && b >= MIN_DEN,
+    return b ? { main: fmtPct(pct(a, b)), sub: `${a} van ${b}`, v: 100 * a / b, key: pct(a, b), n: src.length, ok: src.length >= MIN_N && b >= MIN_DEN, total: a,
       big: fmtPct(pct(a, b)), small: `${a} van ${b}`, pctPts: true } : null; } });
   const groups = [
     ['Aanvallen', [
-      count('Goals', p => p.goals), count('Assists', p => p.assists), count('Tweede assists', v => v.second_assists, { ev: true }),
+      count('Goals', p => p.goals, { career: 'goals' }), count('Assists', p => p.assists, { career: 'assists' }), count('Tweede assists', v => v.second_assists, { ev: true }),
       count('Schoten', p => p.shots), ratio('Conversie', p => p.goals, p => p.shots),
       count('Dribbels', v => v.dribbles_completed, { ev: true }), count('Tegenstanders uitgespeeld', v => v.players_beaten, { ev: true }),
     ]],
     ['Passen', [
-      ratio('Passes gelukt', p => p.passesMade, p => p.passAttempts), count('Passes', p => p.passesMade),
+      ratio('Passes gelukt', p => p.passesMade, p => p.passAttempts, { career: 'passesMade' }), count('Passes', p => p.passesMade, { career: 'passesMade' }),
       count('Steekpasses', v => v.through_balls, { ev: true }), ratio('Vooruit gespeeld', v => v.passes_completed_forward, v => v.passes_completed, { ev: true }),
     ]],
     ['Verdedigen', [
       count('Balwinst', v => v.possession_won, { ev: true }), count('Onderscheppingen', v => v.interceptions, { ev: true }),
-      ratio('Tackles gewonnen', p => p.tacklesMade, p => p.tackleAttempts), count('De nul gehouden', (p, r) => r.m.goalsAgainst === 0 ? 1 : 0),
+      ratio('Tackles gewonnen', p => p.tacklesMade, p => p.tackleAttempts, { career: 'tacklesMade' }), count('De nul gehouden', (p, r) => r.m.goalsAgainst === 0 ? 1 : 0),
       gk ? count('Reddingen', p => p.saves, { cmp: false }) : null,
     ]],
     ['Discipline', [
@@ -56,13 +57,16 @@ function statGroups(rows, club, name, everyone) {
     const d = me.v - us.v, same = me.pctPts ? Math.abs(d) <= 2 : Math.abs(d) <= 0.05 * Math.max(Math.abs(us.v), 0.01);
     return same ? 'same' : (d > 0) !== it.lower ? 'better' : 'worse'; };
   const cell = (x, cls = '') => x ? `<span class="sv ${cls}"><b>${x.main}</b><small>${x.sub}</small></span>` : '<span class="sv"><b>–</b></span>';
-  // De ranglijst van een maat: wie meedoet, gesorteerd op het exacte getal; een plek gedeeld bij hetzelfde getal zoals
-  // het er staat (1, 1, 2).
+  // De ranglijst van een maat: wie meedoet, op het exacte getal per wedstrijd. Bij hetzelfde getal zoals het er staat
+  // (één decimaal, percentage afgerond) beslist het totaal: bij EA als EA het heeft, anders het gevolgde (lager-is-beter:
+  // het kleinere). Alleen bij precies hetzelfde getal en totaal een gedeelde plek.
   const ranking = it => {
-    const list = everyone.map(e => ({ name: e.name, x: it.of(e.rows) })).filter(e => e.x && e.x.ok)
-      .sort((a, b) => it.lower ? a.x.v - b.x.v : b.x.v - a.x.v);
-    const keys = [...new Set(list.map(e => e.x.key))];
-    return list.map(e => ({ ...e, rank: 1 + keys.indexOf(e.x.key) }));
+    const sign = it.lower ? -1 : 1;
+    const list = everyone.map(e => { const x = it.of(e.rows), ea = it.career ? DATA.members.find(m => m.name === e.name)?.[it.career] ?? null : null;
+      return { name: e.name, x, ea, tb: ea ?? x?.total ?? 0 }; }).filter(e => e.x && e.x.ok)
+      .sort((a, b) => sign * (b.x.key - a.x.key) || sign * (b.tb - a.tb) || sign * (b.x.v - a.x.v));
+    let rank = 0, prev = null;
+    return list.map((e, i) => { if (!prev || e.x.key !== prev.x.key || e.tb !== prev.tb) rank = i + 1; prev = e; return { ...e, rank }; });
   };
   statItems = [];
   return groups.map(([title, items]) => `<section class="card stat-group"><h2>${title}</h2>
@@ -81,10 +85,33 @@ function openStat(i) {
   const { it, list, us } = statItems[i], d = $('#rank-dialog');
   const what = list[0]?.x.pctPts ? 'Het percentage' : 'Het gemiddelde per wedstrijd';
   d.querySelector('.rd-body').innerHTML = `<h2 id="rd-title">${it.label}</h2>
-    <p>${what}${it.lower ? ', lager is beter' : ''}. Mee doet wie minstens ${MIN_N} wedstrijden heeft${list[0]?.x.pctPts ? ` en ${MIN_DEN} pogingen` : ''}.</p>
-    <ol class="rd-list">${list.map(e => `<li class="${e.name === selected ? 'me' : ''}"><span class="rank-dot metal-${RIM(e.rank)}">${e.rank}</span><span>${esc(proName(e.name))}</span><b>${e.x.big}</b><small>${esc(e.x.small)}</small></li>`).join('') || '<li class="empty">Nog te weinig wedstrijden.</li>'}
+    <p>${what}${it.lower ? ', lager is beter' : ''}; bij een gelijk getal beslist het totaal${it.career ? ' bij EA' : ''}. Mee doet wie minstens ${MIN_N} wedstrijden heeft${list[0]?.x.pctPts ? ` en ${MIN_DEN} pogingen` : ''}.</p>
+    <ol class="rd-list">${list.map(e => `<li class="${e.name === selected ? 'me' : ''}"><span class="rank-dot metal-${RIM(e.rank)}">${e.rank}</span><span>${esc(proName(e.name))}</span><b>${e.x.big}</b><small>${esc(e.x.small)}${e.ea !== null ? ` · ${e.ea} bij EA` : ''}</small></li>`).join('') || '<li class="empty">Nog te weinig wedstrijden.</li>'}
     ${us ? `<li class="rd-club"><span></span><span>Club</span><b>${us.big}</b><small>${us.pctPts ? esc(us.small) : 'per speler per wedstrijd'}</small></li>` : ''}</ol>`;
   d.showModal();
+}
+
+// Groei (coach-logica §9a, 4): eerder (carrière bij EA min de gevolgde wedstrijden) tegenover nu (de gevolgde). Een
+// verschil is beduidend boven twee keer de onzekerheid; bij de rating plus de afronding van EA.
+const MIN_EARLIER = 10;
+function growthCard(name, rows) {
+  const c = DATA.members.find(m => m.name === name), n2 = rows.length, n1 = c ? c.gamesPlayed - n2 : 0;
+  const since = new Date(DATA.matches[0].ts * 1000).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' }).replace('.', '');
+  if (!c || n1 < MIN_EARLIER) return `<p class="empty">Te weinig wedstrijden van vóór ${since} om te vergelijken${c ? ` (${n1})` : ''}.</p>`;
+  const rated = rows.filter(r => r.p.rating !== null).map(r => r.p.rating), r2 = avg(rated);
+  const sd = Math.sqrt(rated.reduce((a, x) => a + (x - r2) ** 2, 0) / Math.max(1, rated.length - 1));
+  const r1 = (c.ratingAve * c.gamesPlayed - r2 * n2) / n1;
+  const items = [{ label: 'Rating', a: r1, b: r2, lim: 2 * sd * Math.sqrt(1 / n1 + 1 / n2) + 0.05 * c.gamesPlayed / n1 }];
+  for (const [label, key, f] of [['Goals', 'goals', p => p.goals], ['Assists', 'assists', p => p.assists], ['Man of the match', 'mom', p => p.mom]]) {
+    const now = sum(rows, r => f(r.p)), a = Math.max(0, c[key] - now) / n1, b = now / n2;
+    items.push({ label, a, b, lim: 2 * Math.sqrt(a / n1 + b / n2) });
+  }
+  const tone = it => it.b - it.a > it.lim ? 'better' : it.a - it.b > it.lim ? 'worse' : '';
+  const rt = tone(items[0]), d = Math.round(10 * (items[0].b - items[0].a)) / 10 || 0;
+  const verdict = rt === 'better' ? `Beduidend beter dan eerder: rating ${signed(d, 1)}.` : rt === 'worse' ? `Beduidend minder dan eerder: rating ${signed(d, 1)}.` : `Geen duidelijk verschil met eerder in rating (${signed(d, 1)}).`;
+  return `<p class="growth-verdict ${rt}">${verdict}</p>
+    <div class="stat-head growth-head" aria-hidden="true"><span></span><span title="Vóór ${since}">Eerder · ${n1}</span><span title="Sinds ${since}">Nu · ${n2}</span></div>
+    ${items.map(it => `<div class="stat-row growth-row"><span>${it.label}</span><span class="sv"><b>${f1(it.a)}</b></span><span class="sv ${tone(it)}"><b>${f1(it.b)}</b></span></div>`).join('')}`;
 }
 
 function renderPlayer() {
@@ -106,6 +133,7 @@ function renderPlayer() {
   const everyone = players.map(n => ({ name: n, rows: rowsFor(ms, n) })), club = everyone.flatMap(e => e.rows);
   $('#p-stats').innerHTML = rows.length ? statGroups(rows, club, selected, everyone) : '<p class="empty">Nog geen wedstrijden.</p>';
   for (const b of $('#p-stats').querySelectorAll('button.stat-row')) b.addEventListener('click', () => openStat(+b.dataset.i));
+  $('#p-growth').innerHTML = growthCard(selected, rows);
 
   table($('#tbl-player-matches'), [
     { label: 'Datum', render: r => fmtDateTime(r.m.ts) }, { label: 'Tegenstander', render: r => `<a href="wedstrijd.html?id=${r.m.matchId}">${esc(r.m.opponent.name)}</a>` },

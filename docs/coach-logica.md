@@ -83,6 +83,16 @@ aanvallende archetypes.
   op −0,4 en alleen b schatten; bij te weinig data a = 0, b = −0,6, c = −0,4. Het residu (werkelijk − verwacht) is
   "tov verwachting".
 - **Sessie**: wedstrijden met minder dan 3 uur ertussen.
+- **Aantal mensen** (onderzocht op 1 november 2026, 67 wedstrijden): de **rating** hangt nauwelijks af van met hoeveel
+  mensen we spelen (gemiddeld 7,2 met drie, 7,3 met vier, 7,1 met vijf, 7,3 met zes); de **uitslag** zegt veel meer
+  (winst 7,5, gelijk 7,3, verlies 6,8). **Aantallen per speler** stijgen wél met minder mensen: met drie mensen
+  17,4 passes per speler per wedstrijd, met zes 10,1 (meer ballen per mens, minder AI ertussen). Een getal per
+  wedstrijd (passes, dribbels, balwinst) bevoordeelt dus wie vaak in een klein team speelt; percentages en de rating
+  niet. Nog niet gecorrigeerd. Mogelijke correctie later: het aandeel van de speler in wat de mensen samen deden.
+- **Eerder en nu** (§9a, *Groei*): EA geeft per lid de carrièretotalen (wedstrijden, goals, assists, man of the match,
+  gemiddelde rating). Carrière min de gevolgde wedstrijden = alles **vóór** de eerste gevolgde wedstrijd. Gecontroleerd op
+  1 november 2026: tussen twee ledensnapshots groeit de carrière precies zo hard als de gevolgde wedstrijden (op één
+  wedstrijd na), dus die aftrek klopt.
 
 ## 4. Maten voor het advies
 
@@ -401,7 +411,19 @@ Geen reeksen: die staan al in de rondjes bovenaan.
    zegt één schot of tackle te veel. Wie daar niet aan voldoet, krijgt geen rondje. Reddingen hebben geen plek (alleen
    keepers). **Een tik op een regel** opent de ranglijst van die maat: alle spelers die meedoen, met plek, getal per
    wedstrijd (of percentage) en klein het totaal (of de breuk), de gekozen speler gemarkeerd, en onderaan de club.
-3. De laatste acht wedstrijden, de rest achter een knop.
+   **Gelijk getal per wedstrijd: het totaal beslist** (sinds 1 november 2026). Waar EA een carrièretotaal heeft (goals,
+   assists, passes, gewonnen tackles) telt dat totaal, anders het totaal van de gevolgde wedstrijden; bij
+   lager-is-beter wint het kleinere totaal. Alleen bij precies hetzelfde getal én totaal delen spelers de plek. In de
+   ranglijst staat het carrièretotaal klein achter het gevolgde totaal (*120 bij EA*).
+4. **Groei** (sinds 1 november 2026): eerder tegenover nu. *Eerder* is de carrière volgens EA min de gevolgde
+   wedstrijden (§3, *Eerder en nu*), *nu* zijn de gevolgde wedstrijden. Per regel beide (kop: *Eerder* en *Nu* met het aantal
+   wedstrijden): rating, goals, assists en man of the match per wedstrijd, zonder die woorden. Een verschil is **beduidend** als het groter is dan twee keer de onzekerheid: bij de
+   rating de spreiding van de eigen ratings × √(1/n₁ + 1/n₂), plus de afronding van EA (0,05 × carrière / eerder); bij
+   aantallen √(eerder/n₁ + nu/n₂) per wedstrijd (telling). Beduidend beter groen, slechter rood, de rest gewoon.
+   Bovenaan één zin met het oordeel op de rating (*beduidend beter dan eerder*, *beduidend minder*, *geen duidelijk
+   verschil*). Minder dan 10 eerdere wedstrijden: geen vergelijking, alleen dat er te weinig is. Let op: eerder kan
+   in een lagere divisie en met andere medespelers zijn; het oordeel zegt *anders dan eerder*, niet waarom.
+5. De laatste acht wedstrijden, de rest achter een knop.
 Het advies (§8), *Aan de bal in context* (§4a), de vormgrafiek per sessie en het buildformulier staan voorlopig niet
 op de pagina; de code blijft, zodat ze terug kunnen als het eerste scherm klaar is.
 
@@ -422,26 +444,33 @@ rating onder wie minstens de helft van de wedstrijden speelde, met een kleine fo
 rondje met de rand- en achtergrondkleur van de huidige vorm van die speler (goud, zwart-goud of blauw, §9c) en
 altijd de portretfoto (geen vormfoto: in een klein rondje is een gezicht herkenbaarder), goals en
 assists. Geen duur van de avond: die zegt niets. Het kopvlak kleurt zacht mee met de avond: blauw bij ≥ 2 punten per wedstrijd, rood bij < 1. Een tik opent de
-sessie op een eigen pagina, `sessie.html?id=<id>` (een laag dieper), met "Terug naar sessies".
+sessie op een eigen pagina, `sessie.html?id=<id>` (een laag dieper), zonder terugknop: *Sessies* in het menu is daar
+niet actief, zodat een tik erop terug naar de lijst gaat (sinds 1 november 2026).
 
 **Wedstrijden** is één lijst van alle wedstrijden, nieuwste eerst, niet per avond verdeeld. Per wedstrijd: datum en
 tijd, uitslag, tegenstander, score en de beste speler van de wedstrijd (hoogste EA-rating, met een kroon als die ook man of
 the match was). Eerst de laatste twintig, de rest achter een knop.
 
-**Sessiekop** (sinds 31 oktober 2026): het scorebord vertelt de **uitslag**, de radar eronder **hoe we speelden**;
-geen cijfers dubbel. Het scorebord kleurt mee met de avond (blauw bij ≥ 2 punten per wedstrijd, rood bij < 1):
-bovenaan datum, type en aantal spelers; groot de uitslag als W-G-V in de uitslagkleuren met ernaast het doelsaldo
-(voor–tegen) en hoe vaak de nul; daaronder de **wedstrijden als scrollbare rij kaartjes** (een tik opent de wedstrijd);
-de **top drie als minikaartjes** (foto, plek, rating en naam in de kaartvorm), een tik scrollt naar *Per wedstrijd*;
-en één zin anekdote met de Cruijff-quote. De **top drie van de avond** staat op rating over deze avond.
-Bij nul punten heet het "hield het best stand", maar de kaarten blijven hetzelfde. Man of the match staat als kroon
-bij de speler. Daarna *Per wedstrijd* (hieronder); *Spelers deze sessie* is weg (dubbel). De deelkaart (afbeelding van
-1080×1080 in thuiskleuren) toont W-G-V, winstpercentage, doelsaldo, uitblinker, meeste goals
-plus assists en de eerste twee zinnen van de samenvatting.
+**Sessiekop** (sinds 1 november 2026; daarvoor een scorebord zonder duidelijk middelpunt): één **podium** als
+blikvanger. Een donker vlak met het stadion van het Clubhouse (vaste kleuren, los van het thema), linksboven klein
+type en aantal spelers, daaronder groot de **naam van de sessie** (de datum), en de **top drie** als kaartjes op een
+podium: de nummer één in het midden, groter en hoger, twee links, drie rechts, met naam en kroon bij man of the match.
+Onder de naam de uitslag in drie getallen: **W-G-V** in de uitslagkleuren, **Goals** en **Tegengoals**. Geen doelsaldo,
+geen *de nul*: dat lees je zelf uit voor en tegen. De deelknop rechtsboven. Op telefoon alles onder elkaar,
+gecentreerd: naam, podium, uitslag. Een tik op een kaartje scrollt naar *Per wedstrijd*. Daaronder een kaart met de
+**anekdote** en de Cruijff-quote en de **wedstrijden als scrollbare rij kaartjes** (een tik opent de wedstrijd).
+De radar eronder vertelt **hoe we speelden**; geen cijfers dubbel. De top drie staat op rating over deze avond; bij
+nul punten heet het "hield het best stand", maar de kaarten blijven hetzelfde. De deelkaart (afbeelding van
+1080×1080 in thuiskleuren) toont W-G-V, winstpercentage, doelsaldo, uitblinker, meeste goals plus assists en de
+eerste twee zinnen van de samenvatting.
 
 **Per wedstrijd** (sinds 31 oktober 2026, vervangt *Spelers deze sessie*): een raster met per speler een kolom en
-per wedstrijd een rij (uitslag, shirt, score). Bovenaan per speler een **minikaartje**: foto, de plek als medaille,
-het gemiddelde van de avond (dat bepaalt de plek) en de naam, in de kaartvorm met de rand in de kleur van de plek.
+per wedstrijd een rij (uitslag, shirt, score). Bovenaan per speler een **minikaartje**: foto, het gemiddelde van de
+avond en de naam, en linksboven in plaats van een plek of de speler **sterker, zwakker of gelijk** speelde dan normaal
+(sinds 1 november 2026): de groei van §9c (rating min eigen normaal plus ¼ × punten min normaal) ≥ 0,3 is sterker
+(groen pijltje omhoog), ≤ −0,3 zwakker (rood omlaag), daartussen gelijk (grijs streepje). Zelfde grens als *in vorm*
+via groei. Zonder normaal (minder dan 3 andere wedstrijden) of minder dan 3 potten deze avond: geen teken. De rand
+blijft goud; de kolommen staan wel op volgorde van het gemiddelde.
 Elke cel kleurt naar de plek in die rij: goud, zilver en brons voor de beste drie, ijzer voor de rest (gelijke ratings
 delen een plek). Man of the match met een kroon. Geen oplichten bij aanraken: aanklikken van een rij of kolom voor
 meer details is een latere stap. Op telefoon horizontaal scrollen met de wedstrijden vast links.
