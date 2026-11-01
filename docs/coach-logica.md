@@ -287,7 +287,10 @@ Daarnaast *Positiespel en keuzes* en *Al sterk*.
 - **Sessie**: drie delen, elk één of twee zinnen. (1) Het karakter van de avond en de tegenstand, in gewone taal.
   (2) **De anekdote**: het ene moment of de ene speler die de avond kenmerkte, als een verhaaltje en niet als cijfer
   ("Konijnenlover22 schoot er in één pot drie in", "na twee verloren potten draaide het team de avond om").
-  (3) **Een Cruijff-quote** die bij de anekdote past, als los regeltje onder de samenvatting, met naam erbij.
+  (3) **Een quote van de beste speler van de avond** (sinds 1 november 2026; daarvoor een echte Cruijff-quote): een
+  cruijffiaanse uitspraak bij het thema van de anekdote, maar in de stem van die speler, met de pro-naam erbij.
+  Achtergrond en stem per speler staan in `public/personas.js` (de bron; nieuwe eigenschappen daar toevoegen). Per
+  speler één uitspraak per thema; spelers zonder achtergrond krijgen een neutrale cruijffiaanse zin.
   Wie de beste was staat niet in de tekst: dat laat de top drie als kaarten zien (§9a).
   Anekdotes, in volgorde van kracht (de sterkste wint; bij gelijke kracht de meest recente):
   hattrick of meer in één pot; iemand scoorde in elke wedstrijd; iemand was elke wedstrijd man of the match;
@@ -296,7 +299,7 @@ Daarnaast *Positiespel en keuzes* en *Al sterk*.
   veel meer schoten dan de tegenstander (minstens dubbel, en minstens acht); een monsterscore (vier of meer verschil);
   iemand speelde ver boven of ver onder het eigen normaal (minstens 1,0 rating, bij minstens drie andere wedstrijden).
   Is er niets van dit alles, dan zegt de anekdote wie het meest bij de goals betrokken was.
-  Cruijff-quotes per anekdote (korte, bekende uitspraken, altijd met "Johan Cruijff" erbij):
+  Thema's per anekdote (in `personas.js` met de Cruijff-uitspraak waar het thema op leunt):
   hattrick en scoren in elke pot: "Je moet schieten, anders kun je niet scoren." · elke pot man of the match:
   "Je gaat het pas zien als je het doorhebt." · comeback: "Elk nadeel heb z'n voordeel." · inzakker:
   "Als je niet kunt winnen, moet je zorgen dat je niet verliest." · alles gewonnen: "Voetbal is simpel, maar het
@@ -453,24 +456,26 @@ the match was). Eerst de laatste twintig, de rest achter een knop.
 
 **Sessiekop** (sinds 1 november 2026; daarvoor een scorebord zonder duidelijk middelpunt): één **podium** als
 blikvanger. Een donker vlak met het stadion van het Clubhouse (vaste kleuren, los van het thema), linksboven klein
-type en aantal spelers, daaronder groot de **naam van de sessie** (de datum), en de **top drie** als kaartjes op een
-podium: de nummer één in het midden, groter en hoger, twee links, drie rechts, met naam en kroon bij man of the match.
-Onder de naam de uitslag in drie getallen: **W-G-V** in de uitslagkleuren, **Goals** en **Tegengoals**. Geen doelsaldo,
-geen *de nul*: dat lees je zelf uit voor en tegen. De deelknop rechtsboven. Op telefoon alles onder elkaar,
-gecentreerd: naam, podium, uitslag. Een tik op een kaartje scrollt naar *Per wedstrijd*. Daaronder een kaart met de
-**anekdote** en de Cruijff-quote en de **wedstrijden als scrollbare rij kaartjes** (een tik opent de wedstrijd).
-De radar eronder vertelt **hoe we speelden**; geen cijfers dubbel. De top drie staat op rating over deze avond; bij
-nul punten heet het "hield het best stand", maar de kaarten blijven hetzelfde. De deelkaart (afbeelding van
-1080×1080 in thuiskleuren) toont W-G-V, winstpercentage, doelsaldo, uitblinker, meeste goals plus assists en de
-eerste twee zinnen van de samenvatting.
+type, aantal wedstrijden en aantal spelers, daaronder groot de **naam van de sessie** (de datum) en direct eronder de
+**quote van de beste speler** (§9, Sessie). Dan de uitslag in drie getallen: **W-G-V** in de uitslagkleuren,
+**Goals** en **Tegengoals** (geen doelsaldo, geen *de nul*), met rechts ernaast de **deelknop** (daar valt hij op).
+Rechts de **top drie** als kaartjes op een podium: de nummer één in het midden, groter en hoger, twee links, drie
+rechts, met naam en kroon bij man of the match; een tik scrollt naar *Per wedstrijd*. Onder de uitslag, over de hele
+breedte, de **anekdote** als één regel en de **wedstrijden als scrollbare rij kaartjes** (een tik opent de wedstrijd).
+Op telefoon alles onder elkaar, gecentreerd: naam, quote, podium, uitslag met deelknop, anekdote, wedstrijden.
+De radar eronder vertelt **hoe we speelden**; geen cijfers dubbel. De top drie staat op rating over deze avond.
+**Deelkaart** (afbeelding van 1080×1080): dezelfde kop als op de pagina: stadion, type, naam van de sessie, de quote,
+de top drie als kaartjes op het podium (foto, plek, rating, naam) en W-G-V, Goals en Tegengoals.
 
 **Per wedstrijd** (sinds 31 oktober 2026, vervangt *Spelers deze sessie*): een raster met per speler een kolom en
 per wedstrijd een rij (uitslag, shirt, score). Bovenaan per speler een **minikaartje**: foto, het gemiddelde van de
 avond en de naam, en linksboven in plaats van een plek of de speler **sterker, zwakker of gelijk** speelde dan normaal
-(sinds 1 november 2026): de groei van §9c (rating min eigen normaal plus ¼ × punten min normaal) ≥ 0,3 is sterker
-(groen pijltje omhoog), ≤ −0,3 zwakker (rood omlaag), daartussen gelijk (grijs streepje). Zelfde grens als *in vorm*
-via groei. Zonder normaal (minder dan 3 andere wedstrijden) of minder dan 3 potten deze avond: geen teken. De rand
-blijft goud; de kolommen staan wel op volgorde van het gemiddelde.
+(sinds 1 november 2026). **Normaal** is de gemiddelde rating van die speler in alle andere gevolgde wedstrijden;
+dat getal staat klein onder de naam (*normaal 7.3*), zodat het teken uit zichzelf te lezen is. Rating van de avond
+minstens 0,3 boven normaal is sterker (groen pijltje omhoog), minstens 0,3 eronder zwakker (rood omlaag), daartussen
+gelijk (grijs streepje). Alleen de rating, geen punten erbij: dan klopt het met de twee getallen op het scherm.
+Zonder normaal (minder dan 3 andere wedstrijden): geen teken. De rand blijft goud; de kolommen staan op volgorde van
+het gemiddelde.
 Elke cel kleurt naar de plek in die rij: goud, zilver en brons voor de beste drie, ijzer voor de rest (gelijke ratings
 delen een plek). Man of the match met een kroon. Geen oplichten bij aanraken: aanklikken van een rij of kolom voor
 meer details is een latere stap. Op telefoon horizontaal scrollen met de wedstrijden vast links.

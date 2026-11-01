@@ -191,5 +191,5 @@ function reveal(root) {
 const TIER_RANK = { top: 2, zwart: 1, goud: 0 };
 // tierOf(rows): de tier op een eerder moment (rows = [{ m, p }] tot dan, zoals in cardOf). photo(name): de foto die bij de huidige vorm hoort, of null.
 // portrait(name): altijd de gewone portretfoto, voor rondjes (een gezicht is daar herkenbaarder dan een actiefoto).
-window.PlayerCard = { load: () => fetch(API.photos).then(r => r.json()).then(p => { PHOTOS = p || {}; }), render, reveal, html: (name, opts) => cardOf(name, opts).html, tiny: tinyOf, tier: name => cardOf(name).tier, sessionTier: (name, id) => cardOf(name, { session: id }).tier, tierOf, photo: name => photoOf(name, cardOf(name).tier.tier), portrait: name => PHOTOS[slugOf(name)] || null, TIER_RANK };
+window.PlayerCard = { shape: FUT_SHAPE, load: () => fetch(API.photos).then(r => r.json()).then(p => { PHOTOS = p || {}; }), render, reveal, html: (name, opts) => cardOf(name, opts).html, tiny: tinyOf, tier: name => cardOf(name).tier, sessionTier: (name, id) => cardOf(name, { session: id }).tier, tierOf, photo: name => photoOf(name, cardOf(name).tier.tier), portrait: name => PHOTOS[slugOf(name)] || null, TIER_RANK };
 })();

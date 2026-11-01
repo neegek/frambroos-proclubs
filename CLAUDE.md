@@ -18,6 +18,8 @@ claude.ai-connectors in deze map uit. Alle stijl, logica en teksten komen uit di
 - `docs/archetypes.md`: wat we over FC27-archetypes weten (AP-kosten, masteries, signature PlayStyles, EA-patch),
   met bron en datum per gegeven. Bij een nieuwe EA-update eerst daar bijwerken, dan `public/archetypes.js`.
 - `docs/event-codes.md`: betekenis van de EA-eventcodes. `docs/trigger.md`: hoe en wanneer de verzamelaar draait.
+- `public/personas.js`: wie de pro's zijn (achtergrond, stem) en hun cruijffiaanse uitspraken per thema. Nieuwe
+  eigenschappen van een speler daar opslaan; verhalen en zinnen over spelers bouwen daarop.
 - `docs/ea-data.md`: alles wat EA geeft (en niet geeft, zoals logo's van tegenstanders), en wat al in `DATA` zit.
 
 ## Draaien
@@ -93,10 +95,11 @@ alleen in Cloudflare.
   uitslagen en shirts, speler van de sessie met de portretfoto (`PlayerCard.portrait`, ook bij in vorm) of een icoon in een rondje in de kleuren van de vorm; nergens de duur van een avond); een tik opent
   `sessie.html?id=<id>` (eigen pagina, een laag dieper, zonder terugknop; *Sessies* is daar niet actief in het menu).
   Een sessie begint met een podium (`.sess-stage`, coach-logica §9a): het stadion (`stadiumSvg()` in `common.js`), de
-  naam van de sessie groot, W-G-V, Goals en Tegengoals, en de top drie als `PlayerCard.tiny` op een podium (één in het
-  midden, groter) die naar de tabel scrollen, met een deelknop; daaronder een kaart met de anekdote, de Cruijff-quote
-  en de wedstrijden als scrollbare `matchCard`-rij; dan *Zo speelden we*: de radar met standaard het team en per speler uit te lichten (geen
-  cijfers dubbel met het scorebord); dan *Per wedstrijd* (`renderMatrix`: kolommen spelers met een minikaartje (foto, gemiddelde en ▲/▼/– sterker, zwakker of gelijk dan normaal via `trend`), rijen
+  naam van de sessie groot met eronder de quote van de beste speler (`personaQuote`), W-G-V, Goals en Tegengoals met
+  rechts de gele deelknop, de top drie als `PlayerCard.tiny` op een podium (één in het midden, groter) die naar de
+  tabel scrollen, en onderin de anekdote en de wedstrijden als scrollbare `matchCard`-rij. De deelafbeelding
+  (`shareSession`) tekent dezelfde kop; dan *Zo speelden we*: de radar met standaard het team en per speler uit te lichten (geen
+  cijfers dubbel met het scorebord); dan *Per wedstrijd* (`renderMatrix`: kolommen spelers met een minikaartje (foto, gemiddelde, ▲/▼/– via `trend` en eronder *normaal*: de rating in alle andere wedstrijden), rijen
   wedstrijden, cellen in goud/zilver/brons/ijzer naar de plek in die rij; *Spelers deze sessie* is weg, de kaarten
   bewaard in `sessionCardsHtml` voor een later FUT-pack; de tabel licht niet op bij aanraken). De radar (`renderRadar`
   in `public/sessie.js`): assen als percentiel tegenover onze eigen avonden, onder elke astitel de waarde en ons normaal.

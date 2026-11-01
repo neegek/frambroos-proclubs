@@ -897,6 +897,7 @@ a.ftok:hover .ftok-c { transform: translateY(-2px); }
 .rm-face { position: relative; width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: var(--surface-2); border: 1px solid var(--border-strong); }
 .rm-face img { position: absolute; left: 50%; top: 16%; width: 92%; height: auto; transform: translateX(-50%); }
 .rm-name { font-size: 11.5px; color: var(--ink-2); max-width: 70px; overflow: hidden; text-overflow: ellipsis; }
+.rm-norm { font-size: 10.5px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .rm-medals th { padding: 6px 0 0; text-align: center; }
 .rm-medal { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; font: 800 12px/1 var(--num-font); box-shadow: inset 0 0 0 2px rgba(255,255,255,0.35), 0 1px 3px rgba(0,0,0,0.35); }
 .rmatrix tbody th, .rmatrix .rm-top th { position: sticky; left: 0; z-index: 1; background: var(--panel); padding-right: 6px; text-align: left; }
@@ -935,7 +936,11 @@ a.ftok:hover .ftok-c { transform: translateY(-2px); }
 .ss-id { padding-bottom: 28px; min-width: 0; }
 .ss-kicker { margin: 0; font-size: 12.5px; font-weight: 650; letter-spacing: 0.1em; text-transform: uppercase; color: #ffd200; }
 .ss-title { margin: 4px 0 0; font-size: clamp(30px, 5vw, 52px); font-weight: 800; letter-spacing: -0.035em; line-height: 1; color: #fff; }
-.ss-score { display: flex; gap: 28px; margin-top: 22px; flex-wrap: wrap; }
+.ss-quote { margin: 14px 0 0; max-width: 54ch; }
+.ss-quote p { margin: 0; font-size: 16px; font-style: italic; line-height: 1.45; color: #efeaf3; }
+.ss-quote footer { margin-top: 4px; font-size: 12.5px; font-weight: 600; color: #d9d4e0; }
+.ss-score { display: flex; align-items: center; gap: 16px 28px; margin-top: 22px; flex-wrap: wrap; }
+.ss-figs { display: flex; gap: 28px; }
 .ss-fig { display: grid; gap: 4px; }
 .ss-fig b { font-family: var(--num-font); font-size: 34px; font-weight: 600; letter-spacing: -0.04em; line-height: 1; color: #fff; }
 .ss-fig small { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: #d9d4e0; }
@@ -950,19 +955,22 @@ a.ftok:hover .ftok-c { transform: translateY(-2px); }
 .ss-step { width: 100%; min-width: 112px; height: 14px; border-radius: 8px 8px 0 0; background: linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0.06)); }
 .ss-pick.p1 .ss-step { height: 34px; min-width: 148px; background: linear-gradient(180deg, rgba(255,210,0,0.45), rgba(255,210,0,0.1)); }
 .ss-pick.p2 .ss-step { height: 22px; }
-.ss-share { position: absolute; top: 16px; right: 16px; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.28); background: rgba(7,5,13,0.45); color: #fff; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; backdrop-filter: blur(4px); }
-.ss-share svg { width: 16px; height: 16px; }
-.ss-share:hover { background: rgba(255,255,255,0.12); }
-.sess-story { display: grid; gap: 14px; }
+.ss-share { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 0; background: #ffd200; color: #1a1205; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.35); }
+.ss-share svg { width: 18px; height: 18px; }
+.ss-share:hover { background: #ffe14d; }
+.ss-share:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.ss-foot { display: grid; gap: 12px; padding: 18px 36px 24px; border-top: 1px solid rgba(255,255,255,0.12); background: rgba(7,5,13,0.6); }
+.ss-story { margin: 0; font-size: 14px; color: #e6e1ec; }
+.ss-story b { color: #fff; }
 @media (max-width: 760px) {
-  .ss-body { grid-template-columns: 1fr; justify-items: center; text-align: center; padding: 56px 16px 0; gap: 18px; }
+  .ss-body { grid-template-columns: 1fr; justify-items: center; text-align: center; padding: 28px 16px 0; gap: 16px; }
   .ss-id { display: contents; }
-  .ss-kicker { order: 1; } .ss-title { order: 2; margin: 0; } .ss-podium { order: 3; } .ss-score { order: 4; justify-content: center; margin: 0 0 22px; gap: 22px; }
+  .ss-kicker { order: 1; } .ss-title { order: 2; margin: 0; } .ss-quote { order: 3; margin: 0; } .ss-podium { order: 4; } .ss-score { order: 5; justify-content: center; margin: 0 0 22px; gap: 16px; } .ss-figs { gap: 22px; }
   .sess-stage::before { background: linear-gradient(0deg, rgba(7,5,13,0.92) 0%, rgba(7,5,13,0.55) 60%, rgba(7,5,13,0.3) 100%); }
   .ss-pick .fut-tiny { --w: 76px; } .ss-pick.p1 .fut-tiny { --w: 98px; }
   .ss-step { min-width: 84px; } .ss-pick.p1 .ss-step { min-width: 104px; }
   .ss-fig b { font-size: 28px; }
-  .ss-share span { display: none; } .ss-share { padding: 0; width: 40px; justify-content: center; }
+  .ss-foot { padding: 16px; }
 }
 /* Teken op het minikaartje bij Per wedstrijd: sterker, zwakker of gelijk dan normaal. */
 .ft-trend { width: 34%; font-size: calc(var(--w) * 0.17); color: #fff; }
