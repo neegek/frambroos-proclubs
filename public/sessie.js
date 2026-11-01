@@ -372,12 +372,16 @@ Promise.all([loadData(), PlayerCard.load().catch(() => {})]).then(() => { sessio
 let SHARE = null; // de geopende avond: { ms, sm, quote, prow }
 const toast = msg => { let t = $('#toast'); if (!t) { t = document.createElement('div'); t.id = 'toast'; t.className = 'toast'; t.setAttribute('role', 'status'); document.body.append(t); }
   t.textContent = msg; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 2200); };
+// Het adres van deze sessie op de gedeelde site (ook vanuit de lokale app), zodat een link altijd werkt.
+const SITE = 'https://neegek.github.io/frambroos-proclubs/';
+const sessionUrl = ({ ms }) => `${SITE}sessie.html?id=${ms[0].session}`;
 const fileName = ms => `frambroos-${new Date(ms[0].ts * 1000).toISOString().slice(0, 10)}.png`;
 // De avond als tekst: plakklaar in een chat of spreadsheet (kolommen gescheiden door tabs).
 function sessionText({ ms, sm, quote, prow, meta }) {
   const t = ts => new Date(ts * 1000).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
   const lines = [`Frambroos · ${cap(longDate(ms[0].ts))}`, meta, `W-G-V ${sm.W}-${sm.D}-${sm.L} · Goals ${sm.gf} · Tegen ${sm.ga}`];
   if (quote) lines.push(`„${quote.text}” — ${quote.who}`);
+  lines.push(sessionUrl({ ms }));
   lines.push('', ['Tijd', 'Uitslag', 'Score', 'Tegenstander'].join('\t'), ...ms.map(m => [t(m.ts), letter(m.result), `${m.goals}-${m.goalsAgainst}`, m.opponent.name].join('\t')));
   lines.push('', ['Speler', 'Wedstrijden', 'Rating', 'Goals', 'Assists', 'Man of the match'].join('\t'),
     ...prow.map(r => [proName(r.name), r.n, f1(r.rH), r.g, r.a, r.mom].join('\t')));
@@ -386,11 +390,13 @@ function sessionText({ ms, sm, quote, prow, meta }) {
 async function shareAction(kind) {
   const { ms } = SHARE;
   try {
+    if (kind === 'link') { await navigator.clipboard.writeText(sessionUrl(SHARE)); toast('Link gekopieerd'); return; }
     if (kind === 'text') { await navigator.clipboard.writeText(sessionText(SHARE)); toast('Gegevens gekopieerd'); return; }
     if (kind === 'copy') { // de belofte direct meegeven: Safari wil de klembordactie binnen de tik
       await navigator.clipboard.write([new ClipboardItem({ 'image/png': shareImage(SHARE) })]); toast('Afbeelding gekopieerd'); return; }
     const blob = await shareImage(SHARE), file = new File([blob], fileName(ms), { type: 'image/png' });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'Frambroos' }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+    // Een afbeelding kan geen klikbare link bevatten: de link naar deze sessie gaat als tekst mee met het delen.
+    if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'Frambroos', text: `Frambroos · ${cap(longDate(ms[0].ts))}`, url: sessionUrl(SHARE) }); return; } catch (e) { if (e.name === 'AbortError') return; } }
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = file.name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   } catch { toast('Dat lukte niet in deze browser'); }
 }
@@ -476,7 +482,7 @@ async function shareImage({ ms, sm, quote, prow }) {
       won: rows.some(x => x.p.ev) ? sum(p => p.ev?.possession_won) : '–', duels: sum(p => p.tacklesMade) };
     cols.forEach(([, key], j) => { g.fillStyle = relevant.includes(key) ? '#ffffff' : '#7d7788'; mono(28, relevant.includes(key) ? 700 : 500); g.fillText(String(val[key]), colX[j], mid + 10); });
   }
-  g.textAlign = 'center'; g.fillStyle = '#a9a2b3'; font(22); g.fillText('Frambroos Coach · neegek.github.io/frambroos-proclubs', W / 2, H - 36);
+  g.textAlign = 'center'; g.fillStyle = '#a9a2b3'; font(22); g.fillText(sessionUrl({ ms }).replace(/^https:\/\//, ''), W / 2, H - 36);
   return new Promise(r => c.toBlob(r, 'image/png'));
 }
 // Eén kaartje zoals op de pagina (kleuren uit het echte kaartje), met de plek als medaille, rating en naam erin.

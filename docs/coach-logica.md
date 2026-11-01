@@ -499,7 +499,9 @@ the match was). Eerst de laatste twintig, de rest achter een knop.
   ingetogen **deelknop** (rond icoon met een dunne rand, zonder label). Die opent een klein menu: *Afbeelding delen*
   (of downloaden waar delen niet kan), *Afbeelding kopiëren* (naar het klembord) en *Gegevens kopiëren* (de avond als
   tekst: datum, uitslag, alle wedstrijden met tijd, uitslag, score en tegenstander, en per speler wedstrijden, rating,
-  goals, assists en man of the match; plakklaar in een chat of spreadsheet). Een korte melding bevestigt het kopiëren; daaronder de **wedstrijden als scrollbare rij kaartjes** (een tik
+  goals, assists en man of the match; plakklaar in een chat of spreadsheet). Een afbeelding kan geen klikbare link bevatten: bij *Afbeelding delen* gaat de link naar deze sessie als tekst mee
+  (de app waarin je deelt zet hem bij de afbeelding), onderaan de afbeelding staat dat adres, en *Link kopiëren* zet
+  het op het klembord. Een korte melding bevestigt het kopiëren; daaronder de **wedstrijden als scrollbare rij kaartjes** (een tik
   opent de wedstrijd). Geen anekdote als tekst: die bepaalt alleen het thema van de quote.
 De radar eronder vertelt **hoe we speelden**; geen cijfers dubbel. De top drie staat op rating over deze avond.
 **Deelkaart** (afbeelding van 1080 breed, zo hoog als nodig; sinds 1 november 2026): in de stijl van de kop. Boven
