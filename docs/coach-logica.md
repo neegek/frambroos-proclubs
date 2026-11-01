@@ -504,8 +504,8 @@ the match was). Eerst de laatste twintig, de rest achter een knop.
 De radar eronder vertelt **hoe we speelden**; geen cijfers dubbel. De top drie staat op rating over deze avond.
 **Deelkaart** (afbeelding van 1080 breed, zo hoog als nodig; sinds 1 november 2026): in de stijl van de kop. Boven
 het stadion met de dag en de uitslag (W-G-V, Goals, Tegen); dan de **beste speler van de avond** met het kaartje (plek,
-rating, naam), de naam, het gemiddelde en de quote ernaast; dan **iedereen van beste tot minste**: plek als medaille,
-portret, naam, rating van de avond en rechts de maten die de rating dragen (dezelfde als in het spelersscherm, zonder
+rating, naam), de naam en de quote ernaast (het gemiddelde staat al in het kaartje); dan **iedereen van beste tot
+minste**: plek als medaille, een klein kaartje met foto (vorm en kleur van de plek, zoals boven *Per wedstrijd*), naam, rating van de avond en rechts de maten die de rating dragen (dezelfde als in het spelersscherm, zonder
 de rating zelf): goals, assists, passen (percentage), balwinst en gewonnen duels (aantallen, geen percentage bij
 weinig pogingen). Per speler staan de cijfers die bij de rol van die avond horen fel, de rest gedimd: aanval goals en
 assists; middenveld assists, passen en balwinst; verdediging balwinst, duels en passen; keeper passen.

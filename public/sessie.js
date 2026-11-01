@@ -408,12 +408,12 @@ async function shareAction(kind) {
 // Deelkaart (coach-logica §9a): dezelfde kop als op de pagina, als afbeelding van 1080×1080: stadion, type, naam van
 // de sessie, de quote, de top drie als kaartjes op het podium en W-G-V, goals en tegengoals.
 const loadImg = src => new Promise(res => { if (!src) return res(null); const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
-const SHARE_RIM = { gold: ['#fff1bd', '#d9b04a', '#8d6c15', '#f1d27a'], silver: ['#ffffff', '#c3c9d0', '#737b85', '#e4e8ec'], bronze: ['#f6d2ae', '#c27f45', '#74431c', '#e3a674'] };
+const SHARE_RIM = { gold: ['#fff1bd', '#d9b04a', '#8d6c15', '#f1d27a'], silver: ['#ffffff', '#c3c9d0', '#737b85', '#e4e8ec'], bronze: ['#f6d2ae', '#c27f45', '#74431c', '#e3a674'], iron: ['#c3ccd7', '#76828f', '#454e5a', '#9ea8b4'] };
 async function shareImage({ ms, sm, quote, prow }) {
   // Deelafbeelding (coach-logica §9a): dezelfde stijl als de kop (stadion boven, paneel eronder). Boven de dag en de
   // uitslag; dan de beste speler van de avond met kaartje en quote; dan iedereen van beste tot minste met de maten die
   // de rating dragen (zoals in het spelersscherm), zonder de rating zelf.
-  const W = 1080, list = prow.filter(r => r.rH !== null), ROW = 84, LIST_Y = 760;
+  const W = 1080, list = prow.filter(r => r.rH !== null), ROW = 112, LIST_Y = 760;
   const H = LIST_Y + 40 + list.length * ROW + 80;
   const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
   const font = (size, weight = 500, style = '') => { g.font = `${style} ${weight} ${size}px system-ui, -apple-system, "Segoe UI", sans-serif`; };
@@ -441,7 +441,7 @@ async function shareImage({ ms, sm, quote, prow }) {
     else { g.fillStyle = '#fff'; mono(54, 700); g.fillText(val, x, 218); }
     g.fillStyle = '#d9d4e0'; font(22, 600); g.fillText(label, x, 252);
   });
-  // De beste speler: het kaartje van het podium, met naam, gemiddelde en de quote ernaast.
+  // De beste speler: het kaartje van het podium, met de naam en de quote ernaast (het gemiddelde staat al in het kaartje).
   const best = list[0], pick = document.querySelector('#s-podium .ss-pick.p1');
   if (best && pick) {
     const w = 230, h = w * 430 / 300, x0 = 70, y0 = HEAD + 50;
@@ -449,8 +449,7 @@ async function shareImage({ ms, sm, quote, prow }) {
     const tx = x0 + w + 50, tw = W - tx - 70;
     g.textAlign = 'left'; g.fillStyle = '#ffd200'; font(22, 700); g.fillText('BESTE SPELER VAN DE AVOND', tx, y0 + 40);
     g.fillStyle = '#fff'; font(52, 800); g.fillText(fit(proName(best.name), tw), tx, y0 + 100);
-    g.fillStyle = '#d9d4e0'; font(26, 500); g.fillText(`gemiddeld ${f1(best.rH)}`, tx, y0 + 142);
-    if (quote) { g.fillStyle = '#efeaf3'; font(30, 500, 'italic'); let qy = y0 + 210;
+    if (quote) { g.fillStyle = '#efeaf3'; font(30, 500, 'italic'); let qy = y0 + 170;
       for (const l of lines(`„${quote.text}”`, tw).slice(0, 4)) { g.fillText(l, tx, qy); qy += 42; } }
   }
   // Iedereen van beste tot minste: plek, portret, naam, rating, en de maten die de rating dragen.
@@ -466,11 +465,10 @@ async function shareImage({ ms, sm, quote, prow }) {
     if (i % 2 === 0) { g.fillStyle = 'rgba(255,255,255,0.035)'; g.beginPath(); g.roundRect(40, y + 4, W - 80, ROW - 8, 14); g.fill(); }
     const [mc, mi] = k === 1 ? ['#c9a548', '#2a1d05'] : k === 2 ? ['#b9c0c7', '#1d2228'] : k === 3 ? ['#b8794a', '#241205'] : ['#5d6774', '#f4f6f9'];
     g.fillStyle = mc; g.beginPath(); g.arc(84, mid, 20, 0, 7); g.fill(); g.fillStyle = mi; mono(22, 800); g.textAlign = 'center'; g.fillText(String(k), 84, mid + 8);
-    const ph = await loadImg(PlayerCard.portrait(r.name));
-    g.save(); g.beginPath(); g.arc(150, mid, 28, 0, 7); g.fillStyle = '#2a2433'; g.fill(); g.clip();
-    if (ph) { const s2 = Math.max(56 / ph.width, 56 / ph.height); g.drawImage(ph, 150 - ph.width * s2 / 2, mid - 28, ph.width * s2, ph.height * s2); }
-    g.restore();
-    g.textAlign = 'left'; g.fillStyle = '#fff'; font(30, 650); g.fillText(fit(proName(r.name), 300), 194, mid + 10);
+    // Een klein kaartje zoals boven Per wedstrijd (vorm en kleur van de plek), met alleen de foto.
+    const cardEl = [...document.querySelectorAll('#s-matrix .rm-player')].find(a => a.dataset.n === r.name);
+    if (cardEl) { const cw = 66; await drawShareCard(g, cardEl, 122, mid - cw * 430 / 300 / 2, cw, cardEl.querySelector('.fut-tiny')?.dataset.rim || 'gold', null, mono, font, { text: false }); }
+    g.textAlign = 'left'; g.fillStyle = '#fff'; font(30, 650); g.fillText(fit(proName(r.name), 300), 212, mid + 10);
     g.textAlign = 'right'; mono(32, 700); g.fillStyle = '#ffd200'; g.fillText(f1(r.rH), 545, mid + 11);
     g.fillStyle = '#efeaf3'; mono(28, 600);
     const sum = f => rows.reduce((a, x) => a + (f(x.p) || 0), 0), relevant = ROLE_STATS[r.role] || [];
@@ -482,26 +480,29 @@ async function shareImage({ ms, sm, quote, prow }) {
   return new Promise(r => c.toBlob(r, 'image/png'));
 }
 // Eén kaartje zoals op de pagina (kleuren uit het echte kaartje), met de plek als medaille, rating en naam erin.
-async function drawShareCard(g, pickEl, x0, y0, w, rim, place, mono, font) {
+// Met text: false alleen het kaartje met een grotere foto (de kleine kaartjes in de lijst).
+async function drawShareCard(g, pickEl, x0, y0, w, rim, place, mono, font, { text = true } = {}) {
   const tiny = pickEl.querySelector('.fut-tiny'), cs = getComputedStyle(tiny), v = n => cs.getPropertyValue(n).trim();
   const photo = await loadImg(pickEl.querySelector('image')?.getAttribute('href'));
   const s = w / 300;
   g.save(); g.translate(x0, y0); g.scale(s, s);
   const shape = new Path2D(PlayerCard.shape), inset = (sx, sy) => { g.translate(150, 215); g.scale(sx, sy); g.translate(-150, -215); };
-  g.shadowColor = 'rgba(0,0,0,0.45)'; g.shadowBlur = 24 / s; g.shadowOffsetY = 8 / s;
-  let gr = g.createLinearGradient(0, 0, 300, 430); SHARE_RIM[rim].forEach((col, i) => gr.addColorStop([0, 0.35, 0.7, 1][i], col));
+  g.shadowColor = 'rgba(0,0,0,0.45)'; g.shadowBlur = 24 / s * (text ? 1 : 0.3); g.shadowOffsetY = 8 / s * (text ? 1 : 0.3);
+  let gr = g.createLinearGradient(0, 0, 300, 430); (SHARE_RIM[rim] || SHARE_RIM.gold).forEach((col, i) => gr.addColorStop([0, 0.35, 0.7, 1][i], col));
   g.fillStyle = gr; g.fill(shape); g.shadowColor = 'transparent';
   g.save(); inset(0.952, 0.966);
   gr = g.createLinearGradient(0, 0, 110, 430); gr.addColorStop(0, v('--t-bg1') || '#241c0e'); gr.addColorStop(0.55, v('--t-bg2') || '#0e0c09'); gr.addColorStop(1, v('--t-bg3') || '#050403');
   g.fillStyle = gr; g.fill(shape); g.restore();
   g.save(); inset(0.952, 0.966); g.clip(shape); inset(1 / 0.952, 1 / 0.966);
   if (photo) {
-    const bw = 240, bh = 198, r = Math.max(bw / photo.width, bh / photo.height), sw = bw / r, sh = bh / r;
-    g.drawImage(photo, photo.width - sw, 0, sw, sh, 34, 52, bw, bh);
-    gr = g.createLinearGradient(0, 190, 0, 252); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, v('--t-bg2') || '#0e0c09');
-    g.fillStyle = gr; g.fillRect(0, 188, 300, 66);
+    const bx = text ? 34 : 20, by = text ? 52 : 46, bw = text ? 240 : 260, bh = text ? 198 : 330;
+    const r = Math.max(bw / photo.width, bh / photo.height), sw = bw / r, sh = bh / r;
+    g.drawImage(photo, photo.width - sw, 0, sw, sh, bx, by, bw, bh);
+    const fy = by + bh - 62; gr = g.createLinearGradient(0, fy, 0, by + bh + 2); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, v('--t-bg2') || '#0e0c09');
+    g.fillStyle = gr; g.fillRect(0, fy - 2, 300, 66);
   }
   g.restore();
+  if (!text) { g.restore(); return; }
   const [mc, mi] = { 1: ['#c9a548', '#2a1d05'], 2: ['#b9c0c7', '#1d2228'], 3: ['#b8794a', '#241205'] }[place];
   g.fillStyle = mc; g.beginPath(); g.arc(78, 98, 34, 0, 7); g.fill();
   g.fillStyle = mi; mono(40, 800); g.textAlign = 'center'; g.fillText(String(place), 78, 112);
