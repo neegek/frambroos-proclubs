@@ -101,11 +101,12 @@ function render() {
   // De quote: een cruijffiaanse uitspraak van de beste speler van de avond, in de eigen stem (personas.js).
   const best = prow.find(r => r.rH !== null), quote = best ? { text: personaQuote(best.name, sum.theme), who: proName(best.name) } : null;
   $('#s-quote').innerHTML = quote ? `<p>„${esc(quote.text)}” <cite>— ${esc(quote.who)}</cite></p>` : '';
-  $('#s-share').onclick = () => shareSession(ms, sm, quote);
-  // Top drie op een podium: één in het midden, groter en hoger; twee links, drie rechts. Een tik scrollt naar Per wedstrijd.
+  SHARE = { ms, sm, quote, prow };
+  // Top drie op een podium: één in het midden, groter en hoger; twee links, drie rechts. Naam in het kaartje, de plek op
+  // de trede (de rand houdt de kleur van de plek). Een tik scrollt naar Per wedstrijd.
   const top = prow.filter(r => r.rH !== null).slice(0, 3);
   const pick = (r, i) => `<a class="ss-pick p${i + 1}" href="#per-wedstrijd" title="${esc(proName(r.name))}: rating ${f1(r.rH)} deze avond">
-      ${PlayerCard.tiny(r.name, { session: s.id, rank: i + 1, value: f1(r.rH), key: '-p' })}<span class="ss-pick-name">${esc(proName(r.name))}${r.mom ? ' <span class="crown" title="Man of the match">♛</span>' : ''}</span><span class="ss-step" aria-hidden="true"></span></a>`;
+      ${PlayerCard.tiny(r.name, { session: s.id, rank: i + 1, medal: false, label: proName(r.name), value: f1(r.rH), key: '-p' })}<span class="ss-step" aria-hidden="true">${i + 1}</span></a>`;
   $('#s-podium').innerHTML = [1, 0, 2].filter(i => top[i]).map(i => pick(top[i], i)).join('');
   for (const a of $('#s-podium').querySelectorAll('a')) a.addEventListener('click', e => { e.preventDefault(); $('#per-wedstrijd').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
   PlayerCard.reveal($('#s-podium'));
@@ -262,12 +263,48 @@ Promise.all([loadData(), PlayerCard.load().catch(() => {})]).then(() => { sessio
 // ---------- deelkaart ----------
 // Een avond als afbeelding (1080×1080) voor de groepsapp: uitslag, kerncijfers, uitblinker, de eerste zin van de
 // samenvatting. Kleuren van het thuistenue. Deelt via het deelmenu van de telefoon, anders als download.
+// ---------- delen (coach-logica §9a): een klein menu met afbeelding delen, afbeelding kopiëren en gegevens kopiëren ----------
+let SHARE = null; // de geopende avond: { ms, sm, quote, prow }
+const toast = msg => { let t = $('#toast'); if (!t) { t = document.createElement('div'); t.id = 'toast'; t.className = 'toast'; t.setAttribute('role', 'status'); document.body.append(t); }
+  t.textContent = msg; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 2200); };
+const fileName = ms => `frambroos-${new Date(ms[0].ts * 1000).toISOString().slice(0, 10)}.png`;
+// De avond als tekst: plakklaar in een chat of spreadsheet (kolommen gescheiden door tabs).
+function sessionText({ ms, sm, quote, prow }) {
+  const t = ts => new Date(ts * 1000).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+  const lines = [`Frambroos · ${cap(longDate(ms[0].ts))}`, cap($('#s-meta').textContent), `W-G-V ${sm.W}-${sm.D}-${sm.L} · Goals ${sm.gf} · Tegengoals ${sm.ga}`];
+  if (quote) lines.push(`„${quote.text}” — ${quote.who}`);
+  lines.push('', ['Tijd', 'Uitslag', 'Score', 'Tegenstander'].join('\t'), ...ms.map(m => [t(m.ts), letter(m.result), `${m.goals}-${m.goalsAgainst}`, m.opponent.name].join('\t')));
+  lines.push('', ['Speler', 'Wedstrijden', 'Rating', 'Goals', 'Assists', 'Man of the match'].join('\t'),
+    ...prow.map(r => [proName(r.name), r.n, f1(r.rH), r.g, r.a, r.mom].join('\t')));
+  return lines.join('\n');
+}
+async function shareAction(kind) {
+  const { ms } = SHARE;
+  try {
+    if (kind === 'text') { await navigator.clipboard.writeText(sessionText(SHARE)); toast('Gegevens gekopieerd'); return; }
+    if (kind === 'copy') { // de belofte direct meegeven: Safari wil de klembordactie binnen de tik
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': shareImage(SHARE) })]); toast('Afbeelding gekopieerd'); return; }
+    const blob = await shareImage(SHARE), file = new File([blob], fileName(ms), { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'Frambroos' }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = file.name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  } catch { toast('Dat lukte niet in deze browser'); }
+}
+(function shareMenu() {
+  const btn = $('#s-share'), menu = $('#s-share-menu');
+  if (!(navigator.canShare && navigator.canShare({ files: [new File([''], 'x.png', { type: 'image/png' })] }))) menu.querySelector('[data-k="share"] span').textContent = 'Afbeelding downloaden';
+  if (!(navigator.clipboard && window.ClipboardItem)) menu.querySelector('[data-k="copy"]').hidden = true;
+  const close = () => { menu.hidden = true; btn.setAttribute('aria-expanded', 'false'); };
+  btn.addEventListener('click', e => { e.stopPropagation(); menu.hidden = !menu.hidden; btn.setAttribute('aria-expanded', String(!menu.hidden)); });
+  menu.addEventListener('click', e => { const b = e.target.closest('button[data-k]'); if (!b || !SHARE) return; close(); shareAction(b.dataset.k); });
+  document.addEventListener('click', e => { if (!menu.hidden && !menu.contains(e.target)) close(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !menu.hidden) { close(); btn.focus(); } });
+})();
+
 // Deelkaart (coach-logica §9a): dezelfde kop als op de pagina, als afbeelding van 1080×1080: stadion, type, naam van
 // de sessie, de quote, de top drie als kaartjes op het podium en W-G-V, goals en tegengoals.
 const loadImg = src => new Promise(res => { if (!src) return res(null); const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
 const SHARE_RIM = { gold: ['#fff1bd', '#d9b04a', '#8d6c15', '#f1d27a'], silver: ['#ffffff', '#c3c9d0', '#737b85', '#e4e8ec'], bronze: ['#f6d2ae', '#c27f45', '#74431c', '#e3a674'] };
-const SHARE_MEDAL = { gold: ['#c9a548', '#2a1d05'], silver: ['#b9c0c7', '#1d2228'], bronze: ['#b8794a', '#241205'] };
-async function shareSession(ms, sm, quote) {
+async function shareImage({ ms, sm, quote }) {
   const W = 1080, c = document.createElement('canvas'); c.width = W; c.height = W; const g = c.getContext('2d');
   const font = (size, weight = 500, style = '') => { g.font = `${style} ${weight} ${size}px system-ui, -apple-system, "Segoe UI", sans-serif`; };
   const mono = (size, weight = 600) => { g.font = `${weight} ${size}px ui-monospace, "SF Mono", Menlo, monospace`; };
@@ -286,19 +323,23 @@ async function shareSession(ms, sm, quote) {
   let y = 222;
   if (quote) {
     g.fillStyle = '#efeaf3'; font(30, 500, 'italic');
-    for (const l of lines(`„${quote.text}” — ${quote.who}`, 900).slice(0, 3)) { g.fillText(l, W / 2, y); y += 40; }
+    for (const l of lines(`„${quote.text}” —\u00A0${quote.who.replace(/ /g, '\u00A0')}`, 900).slice(0, 3)) { g.fillText(l, W / 2, y); y += 40; }
   }
   // Podium: dezelfde kaartjes als op de pagina, met foto, plek en rating; nummer één in het midden.
   const picks = [...document.querySelectorAll('#s-podium .ss-pick')];
-  const top = Math.max(y + 40, 360), base = 800;
+  const base = 836, STEP = { p1: 96, p2: 64, p3: 42 };
   const spec = { p1: { w: 250, x: W / 2 }, p2: { w: 196, x: W / 2 - 250 }, p3: { w: 196, x: W / 2 + 250 } };
   for (const a of picks) {
     const k = ['p1', 'p2', 'p3'].find(x => a.classList.contains(x)), { w, x } = spec[k], h = w * 430 / 300;
-    const bottom = k === 'p1' ? base - 30 : k === 'p2' ? base - 14 : base;
     const tiny = a.querySelector('.fut-tiny'), cs = getComputedStyle(tiny), v = n => cs.getPropertyValue(n).trim();
     const rim = { p1: 'gold', p2: 'silver', p3: 'bronze' }[k];
     const photo = await loadImg(a.querySelector('image')?.getAttribute('href'));
-    const s = w / 300, x0 = x - w / 2, y0 = Math.max(top, bottom - h - 40) ;
+    const s = w / 300, x0 = x - w / 2, y0 = Math.max(y + 24, base - STEP[k] - h - 10);
+    // De trede met de plek erop.
+    const sx = x - w / 2 - 12, sw = w + 24, sy = base - STEP[k];
+    let sg = g.createLinearGradient(0, sy, 0, base); sg.addColorStop(0, k === 'p1' ? 'rgba(255,210,0,0.55)' : 'rgba(255,255,255,0.3)'); sg.addColorStop(1, k === 'p1' ? 'rgba(255,210,0,0.12)' : 'rgba(255,255,255,0.06)');
+    g.fillStyle = sg; g.beginPath(); g.roundRect(sx, sy, sw, STEP[k], [12, 12, 0, 0]); g.fill();
+    g.fillStyle = '#fff'; mono(k === 'p1' ? 52 : 40, 800); g.textAlign = 'center'; g.fillText(k.slice(1), x, sy + Math.min(STEP[k] - 8, k === 'p1' ? 66 : 46));
     g.save(); g.translate(x0, y0); g.scale(s, s);
     const shape = new Path2D(PlayerCard.shape), inset = (sx, sy) => { g.translate(150, 215); g.scale(sx, sy); g.translate(-150, -215); };
     g.shadowColor = 'rgba(0,0,0,0.45)'; g.shadowBlur = 24 / s; g.shadowOffsetY = 8 / s;
@@ -315,15 +356,12 @@ async function shareSession(ms, sm, quote) {
       g.fillStyle = gr; g.fillRect(0, 188, 300, 66);
     }
     g.restore();
-    const [mBg, mInk] = SHARE_MEDAL[rim];
-    g.fillStyle = mBg; g.beginPath(); g.arc(72, 76, 40, 0, 7); g.fill();
-    g.fillStyle = mInk; mono(46, 800); g.textAlign = 'center'; g.fillText(k.slice(1), 72, 92);
-    g.fillStyle = v('--t-ink') || '#f6e6b8'; mono(96, 800); g.fillText(a.querySelector('.ft-val')?.textContent || '', 150, 352);
+    // Rating en naam in het kaartje; de naam afgekapt op de breedte van de kaart.
+    g.fillStyle = v('--t-ink') || '#f6e6b8'; g.textAlign = 'center'; mono(88, 800); g.fillText(a.querySelector('.ft-val')?.textContent || '', 150, 318);
+    font(30, 700); let nm = a.querySelector('.ft-name')?.textContent.trim() || '';
+    while (nm.length > 1 && g.measureText(nm).width > 220) nm = nm.slice(0, -2).trimEnd() + '…';
+    g.fillText(nm, 150, 366);
     g.restore();
-    g.fillStyle = '#fff'; font(k === 'p1' ? 30 : 26, 700); g.textAlign = 'center';
-    let nm = a.querySelector('.ss-pick-name')?.textContent.trim() || ''; // afkappen op de breedte van de kaart
-    while (nm.length > 1 && g.measureText(nm).width > w) nm = nm.slice(0, -2).trimEnd() + '…';
-    g.fillText(nm, x, y0 + h + 40);
   }
   // Uitslag: W-G-V, goals en tegengoals.
   const figs = [[`${sm.W}-${sm.D}-${sm.L}`, 'W-G-V'], [String(sm.gf), 'Goals'], [String(sm.ga), 'Tegengoals']];
@@ -336,8 +374,5 @@ async function shareSession(ms, sm, quote) {
     g.fillStyle = '#d9d4e0'; font(24, 600); g.fillText(label, x, 978);
   });
   g.fillStyle = '#a9a2b3'; font(22); g.fillText('Frambroos Coach · neegek.github.io/frambroos-proclubs', W / 2, 1042);
-  const blob = await new Promise(r => c.toBlob(r, 'image/png'));
-  const file = new File([blob], `frambroos-${new Date(ms[0].ts * 1000).toISOString().slice(0, 10)}.png`, { type: 'image/png' });
-  if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'Frambroos' }); return; } catch { /* geannuleerd: dan downloaden */ } }
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = file.name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  return new Promise(r => c.toBlob(r, 'image/png'));
 }

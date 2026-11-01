@@ -71,6 +71,7 @@ alleen in Cloudflare.
   zijn meet EA niet; "geen goede optie" is de benadering en heet *lastige balmomenten*.
 - Advies en samenvattingen: volg coach-logica §1, §8 en §9. Kort gezegd: verder kijken dan één cijfer, twee richtingen,
   build bepaalt wat goed is, iedereen dezelfde opbouw, samenvattingen kwalitatief in drie of vier zinnen.
+- Namen voluit zoals EA ze geeft (Petra Selie, niet P. Selie); te lang: afkappen met …, nooit zelf afkorten.
 - Over spelers geen *hij* of *zij*. Waar de app over onze spelers praat of ze noemt (samenvattingen, nieuws, ranglijsten,
   menu, knoppen), staat de **naam van de pro** (Terry Yaki), niet de accountnaam (Neegek): `proName(naam)` uit
   `public/common.js`. Links en hashes houden de accountnaam; tegenstanders houden hun EA-naam.
@@ -96,9 +97,11 @@ alleen in Cloudflare.
   `sessie.html?id=<id>` (eigen pagina, een laag dieper, zonder terugknop; *Sessies* is daar niet actief in het menu).
   Een sessie begint met één kaart met een split (`.sess-stage`, coach-logica §9a): boven het beeld (`.ss-visual`) op
   het stadion (`stadiumSvg()` in `common.js`, vaste kleuren) met gele regel, naam van de sessie, de quote van de beste
-  speler (`personaQuote`) en de top drie als `PlayerCard.tiny` op een podium (één in het midden, groter; treden
-  eindigen op de rand van het beeld; lange namen afgekapt met …; een tik scrollt naar de tabel); onder een paneel
-  (`.ss-panel`, themakleuren) met W-G-V, Goals en Tegengoals, rechts op dezelfde regel de deelknop (rond geel icoon),
+  speler (`personaQuote`) en de top drie als `PlayerCard.tiny` (`medal: false`, naam in het kaartje via `label`) op
+  een podium (één in het midden, groter; de plek als cijfer op de trede; treden eindigen op de rand van het beeld;
+  geen kroon; een tik scrollt naar de tabel); onder een paneel (`.ss-panel`, themakleuren) met W-G-V, Goals en
+  Tegengoals, rechts op dezelfde regel een ingetogen deelknop met menu (afbeelding delen of downloaden, afbeelding
+  kopiëren, gegevens kopiëren als tekst),
   en de wedstrijden als scrollbare `matchCard`-rij. De deelafbeelding
   (`shareSession`) tekent dezelfde kop; dan *Zo speelden we*: de radar met standaard alleen het team, aantallen als totaal van de
   avond; een tik op een naam licht die speler uit, nog een tik zet hem uit (geen knop *Team*); dan *Per wedstrijd* (`renderMatrix`: kolommen spelers met een minikaartje (foto, gemiddelde, ▲/▼/– via `trend` en eronder *normaal*: de rating in alle andere wedstrijden), rijen

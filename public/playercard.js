@@ -94,12 +94,9 @@ function tierOf(rows) {
   return sid === undefined ? { tier: 'goud', why: '', level: null, growth: null, session: null, rows: [] } : tierAt(r, sid);
 }
 
-// Naam op de kaart: voorletter en achternaam van de pro (P. Selie), anders de accountnaam. Eén woord blijft heel.
+// Naam op de kaart: de pro-naam voluit zoals EA hem geeft (coach-logica §9), anders de accountnaam.
 function cardName(career, name) {
-  const pro = (career?.proName || '').trim();
-  if (!pro) return name;
-  const parts = pro.split(/\s+/);
-  return parts.length > 1 ? `${parts[0].charAt(0).toUpperCase()}. ${parts.slice(1).join(' ')}` : pro;
+  return (career?.proName || '').trim() || name;
 }
 
 function lastArch(rows) { const r = [...rows].reverse().find(x => x.p.archetypeId); return r ? r.p.archetypeId : null; }
@@ -152,14 +149,15 @@ function cardOf(name, { session = null, key = '', rank = null } = {}) {
 // Linksboven de plek als medaille (rank; buitenrand in de kleur van de plek), of met trend ('up', 'down', 'same') een
 // teken of de speler sterker, zwakker of gelijk speelde dan normaal (rand goud). Tier en foto van de sessie.
 const TREND = { up: ['▲', 'sterker dan normaal'], down: ['▼', 'zwakker dan normaal'], same: ['–', 'gelijk aan normaal'] };
-function tinyOf(name, { session, rank = null, trend = null, value, key = '-t' }) {
+// medal: false laat de plek weg (de rand houdt de kleur); label: een naam onderin het kaartje.
+function tinyOf(name, { session, rank = null, trend = null, value, key = '-t', medal = true, label: nameLabel = '' }) {
   const all = DATA.matches.map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p);
   const tier = tierAt(all.filter(x => x.p.rating !== null), session), photo = photoOf(name, tier.tier), rim = rimOf(rank);
-  const badge = rank ? `<span class="ft-rank metal-${rim}">${rank}</span>` : trend ? `<span class="ft-rank ft-trend ${trend}">${TREND[trend][0]}</span>` : '';
+  const badge = rank && medal ? `<span class="ft-rank metal-${rim}">${rank}</span>` : rank ? '' : trend ? `<span class="ft-rank ft-trend ${trend}">${TREND[trend][0]}</span>` : '';
   const label = rank ? `plek ${rank}` : trend ? TREND[trend][1] : '';
-  return `<span class="fut-tiny" data-tier="${tier.tier}" data-rim="${rim}" role="img" aria-label="${esc(proName(name))}: ${label ? `${label}, ` : ''}rating ${value}">
+  return `<span class="fut-tiny${nameLabel ? ' has-name' : ''}" data-tier="${tier.tier}" data-rim="${rim}" role="img" aria-label="${esc(proName(name))}: ${label ? `${label}, ` : ''}rating ${value}">
     ${futFrame(photo, `${slugOf(name)}-s${session}${key}`, rim)}${photo ? '' : `<span class="ft-icon">${personIcon()}</span>`}
-    ${badge}<span class="ft-val">${value}</span></span>`;
+    ${badge}<span class="ft-val">${value}</span>${nameLabel ? `<span class="ft-name">${esc(nameLabel)}</span>` : ''}</span>`;
 }
 
 function render(name) {

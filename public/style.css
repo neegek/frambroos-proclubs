@@ -947,11 +947,12 @@ a.ftok:hover .ftok-c { transform: translateY(-2px); }
 .ss-pick .fut-tiny { --w: 108px; transition: transform .15s; }
 .ss-pick.p1 .fut-tiny { --w: 144px; }
 .ss-pick:hover .fut-tiny { transform: translateY(-3px); }
-.ss-pick-name { font-size: 13px; font-weight: 650; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
-.ss-pick .crown { color: #ffd200; }
-.ss-step { width: 100%; height: 16px; margin-top: 2px; border-radius: 8px 8px 0 0; background: linear-gradient(180deg, rgba(255,255,255,0.26), rgba(255,255,255,0.08)); }
-.ss-pick.p1 .ss-step { height: 40px; background: linear-gradient(180deg, rgba(255,210,0,0.5), rgba(255,210,0,0.14)); }
-.ss-pick.p2 .ss-step { height: 26px; }
+.ss-step { width: 100%; height: 40px; margin-top: 4px; display: grid; place-items: start center; padding-top: 6px; border-radius: 10px 10px 0 0; background: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0.07)); font: 800 22px/1 var(--num-font); color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
+.ss-pick.p1 .ss-step { height: 88px; padding-top: 10px; font-size: 30px; background: linear-gradient(180deg, rgba(255,210,0,0.55), rgba(255,210,0,0.12)); }
+.ss-pick.p2 .ss-step { height: 60px; }
+/* Naam in het minikaartje, onder de rating; afgekapt met … als hij niet past. */
+.fut-tiny.has-name .ft-val { bottom: 25%; }
+.ft-name { position: absolute; left: 9%; right: 9%; bottom: 13%; text-align: center; font: 700 calc(var(--w) * 0.11)/1.15 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--t-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ss-panel { display: grid; gap: 16px; padding: 20px 24px 22px; }
 .ss-score { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .ss-figs { display: flex; gap: 32px; }
@@ -959,9 +960,17 @@ a.ftok:hover .ftok-c { transform: translateY(-2px); }
 .ss-fig b { font-family: var(--num-font); font-size: 32px; font-weight: 600; letter-spacing: -0.04em; line-height: 1; color: var(--ink); }
 .ss-fig small { font-size: 12px; font-weight: 600; letter-spacing: 0.02em; color: var(--ink-2); }
 .ss-rec .W { color: var(--pos-text); } .ss-rec .D { color: var(--ink-2); } .ss-rec .L { color: var(--neg-text); }
-.ss-share { flex: none; display: inline-grid; place-items: center; width: 44px; height: 44px; padding: 0; border-radius: 999px; border: 0; background: #ffd200; color: #1a1205; cursor: pointer; }
+.ss-share-wrap { position: relative; flex: none; }
+.ss-share { display: inline-grid; place-items: center; width: 42px; height: 42px; padding: 0; border-radius: 999px; border: 1px solid var(--panel-border); background: transparent; color: var(--ink-2); cursor: pointer; }
 .ss-share svg { width: 18px; height: 18px; }
-.ss-share:hover { background: #ffe14d; }
+.ss-share:hover, .ss-share[aria-expanded="true"] { color: var(--ink); background: var(--surface-2); }
+.ss-menu { position: absolute; right: 0; top: calc(100% + 8px); z-index: 20; display: grid; min-width: 220px; padding: 6px; border-radius: 14px; border: 1px solid var(--panel-border); background: var(--panel); box-shadow: var(--float); }
+.ss-menu[hidden] { display: none; }
+.ss-menu button { white-space: nowrap; display: flex; align-items: center; gap: 10px; min-height: 42px; padding: 0 12px; border: 0; border-radius: 10px; background: none; color: var(--ink); font: inherit; font-size: 14px; text-align: left; cursor: pointer; }
+.ss-menu button:hover, .ss-menu button:focus-visible { background: var(--surface-2); outline: none; }
+.ss-menu svg { width: 18px; height: 18px; flex: none; color: var(--ink-2); }
+.toast { position: fixed; left: 50%; bottom: 96px; z-index: 50; transform: translate(-50%, 12px); padding: 10px 16px; border-radius: 999px; background: var(--ink); color: var(--page); font-size: 14px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; }
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
 .ss-share:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 @media (max-width: 760px) {
   .ss-visual { grid-template-columns: 1fr; justify-items: center; text-align: center; padding: 28px 16px 0; gap: 20px; }
@@ -969,9 +978,9 @@ a.ftok:hover .ftok-c { transform: translateY(-2px); }
   .ss-title { margin-top: 4px; }
   .ss-quote { margin-top: 12px; }
   .ss-visual::before { background: linear-gradient(0deg, rgba(7,5,13,0.85) 0%, rgba(7,5,13,0.55) 60%, rgba(7,5,13,0.35) 100%); }
-  .ss-pick .fut-tiny { --w: 78px; } .ss-pick.p1 .fut-tiny { --w: 100px; }
-  .ss-pick { width: 94px; } .ss-pick.p1 { width: 114px; }
-  .ss-step { height: 12px; } .ss-pick.p1 .ss-step { height: 30px; } .ss-pick.p2 .ss-step { height: 20px; }
+  .ss-pick .fut-tiny { --w: 86px; } .ss-pick.p1 .fut-tiny { --w: 108px; }
+  .ss-podium { gap: 8px; } .ss-pick { width: 98px; } .ss-pick.p1 { width: 118px; }
+  .ss-step { height: 30px; font-size: 18px; padding-top: 5px; } .ss-pick.p1 .ss-step { height: 64px; font-size: 24px; } .ss-pick.p2 .ss-step { height: 44px; }
   .ss-panel { padding: 16px; gap: 14px; }
   .ss-figs { gap: 22px; }
   .ss-fig b { font-size: 28px; }
