@@ -94,12 +94,14 @@ alleen in Cloudflare.
   begint met een `.scard` per avond (datum, W-G-V, goals, team rating, tijdlijn met
   uitslagen en shirts, speler van de sessie met de portretfoto (`PlayerCard.portrait`, ook bij in vorm) of een icoon in een rondje in de kleuren van de vorm; nergens de duur van een avond); een tik opent
   `sessie.html?id=<id>` (eigen pagina, een laag dieper, zonder terugknop; *Sessies* is daar niet actief in het menu).
-  Een sessie begint met een podium (`.sess-stage`, coach-logica §9a): het stadion (`stadiumSvg()` in `common.js`), de
-  naam van de sessie groot met eronder de quote van de beste speler (`personaQuote`), W-G-V, Goals en Tegengoals met
-  rechts op dezelfde regel de deelknop (rond geel icoon), de top drie als `PlayerCard.tiny` op een podium (één in het midden, groter) die naar de
-  tabel scrollen (lange namen afgekapt met …), en onderin de wedstrijden als scrollbare `matchCard`-rij. De deelafbeelding
-  (`shareSession`) tekent dezelfde kop; dan *Zo speelden we*: de radar met standaard het team en per speler uit te lichten (geen
-  cijfers dubbel met het scorebord); dan *Per wedstrijd* (`renderMatrix`: kolommen spelers met een minikaartje (foto, gemiddelde, ▲/▼/– via `trend` en eronder *normaal*: de rating in alle andere wedstrijden), rijen
+  Een sessie begint met één kaart met een split (`.sess-stage`, coach-logica §9a): boven het beeld (`.ss-visual`) op
+  het stadion (`stadiumSvg()` in `common.js`, vaste kleuren) met gele regel, naam van de sessie, de quote van de beste
+  speler (`personaQuote`) en de top drie als `PlayerCard.tiny` op een podium (één in het midden, groter; treden
+  eindigen op de rand van het beeld; lange namen afgekapt met …; een tik scrollt naar de tabel); onder een paneel
+  (`.ss-panel`, themakleuren) met W-G-V, Goals en Tegengoals, rechts op dezelfde regel de deelknop (rond geel icoon),
+  en de wedstrijden als scrollbare `matchCard`-rij. De deelafbeelding
+  (`shareSession`) tekent dezelfde kop; dan *Zo speelden we*: de radar met standaard alleen het team, aantallen als totaal van de
+  avond; een tik op een naam licht die speler uit, nog een tik zet hem uit (geen knop *Team*); dan *Per wedstrijd* (`renderMatrix`: kolommen spelers met een minikaartje (foto, gemiddelde, ▲/▼/– via `trend` en eronder *normaal*: de rating in alle andere wedstrijden), rijen
   wedstrijden, cellen in goud/zilver/brons/ijzer naar de plek in die rij; *Spelers deze sessie* is weg, de kaarten
   bewaard in `sessionCardsHtml` voor een later FUT-pack; de tabel licht niet op bij aanraken). De radar (`renderRadar`
   in `public/sessie.js`): assen als percentiel tegenover onze eigen avonden, onder elke astitel de waarde en ons normaal.

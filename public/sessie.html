@@ -15,25 +15,25 @@
   <main class="content">
     <div class="session-detail" id="session-detail">
       <section class="sess-stage" id="s-hero" aria-labelledby="s-title">
-        <div class="ss-body">
+        <div class="ss-visual" id="s-visual">
           <div class="ss-id">
             <p class="ss-kicker" id="s-meta"></p>
             <h1 class="ss-title" id="s-title">…</h1>
             <blockquote class="ss-quote" id="s-quote"></blockquote>
-            <div class="ss-score">
-              <div class="ss-figs" id="s-record"></div>
-              <button type="button" class="ss-share" id="s-share" title="Deel deze avond als afbeelding" aria-label="Deel deze avond als afbeelding"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button>
-            </div>
           </div>
           <div class="ss-podium" id="s-podium" role="group" aria-label="Top drie van de avond"></div>
         </div>
-        <div class="ss-foot">
+        <div class="ss-panel">
+          <div class="ss-score">
+            <div class="ss-figs" id="s-record"></div>
+            <button type="button" class="ss-share" id="s-share" title="Deel deze avond als afbeelding" aria-label="Deel deze avond als afbeelding"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button>
+          </div>
           <div class="match-cards sh-matches" id="s-matches"></div>
         </div>
       </section>
       <section class="card">
-        <div class="card-head"><div><h2>Zo speelden we</h2><p class="hint">Standaard het team, tik een naam voor één speler: per as tegenover al onze eigen avonden; de gestippelde ring is een gewone avond.</p></div></div>
-        <div class="radar-wrap"><div id="s-radar" class="radar"></div><div class="radar-chips" id="s-radar-chips" role="group" aria-label="Team of speler uitlichten"></div></div>
+        <div class="card-head"><div><h2>Zo speelden we</h2><p class="hint">Het team over de hele avond; tik een naam om die speler uit te lichten en nog eens om terug te gaan, met per as de vergelijking met al onze eigen avonden (de gestippelde ring is een gewone avond).</p></div></div>
+        <div class="radar-wrap"><div id="s-radar" class="radar"></div><div class="radar-chips" id="s-radar-chips" role="group" aria-label="Speler uitlichten"></div></div>
       </section>
       <section class="card" id="per-wedstrijd">
         <h2>Per wedstrijd</h2>
