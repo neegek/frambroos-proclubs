@@ -410,7 +410,7 @@ Geen reeksen: die staan al in de rondjes bovenaan.
    *Verdedigen*: balwinst, onderscheppingen, tackles gewonnen van pogingen, de nul gehouden, reddingen (keepers).
    *Discipline*: balverlies, uit positie, overtredingen, kaarten. Alleen wat EA telt (§2 en docs/event-codes.md).
    Vóór de speler staat per regel een **rondje met de plek** van de speler onder onze spelers (sinds 31 oktober 2026),
-   in goud, zilver, brons of ijzer zoals bij de sessies. De plek gaat op het getal per wedstrijd (bij een percentage
+   in goud, zilver, brons of leigrijs zoals bij de sessies. De plek gaat op het getal per wedstrijd (bij een percentage
    het percentage), niet op het totaal: wie meer speelt, telt anders vanzelf meer. Wie hetzelfde getal heeft zoals het
    er staat (één decimaal, percentage afgerond), deelt de plek; de volgende plek telt door (1, 1, 2). Lager is beter
    bij balverlies, uit positie, overtredingen en kaarten. Mee doet wie minstens **3 wedstrijden** heeft voor die maat
@@ -462,14 +462,14 @@ the match was). Eerst de laatste twintig, de rest achter een knop.
 **split**, zodat elk deel bij zijn soort hoort en het met de thema's meeschaalt.
 - **Boven: het beeld** op het stadion van het Clubhouse (vaste kleuren, los van het thema): klein en geel type, aantal
   wedstrijden en aantal spelers; groot de **naam van de sessie** (de datum); daaronder de **quote van de beste
-  speler** (§9, Sessie) met de naam erachter op dezelfde regel; en de **top drie op een podium**: de nummer één in het
-  midden, groter en hoger, twee links, drie rechts. De **naam staat in het kaartje** onder de rating (past hij niet,
-  dan afgekapt met …, zodat de kaartjes even breed blijven); geen kroon voor man of the match. De **plek staat op de
-  trede** (1, 2, 3) in een medaillerondje in goud, zilver of brons, alle drie **op dezelfde hoogte** (rust in het
-  beeld), in plaats van op de kaart; elke trede heeft zelf een zachte tint van die kleur en de rand van het kaartje
-  ook. De naam in het kaartje houdt ruim afstand tot de rand. De treden zijn hoog genoeg om als podium te lezen en **eindigen op de rand van het beeld**: daar is het podium
-  afgesneden; een tik scrollt naar *Per wedstrijd*. Op een groot scherm de tekst links en het podium rechts, op telefoon
-  alles onder elkaar en gecentreerd.
+  speler** (§9, Sessie) met de naam erachter op dezelfde regel; en de **top drie** als kaartjes naast elkaar (sinds
+  1 november 2026 zonder podium): de nummer één in het midden en groter, twee links, drie rechts, met de onderkanten
+  op één lijn. De **plek staat in het kaartje** als medaille linksboven, de **naam in het kaartje** onder de rating
+  (afgekapt met … als hij niet past, met ruim afstand tot de rand). Rand en vlak in de kleur van de plek (zie
+  *Kleur van de plek*, §9c). Een tik scrollt naar *Per wedstrijd*. Op een groot scherm de tekst links en de kaartjes
+  rechts, op telefoon alles onder elkaar en gecentreerd, met ruimte tussen titel, quote en kaartjes.
+  **Vorige en volgende sessie**: op telefoon een rond icoonknopje linksboven (vorige, ouder) en rechtsboven (volgende,
+  nieuwer) in het beeld; een knop staat er alleen als die sessie bestaat.
 - **Onder: een paneel** in de kleuren van het thema (donker of licht): de uitslag in drie getallen, **W-G-V** in de
   uitslagkleuren, **Goals** en **Tegengoals** (geen doelsaldo, geen *de nul*), met op dezelfde regel rechts een
   ingetogen **deelknop** (rond icoon met een dunne rand, zonder label). Die opent een klein menu: *Afbeelding delen*
@@ -484,13 +484,14 @@ Tegengoals.
 
 **Per wedstrijd** (sinds 31 oktober 2026, vervangt *Spelers deze sessie*): een raster met per speler een kolom en
 per wedstrijd een rij (uitslag, shirt, score). Bovenaan per speler een **minikaartje** met foto, het gemiddelde van de
-avond en de **naam in het kaartje**; geen plek en geen vergelijking met normaal (sinds 1 november 2026 weggehaald:
+avond en de **naam in het kaartje**, in de kleur van de plek op dat gemiddelde (*Kleur van de plek*, zonder
+medaille); geen vergelijking met normaal (sinds 1 november 2026 weggehaald:
 te ingewikkeld voor wat het zei). De kolommen staan op volgorde van het gemiddelde.
 **Een tik op een cijfer** opent wat die speler in die wedstrijd deed (sinds 1 november 2026): de rating, en waar die
 op rust: goals, assists, schoten, passes gelukt van pogingen, tackles gewonnen van pogingen, balwinst en balverlies
 (uit de events), reddingen bij een keeper, man of the match, en het archetype. EA zegt niet hoe de rating berekend
 wordt; dit is wat erachter zit, niet de formule. Met een link naar de wedstrijd.
-Elke cel kleurt naar de plek in die rij: goud, zilver en brons voor de beste drie, ijzer voor de rest (gelijke ratings
+Elke cel kleurt naar de plek in die rij: goud, zilver en brons voor de beste drie, leigrijs voor de rest (gelijke ratings
 delen een plek). Man of the match met een kroon. Geen oplichten bij aanraken: aanklikken van een rij of kolom voor
 meer details is een latere stap. Op telefoon horizontaal scrollen met de wedstrijden vast links.
 **Metaalkleuren** (medailles, cellen): vlak met een heel zachte glans bovenaan, geen felle verlopen.
@@ -612,8 +613,15 @@ rest goud; dezelfde verdeling als met de laatste vijf.
 **Sessiekaart**: elke speler krijgt per sessie een eigen kaart, zoals een in-form-kaart in FC. Tier en foto volgen die
 sessie (minder dan 3 wedstrijden: goud), de zes cijfers zijn die van de avond: WED, RAT (gemiddeld), GLS | ASS, MOTM,
 WIN. Bij een sessie (top drie, en later het FUT-pack) krijgt de **buitenste rand** de kleur van de plek op
-rating die avond: goud (1), zilver (2), brons (3), en ijzer (donkergrijs) voor de rest. De binnenste rand blijft goud,
-zodat de tier (het vlak) en de plek (de rand) los te lezen zijn. Linksboven staat dan **de plek** in plaats van de
+rating die avond: goud (1), zilver (2), brons (3), en leigrijs voor de rest. De binnenste rand blijft goud,
+zodat de tier (het vlak) en de plek (de rand) los te lezen zijn.
+
+**Kleur van de plek** (sinds 1 november 2026): waar kaartjes een plek hebben (top drie en *Per wedstrijd* op de
+sessiepagina), volgen de **rand** én, bij een gewone kaart (tier goud, dus niet in vorm), ook het **vlak** de plek:
+goud voor één, zilver voor twee, brons voor drie, en **leigrijs** (koel blauwgrijs, met lichte tekst) voor de rest:
+duidelijk buiten de prijzen en niet te verwarren met het zwart van *in vorm*. Zo is een gouden kaart altijd de
+nummer één en niet "geen vorm". Een kaart in vorm of topvorm houdt het eigen vlak; alleen de rand toont de plek.
+Hetzelfde leigrijs voor de cellen en medailles buiten de top drie (vroeger ijzer). Linksboven staat dan **de plek** in plaats van de
 overall van de pro (die zegt over één avond niets), in een medaille in de kleur van de buitenrand; de top drie heeft
 daardoor geen apart nummerbolletje meer. Op een telefoon vallen archetype, clublogo en vlag op die kaart weg (te klein);
 op een groter scherm blijven ze staan. Elders (nieuws) blijft de buitenrand goud. De kaart van nu (spelerspagina, Selectie) blijft de carrièrecijfers van EA tonen, met de tier van de laatste

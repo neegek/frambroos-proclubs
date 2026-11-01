@@ -250,6 +250,9 @@ td.split small, .split small { color: var(--muted); }
 .fut-icon { width: 128px; height: 128px; color: var(--t-ink); opacity: 0.28; align-self: end; }
 /* Tiers (coach-logica §9c). Kleuren los van het thema. Contrast nagerekend op de lichtste en donkerste vlakken. */
 .fut[data-tier="goud"], .fut-tiny[data-tier="goud"], .mvp-avatar[data-tier="goud"] { --t-ink: #2a1d05; --t-muted: #3d2d08; --t-accent: #2a1d05; --t-photo: #b98c2a; --t-halo: rgba(255,244,210,0.9); --t-bg1: #f2dc92; --t-bg2: #d9b24a; --t-bg3: #c2932a; --t-ring: #8d6c15; --t-sheen: rgba(255,250,228,0.28); --t-dots: transparent; }
+.fut[data-tier="zilver"], .fut-tiny[data-tier="zilver"] { --t-ink: #1d2228; --t-muted: #3a4149; --t-accent: #1d2228; --t-photo: #9aa3ad; --t-halo: rgba(255,255,255,0.9); --t-bg1: #f1f3f5; --t-bg2: #c9cfd6; --t-bg3: #a2aab3; --t-ring: #737b85; --t-sheen: rgba(255,255,255,0.3); --t-dots: transparent; }
+.fut[data-tier="brons"], .fut-tiny[data-tier="brons"] { --t-ink: #241205; --t-muted: #3e220d; --t-accent: #241205; --t-photo: #a96e40; --t-halo: rgba(255,236,214,0.9); --t-bg1: #efc9a2; --t-bg2: #c98d5b; --t-bg3: #a66b3c; --t-ring: #74431c; --t-sheen: rgba(255,240,224,0.25); --t-dots: transparent; }
+.fut[data-tier="lei"], .fut-tiny[data-tier="lei"] { --t-ink: #eef2f6; --t-muted: #c8d0d9; --t-accent: #eef2f6; --t-photo: #4f5a67; --t-halo: rgba(20,26,33,0.8); --t-bg1: #77828f; --t-bg2: #56606c; --t-bg3: #3f4752; --t-ring: #9ea8b4; --t-sheen: rgba(255,255,255,0.08); --t-dots: transparent; }
 .fut[data-tier="zwart"], .fut-tiny[data-tier="zwart"], .mvp-avatar[data-tier="zwart"] { --t-ink: #f6e6b8; --t-muted: #cbb98a; --t-accent: #e9c767; --t-photo: #2a2214; --t-halo: rgba(0,0,0,0.85); --t-bg1: #241c0e; --t-bg2: #0e0c09; --t-bg3: #050403; --t-ring: #d9b04a; --t-sheen: rgba(233,199,103,0.07); --t-dots: transparent; }
 .fut[data-tier="top"], .fut-tiny[data-tier="top"], .mvp-avatar[data-tier="top"] { --t-ink: #ffffff; --t-muted: #d6dcff; --t-accent: #ffd98a; --t-photo: #14237a; --t-halo: rgba(3,6,30,0.85); --t-bg1: #1b2e9a; --t-bg2: #0b1a5c; --t-bg3: #05092b; --t-ring: #ffd98a; --t-sheen: rgba(255,255,255,0.06); --t-dots: rgba(255,217,138,0.45); }
 .fut-inner > * { position: relative; }
@@ -926,7 +929,7 @@ a.ftok:hover .ftok-c { transform: translateY(-2px); }
 .metal-gold, .rim-gold, .fut[data-rim="gold"] .fut-rank { background: linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0) 55%), #c9a548; color: #2a1d05; }
 .metal-silver, .rim-silver, .fut[data-rim="silver"] .fut-rank { background: linear-gradient(180deg, rgba(255,255,255,0.25), rgba(255,255,255,0) 55%), #b9c0c7; color: #1d2228; }
 .metal-bronze, .rim-bronze, .fut[data-rim="bronze"] .fut-rank { background: linear-gradient(180deg, rgba(255,255,255,0.2), rgba(255,255,255,0) 55%), #b8794a; color: #241205; }
-.metal-iron, .rim-iron, .fut[data-rim="iron"] .fut-rank { background: linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0) 55%), #4b5058; color: #f2f2f2; }
+.metal-iron, .rim-iron, .fut[data-rim="iron"] .fut-rank { background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0) 55%), #5d6774; color: #f4f6f9; }
 
 /* Minikaartje: de kaartvorm klein, met de plek linksboven en één cijfer onderin; breedte via --w. */
 .fut-tiny { --w: 76px; position: relative; display: block; width: var(--w); aspect-ratio: 300 / 430; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3)); }
@@ -940,27 +943,27 @@ a.ftok:hover .ftok-c { transform: translateY(-2px); }
    thema): type, naam, quote en het podium, waarvan de treden op de rand van het beeld eindigen. Onder een paneel in de
    kleuren van het thema: de uitslag met de deelknop en de wedstrijden. */
 .sess-stage { overflow: hidden; border-radius: 20px; background: var(--panel); border: 1px solid var(--panel-border); box-shadow: var(--float); }
-.ss-visual { position: relative; isolation: isolate; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 20px 40px; padding: 44px 40px 0; background: #07050d; color: #fff; }
+.ss-visual { position: relative; isolation: isolate; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 24px 40px; padding: 48px 40px 36px; background: #07050d; color: #fff; }
 .ss-visual .hh-stadium { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -2; }
 .ss-visual::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgba(7,5,13,0.88) 0%, rgba(7,5,13,0.5) 50%, rgba(7,5,13,0.15) 100%), linear-gradient(0deg, rgba(7,5,13,0.7) 0%, rgba(7,5,13,0) 55%); }
-.ss-id { padding-bottom: 36px; min-width: 0; }
+.ss-id { min-width: 0; }
 .ss-kicker { margin: 0; font-size: 12.5px; font-weight: 650; letter-spacing: 0.1em; text-transform: uppercase; color: #ffd200; }
 .ss-title { margin: 6px 0 0; font-size: clamp(30px, 4.6vw, 56px); font-weight: 800; letter-spacing: -0.035em; line-height: 1; color: #fff; }
 .ss-quote { margin: 16px 0 0; max-width: 56ch; }
 .ss-quote p { margin: 0; font-size: 16px; font-style: italic; line-height: 1.45; color: #efeaf3; }
 .ss-quote cite { font-size: 13px; font-style: normal; font-weight: 600; color: #d9d4e0; white-space: nowrap; }
-.ss-podium { display: flex; align-items: flex-end; gap: 12px; }
-.ss-pick { display: grid; justify-items: center; gap: 6px; width: 120px; min-width: 0; text-decoration: none; color: #fff; }
+.ss-podium { display: flex; align-items: flex-end; gap: 14px; }
+.ss-pick { display: grid; justify-items: center; width: 120px; min-width: 0; text-decoration: none; color: #fff; }
 .ss-pick.p1 { width: 156px; }
+.ss-pick .ft-rank { width: 26%; }
+/* Vorige en volgende sessie: alleen op telefoon, rond in de bovenhoeken van het beeld. */
+.ss-nav { display: none; position: absolute; top: 14px; z-index: 1; width: 40px; height: 40px; place-items: center; border-radius: 50%; border: 1px solid rgba(255,255,255,0.25); background: rgba(7,5,13,0.45); color: #fff; backdrop-filter: blur(4px); }
+.ss-nav svg { width: 18px; height: 18px; }
+.ss-nav.prev { left: 14px; } .ss-nav.next { right: 14px; }
+.ss-nav:hover { background: rgba(255,255,255,0.14); }
 .ss-pick .fut-tiny { --w: 108px; transition: transform .15s; }
 .ss-pick.p1 .fut-tiny { --w: 144px; }
 .ss-pick:hover .fut-tiny { transform: translateY(-3px); }
-.ss-step { width: 100%; height: 48px; margin-top: 4px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 8px; border-radius: 10px 10px 0 0; }
-.ss-pick.p1 .ss-step { height: 92px; background: linear-gradient(180deg, rgba(201,165,72,0.62), rgba(201,165,72,0.12)); }
-.ss-pick.p2 .ss-step { height: 66px; background: linear-gradient(180deg, rgba(185,192,199,0.5), rgba(185,192,199,0.1)); }
-.ss-pick.p3 .ss-step { background: linear-gradient(180deg, rgba(184,121,74,0.55), rgba(184,121,74,0.1)); }
-/* De plek als medaille, bij alle drie op dezelfde hoogte (de treden staan op één lijn). */
-.ss-step b { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%; font: 800 16px/1 var(--num-font); box-shadow: 0 1px 3px rgba(0,0,0,0.4); }
 /* Naam in het minikaartje, onder de rating; afgekapt met … als hij niet past. */
 .fut-tiny.has-name .ft-val { bottom: 25%; }
 .ft-name { position: absolute; left: 15%; right: 15%; bottom: 13%; text-align: center; font: 700 calc(var(--w) * 0.11)/1.15 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--t-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -984,17 +987,16 @@ a.ftok:hover .ftok-c { transform: translateY(-2px); }
 .toast.on { opacity: 1; transform: translate(-50%, 0); }
 .ss-share:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 @media (max-width: 760px) {
-  .ss-visual { grid-template-columns: 1fr; justify-items: center; text-align: center; padding: 28px 16px 0; gap: 20px; }
-  .ss-id { padding-bottom: 0; }
-  .ss-title { margin-top: 4px; }
-  .ss-quote { margin-top: 12px; }
+  .ss-visual { grid-template-columns: 1fr; justify-items: center; text-align: center; padding: 68px 20px 30px; gap: 28px; }
+  .ss-nav { display: grid; }
+  .ss-title { margin-top: 8px; font-size: clamp(26px, 7.6vw, 40px); }
+  .ss-quote { margin-top: 16px; }
+  .ss-quote p { font-size: 15px; line-height: 1.5; }
   .ss-visual::before { background: linear-gradient(0deg, rgba(7,5,13,0.85) 0%, rgba(7,5,13,0.55) 60%, rgba(7,5,13,0.35) 100%); }
-  .ss-pick .fut-tiny { --w: 86px; } .ss-pick.p1 .fut-tiny { --w: 108px; }
-  .ss-podium { gap: 8px; } .ss-pick { width: 98px; } .ss-pick.p1 { width: 118px; }
-  .ss-step { height: 40px; padding-bottom: 6px; } .ss-pick.p1 .ss-step { height: 72px; } .ss-pick.p2 .ss-step { height: 54px; }
-  .ss-step b { width: 28px; height: 28px; font-size: 14px; }
-  .ss-panel { padding: 16px; gap: 14px; }
-  .ss-figs { gap: 22px; }
+  .ss-pick .fut-tiny { --w: 90px; } .ss-pick.p1 .fut-tiny { --w: 112px; }
+  .ss-podium { gap: 10px; } .ss-pick { width: 94px; } .ss-pick.p1 { width: 114px; }
+  .ss-panel { padding: 20px 18px 22px; gap: 18px; }
+  .ss-figs { gap: 24px; }
   .ss-fig b { font-size: 28px; }
 }
 /* Teken op het minikaartje bij Per wedstrijd: sterker, zwakker of gelijk dan normaal. */
