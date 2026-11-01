@@ -81,6 +81,10 @@ function render() {
   const names = [...new Set(ms.flatMap(m => m.players.map(p => p.name)))];
   $('#s-title').textContent = cap(longDate(ms[0].ts));
   if (!$('#s-visual .hh-stadium')) $('#s-visual').insertAdjacentHTML('afterbegin', stadiumSvg());
+  // Vorige en volgende sessie (op telefoon): alleen een knop als die sessie bestaat.
+  const at = sessions.indexOf(s), nav = (to, cls, label, d) => to ? `<a class="ss-nav ${cls}" href="sessie.html?id=${to.id}" aria-label="${label}: ${esc(cap(longDate(to.matches[0].ts)))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg></a>` : '';
+  $('#s-visual').querySelectorAll('.ss-nav').forEach(a => a.remove());
+  $('#s-visual').insertAdjacentHTML('beforeend', nav(sessions[at - 1], 'prev', 'Vorige sessie', 'M15 18l-6-6 6-6') + nav(sessions[at + 1], 'next', 'Volgende sessie', 'M9 18l6-6-6-6'));
   $('#s-meta').textContent = `${typeLabel(ms)} · ${plural(ms.length, 'wedstrijd', 'wedstrijden')} · ${names.length} spelers`;
 
   const opp = avg(ms.map(m => m.opponent.skillRating).filter(Boolean));
@@ -102,11 +106,11 @@ function render() {
   const best = prow.find(r => r.rH !== null), quote = best ? { text: personaQuote(best.name, sum.theme), who: proName(best.name) } : null;
   $('#s-quote').innerHTML = quote ? `<p>„${esc(quote.text)}” <cite>— ${esc(quote.who)}</cite></p>` : '';
   SHARE = { ms, sm, quote, prow };
-  // Top drie op een podium: één in het midden, groter en hoger; twee links, drie rechts. Naam in het kaartje, de plek op
-  // de trede (de rand houdt de kleur van de plek). Een tik scrollt naar Per wedstrijd.
+  // Top drie naast elkaar: één in het midden en groter, twee links, drie rechts. Plek als medaille en naam in het kaartje,
+  // rand en vlak in de kleur van de plek (coach-logica §9c). Een tik scrollt naar Per wedstrijd.
   const top = prow.filter(r => r.rH !== null).slice(0, 3);
   const pick = (r, i) => `<a class="ss-pick p${i + 1}" href="#per-wedstrijd" title="${esc(proName(r.name))}: rating ${f1(r.rH)} deze avond">
-      ${PlayerCard.tiny(r.name, { session: s.id, rank: i + 1, medal: false, label: proName(r.name), value: f1(r.rH), key: '-p' })}<span class="ss-step" aria-hidden="true"><b class="metal-${RIM(i + 1)}">${i + 1}</b></span></a>`;
+      ${PlayerCard.tiny(r.name, { session: s.id, rank: i + 1, label: proName(r.name), value: f1(r.rH), key: '-p' })}</a>`;
   $('#s-podium').innerHTML = [1, 0, 2].filter(i => top[i]).map(i => pick(top[i], i)).join('');
   for (const a of $('#s-podium').querySelectorAll('a')) a.addEventListener('click', e => { e.preventDefault(); $('#per-wedstrijd').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
   PlayerCard.reveal($('#s-podium'));
@@ -145,7 +149,9 @@ const RIM = rank => rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? '
 const rankIn = (v, list) => 1 + [...new Set(list.filter(x => x > v))].length;
 function renderMatrix(ms, prow) {
   const cols = prow.filter(r => r.rH !== null);
-  const head = cols.map(r => `<th scope="col"><a class="rm-player" href="spelers.html#${encodeURIComponent(r.name)}" title="${esc(proName(r.name))}: ${f1(r.rH)} deze avond">${PlayerCard.tiny(r.name, { session: SESSION_ID, value: f1(r.rH), label: proName(r.name), key: '-m' })}</a></th>`).join('');
+  // Kaartjes in de kleur van de plek op het gemiddelde van de avond, zonder medaille (coach-logica §9a).
+  const avgs = cols.map(r => r.rH);
+  const head = cols.map(r => `<th scope="col"><a class="rm-player" href="spelers.html#${encodeURIComponent(r.name)}" title="${esc(proName(r.name))}: ${f1(r.rH)} deze avond, plek ${rankIn(r.rH, avgs)}">${PlayerCard.tiny(r.name, { session: SESSION_ID, rank: rankIn(r.rH, avgs), medal: false, value: f1(r.rH), label: proName(r.name), key: '-m' })}</a></th>`).join('');
   const rows = ms.map(m => {
     const ps = cols.map(r => m.players.find(p => p.name === r.name)), vals = ps.filter(p => p && p.rating !== null).map(p => p.rating);
     const cell = p => !p || p.rating === null ? '<td class="rm-none">–</td>'
@@ -346,22 +352,14 @@ async function shareImage({ ms, sm, quote }) {
   }
   // Podium: dezelfde kaartjes als op de pagina, met foto, plek en rating; nummer één in het midden.
   const picks = [...document.querySelectorAll('#s-podium .ss-pick')];
-  const base = 836, STEP = { p1: 104, p2: 72, p3: 48 };
+  const base = 836;
   const spec = { p1: { w: 250, x: W / 2 }, p2: { w: 196, x: W / 2 - 250 }, p3: { w: 196, x: W / 2 + 250 } };
   for (const a of picks) {
     const k = ['p1', 'p2', 'p3'].find(x => a.classList.contains(x)), { w, x } = spec[k], h = w * 430 / 300;
     const tiny = a.querySelector('.fut-tiny'), cs = getComputedStyle(tiny), v = n => cs.getPropertyValue(n).trim();
     const rim = { p1: 'gold', p2: 'silver', p3: 'bronze' }[k];
     const photo = await loadImg(a.querySelector('image')?.getAttribute('href'));
-    const s = w / 300, x0 = x - w / 2, y0 = Math.max(y + 24, base - STEP[k] - h - 10);
-    // De trede met de plek erop.
-    const sx = x - w / 2 - 12, sw = w + 24, sy = base - STEP[k];
-    // Trede in de kleur van de plek; de plek als medaille, bij alle drie op dezelfde hoogte.
-    const [mc, mi] = { p1: ['201,165,72', '#2a1d05'], p2: ['185,192,199', '#1d2228'], p3: ['184,121,74', '#241205'] }[k];
-    let sg = g.createLinearGradient(0, sy, 0, base); sg.addColorStop(0, `rgba(${mc},0.62)`); sg.addColorStop(1, `rgba(${mc},0.1)`);
-    g.fillStyle = sg; g.beginPath(); g.roundRect(sx, sy, sw, STEP[k], [12, 12, 0, 0]); g.fill();
-    g.fillStyle = `rgb(${mc})`; g.beginPath(); g.arc(x, base - 30, 24, 0, 7); g.fill();
-    g.fillStyle = mi; mono(28, 800); g.textAlign = 'center'; g.fillText(k.slice(1), x, base - 20);
+    const s = w / 300, x0 = x - w / 2, y0 = Math.max(y + 24, base - h); // onderkanten op één lijn, geen podium
     g.save(); g.translate(x0, y0); g.scale(s, s);
     const shape = new Path2D(PlayerCard.shape), inset = (sx, sy) => { g.translate(150, 215); g.scale(sx, sy); g.translate(-150, -215); };
     g.shadowColor = 'rgba(0,0,0,0.45)'; g.shadowBlur = 24 / s; g.shadowOffsetY = 8 / s;
@@ -378,7 +376,10 @@ async function shareImage({ ms, sm, quote }) {
       g.fillStyle = gr; g.fillRect(0, 188, 300, 66);
     }
     g.restore();
-    // Rating en naam in het kaartje; de naam afgekapt op de breedte van de kaart.
+    // De plek als medaille linksboven, rating en naam in het kaartje; de naam afgekapt op de breedte van de kaart.
+    const [mc, mi] = { p1: ['#c9a548', '#2a1d05'], p2: ['#b9c0c7', '#1d2228'], p3: ['#b8794a', '#241205'] }[k];
+    g.fillStyle = mc; g.beginPath(); g.arc(70, 78, 36, 0, 7); g.fill();
+    g.fillStyle = mi; mono(42, 800); g.textAlign = 'center'; g.fillText(k.slice(1), 70, 93);
     g.fillStyle = v('--t-ink') || '#f6e6b8'; g.textAlign = 'center'; mono(88, 800); g.fillText(a.querySelector('.ft-val')?.textContent || '', 150, 318);
     font(30, 700); let nm = a.querySelector('.ft-name')?.textContent.trim() || '';
     while (nm.length > 1 && g.measureText(nm).width > 190) nm = nm.slice(0, -2).trimEnd() + '…';

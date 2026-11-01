@@ -71,6 +71,8 @@ alleen in Cloudflare.
   zijn meet EA niet; "geen goede optie" is de benadering en heet *lastige balmomenten*.
 - Advies en samenvattingen: volg coach-logica §1, §8 en §9. Kort gezegd: verder kijken dan één cijfer, twee richtingen,
   build bepaalt wat goed is, iedereen dezelfde opbouw, samenvattingen kwalitatief in drie of vier zinnen.
+- Kleur van de plek (coach-logica §9c): bij kaartjes met `rank` volgen rand en, bij een gewone kaart (tier goud), ook het
+  vlak de plek: goud, zilver, brons, leigrijs voor de rest (`faceOf` in `playercard.js`); in vorm en topvorm houden hun vlak.
 - Een naam bij een spelerskaart(je) staat ín het kaartje (`label` bij `PlayerCard.tiny`), niet eronder.
 - Namen voluit zoals EA ze geeft (Petra Selie, niet P. Selie); te lang: afkappen met …, nooit zelf afkorten.
 - Over spelers geen *hij* of *zij*. Waar de app over onze spelers praat of ze noemt (samenvattingen, nieuws, ranglijsten,
@@ -98,14 +100,14 @@ alleen in Cloudflare.
   `sessie.html?id=<id>` (eigen pagina, een laag dieper, zonder terugknop; *Sessies* is daar niet actief in het menu).
   Een sessie begint met één kaart met een split (`.sess-stage`, coach-logica §9a): boven het beeld (`.ss-visual`) op
   het stadion (`stadiumSvg()` in `common.js`, vaste kleuren) met gele regel, naam van de sessie, de quote van de beste
-  speler (`personaQuote`) en de top drie als `PlayerCard.tiny` (`medal: false`, naam in het kaartje via `label`) op
-  een podium (één in het midden, groter; de plek als medaille op de trede, alle drie even hoog, treden in de kleur van de plek; treden eindigen op de rand van het beeld;
-  geen kroon; een tik scrollt naar de tabel); onder een paneel (`.ss-panel`, themakleuren) met W-G-V, Goals en
+  speler (`personaQuote`) en de top drie als `PlayerCard.tiny` naast elkaar (geen podium; één in het midden, groter;
+  plek als medaille en naam via `label` in het kaartje; geen kroon; een tik scrollt naar de tabel); op telefoon
+  linksboven en rechtsboven ronde knoppen naar de vorige en volgende sessie (`.ss-nav`, alleen als die bestaat); onder een paneel (`.ss-panel`, themakleuren) met W-G-V, Goals en
   Tegengoals, rechts op dezelfde regel een ingetogen deelknop met menu (afbeelding delen of downloaden, afbeelding
   kopiëren, gegevens kopiëren als tekst),
   en de wedstrijden als scrollbare `matchCard`-rij. De deelafbeelding
   (`shareSession`) tekent dezelfde kop; dan *Zo speelden we*: de radar met alle vlakken zichtbaar, standaard het team het felst, aantallen als totaal van de
-  avond; een tik op een naam licht die speler uit, nog een tik zet hem uit (geen knop *Team*); dan *Per wedstrijd* (`renderMatrix`: kolommen spelers met een minikaartje (foto, gemiddelde, naam in het kaartje; geen normaal), rijen
+  avond; een tik op een naam licht die speler uit, nog een tik zet hem uit (geen knop *Team*); dan *Per wedstrijd* (`renderMatrix`: kolommen spelers met een minikaartje (foto, gemiddelde, naam in het kaartje, kleur van de plek zonder medaille; geen normaal), rijen
   wedstrijden, cellen in goud/zilver/brons/ijzer naar de plek in die rij, een tik op een cel opent `#cell-dialog` met wat de speler die wedstrijd deed; *Spelers deze sessie* is weg, de kaarten
   bewaard in `sessionCardsHtml` voor een later FUT-pack; de tabel licht niet op bij aanraken). De radar (`renderRadar`
   in `public/sessie.js`): assen als percentiel tegenover onze eigen avonden, onder elke astitel de waarde en ons normaal.

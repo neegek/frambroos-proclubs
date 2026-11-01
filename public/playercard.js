@@ -42,8 +42,11 @@ const FUT_SHAPE = 'M18 62Q150 -8 282 62L282 352C282 380 262 400 230 408C200 414 
 // Buitenste rand: goud, of bij een sessie de kleur van de plek op rating (coach-logica §9c). De binnenrand blijft goud.
 const RIMS = {
   gold: ['#fff1bd', '#d9b04a', '#8d6c15', '#f1d27a'], silver: ['#ffffff', '#c3c9d0', '#737b85', '#e4e8ec'],
-  bronze: ['#f6d2ae', '#c27f45', '#74431c', '#e3a674'], iron: ['#a3a9b0', '#5f656d', '#2f3338', '#7d838b'],
+  bronze: ['#f6d2ae', '#c27f45', '#74431c', '#e3a674'], iron: ['#c3ccd7', '#76828f', '#454e5a', '#9ea8b4'], // leigrijs: buiten de prijzen
 };
+// Kleur van de plek (coach-logica §9c): bij een gewone kaart (tier goud) volgt ook het vlak de plek.
+const RANK_TIER = { 1: 'goud', 2: 'zilver', 3: 'brons' };
+const faceOf = (tier, rank) => rank && tier === 'goud' ? RANK_TIER[rank] || 'lei' : tier;
 const rimOf = rank => !rank ? 'gold' : rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : 'iron';
 function futFrame(photo, uid, rim = 'gold') {
   const id = k => `fut-${k}-${uid}`;
@@ -128,7 +131,7 @@ function cardOf(name, { session = null, key = '', rank = null } = {}) {
   const tierNames = { goud: 'goud', zwart: 'zwart-goud, in vorm', top: 'topvorm' };
   const shown = cardName(career, name);
   const col = list => `<div class="fut-col">${list.map(([l, v]) => `<div><b>${v}</b><span>${l}</span></div>`).join('')}</div>`;
-  const html = `<div class="fut${photo ? ' has-photo' : ''}${rank ? ' ranked' : ''}" data-tier="${tier.tier}"${rank ? ` data-rim="${rimOf(rank)}"` : ''} role="img" title="Kaart: ${tierNames[tier.tier]}${tier.why ? ` (${tier.why})` : ''}" aria-label="Spelerskaart van ${esc(name)}: overall ${career?.proOverall ?? 'onbekend'}, ${info ? info.name : ''}, ${tierNames[tier.tier]}">
+  const html = `<div class="fut${photo ? ' has-photo' : ''}${rank ? ' ranked' : ''}" data-tier="${faceOf(tier.tier, rank)}"${rank ? ` data-rim="${rimOf(rank)}"` : ''} role="img" title="Kaart: ${tierNames[tier.tier]}${tier.why ? ` (${tier.why})` : ''}" aria-label="Spelerskaart van ${esc(name)}: overall ${career?.proOverall ?? 'onbekend'}, ${info ? info.name : ''}, ${tierNames[tier.tier]}">
       ${futFrame(photo, `${slugOf(name)}${session === null ? '' : `-s${session}`}${key}`, rimOf(rank))}
       <div class="fut-inner">
         <div class="fut-top">
@@ -155,7 +158,7 @@ function tinyOf(name, { session, rank = null, trend = null, value, key = '-t', m
   const tier = tierAt(all.filter(x => x.p.rating !== null), session), photo = photoOf(name, tier.tier), rim = rimOf(rank);
   const badge = rank && medal ? `<span class="ft-rank metal-${rim}">${rank}</span>` : rank ? '' : trend ? `<span class="ft-rank ft-trend ${trend}">${TREND[trend][0]}</span>` : '';
   const label = rank ? `plek ${rank}` : trend ? TREND[trend][1] : '';
-  return `<span class="fut-tiny${nameLabel ? ' has-name' : ''}" data-tier="${tier.tier}" data-rim="${rim}" role="img" aria-label="${esc(proName(name))}: ${label ? `${label}, ` : ''}rating ${value}">
+  return `<span class="fut-tiny${nameLabel ? ' has-name' : ''}" data-tier="${faceOf(tier.tier, rank)}" data-rim="${rim}" role="img" aria-label="${esc(proName(name))}: ${label ? `${label}, ` : ''}rating ${value}">
     ${futFrame(photo, `${slugOf(name)}-s${session}${key}`, rim)}${photo ? '' : `<span class="ft-icon">${personIcon()}</span>`}
     ${badge}<span class="ft-val">${value}</span>${nameLabel ? `<span class="ft-name">${esc(nameLabel)}</span>` : ''}</span>`;
 }
