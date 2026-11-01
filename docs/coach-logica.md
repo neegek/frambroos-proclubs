@@ -506,7 +506,15 @@ De radar eronder vertelt **hoe we speelden**; geen cijfers dubbel. De top drie s
 het stadion met de dag en de uitslag (W-G-V, Goals, Tegen); dan de **beste speler van de avond** met het kaartje (plek,
 rating, naam), de naam, het gemiddelde en de quote ernaast; dan **iedereen van beste tot minste**: plek als medaille,
 portret, naam, rating van de avond en rechts de maten die de rating dragen (dezelfde als in het spelersscherm, zonder
-de rating zelf): goals, creëren, passen, balwinst en duels, aantallen als totaal van de avond.
+de rating zelf): goals, assists, passen (percentage), balwinst en gewonnen duels (aantallen, geen percentage bij
+weinig pogingen). Per speler staan de cijfers die bij de rol van die avond horen fel, de rest gedimd: aanval goals en
+assists; middenveld assists, passen en balwinst; verdediging balwinst, duels en passen; keeper passen.
+
+**Plek op een avond** (top drie, *Per wedstrijd*, deelkaart): op het exacte gemiddelde van de rating, niet op het
+afgeronde getal (7,10 gaat voor 7,08, ook al staat er twee keer 7,1). Alleen bij precies hetzelfde gemiddelde beslist
+een succesmaat van de rol van die avond (de positie die het vaakst voorkwam): aanval goals plus assists per
+wedstrijd, middenveld passnauwkeurigheid, verdediging gewonnen tackles van de pogingen, keeper reddingen per wedstrijd.
+Pas als ook die gelijk is, delen spelers de plek.
 
 **Per wedstrijd** (sinds 31 oktober 2026, vervangt *Spelers deze sessie*): een raster met per speler een kolom en
 per wedstrijd een rij (uitslag, shirt, score). Bovenaan per speler een **minikaartje** met foto, het gemiddelde van de

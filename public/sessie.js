@@ -128,7 +128,9 @@ function render() {
     const there = others.map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p);
     const rH = avg(here.map(r => r.p.rating).filter(v => v !== null)), rT = avg(there.map(r => r.p.rating).filter(v => v !== null));
     return { name, n: here.length, nT: there.length, rH, rT, d: rT === null || rH === null ? null : rH - rT, g: pSum(here, p => p.goals), a: pSum(here, p => p.assists), mom: pSum(here, p => p.mom) };
-  }).sort((x, y) => (y.rH ?? 0) - (x.rH ?? 0));
+  }).map(r => ({ ...r, ...roleOf(ms, r.name) })).sort((x, y) => (y.rH ?? -1) - (x.rH ?? -1) || y.tb - x.tb);
+  // Plek: op het exacte gemiddelde; alleen bij precies hetzelfde gemiddelde én dezelfde rolmaat een gedeelde plek.
+  prow.forEach((r, i) => { const p = prow[i - 1]; r.place = p && p.rH === r.rH && p.tb === r.tb ? p.place : i + 1; });
   const sum = sessionSummary(ms, sm, opp, own, prow);
   // De quote: een cruijffiaanse uitspraak van de beste speler van de avond, in de eigen stem (personas.js).
   const quote = sessionQuote(s);
@@ -138,7 +140,7 @@ function render() {
   // rand en vlak in de kleur van de plek (coach-logica §9c). Een tik scrollt naar Per wedstrijd.
   const top = prow.filter(r => r.rH !== null).slice(0, 3);
   const pick = (r, i) => `<a class="ss-pick p${i + 1}" href="spelers.html#${encodeURIComponent(r.name)}" data-n="${esc(r.name)}" aria-haspopup="dialog" title="${esc(proName(r.name))}: rating ${f1(r.rH)} deze avond">
-      ${PlayerCard.tiny(r.name, { session: s.id, rank: i + 1, label: proName(r.name), value: f1(r.rH), key: '-p' })}</a>`;
+      ${PlayerCard.tiny(r.name, { session: s.id, rank: r.place, label: proName(r.name), value: f1(r.rH), key: '-p' })}</a>`;
   $('#s-podium').innerHTML = [1, 0, 2].filter(i => top[i]).map(i => pick(top[i], i)).join('');
   for (const a of $('#s-podium').querySelectorAll('a')) a.addEventListener('click', e => { e.preventDefault(); openPlayer(a.dataset.n); });
   PlayerCard.reveal($('#s-podium'));
@@ -149,6 +151,20 @@ function render() {
 
 // Sessiekaarten van alle spelers met plek, rating, groei en reeks (wat eerst *Spelers deze sessie* was). Nu niet op de
 // pagina (dubbel met *Per wedstrijd*); bewaard voor het FUT-pack per sessie (coach-logica §9a, idee).
+// Rol van een speler op een avond (de positie die het vaakst voorkwam) en de rolmaat die bij precies hetzelfde
+// gemiddelde beslist (coach-logica §9a): aanval goals plus assists, middenveld passnauwkeurigheid, verdediging
+// gewonnen tackles van de pogingen, keeper reddingen; alles per wedstrijd.
+const ROLE_STATS = { forward: ['goals', 'assists'], midfielder: ['assists', 'pass', 'won'], defender: ['won', 'duels', 'pass'], goalkeeper: ['pass'] };
+function roleOf(ms, name) {
+  const ps = ms.map(m => m.players.find(p => p.name === name)).filter(Boolean), n = ps.length || 1, cnt = {};
+  for (const p of ps) cnt[p.pos] = (cnt[p.pos] || 0) + 1;
+  const role = Object.entries(cnt).sort((a, b) => b[1] - a[1])[0]?.[0] || 'midfielder', sum = f => ps.reduce((a, p) => a + (f(p) || 0), 0);
+  const ratio = (a, b) => b ? a / b : 0;
+  const tb = role === 'forward' ? (sum(p => p.goals) + sum(p => p.assists)) / n : role === 'defender' ? ratio(sum(p => p.tacklesMade), sum(p => p.tackleAttempts))
+    : role === 'goalkeeper' ? sum(p => p.saves) / n : ratio(sum(p => p.passesMade), sum(p => p.passAttempts));
+  return { role, tb };
+}
+
 function sessionCardsHtml(s, ms, prow) {
   return `<div class="splayers">${prow.map((r, i) => {
     const rows = ms.map(m => ({ m, p: m.players.find(p => p.name === r.name) })).filter(x => x.p);
@@ -178,8 +194,7 @@ const rankIn = (v, list) => 1 + [...new Set(list.filter(x => x > v))].length;
 function renderMatrix(ms, prow) {
   const cols = prow.filter(r => r.rH !== null);
   // Kaartjes in de kleur van de plek op het gemiddelde van de avond, zonder medaille (coach-logica §9a).
-  const avgs = cols.map(r => r.rH);
-  const head = cols.map(r => `<th scope="col"><a class="rm-player" href="spelers.html#${encodeURIComponent(r.name)}" data-n="${esc(r.name)}" aria-haspopup="dialog" title="${esc(proName(r.name))}: ${f1(r.rH)} deze avond, plek ${rankIn(r.rH, avgs)}">${PlayerCard.tiny(r.name, { session: SESSION_ID, rank: rankIn(r.rH, avgs), medal: false, value: f1(r.rH), label: proName(r.name), key: '-m' })}</a></th>`).join('');
+  const head = cols.map(r => `<th scope="col"><a class="rm-player" href="spelers.html#${encodeURIComponent(r.name)}" data-n="${esc(r.name)}" aria-haspopup="dialog" title="${esc(proName(r.name))}: ${f1(r.rH)} deze avond, plek ${r.place}">${PlayerCard.tiny(r.name, { session: SESSION_ID, rank: r.place, medal: false, value: f1(r.rH), label: proName(r.name), key: '-m' })}</a></th>`).join('');
   const rows = ms.map(m => {
     const ps = cols.map(r => m.players.find(p => p.name === r.name)), vals = ps.filter(p => p && p.rating !== null).map(p => p.rating);
     const cell = p => !p || p.rating === null ? '<td class="rm-none">–</td>'
@@ -439,14 +454,15 @@ async function shareImage({ ms, sm, quote, prow }) {
       for (const l of lines(`„${quote.text}”`, tw).slice(0, 4)) { g.fillText(l, tx, qy); qy += 42; } }
   }
   // Iedereen van beste tot minste: plek, portret, naam, rating, en de maten die de rating dragen.
-  const cols = [['Goals', 'goals'], ['Creëren', 'create'], ['Passen', 'pass'], ['Balwinst', 'won'], ['Duels', 'duels']];
-  const colX = [625, 738, 848, 952, 1025];
+  // Vooral relevante cijfers: aantallen (duels als gewonnen duels), en per speler fel wat bij de rol van die avond hoort.
+  const cols = [['Goals', 'goals'], ['Assists', 'assists'], ['Passen', 'pass'], ['Balwinst', 'won'], ['Duels', 'duels']];
+  const colX = [645, 750, 855, 955, 1025];
   g.fillStyle = '#9a95a3'; font(20, 650); g.textAlign = 'right';
-  g.fillText('Rating', 560, LIST_Y); cols.forEach(([l], i) => g.fillText(l, colX[i], LIST_Y));
-  const rank = (v, all) => 1 + [...new Set(all.filter(x => x > v))].length, avgs = list.map(r => r.rH);
+  g.fillText('Rating', 545, LIST_Y); cols.forEach(([l], i) => g.fillText(l, colX[i], LIST_Y));
+
   for (const [i, r] of list.entries()) {
     const y = LIST_Y + 24 + i * ROW, mid = y + ROW / 2, rows = ms.map(m => ({ m, p: m.players.find(p => p.name === r.name) })).filter(x => x.p);
-    const st = nightStats(rows), n = rows.length, k = rank(r.rH, avgs);
+    const st = nightStats(rows), n = rows.length, k = r.place;
     if (i % 2 === 0) { g.fillStyle = 'rgba(255,255,255,0.035)'; g.beginPath(); g.roundRect(40, y + 4, W - 80, ROW - 8, 14); g.fill(); }
     const [mc, mi] = k === 1 ? ['#c9a548', '#2a1d05'] : k === 2 ? ['#b9c0c7', '#1d2228'] : k === 3 ? ['#b8794a', '#241205'] : ['#5d6774', '#f4f6f9'];
     g.fillStyle = mc; g.beginPath(); g.arc(84, mid, 20, 0, 7); g.fill(); g.fillStyle = mi; mono(22, 800); g.textAlign = 'center'; g.fillText(String(k), 84, mid + 8);
@@ -455,9 +471,12 @@ async function shareImage({ ms, sm, quote, prow }) {
     if (ph) { const s2 = Math.max(56 / ph.width, 56 / ph.height); g.drawImage(ph, 150 - ph.width * s2 / 2, mid - 28, ph.width * s2, ph.height * s2); }
     g.restore();
     g.textAlign = 'left'; g.fillStyle = '#fff'; font(30, 650); g.fillText(fit(proName(r.name), 300), 194, mid + 10);
-    g.textAlign = 'right'; mono(32, 700); g.fillStyle = '#ffd200'; g.fillText(f1(r.rH), 560, mid + 11);
+    g.textAlign = 'right'; mono(32, 700); g.fillStyle = '#ffd200'; g.fillText(f1(r.rH), 545, mid + 11);
     g.fillStyle = '#efeaf3'; mono(28, 600);
-    cols.forEach(([, key], j) => { const a = RADAR_AXES.find(x => x.key === key), v = st[key]; g.fillText(v === null ? '–' : radarShow(a, v, n), colX[j], mid + 10); });
+    const sum = f => rows.reduce((a, x) => a + (f(x.p) || 0), 0), relevant = ROLE_STATS[r.role] || [];
+    const val = { goals: sum(p => p.goals), assists: sum(p => p.assists), pass: st.pass === null ? '–' : `${Math.round(100 * st.pass)}%`,
+      won: rows.some(x => x.p.ev) ? sum(p => p.ev?.possession_won) : '–', duels: sum(p => p.tacklesMade) };
+    cols.forEach(([, key], j) => { g.fillStyle = relevant.includes(key) ? '#ffffff' : '#7d7788'; mono(28, relevant.includes(key) ? 700 : 500); g.fillText(String(val[key]), colX[j], mid + 10); });
   }
   g.textAlign = 'center'; g.fillStyle = '#a9a2b3'; font(22); g.fillText('Frambroos Coach · neegek.github.io/frambroos-proclubs', W / 2, H - 36);
   return new Promise(r => c.toBlob(r, 'image/png'));
