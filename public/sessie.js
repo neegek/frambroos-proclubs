@@ -394,71 +394,101 @@ async function shareAction(kind) {
 // de sessie, de quote, de top drie als kaartjes op het podium en W-G-V, goals en tegengoals.
 const loadImg = src => new Promise(res => { if (!src) return res(null); const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
 const SHARE_RIM = { gold: ['#fff1bd', '#d9b04a', '#8d6c15', '#f1d27a'], silver: ['#ffffff', '#c3c9d0', '#737b85', '#e4e8ec'], bronze: ['#f6d2ae', '#c27f45', '#74431c', '#e3a674'] };
-async function shareImage({ ms, sm, quote }) {
-  const W = 1080, c = document.createElement('canvas'); c.width = W; c.height = W; const g = c.getContext('2d');
+async function shareImage({ ms, sm, quote, prow }) {
+  // Deelafbeelding (coach-logica §9a): dezelfde stijl als de kop (stadion boven, paneel eronder). Boven de dag en de
+  // uitslag; dan de beste speler van de avond met kaartje en quote; dan iedereen van beste tot minste met de maten die
+  // de rating dragen (zoals in het spelersscherm), zonder de rating zelf.
+  const W = 1080, list = prow.filter(r => r.rH !== null), ROW = 84, LIST_Y = 760;
+  const H = LIST_Y + 40 + list.length * ROW + 80;
+  const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
   const font = (size, weight = 500, style = '') => { g.font = `${style} ${weight} ${size}px system-ui, -apple-system, "Segoe UI", sans-serif`; };
   const mono = (size, weight = 600) => { g.font = `${weight} ${size}px ui-monospace, "SF Mono", Menlo, monospace`; };
   const lines = (text, maxW) => { const out = []; let line = ''; for (const w of text.split(' ')) { const t = line ? `${line} ${w}` : w; if (g.measureText(t).width > maxW && line) { out.push(line); line = w; } else line = t; } if (line) out.push(line); return out; };
-  // Stadion op de hele achtergrond, met een donkere overloop zodat tekst en kaarten leesbaar blijven.
-  const svg = stadiumSvg().replace('<svg ', `<svg xmlns="http://www.w3.org/2000/svg" width="${Math.round(W * 1200 / 420)}" height="${W}" `);
+  const fit = (t, maxW) => { while (t.length > 1 && g.measureText(t).width > maxW) t = t.slice(0, -2).trimEnd() + '…'; return t; };
+  // Achtergrond: stadion in de kop, daaronder het donkere paneel.
+  const HEAD = 300;
+  const svg = stadiumSvg().replace('<svg ', `<svg xmlns="http://www.w3.org/2000/svg" width="${Math.round(W * 1200 / 420) / 2}" height="${W / 2}" `);
   const stadium = await loadImg(URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' })));
-  g.fillStyle = '#07050d'; g.fillRect(0, 0, W, W);
+  g.fillStyle = '#17141b'; g.fillRect(0, 0, W, H);
+  g.save(); g.beginPath(); g.rect(0, 0, W, HEAD); g.clip(); g.fillStyle = '#07050d'; g.fillRect(0, 0, W, HEAD);
   if (stadium) g.drawImage(stadium, (W - stadium.width) / 2, 0);
-  let grad = g.createLinearGradient(0, 0, 0, W); grad.addColorStop(0, 'rgba(7,5,13,0.55)'); grad.addColorStop(0.45, 'rgba(7,5,13,0.35)'); grad.addColorStop(1, 'rgba(7,5,13,0.92)');
-  g.fillStyle = grad; g.fillRect(0, 0, W, W);
-  // Kop: naam van de sessie en de quote.
-  g.textAlign = 'center'; g.fillStyle = '#fff'; font(76, 800); g.fillText(cap(longDate(ms[0].ts)), W / 2, 140);
-  let y = 200;
-  if (quote) {
-    g.fillStyle = '#efeaf3'; font(30, 500, 'italic');
-    for (const l of lines(`„${quote.text}” —\u00A0${quote.who.replace(/ /g, '\u00A0')}`, 900).slice(0, 3)) { g.fillText(l, W / 2, y); y += 40; }
-  }
-  // Podium: dezelfde kaartjes als op de pagina, met foto, plek en rating; nummer één in het midden.
-  const picks = [...document.querySelectorAll('#s-podium .ss-pick')];
-  const base = 836;
-  const spec = { p1: { w: 250, x: W / 2 }, p2: { w: 196, x: W / 2 - 250 }, p3: { w: 196, x: W / 2 + 250 } };
-  for (const a of picks) {
-    const k = ['p1', 'p2', 'p3'].find(x => a.classList.contains(x)), { w, x } = spec[k], h = w * 430 / 300;
-    const tiny = a.querySelector('.fut-tiny'), cs = getComputedStyle(tiny), v = n => cs.getPropertyValue(n).trim();
-    const rim = { p1: 'gold', p2: 'silver', p3: 'bronze' }[k];
-    const photo = await loadImg(a.querySelector('image')?.getAttribute('href'));
-    const s = w / 300, x0 = x - w / 2, y0 = Math.max(y + 24, base - h); // onderkanten op één lijn, geen podium
-    g.save(); g.translate(x0, y0); g.scale(s, s);
-    const shape = new Path2D(PlayerCard.shape), inset = (sx, sy) => { g.translate(150, 215); g.scale(sx, sy); g.translate(-150, -215); };
-    g.shadowColor = 'rgba(0,0,0,0.45)'; g.shadowBlur = 24 / s; g.shadowOffsetY = 8 / s;
-    let gr = g.createLinearGradient(0, 0, 300, 430); SHARE_RIM[rim].forEach((col, i) => gr.addColorStop([0, 0.35, 0.7, 1][i], col));
-    g.fillStyle = gr; g.fill(shape); g.shadowColor = 'transparent';
-    g.save(); inset(0.952, 0.966);
-    gr = g.createLinearGradient(0, 0, 110, 430); gr.addColorStop(0, v('--t-bg1') || '#241c0e'); gr.addColorStop(0.55, v('--t-bg2') || '#0e0c09'); gr.addColorStop(1, v('--t-bg3') || '#050403');
-    g.fillStyle = gr; g.fill(shape); g.clip(shape); g.restore();
-    g.save(); inset(0.952, 0.966); g.clip(shape); inset(1 / 0.952, 1 / 0.966);
-    if (photo) {
-      const bw = 240, bh = 198, r = Math.max(bw / photo.width, bh / photo.height), sw = bw / r, sh = bh / r;
-      g.drawImage(photo, photo.width - sw, 0, sw, sh, 34, 52, bw, bh); // rechtsboven bijgesneden, zoals op de kaart
-      gr = g.createLinearGradient(0, 190, 0, 252); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, v('--t-bg2') || '#0e0c09');
-      g.fillStyle = gr; g.fillRect(0, 188, 300, 66);
-    }
-    g.restore();
-    // De plek als medaille linksboven, rating en naam in het kaartje; de naam afgekapt op de breedte van de kaart.
-    const [mc, mi] = { p1: ['#c9a548', '#2a1d05'], p2: ['#b9c0c7', '#1d2228'], p3: ['#b8794a', '#241205'] }[k];
-    g.fillStyle = mc; g.beginPath(); g.arc(70, 78, 36, 0, 7); g.fill();
-    g.fillStyle = mi; mono(42, 800); g.textAlign = 'center'; g.fillText(k.slice(1), 70, 93);
-    g.fillStyle = v('--t-ink') || '#f6e6b8'; g.textAlign = 'center'; mono(88, 800); g.fillText(a.querySelector('.ft-val')?.textContent || '', 150, 318);
-    font(30, 700); let nm = a.querySelector('.ft-name')?.textContent.trim() || '';
-    while (nm.length > 1 && g.measureText(nm).width > 190) nm = nm.slice(0, -2).trimEnd() + '…';
-    g.fillText(nm, 150, 366);
-    g.restore();
-  }
-  // Uitslag: W-G-V, goals en tegengoals.
-  const figs = [[`${sm.W}-${sm.D}-${sm.L}`, 'W-G-V'], [String(sm.gf), 'Goals'], [String(sm.ga), 'Tegen']];
+  let grad = g.createLinearGradient(0, 0, 0, HEAD); grad.addColorStop(0, 'rgba(7,5,13,0.45)'); grad.addColorStop(1, 'rgba(7,5,13,0.85)');
+  g.fillStyle = grad; g.fillRect(0, 0, W, HEAD); g.restore();
+  g.fillStyle = 'rgba(255,255,255,0.1)'; g.fillRect(0, HEAD, W, 2);
+  // Kop: de dag en de uitslag.
+  g.textAlign = 'center'; g.fillStyle = '#fff'; font(72, 800); g.fillText(cap(longDate(ms[0].ts)), W / 2, 120);
+  const figs = [['W-G-V'], [String(sm.gf), 'Goals'], [String(sm.ga), 'Tegen']];
   figs.forEach(([val, label], i) => {
-    const x = W / 2 + (i - 1) * 280;
-    if (i === 0) { mono(68, 700); const parts = [[String(sm.W), '#6aa8f5'], ['-', '#9a95a3'], [String(sm.D), '#c9c4d1'], ['-', '#9a95a3'], [String(sm.L), '#f58a8a']];
+    const x = W / 2 + (i - 1) * 230;
+    if (i === 0) { mono(54, 700); const parts = [[String(sm.W), '#6aa8f5'], ['-', '#9a95a3'], [String(sm.D), '#c9c4d1'], ['-', '#9a95a3'], [String(sm.L), '#f58a8a']];
       const tw = parts.reduce((a, [t]) => a + g.measureText(t).width, 0); let px = x - tw / 2; g.textAlign = 'left';
-      for (const [t, col] of parts) { g.fillStyle = col; g.fillText(t, px, 940); px += g.measureText(t).width; } g.textAlign = 'center'; }
-    else { g.fillStyle = '#fff'; mono(68, 700); g.fillText(val, x, 940); }
-    g.fillStyle = '#d9d4e0'; font(24, 600); g.fillText(label, x, 978);
+      for (const [t, col] of parts) { g.fillStyle = col; g.fillText(t, px, 218); px += g.measureText(t).width; } g.textAlign = 'center'; label = 'W-G-V'; }
+    else { g.fillStyle = '#fff'; mono(54, 700); g.fillText(val, x, 218); }
+    g.fillStyle = '#d9d4e0'; font(22, 600); g.fillText(label, x, 252);
   });
-  g.fillStyle = '#a9a2b3'; font(22); g.fillText('Frambroos Coach · neegek.github.io/frambroos-proclubs', W / 2, 1042);
+  // De beste speler: het kaartje van het podium, met naam, gemiddelde en de quote ernaast.
+  const best = list[0], pick = document.querySelector('#s-podium .ss-pick.p1');
+  if (best && pick) {
+    const w = 230, h = w * 430 / 300, x0 = 70, y0 = HEAD + 50;
+    await drawShareCard(g, pick, x0, y0, w, 'gold', 1, mono, font);
+    const tx = x0 + w + 50, tw = W - tx - 70;
+    g.textAlign = 'left'; g.fillStyle = '#ffd200'; font(22, 700); g.fillText('BESTE SPELER VAN DE AVOND', tx, y0 + 40);
+    g.fillStyle = '#fff'; font(52, 800); g.fillText(fit(proName(best.name), tw), tx, y0 + 100);
+    g.fillStyle = '#d9d4e0'; font(26, 500); g.fillText(`gemiddeld ${f1(best.rH)}`, tx, y0 + 142);
+    if (quote) { g.fillStyle = '#efeaf3'; font(30, 500, 'italic'); let qy = y0 + 210;
+      for (const l of lines(`„${quote.text}”`, tw).slice(0, 4)) { g.fillText(l, tx, qy); qy += 42; } }
+  }
+  // Iedereen van beste tot minste: plek, portret, naam, rating, en de maten die de rating dragen.
+  const cols = [['Goals', 'goals'], ['Creëren', 'create'], ['Passen', 'pass'], ['Balwinst', 'won'], ['Duels', 'duels']];
+  const colX = [625, 738, 848, 952, 1025];
+  g.fillStyle = '#9a95a3'; font(20, 650); g.textAlign = 'right';
+  g.fillText('Rating', 560, LIST_Y); cols.forEach(([l], i) => g.fillText(l, colX[i], LIST_Y));
+  const rank = (v, all) => 1 + [...new Set(all.filter(x => x > v))].length, avgs = list.map(r => r.rH);
+  for (const [i, r] of list.entries()) {
+    const y = LIST_Y + 24 + i * ROW, mid = y + ROW / 2, rows = ms.map(m => ({ m, p: m.players.find(p => p.name === r.name) })).filter(x => x.p);
+    const st = nightStats(rows), n = rows.length, k = rank(r.rH, avgs);
+    if (i % 2 === 0) { g.fillStyle = 'rgba(255,255,255,0.035)'; g.beginPath(); g.roundRect(40, y + 4, W - 80, ROW - 8, 14); g.fill(); }
+    const [mc, mi] = k === 1 ? ['#c9a548', '#2a1d05'] : k === 2 ? ['#b9c0c7', '#1d2228'] : k === 3 ? ['#b8794a', '#241205'] : ['#5d6774', '#f4f6f9'];
+    g.fillStyle = mc; g.beginPath(); g.arc(84, mid, 20, 0, 7); g.fill(); g.fillStyle = mi; mono(22, 800); g.textAlign = 'center'; g.fillText(String(k), 84, mid + 8);
+    const ph = await loadImg(PlayerCard.portrait(r.name));
+    g.save(); g.beginPath(); g.arc(150, mid, 28, 0, 7); g.fillStyle = '#2a2433'; g.fill(); g.clip();
+    if (ph) { const s2 = Math.max(56 / ph.width, 56 / ph.height); g.drawImage(ph, 150 - ph.width * s2 / 2, mid - 28, ph.width * s2, ph.height * s2); }
+    g.restore();
+    g.textAlign = 'left'; g.fillStyle = '#fff'; font(30, 650); g.fillText(fit(proName(r.name), 300), 194, mid + 10);
+    g.textAlign = 'right'; mono(32, 700); g.fillStyle = '#ffd200'; g.fillText(f1(r.rH), 560, mid + 11);
+    g.fillStyle = '#efeaf3'; mono(28, 600);
+    cols.forEach(([, key], j) => { const a = RADAR_AXES.find(x => x.key === key), v = st[key]; g.fillText(v === null ? '–' : radarShow(a, v, n), colX[j], mid + 10); });
+  }
+  g.textAlign = 'center'; g.fillStyle = '#a9a2b3'; font(22); g.fillText('Frambroos Coach · neegek.github.io/frambroos-proclubs', W / 2, H - 36);
   return new Promise(r => c.toBlob(r, 'image/png'));
+}
+// Eén kaartje zoals op de pagina (kleuren uit het echte kaartje), met de plek als medaille, rating en naam erin.
+async function drawShareCard(g, pickEl, x0, y0, w, rim, place, mono, font) {
+  const tiny = pickEl.querySelector('.fut-tiny'), cs = getComputedStyle(tiny), v = n => cs.getPropertyValue(n).trim();
+  const photo = await loadImg(pickEl.querySelector('image')?.getAttribute('href'));
+  const s = w / 300;
+  g.save(); g.translate(x0, y0); g.scale(s, s);
+  const shape = new Path2D(PlayerCard.shape), inset = (sx, sy) => { g.translate(150, 215); g.scale(sx, sy); g.translate(-150, -215); };
+  g.shadowColor = 'rgba(0,0,0,0.45)'; g.shadowBlur = 24 / s; g.shadowOffsetY = 8 / s;
+  let gr = g.createLinearGradient(0, 0, 300, 430); SHARE_RIM[rim].forEach((col, i) => gr.addColorStop([0, 0.35, 0.7, 1][i], col));
+  g.fillStyle = gr; g.fill(shape); g.shadowColor = 'transparent';
+  g.save(); inset(0.952, 0.966);
+  gr = g.createLinearGradient(0, 0, 110, 430); gr.addColorStop(0, v('--t-bg1') || '#241c0e'); gr.addColorStop(0.55, v('--t-bg2') || '#0e0c09'); gr.addColorStop(1, v('--t-bg3') || '#050403');
+  g.fillStyle = gr; g.fill(shape); g.restore();
+  g.save(); inset(0.952, 0.966); g.clip(shape); inset(1 / 0.952, 1 / 0.966);
+  if (photo) {
+    const bw = 240, bh = 198, r = Math.max(bw / photo.width, bh / photo.height), sw = bw / r, sh = bh / r;
+    g.drawImage(photo, photo.width - sw, 0, sw, sh, 34, 52, bw, bh);
+    gr = g.createLinearGradient(0, 190, 0, 252); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, v('--t-bg2') || '#0e0c09');
+    g.fillStyle = gr; g.fillRect(0, 188, 300, 66);
+  }
+  g.restore();
+  const [mc, mi] = { 1: ['#c9a548', '#2a1d05'], 2: ['#b9c0c7', '#1d2228'], 3: ['#b8794a', '#241205'] }[place];
+  g.fillStyle = mc; g.beginPath(); g.arc(78, 98, 34, 0, 7); g.fill();
+  g.fillStyle = mi; mono(40, 800); g.textAlign = 'center'; g.fillText(String(place), 78, 112);
+  g.fillStyle = v('--t-ink') || '#f6e6b8'; mono(88, 800); g.fillText(pickEl.querySelector('.ft-val')?.textContent || '', 150, 318);
+  font(30, 700); let nm = pickEl.querySelector('.ft-name')?.textContent.trim() || '';
+  while (nm.length > 1 && g.measureText(nm).width > 190) nm = nm.slice(0, -2).trimEnd() + '…';
+  g.fillText(nm, 150, 366);
+  g.restore();
 }

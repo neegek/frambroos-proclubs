@@ -502,9 +502,11 @@ the match was). Eerst de laatste twintig, de rest achter een knop.
   goals, assists en man of the match; plakklaar in een chat of spreadsheet). Een korte melding bevestigt het kopiëren; daaronder de **wedstrijden als scrollbare rij kaartjes** (een tik
   opent de wedstrijd). Geen anekdote als tekst: die bepaalt alleen het thema van de quote.
 De radar eronder vertelt **hoe we speelden**; geen cijfers dubbel. De top drie staat op rating over deze avond.
-**Deelkaart** (afbeelding van 1080×1080): dezelfde kop als op de pagina: stadion, type, naam van de sessie, de quote,
-de top drie als kaartjes op het podium (foto, rating en naam in het kaartje, de plek op de trede) en W-G-V, Goals en
-Tegengoals.
+**Deelkaart** (afbeelding van 1080 breed, zo hoog als nodig; sinds 1 november 2026): in de stijl van de kop. Boven
+het stadion met de dag en de uitslag (W-G-V, Goals, Tegen); dan de **beste speler van de avond** met het kaartje (plek,
+rating, naam), de naam, het gemiddelde en de quote ernaast; dan **iedereen van beste tot minste**: plek als medaille,
+portret, naam, rating van de avond en rechts de maten die de rating dragen (dezelfde als in het spelersscherm, zonder
+de rating zelf): goals, creëren, passen, balwinst en duels, aantallen als totaal van de avond.
 
 **Per wedstrijd** (sinds 31 oktober 2026, vervangt *Spelers deze sessie*): een raster met per speler een kolom en
 per wedstrijd een rij (uitslag, shirt, score). Bovenaan per speler een **minikaartje** met foto, het gemiddelde van de
@@ -624,8 +626,8 @@ omdat het eigen normaal al hoog ligt.
 | Tier | Voorwaarde (over de sessie) | Uiterlijk |
 |---|---|---|
 | **Goud** | standaard, of minder dan 3 wedstrijden in die sessie | goud verloop met een zachte, schuine lichtere baan, donkere tekst |
-| **Zwart-goud** (in vorm) | niveau ≥ 7,0 (sinds 29 oktober 2026; daarvoor 7,5) **of** (minstens 8 wedstrijden in totaal en groei ≥ 0,3) | zwart met gouden rand en gouden cijfers |
-| **Topvorm** | niveau ≥ 8,0 **en** minstens 60 % van de sessie gewonnen | diepblauw met gouden stippen en gouden accenten |
+| **Zwart-goud** (in vorm) | niveau ≥ 7,0, afgerond op één decimaal zoals het er staat (6,95 telt als 7,0; sinds 1 november 2026) (sinds 29 oktober 2026; daarvoor 7,5) **of** (minstens 8 wedstrijden in totaal en groei ≥ 0,3) | zwart met gouden rand en gouden cijfers |
+| **Topvorm** | niveau ≥ 8,0 (afgerond, dus vanaf 7,95) **en** minstens 60 % van de sessie gewonnen | diepblauw met gouden stippen en gouden accenten |
 
 In de sessiedetails staat bij elke speler de **rating van de avond** met de groei ernaast, zonder het woord *groei*
 (sinds 30 oktober 2026). Geen tier-label (de kaart zegt het al) en geen "normaal": de groei zegt al of het beter of
