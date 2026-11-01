@@ -476,6 +476,12 @@ function oppBadge(opp) {
   if (!id) return kitShirt(opp?.kit, opp?.name || '');
   return `<span class="opp-badge"><img src="${CREST_URL(id)}" alt="${esc(opp.name)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add('no-crest')">${kitShirt(opp.kit, opp.name)}</span>`;
 }
+// Dialoog met een vaste knop onderaan (blijft staan bij scrollen); zonder href geen knop.
+function dialogFoot(d, href, label) {
+  let f = d.querySelector('.rd-foot');
+  if (!f) { f = document.createElement('div'); f.className = 'rd-foot'; d.append(f); }
+  f.hidden = !href; f.innerHTML = href ? `<a class="rd-foot-btn" href="${href}">${label}</a>` : '';
+}
 function kitShirt(c, label) {
   const [c1, c2, c3] = c || ['#888888', '#666666', '#444444'];
   return `<svg class="shirt" viewBox="0 0 64 60" role="img" aria-label="${esc(label)}">

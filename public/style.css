@@ -249,7 +249,7 @@ td.split small, .split small { color: var(--muted); }
 .fut-name.long { font-size: 19px; letter-spacing: 0; }
 .fut-icon { width: 128px; height: 128px; color: var(--t-ink); opacity: 0.28; align-self: end; }
 /* Tiers (coach-logica §9c). Kleuren los van het thema. Contrast nagerekend op de lichtste en donkerste vlakken. */
-.fut[data-tier="goud"], .fut-tiny[data-tier="goud"], .mvp-avatar[data-tier="goud"] { --t-ink: #2a1d05; --t-muted: #3d2d08; --t-accent: #2a1d05; --t-photo: #b98c2a; --t-halo: rgba(255,244,210,0.9); --t-bg1: #f2dc92; --t-bg2: #d9b24a; --t-bg3: #c2932a; --t-ring: #8d6c15; --t-sheen: rgba(255,250,228,0.28); --t-dots: transparent; }
+.fut[data-tier="goud"], .fut-tiny[data-tier="goud"], .mvp-avatar[data-tier="goud"] { --t-ink: #2a1d05; --t-muted: #3d2d08; --t-accent: #2a1d05; --t-photo: #c99d3c; --t-halo: rgba(255,244,210,0.9); --t-bg1: #f8e9b6; --t-bg2: #e8cc78; --t-bg3: #d4ae4f; --t-ring: #8d6c15; --t-sheen: rgba(255,250,228,0.28); --t-dots: transparent; }
 .fut[data-tier="zilver"], .fut-tiny[data-tier="zilver"] { --t-ink: #1d2228; --t-muted: #3a4149; --t-accent: #1d2228; --t-photo: #9aa3ad; --t-halo: rgba(255,255,255,0.9); --t-bg1: #f1f3f5; --t-bg2: #c9cfd6; --t-bg3: #a2aab3; --t-ring: #737b85; --t-sheen: rgba(255,255,255,0.3); --t-dots: transparent; }
 .fut[data-tier="brons"], .fut-tiny[data-tier="brons"] { --t-ink: #241205; --t-muted: #3e220d; --t-accent: #241205; --t-photo: #a96e40; --t-halo: rgba(255,236,214,0.9); --t-bg1: #efc9a2; --t-bg2: #c98d5b; --t-bg3: #a66b3c; --t-ring: #74431c; --t-sheen: rgba(255,240,224,0.25); --t-dots: transparent; }
 .fut[data-tier="lei"], .fut-tiny[data-tier="lei"] { --t-ink: #eef2f6; --t-muted: #c8d0d9; --t-accent: #eef2f6; --t-photo: #4f5a67; --t-halo: rgba(20,26,33,0.8); --t-bg1: #77828f; --t-bg2: #56606c; --t-bg3: #3f4752; --t-ring: #9ea8b4; --t-sheen: rgba(255,255,255,0.08); --t-dots: transparent; }
@@ -634,9 +634,16 @@ button.rank-card:hover { border-color: var(--border-strong); }
 button.rank-card:hover .rank-more { color: var(--brand-text); border-color: var(--brand-text); }
 
 /* Uitlegscherm van een ranglijst. */
-.rank-dialog { width: min(560px, calc(100vw - 24px)); max-height: calc(100dvh - 48px); padding: 20px 22px 22px; border: 1px solid var(--panel-border); border-radius: 18px; background: var(--panel); color: var(--ink); box-shadow: var(--float); }
+.rank-dialog { width: min(560px, calc(100vw - 24px)); max-height: calc(100dvh - 48px); padding: 0; overflow: hidden; border: 1px solid var(--panel-border); border-radius: 18px; background: var(--panel); color: var(--ink); box-shadow: var(--float); }
 .rank-dialog::backdrop { background: rgba(5,4,8,0.6); backdrop-filter: blur(2px); }
-.rd-close { position: absolute; top: 14px; right: 14px; width: 40px; height: 40px; font-size: 15px; }
+.rd-close { position: absolute; top: 14px; right: 14px; z-index: 3; width: 40px; height: 40px; font-size: 15px; background: var(--panel); }
+/* Dialogen: de sluitknop en de knop onderaan blijven staan, alleen de inhoud scrolt. */
+.rank-dialog[open] { display: flex; flex-direction: column; }
+.rank-dialog .rd-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 20px 22px 22px; overscroll-behavior: contain; }
+.rd-foot { flex: none; padding: 12px 22px calc(14px + env(safe-area-inset-bottom)); border-top: 1px solid var(--panel-border); background: var(--panel); }
+.rd-foot[hidden] { display: none; }
+.rd-foot-btn { display: flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 12px; background: var(--brand); color: var(--brand-ink, #1a1205); font-weight: 700; text-decoration: none; }
+.rd-foot-btn:hover { filter: brightness(1.06); }
 .rd-body h2 { margin: 0 48px 6px 0; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
 .rd-body h3 { margin: 16px 0 4px; font-size: 11.5px; font-weight: 650; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
 .rd-body p { margin: 0; font-size: 14px; color: var(--ink-2); max-width: 62ch; }
@@ -902,7 +909,7 @@ a.ftok:hover .ftok-c { transform: translateY(-2px); }
 .rm-face img { position: absolute; left: 50%; top: 16%; width: 92%; height: auto; transform: translateX(-50%); }
 .rm-medals th { padding: 6px 0 0; text-align: center; }
 .rm-medal { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; font: 800 12px/1 var(--num-font); box-shadow: inset 0 0 0 2px rgba(255,255,255,0.35), 0 1px 3px rgba(0,0,0,0.35); }
-.rmatrix tbody th, .rmatrix .rm-top th, .rmatrix thead th:first-child { position: sticky; left: 0; z-index: 2; background: var(--panel); padding-right: 6px; text-align: left; box-shadow: 0 0 0 4px var(--panel), calc(-1 * var(--px, 18px)) 0 0 4px var(--panel); }
+.rmatrix tbody th, .rmatrix .rm-top th { position: sticky; left: 0; z-index: 2; background: var(--panel); padding-right: 6px; text-align: left; box-shadow: 0 0 0 4px var(--panel), calc(-1 * var(--px, 18px)) 0 0 4px var(--panel); }
 .rm-top th { font-size: 12px; color: var(--muted); font-weight: 600; }
 .rm-match { display: flex; align-items: center; gap: 6px; text-decoration: none; color: inherit; }
 .rm-match .tl-dot { width: 24px; height: 24px; font-size: 11px; }
@@ -936,7 +943,7 @@ a.ftok:hover .ftok-c { transform: translateY(-2px); }
 .fut-tiny .fut-frame { position: absolute; inset: 0; width: 100%; height: 100%; }
 .ft-icon { position: absolute; left: 30%; top: 16%; width: 46%; color: var(--t-ink); opacity: 0.5; }
 .ft-icon svg { width: 100%; height: auto; display: block; }
-.ft-rank { position: absolute; left: 13%; top: 12.5%; width: 26%; aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; font: 800 calc(var(--w) * 0.15)/1 var(--num-font); box-shadow: 0 1px 2px rgba(0,0,0,0.35); }
+.ft-rank { position: absolute; left: 13%; top: 15.5%; width: 26%; aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; font: 800 calc(var(--w) * 0.15)/1 var(--num-font); box-shadow: 0 1px 2px rgba(0,0,0,0.35); }
 .ft-val { position: absolute; left: 0; right: 0; bottom: 17%; text-align: center; font: 800 calc(var(--w) * 0.24)/1 var(--num-font); letter-spacing: -0.03em; color: var(--t-ink); }
 
 /* Sessiekop (coach-logica §9a): één kaart met een split. Boven het beeld op het stadion (vaste kleuren, los van het
@@ -971,6 +978,7 @@ a.ftok:hover .ftok-c { transform: translateY(-2px); }
 .ss-score { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .ss-figs { display: flex; gap: 32px; }
 .ss-fig { display: grid; gap: 4px; }
+.ss-fig + .ss-fig { justify-items: end; text-align: right; }
 .ss-fig b { font-family: var(--num-font); font-size: 32px; font-weight: 600; letter-spacing: -0.04em; line-height: 1; color: var(--ink); }
 .ss-fig small { font-size: 12px; font-weight: 600; letter-spacing: 0.02em; color: var(--ink-2); }
 .ss-rec .W { color: var(--pos-text); } .ss-rec .D { color: var(--ink-2); } .ss-rec .L { color: var(--neg-text); }
@@ -1043,3 +1051,10 @@ a.ftok:hover .ftok-c { transform: translateY(-2px); }
 .pd-table th[scope="row"], .pd-table thead th:first-child { text-align: left; font-family: inherit; color: var(--ink-2); font-weight: 500; }
 .pd-table thead th { font-size: 11.5px; color: var(--muted); font-weight: 600; border-top: 0; }
 @media (max-width: 600px) { .pd-facts { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* Radar op telefoon: grotere teksten (radarSvg schaalt de ruimte mee). */
+@media (max-width: 600px) {
+  .radar-label { font-size: 25px; }
+  .radar-value { font-size: 23px; }
+  .radar-norm { font-size: 18px; }
+}
