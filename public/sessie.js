@@ -98,10 +98,9 @@ function render() {
     return { name, n: here.length, nT: there.length, rH, rT, d: rT === null || rH === null ? null : rH - rT, g: pSum(here, p => p.goals), a: pSum(here, p => p.assists), mom: pSum(here, p => p.mom) };
   }).sort((x, y) => (y.rH ?? 0) - (x.rH ?? 0));
   const sum = sessionSummary(ms, sm, opp, own, prow);
-  $('#s-summary').innerHTML = sum.story; // van de samenvatting alleen de anekdote; de cijfers staan erboven
   // De quote: een cruijffiaanse uitspraak van de beste speler van de avond, in de eigen stem (personas.js).
   const best = prow.find(r => r.rH !== null), quote = best ? { text: personaQuote(best.name, sum.theme), who: proName(best.name) } : null;
-  $('#s-quote').innerHTML = quote ? `<p>„${esc(quote.text)}”</p><footer>— ${esc(quote.who)}</footer>` : '';
+  $('#s-quote').innerHTML = quote ? `<p>„${esc(quote.text)}” <cite>— ${esc(quote.who)}</cite></p>` : '';
   $('#s-share').onclick = () => shareSession(ms, sm, quote);
   // Top drie op een podium: één in het midden, groter en hoger; twee links, drie rechts. Een tik scrollt naar Per wedstrijd.
   const top = prow.filter(r => r.rH !== null).slice(0, 3);
@@ -283,8 +282,7 @@ async function shareSession(ms, sm, quote) {
   let y = 222;
   if (quote) {
     g.fillStyle = '#efeaf3'; font(30, 500, 'italic');
-    for (const l of lines(`„${quote.text}”`, 900).slice(0, 3)) { g.fillText(l, W / 2, y); y += 40; }
-    g.fillStyle = '#d9d4e0'; font(24, 600); g.fillText(`— ${quote.who}`, W / 2, y + 2); y += 30;
+    for (const l of lines(`„${quote.text}” — ${quote.who}`, 900).slice(0, 3)) { g.fillText(l, W / 2, y); y += 40; }
   }
   // Podium: dezelfde kaartjes als op de pagina, met foto, plek en rating; nummer één in het midden.
   const picks = [...document.querySelectorAll('#s-podium .ss-pick')];
@@ -319,7 +317,9 @@ async function shareSession(ms, sm, quote) {
     g.fillStyle = v('--t-ink') || '#f6e6b8'; mono(96, 800); g.fillText(a.querySelector('.ft-val')?.textContent || '', 150, 352);
     g.restore();
     g.fillStyle = '#fff'; font(k === 'p1' ? 30 : 26, 700); g.textAlign = 'center';
-    g.fillText(a.querySelector('.ss-pick-name')?.textContent.trim() || '', x, y0 + h + 40);
+    let nm = a.querySelector('.ss-pick-name')?.textContent.trim() || ''; // afkappen op de breedte van de kaart
+    while (nm.length > 1 && g.measureText(nm).width > w) nm = nm.slice(0, -2).trimEnd() + '…';
+    g.fillText(nm, x, y0 + h + 40);
   }
   // Uitslag: W-G-V, goals en tegengoals.
   const figs = [[`${sm.W}-${sm.D}-${sm.L}`, 'W-G-V'], [String(sm.gf), 'Goals'], [String(sm.ga), 'Tegengoals']];
