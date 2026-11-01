@@ -91,11 +91,12 @@ alleen in Cloudflare.
   Wedstrijden: die is één lijst van `matchRow`-regels, nieuwste eerst, met de beste speler per wedstrijd. Sessies
   begint met een `.scard` per avond (datum, W-G-V, goals, team rating, tijdlijn met
   uitslagen en shirts, speler van de sessie met de portretfoto (`PlayerCard.portrait`, ook bij in vorm) of een icoon in een rondje in de kleuren van de vorm; nergens de duur van een avond); een tik opent
-  `sessie.html?id=<id>` (eigen pagina, een laag dieper) met "Terug naar sessies". Een sessie begint met een scorebord
-  (`.sess-hero`, coach-logica §9a): de **uitslag** (W-G-V groot met doelsaldo en de nul, de wedstrijden als scrollbare
-  `matchCard`-rij, de top drie als minikaartjes `PlayerCard.tiny` die naar de tabel scrollen, één zin anekdote met de
-  Cruijff-quote, een deelknop); dan *Zo speelden we*: de radar met standaard het team en per speler uit te lichten (geen
-  cijfers dubbel met het scorebord); dan *Per wedstrijd* (`renderMatrix`: kolommen spelers met een minikaartje (foto, plek, gemiddelde), rijen
+  `sessie.html?id=<id>` (eigen pagina, een laag dieper, zonder terugknop; *Sessies* is daar niet actief in het menu).
+  Een sessie begint met een podium (`.sess-stage`, coach-logica §9a): het stadion (`stadiumSvg()` in `common.js`), de
+  naam van de sessie groot, W-G-V, Goals en Tegengoals, en de top drie als `PlayerCard.tiny` op een podium (één in het
+  midden, groter) die naar de tabel scrollen, met een deelknop; daaronder een kaart met de anekdote, de Cruijff-quote
+  en de wedstrijden als scrollbare `matchCard`-rij; dan *Zo speelden we*: de radar met standaard het team en per speler uit te lichten (geen
+  cijfers dubbel met het scorebord); dan *Per wedstrijd* (`renderMatrix`: kolommen spelers met een minikaartje (foto, gemiddelde en ▲/▼/– sterker, zwakker of gelijk dan normaal via `trend`), rijen
   wedstrijden, cellen in goud/zilver/brons/ijzer naar de plek in die rij; *Spelers deze sessie* is weg, de kaarten
   bewaard in `sessionCardsHtml` voor een later FUT-pack; de tabel licht niet op bij aanraken). De radar (`renderRadar`
   in `public/sessie.js`): assen als percentiel tegenover onze eigen avonden, onder elke astitel de waarde en ons normaal.
@@ -132,8 +133,9 @@ alleen in Cloudflare.
   (`.stat-groups`: Aanvallen, Passen, Verdedigen, Discipline) met per regel de speler (kop: pro-naam) en de club, elk
   groot het totaal en klein het getal per wedstrijd (zonder die woorden); ervoor een rondje met de plek onder onze
   spelers (`.rank-dot` in metaalkleur, per wedstrijd, gedeelde plek bij gelijk getal); een tik op een regel opent de
-  ranglijst van die maat in `#rank-dialog`; de speler groen als beter dan de club, rood als slechter; de laatste acht
-  wedstrijden. Advies, *Aan de bal in context* en het buildformulier staan voorlopig niet op de pagina (code blijft in
+  ranglijst van die maat in `#rank-dialog` (bij gelijk getal beslist het totaal, bij EA waar EA het heeft); de speler
+  groen als beter dan de club, rood als slechter; *Groei* (eerder volgens EA tegenover nu, alleen gekleurd als het
+  beduidend is); de laatste acht wedstrijden. Advies, *Aan de bal in context* en het buildformulier staan voorlopig niet op de pagina (code blijft in
   `builds.js`).
 - Laden: elke pagina heeft `.skel`-vlakken in de containers die de render vervangt, `html.loading` (gezet door
   `loadData`) toont een lijntje bovenaan, en foto's (kaarten en rondjes, `img.fade-img`) faden pas in als ze geladen
