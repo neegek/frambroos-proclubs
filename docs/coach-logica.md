@@ -271,6 +271,11 @@ Daarnaast *Positiespel en keuzes* en *Al sterk*.
 - **Getallen** (sinds 30 oktober 2026): overal **één decimaal** (8.4, 0.6 per wedstrijd). Sorteren en rangschikken
   gebeurt op het exacte getal, zodat twee gelijk afgeronde scores toch een vaste volgorde hebben. De **groei** (§9c)
   ook met één decimaal en zonder ",0" als het een heel getal is (+1, −0.4); het woord *groei* staat er niet bij.
+- **Horizontaal scrollen in een kaart**: de rij loopt door tot de rand van de kaart en wordt daar afgesneden, niet
+  door de binnenruimte; aan het begin en het eind staat dezelfde ruimte als de kaart heeft (sinds 1 november 2026).
+  Een vaste eerste kolom (*Per wedstrijd*) dekt ook de ruimte ernaast af, zodat er niets tussendoor schemert.
+- **Logo's van tegenstanders**: waar een tegenstander staat, het clublogo van EA's CDN (docs/ea-data.md); laadt dat
+  niet, dan het shirt in de clubkleuren. Ons eigen logo is `crest.png`.
 - **Naam bij een kaart**: staat een naam naast of onder een spelerskaart(je), dan hoort hij **in** het kaartje
   (sinds 1 november 2026); geen losse naam eronder.
 - **Namen** overal voluit zoals EA ze geeft (Petra Selie, niet P. Selie); alleen een naam die in het spel al met een
@@ -460,16 +465,23 @@ the match was). Eerst de laatste twintig, de rest achter een knop.
 
 **Sessiekop** (sinds 1 november 2026; daarvoor een scorebord zonder duidelijk middelpunt): één kaart met een
 **split**, zodat elk deel bij zijn soort hoort en het met de thema's meeschaalt.
-- **Boven: het beeld** op het stadion van het Clubhouse (vaste kleuren, los van het thema): klein en geel type, aantal
-  wedstrijden en aantal spelers; groot de **naam van de sessie** (de datum); daaronder de **quote van de beste
+- **Boven: het beeld** op het stadion van het Clubhouse (vaste kleuren, los van het thema): groot de **naam van de
+  sessie** (de datum; sinds 1 november 2026 zonder gele regel met type en aantallen: niet boeiend genoeg); op
+  telefoon afgekort tot drie letters (*Don 29 okt*), met links en rechts ervan de knoppen naar de vorige en volgende
+  sessie; daaronder de **quote van de beste
   speler** (§9, Sessie) met de naam erachter op dezelfde regel; en de **top drie** als kaartjes naast elkaar (sinds
   1 november 2026 zonder podium): de nummer één in het midden en groter, twee links, drie rechts, met de onderkanten
   op één lijn. De **plek staat in het kaartje** als medaille linksboven, de **naam in het kaartje** onder de rating
   (afgekapt met … als hij niet past, met ruim afstand tot de rand). Rand en vlak in de kleur van de plek (zie
   *Kleur van de plek*, §9c). Een tik scrollt naar *Per wedstrijd*. Op een groot scherm de tekst links en de kaartjes
   rechts, op telefoon alles onder elkaar en gecentreerd, met ruimte tussen titel, quote en kaartjes.
-  **Vorige en volgende sessie**: op telefoon een rond icoonknopje linksboven (vorige, ouder) en rechtsboven (volgende,
-  nieuwer) in het beeld; een knop staat er alleen als die sessie bestaat.
+  **Vorige en volgende sessie**: op telefoon een rond icoonknopje links (vorige, ouder) en rechts (volgende, nieuwer)
+  van de titel; een knop staat er alleen als die sessie bestaat (anders een lege plek, zodat de titel in het midden
+  blijft). **Een tik op een kaartje** (ook boven *Per wedstrijd*) opent de speler over de hele avond: wedstrijden,
+  rating, goals, assists en man of the match, de rating per wedstrijd als rondjes, de radar van die speler met het
+  team vaag erachter, en dezelfde zes maten als tabel (deze avond en normaal); met een link naar de spelerspagina.
+  **Medaille in het kaartje**: iets van de hoek af (naar rechts en omlaag), zodat er kaart omheen zichtbaar blijft.
+  Op telefoon staan W-G-V links en Goals en Tegengoals rechts, direct links van de deelknop.
 - **Onder: een paneel** in de kleuren van het thema (donker of licht): de uitslag in drie getallen, **W-G-V** in de
   uitslagkleuren, **Goals** en **Tegengoals** (geen doelsaldo, geen *de nul*), met op dezelfde regel rechts een
   ingetogen **deelknop** (rond icoon met een dunne rand, zonder label). Die opent een klein menu: *Afbeelding delen*

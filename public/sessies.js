@@ -27,7 +27,7 @@ function renderCards() {
           <span class="scard-figs"><span><b>${sm.gf}</b><small>Goals</small></span><span><b>${team === null ? '–' : f1(team)}</b><small>Team rating</small></span></span>
         </span>
       </span>
-      <span class="scard-line" aria-label="Uitslagen op volgorde">${ms.map(m => `<span class="tl-item" title="${esc(m.opponent.name)}"><span class="tl-dot ${m.result}">${letter(m.result)}</span>${kitShirt(m.opponent.kit, m.opponent.name)}<b>${m.goals}-${m.goalsAgainst}</b></span>`).join('')}</span>
+      <span class="scard-line" aria-label="Uitslagen op volgorde">${ms.map(m => `<span class="tl-item" title="${esc(m.opponent.name)}"><span class="tl-dot ${m.result}">${letter(m.result)}</span>${oppBadge(m.opponent)}<b>${m.goals}-${m.goalsAgainst}</b></span>`).join('')}</span>
       ${mvp ? `<span class="scard-mvp"><span class="mvp-avatar" data-tier="${PlayerCard.sessionTier(mvp.n, s.id).tier}">${photo ? `<img class="fade-img" src="${photo}" alt="">` : PERSON}</span><span class="mvp-who"><small>Speler van de sessie</small><b>${esc(proName(mvp.n))}</b></span><span class="mvp-stats"><b>${f1(mvp.v)}</b><small>${mvp.g} G · ${mvp.a} A${mvp.mom ? ` · ${mvp.mom}× MOTM` : ''}</small></span></span>` : ''}
     </a>`;
   }).join('');

@@ -468,6 +468,14 @@ const NUM_WORD = ['geen', 'één', 'twee', 'drie', 'vier', 'vijf', 'zes', 'zeven
 const numWord = n => NUM_WORD[n] ?? String(n);
 
 // Kleurindicatie van een tenue (romp, mouwen en kraag, bies).
+// Logo van de tegenstander (docs/ea-data.md): EA's CDN voor clublogo's, met het eigen logo-id (crestAssetId) of bij
+// een echt clublogo het teamId. Laadt het niet, dan het shirt in de clubkleuren.
+const CREST_URL = id => `https://eafc24.content.easports.com/fifa/fltOnlineAssets/24B23FDE-7835-41C2-87A2-F453DFDB2E82/2024/fcweb/crests/256x256/l${id}.png`;
+function oppBadge(opp) {
+  const id = opp?.club?.crestAssetId || opp?.club?.teamId;
+  if (!id) return kitShirt(opp?.kit, opp?.name || '');
+  return `<span class="opp-badge"><img src="${CREST_URL(id)}" alt="${esc(opp.name)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add('no-crest')">${kitShirt(opp.kit, opp.name)}</span>`;
+}
 function kitShirt(c, label) {
   const [c1, c2, c3] = c || ['#888888', '#666666', '#444444'];
   return `<svg class="shirt" viewBox="0 0 64 60" role="img" aria-label="${esc(label)}">
@@ -492,7 +500,7 @@ function matchCard(m, { own = null, player = null } = {}) {
   const r = m.resid, badge = r === null || r === undefined ? '' : `<span class="kpi-badge ${r >= 0.5 ? 'up' : r <= -0.5 ? 'down' : ''}" title="Tov verwachting: doelsaldo tegenover wat de tegenstander deed verwachten">${signed(r, 1)}</span>`;
   return `<a class="mcard" href="wedstrijd.html?id=${m.matchId}">
     <span class="mcard-top"><span class="pill ${m.result}">${m.result === 'D' ? 'G' : m.result === 'L' ? 'V' : 'W'}</span><span class="mcard-type">${m.matchType === 'playoffMatch' ? 'playoff' : 'league'} · ${t}${m.winnerByDnf ? ' · opgave' : ''}${m.live ? ' · live' : ''}</span></span>
-    <span class="mcard-opp">${kitShirt(m.opponent.kit, m.opponent.name)}<span><b>${esc(m.opponent.name)}</b><small>${m.opponent.skillRating ? `rating ${m.opponent.skillRating}${str ? `, ${str}` : ''}` : ''}${m.players.length !== m.opponentPlayers.length ? ` · ${m.players.length} tegen ${m.opponentPlayers.length}` : ''}</small></span></span>
+    <span class="mcard-opp">${oppBadge(m.opponent)}<span><b>${esc(m.opponent.name)}</b><small>${m.opponent.skillRating ? `rating ${m.opponent.skillRating}${str ? `, ${str}` : ''}` : ''}${m.players.length !== m.opponentPlayers.length ? ` · ${m.players.length} tegen ${m.opponentPlayers.length}` : ''}</small></span></span>
     <span class="mcard-score">${m.goals}–${m.goalsAgainst}</span>
     <span class="mcard-foot"><span class="mcard-best">${foot}</span>${badge}</span></a>`;
 }
@@ -509,7 +517,7 @@ function matchRow(m, own) {
   return `<a class="match-row" href="wedstrijd.html?id=${m.matchId}">
     <span class="mr-time">${when}</span>
     <span class="pill ${m.result}">${letter(m.result)}</span>
-    <span class="mr-opp">${kitShirt(m.opponent.kit, m.opponent.name)}<span><b>${esc(m.opponent.name)}</b><small>${m.matchType === 'playoffMatch' ? 'playoff' : 'league'}${m.opponent.skillRating ? ` · rating ${m.opponent.skillRating}${str ? `, ${str}` : ''}` : ''}${m.winnerByDnf ? ' · opgave' : ''}${m.live ? ' · live, nog niet opgeslagen' : ''}</small><small class="mr-when">${best ? `${esc(best.name)} ${f1(best.rating)}${best.mom ? ' ♛' : ''} · ` : ''}${dayLabel(m.ts)}</small></span></span>
+    <span class="mr-opp">${oppBadge(m.opponent)}<span><b>${esc(m.opponent.name)}</b><small>${m.matchType === 'playoffMatch' ? 'playoff' : 'league'}${m.opponent.skillRating ? ` · rating ${m.opponent.skillRating}${str ? `, ${str}` : ''}` : ''}${m.winnerByDnf ? ' · opgave' : ''}${m.live ? ' · live, nog niet opgeslagen' : ''}</small><small class="mr-when">${best ? `${esc(best.name)} ${f1(best.rating)}${best.mom ? ' ♛' : ''} · ` : ''}${dayLabel(m.ts)}</small></span></span>
     <span class="mr-best" title="Beste speler van de wedstrijd">${bestHtml}</span>
     <span class="mr-score">${m.goals}–${m.goalsAgainst}</span></a>`;
 }
