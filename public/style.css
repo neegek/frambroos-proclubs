@@ -1630,4 +1630,6 @@ html, body { overflow-x: clip; overscroll-behavior-x: none; }
 .sq-fav[aria-pressed="true"] { color: #ffd200; border-color: color-mix(in srgb, #ffd200 50%, var(--panel-border)); }
 .sq-fav[aria-pressed="true"] svg path { fill: currentColor; }
 .sq-fav:hover { color: var(--ink); }
-.squad-row .sq-bio { -webkit-line-clamp: unset; display: block; }
+.squad-row .sq-bio { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; -webkit-line-clamp: 2; line-clamp: 2; }
+@media (min-width: 761px) { .squad-row .sq-bio { -webkit-line-clamp: 3; line-clamp: 3; } }
+@media (min-width: 1100px) { .squad-row .sq-bio { -webkit-line-clamp: 4; line-clamp: 4; } }

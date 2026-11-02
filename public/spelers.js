@@ -144,9 +144,8 @@ function renderSquad() {
   // dezelfde wedstrijden).
   const rowsHtml = members.map(({ m }) => {
     const p = typeof PERSONAS !== 'undefined' ? PERSONAS[m.name] : null, b = p?.bio;
-    // Uit de biografie de eerste twee zinnen (niet afbreken na een voorletter zoals J. Wheatley).
-    const sentences = (b ? b.tekst.join(' ') : p?.achtergrond || '').split(/(?<=[\p{Ll}\d)][.!?])\s+/u);
-    const text = sentences.slice(0, 2).join(' ');
+    // De biografie zelf; de lengte regelt de css: afgekapt op een paar regels, op telefoon korter dan op een groot scherm.
+    const text = b ? b.tekst.join(' ') : p?.achtergrond || '';
     const on = m.name === fav;
     return `<a class="squad-row card" href="spelers.html#${encodeURIComponent(m.name)}" aria-label="${esc(proName(m.name))}">
       <button type="button" class="sq-fav" data-fav="${esc(m.name)}" aria-pressed="${on}" aria-label="${on ? 'Favoriet, tik om weg te halen' : 'Maak favoriet'}" title="${on ? 'Je favoriet' : 'Maak favoriet'}">${STAR}</button>
