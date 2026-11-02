@@ -18,4 +18,5 @@ const legacyHash = () => { if (/^#\d+$/.test(location.hash)) location.replace(`s
 legacyHash();
 addEventListener('hashchange', legacyHash);
 window.rerender = () => { renderCards(); PlayerCard.reveal($('#session-cards')); };
-Promise.all([loadData(), PlayerCard.load().catch(() => {})]).then(() => { sessions = sessionsOf(DATA.matches); renderCards(); PlayerCard.reveal($('#session-cards')); packOnLoad(); }).catch(showError);
+Promise.all([loadData(), PlayerCard.load().catch(() => {})]).then(() => { sessions = sessionsOf(DATA.matches); renderCards(); PlayerCard.reveal($('#session-cards')); }).catch(showError);
+addEventListener('pack-closed', () => { if (DATA) { renderCards(); PlayerCard.reveal($('#session-cards')); } });

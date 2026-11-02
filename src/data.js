@@ -57,7 +57,10 @@ export function buildData(db = realDb) {
   // eindgroep en de hoogste divisie. Alleen wat EA geeft; geen geschiedenis per seizoen.
   { let raw = {}; try { raw = JSON.parse(own?.raw || '{}'); } catch {}
     trophies.titles = Object.fromEntries([1, 2, 3, 4, 5, 6].map(d => [d, Number(raw[`finishesInDivision${d}Group1`]) || 0]).filter(([, n]) => n > 0));
-    trophies.bestFinishGroup = Number(raw.bestFinishGroup) || null; trophies.currentDivision = Number(raw.currentDivision) || null; }
+    trophies.bestFinishGroup = Number(raw.bestFinishGroup) || null; trophies.currentDivision = Number(raw.currentDivision) || null;
+    // Trofeeënkast van EA: per afgesloten seizoen de hoogste divisie en de eindgroep in de playoffs.
+    trophies.seasons = (Array.isArray(raw.playoffAchievements) ? raw.playoffAchievements : []).map(a => ({
+      season: Number(String(a.seasonName || '').match(/(\d+)\s*$/)?.[1] || a.seasonId) || null, division: Number(a.bestDivision) || null, group: Number(a.bestFinishGroup) || null })); }
   const matchRows = db.prepare(`
     SELECT m.match_id, m.ts, m.match_type, m.raw, mc.goals, mc.goals_against, mc.result, mc.winner_by_dnf, mc.opponent_id, c.name AS opponent_name
     FROM matches m
