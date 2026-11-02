@@ -508,8 +508,12 @@ uitslagen, Algemeen en Selectie. Meer lucht tussen de kaarten (20 px). Op telefo
 dezelfde kaart als in de sessielijst (`sessionCardHtml`) met het label *Huidige sessie* of *Laatste sessie*.
 **Selectie** (Spelers): per speler de spelerskaart groter, met rechts de titel en het begin van de biografie; geen losse
 cijfers ernaast (die staan op de kaart) en geen vorm per wedstrijd (iedereen speelt dezelfde wedstrijden).
-**Opstelling** (wedstrijd): één staand veld, de tegenstander boven en wij onder, met alle lijnen van een echt veld:
-zijlijnen, middenlijn, middencirkel en -stip, en aan beide kanten strafschopgebied, stip, boog, doelgebied en doel.
+**Opstelling** (wedstrijd, sinds 2 november 2026): één staand veld met per linie **wij links en de tegenstander rechts**,
+het label (Aanval, Middenveld, Verdediging, Keeper) in het midden, zodat je per linie van links naar rechts vergelijkt;
+onderaan het eigen doel, bovenaan het doel waar op wordt aangevallen. Een linie zonder mensen heet *AI*. Het veld is
+twaalf banen hoog in licht- en donkergroen, en de lijnen vallen precies op de baangrenzen: strafschopgebied twee banen,
+doelgebied één, middenlijn na zes; verder middencirkel en -stip, penaltystip, boog en doel aan beide kanten. Op
+telefoon smallere banen en rondjes zonder naam.
 **Wij tegen hen** (wedstrijd): per cijfer één regel met beide totalen en een verdeelde balk; een tik klapt de regel
 open met alle spelers van beide kanten als balkjes (wij blauw, zij oranje), de beste bovenaan. Vervangt de losse
 ranglijstkaartjes *Spelers* op de wedstrijdpagina. Nieuwe cijfers: één regel in `VS_STATS` (`wedstrijd.js`).

@@ -10,7 +10,7 @@ const resLetter = r => r === 'D' ? 'G' : r === 'L' ? 'V' : 'W';
 const side = (players, k) => players.reduce((a, p) => a + (p[k] || 0), 0);
 const sideEv = (players, k) => players.some(p => p.ev) ? players.reduce((a, p) => a + (p.ev?.[k] || 0), 0) : null;
 
-// Opstelling (coach-logica §9a, Opstelling): één staand veld met beide teams, de tegenstander boven en wij onder.
+// Opstelling (coach-logica §9a, Opstelling): één veld met per linie wij links en de tegenstander rechts.
 // Elke speler is een rondje met de rating eronder: bij ons het portret, bij de tegenstander het archetype-icoon.
 // AI per linie geeft EA niet, dus een lege linie heet "AI".
 const LINE_KEY = { forward: 'a', midfielder: 'm', defender: 'd', goalkeeper: 'g' };
@@ -25,15 +25,13 @@ function lineup(m) {
     return mine ? `<a class="ftok us" href="spelers.html#${encodeURIComponent(p.name)}" title="${title}">${inner}</a>` : `<span class="ftok" title="${title}">${inner}</span>`;
   };
   const toks = (list, mine) => list.length ? list.map(p => token(p, mine)).join('') : '<span class="ftok-ai">AI</span>';
-  // Een echt veld (coach-logica §9a, Opstelling): staand, de tegenstander boven (keeper bij het bovenste doel), wij
-  // onder (keeper bij het onderste doel), de aanvallers tegenover elkaar bij de middenlijn. Lijnen: zijlijnen, middenlijn,
-  // middencirkel en -stip, en aan beide kanten het strafschopgebied met stip en boog, het doelgebied en het doel.
-  const order = ['goalkeeper', 'defender', 'midfielder', 'forward'];
-  const rows = [...order.map(k => `<div class="frow them l-${LINE_KEY[k]}">${toks(them[k], false)}</div>`),
-    ...[...order].reverse().map(k => `<div class="frow us l-${LINE_KEY[k]}">${toks(us[k], true)}</div>`)];
+  // Eén veld (coach-logica §9a, Opstelling): onder ons doel, boven het doel waar we op aanvallen. Per linie één rij:
+  // links wij, rechts de tegenstander, in het midden het label; zo vergelijk je per linie van links naar rechts.
+  // Het veld is twaalf banen hoog; de lijnen (strafschopgebieden, middenlijn) vallen precies op de baangrenzen.
+  const rows = LINES.map(([k, label]) => `<div class="frow l-${LINE_KEY[k]}"><div class="fs us">${toks(us[k], true)}</div><span class="flabel">${label}</span><div class="fs them">${toks(them[k], false)}</div></div>`);
   const marks = ['pm-half', 'pm-circle', 'pm-spot', ...['top', 'bot'].flatMap(e => [`pm-box ${e}`, `pm-six ${e}`, `pm-goal ${e}`, `pm-pen ${e}`, `pm-arc ${e}`])]
     .map(c => `<span class="${c}" aria-hidden="true"></span>`).join('');
-  return `<div class="pfield" role="img" aria-label="Opstelling: ${esc(m.opponent.name)} boven, Frambroos onder">${marks}${rows.join('')}</div>`;
+  return `<div class="pfield" role="img" aria-label="Opstelling per linie: Frambroos links, ${esc(m.opponent.name)} rechts">${marks}${rows.join('')}</div>`;
 }
 
 // Wij tegen hen (coach-logica §9a, Wedstrijdpagina): per cijfer één regel met het totaal van beide kanten en een
