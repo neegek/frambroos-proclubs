@@ -113,7 +113,7 @@ alleen in Cloudflare.
   kopiëren, gegevens kopiëren als tekst),
   en de wedstrijden als scrollbare `matchCard`-rij. De deelafbeelding
   (`shareSession`) tekent dezelfde kop; dan *Zo speelden we*: de radar met alle vlakken zichtbaar, standaard het team het felst, aantallen als totaal van de
-  avond; een tik op een naam licht die speler uit, nog een tik zet hem uit (eerst de knop *Team*); dan *Per wedstrijd* (`renderMatrix`: kolommen spelers met een minikaartje (foto, gemiddelde, naam in het kaartje, kleur van de plek zonder medaille; geen normaal), rijen
+  avond, assen Rating, Scoren, Creëren, Passen, Dribbelen, Verdedigen met uitleg achter de knop *Assen*; een tik op een naam licht die speler uit, nog een tik zet hem uit (eerst de knop *Team*); dan *Per wedstrijd* (`renderMatrix`: kolommen spelers met een minikaartje (foto, gemiddelde, naam in het kaartje, kleur van de plek zonder medaille; geen normaal), rijen
   wedstrijden, cellen in goud/zilver/brons/ijzer naar de plek in die rij, een tik op een cel opent `#cell-dialog` met wat de speler die wedstrijd deed; *Spelers deze sessie* is weg, de kaarten
   bewaard in `sessionCardsHtml` voor een later FUT-pack; de tabel licht niet op bij aanraken). De radar (`renderRadar`
   in `public/sessie.js`): assen als percentiel tegenover onze eigen avonden, onder elke astitel de waarde en ons normaal.
@@ -141,7 +141,7 @@ alleen in Cloudflare.
 - Lijngrafieken: vloeiend (monotone spline), hoofdlijn met `area: true` voor een zachte vlakvulling, geen vaste
   stippen (alleen bij hover). Klassenamen in componenten specifiek houden (bijv. `.pitch-line`, niet `.line`).
 - Menu: Clubhouse (startpagina, coach-logica §9a), Sessies, Wedstrijden, Spelers. De spelersnamen staan als knoppen
-  bovenaan de spelerspagina (`#chips`), niet in het menu. Het Clubhouse heeft geen KPI-tegels maar één kaart *Seizoen*:
+  bovenaan de spelerspagina (`#chips`), niet in het menu. Op het Clubhouse staat boven *Topspelers* de kaart *Algemeen* (`renderGeneral`: rating, man of the match en goals + assists over de carrière volgens EA, groot totaal en klein per wedstrijd). Het Clubhouse heeft geen KPI-tegels maar één kaart *Seizoen*:
   eerst *In het kort* (`.kort`: drie regels in woorden, coach-logica §9a), dan de totalen zonder badges
   (`.totals-band`) en de vormgrafiek (staafjes per wedstrijd plus één lijn: doelsaldo over vijf), met twee kerncijfers
   via `figsHtml` in de kop. Geen "verwacht" of "tov ons" op de startpagina. Geen aparte analysepagina. De app is bewust eenvoudig: liever één duidelijke kaart dan drie tabellen.

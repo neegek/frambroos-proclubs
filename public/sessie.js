@@ -235,35 +235,44 @@ $('#cell-dialog').addEventListener('click', e => { if (e.target === e.currentTar
 // ---------- radar van de avond (coach-logica §9a) ----------
 // Zes assen; elke as is een percentiel tegenover al onze eigen avonden (per speler per sessie, minstens 2 wedstrijden),
 // zodat "groot" ook echt "goed gespeeld" betekent. null = te weinig om te meten.
+// Elke as heeft een samengestelde maat (key, voor de vorm) en een leesbaar getal (show) onder de astitel.
 const RADAR_AXES = [
-  { key: 'rating', label: 'Rating', fmt: v => f1(v) },
-  { key: 'goals', label: 'Scoren', count: true },
-  { key: 'create', label: 'Creëren', count: true },
-  { key: 'pass', label: 'Passen', fmt: v => `${Math.round(100 * v)}%` },
-  { key: 'won', label: 'Balwinst', count: true },
-  { key: 'duels', label: 'Duels', fmt: v => `${Math.round(100 * v)}%` },
+  { key: 'rating', show: 'rating', label: 'Rating', code: 'RAT', fmt: v => f1(v),
+    about: 'De gemiddelde EA-rating over de wedstrijden van deze avond.' },
+  { key: 'scoring', show: 'gpm', label: 'Scoren', code: 'SCO', count: true,
+    about: 'Goals per wedstrijd plus de kwaliteit van de afronding (goals per schot); bij minder dan vijf schoten telt die afronding naar rato minder, zodat één raak schot niet alles bepaalt. Onder de titel het aantal goals.' },
+  { key: 'creation', show: 'apm', label: 'Creëren', code: 'CRE', count: true,
+    about: 'Assists per wedstrijd, met tweede assists voor 70% en steekpasses voor 35%. Onder de titel het aantal assists.' },
+  { key: 'passing', show: 'ppct', label: 'Passen', code: 'PAS', fmt: v => `${Math.round(100 * v)}%`,
+    about: 'Geslaagde passes per wedstrijd, gewogen met de passnauwkeurigheid: veel passes én weinig balverlies. Onder de titel de nauwkeurigheid.' },
+  { key: 'dribbling', show: 'dpm', label: 'Dribbelen', code: 'DRI', count: true,
+    about: 'Tegenstanders uitgespeeld plus geslaagde dribbels per wedstrijd, uit de gebeurtenissen die EA meegeeft. Onder de titel het totaal.' },
+  { key: 'defending', show: 'defpm', label: 'Verdedigen', code: 'VER', count: true,
+    about: 'Gewonnen tackles per wedstrijd, gewogen met het slagingspercentage, plus onderscheppingen per wedstrijd. Onder de titel gewonnen tackles plus onderscheppingen.' },
 ];
-function nightStats(rows) {
-  const n = rows.length, sum = f => rows.reduce((a, r) => a + (f(r.p) || 0), 0), ev = rows.filter(r => r.p.ev);
-  const rated = rows.map(r => r.p.rating).filter(v => v !== null), pa = sum(p => p.passAttempts), ta = sum(p => p.tackleAttempts);
+// De maten van een avond. n = wedstrijden, nEv = wedstrijden met gebeurtenissen (voor het team: per wedstrijd van het
+// team, niet per speler); goals = eigen goals (het team: alle goals van de uitslag, ook die van AI).
+function nightStats(rows, n = rows.length, nEv = null, goals = null) {
+  const sum = f => rows.reduce((a, r) => a + (f(r.p) || 0), 0), ev = rows.filter(r => r.p.ev), evSum = f => ev.reduce((a, r) => a + (f(r.p.ev) || 0), 0);
+  const ne = nEv ?? ev.length, rated = rows.map(r => r.p.rating).filter(v => v !== null);
+  const G = goals ?? sum(p => p.goals), S = sum(p => p.shots), A = sum(p => p.assists), pm = sum(p => p.passesMade), pa = sum(p => p.passAttempts);
+  const tm = sum(p => p.tacklesMade), ta = sum(p => p.tackleAttempts), inter = evSum(e => e.interceptions);
+  const conv = S ? Math.min(1, G / S) : 0;
   return {
     rating: rated.length ? avg(rated) : null,
-    goals: sum(p => p.goals) / n,
-    create: (sum(p => p.assists) + ev.reduce((a, r) => a + (r.p.ev.second_assists || 0), 0)) / n,
-    pass: pa >= 10 ? sum(p => p.passesMade) / pa : null,
-    won: ev.length ? ev.reduce((a, r) => a + (r.p.ev.possession_won || 0), 0) / ev.length : null,
-    duels: ta >= 3 ? sum(p => p.tacklesMade) / ta : null,
+    scoring: G / n + 0.5 * conv * Math.min(1, S / 5), gpm: G / n,
+    creation: (A + 0.7 * evSum(e => e.second_assists) + 0.35 * evSum(e => e.through_balls)) / n, apm: A / n,
+    passing: pa >= 10 ? (pm / n) * (pm / pa) : null, ppct: pa >= 10 ? pm / pa : null,
+    dribbling: ne ? (evSum(e => e.players_beaten) + evSum(e => e.dribbles_completed)) / ne : null,
+    dpm: ne ? (evSum(e => e.players_beaten) + evSum(e => e.dribbles_completed)) / ne : null,
+    defending: (tm / n) * (ta ? tm / ta : 0) + (ne ? inter / ne : 0), defpm: tm / n + (ne ? inter / ne : 0),
   };
 }
-// Het team over een avond: dezelfde zes maten, maar per wedstrijd van het hele team (goals uit de uitslag, creëren en
-// balwinst per wedstrijd; pass en duels over alle pogingen; rating als gemiddelde van alle spelers).
+// Het team over een avond: dezelfde maten per wedstrijd van het hele team; rating als gemiddelde van alle spelers.
 function teamStats(ms) {
-  const rows = ms.flatMap(m => m.players.map(p => ({ m, p }))), n = ms.length;
-  const st = nightStats(rows);
-  const ev = rows.filter(r => r.p.ev), evMatches = new Set(ev.map(r => r.m)).size;
-  // Scoren van het team: alle goals van de uitslag (ook die van AI), zodat het klopt met de kop.
-  return { ...st, goals: ms.reduce((a, m) => a + m.goals, 0) / n, create: st.create * rows.length / n,
-    won: evMatches ? ev.reduce((a, r) => a + (r.p.ev.possession_won || 0), 0) / evMatches : null };
+  const rows = ms.flatMap(m => m.players.map(p => ({ m, p })));
+  const evMatches = new Set(rows.filter(r => r.p.ev).map(r => r.m)).size;
+  return nightStats(rows, ms.length, evMatches, ms.reduce((a, m) => a + m.goals, 0));
 }
 // Referentie, één keer berekend: per as alle waarden van onze avonden, voor het team en voor de spelers, en per
 // speler en voor het team de waarden per sessie (voor "normaal").
@@ -319,7 +328,7 @@ function radarSvg(sel, others, sid, label) {
   const ring = v => RADAR_AXES.map((_, i) => pt(i, v).map(n => n.toFixed(1)).join(',')).join(' ');
   const axes = RADAR_AXES.map((a, i) => { const [x, y] = pt(i, 100), [lx, ly0] = pt(i, 128);
     const anchor = Math.abs(lx - c) < 4 ? 'middle' : lx > c ? 'start' : 'end', ly = ly0 < c - 20 ? ly0 - 30 * z : ly0 + (ly0 > c + 20 ? 12 * z : -6 * z);
-    const v = sel.st[a.key], norm = normalOf(a.key, sel.name === null ? 'team' : sel.name, sid);
+    const v = sel.st[a.show], norm = normalOf(a.show, sel.name === null ? 'team' : sel.name, sid);
     return `<line x1="${c}" y1="${c}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" class="radar-axis"/><text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}" class="radar-label">${a.label}<tspan x="${lx.toFixed(1)}" class="radar-value sel" style="--pc:${radarColor(sel.name)}" dy="${17 * z}">${v === null ? 'te weinig' : radarShow(a, v, sel.n)}</tspan>${norm === null ? '' : `<tspan x="${lx.toFixed(1)}" dy="${14 * z}" class="radar-norm">normaal ${radarShowNorm(a, norm, sel.n)}</tspan>`}</text>`; }).join('');
   const shape = (x, cls) => `<polygon points="${RADAR_AXES.map((a, i) => pt(i, x.pc[a.key] ?? 0).map(n => n.toFixed(1)).join(',')).join(' ')}" style="stroke:${radarColor(x.name)};fill:${radarColor(x.name)}" class="radar-shape ${cls}"><title>${x.name === null ? 'Team' : esc(proName(x.name))}</title></polygon>`;
   const mx = 90 * z, my = 50 * z;
@@ -347,7 +356,7 @@ function openPlayer(name) {
   const sum = f => rows.reduce((a, r) => a + (f(r.p) || 0), 0), rated = rows.map(r => r.p.rating).filter(v => v !== null);
   const facts = [['Wedstrijden', rows.length], ['Rating', f1(avg(rated))], ['Goals', sum(p => p.goals)], ['Assists', sum(p => p.assists)], ['Man of the match', sum(p => p.mom)]];
   const table = me ? `<table class="pd-table"><thead><tr><th></th><th>Deze avond</th><th>Normaal</th></tr></thead><tbody>${RADAR_AXES.map(a => {
-    const v = me.st[a.key], norm = normalOf(a.key, name, SESSION_ID);
+    const v = me.st[a.show], norm = normalOf(a.show, name, SESSION_ID);
     return `<tr><th scope="row">${a.label}</th><td>${v === null ? '–' : radarShow(a, v, me.n)}</td><td>${norm === null ? '–' : radarShowNorm(a, norm, me.n)}</td></tr>`; }).join('')}</tbody></table>` : '';
   d.querySelector('.rd-body').innerHTML = `<h2 id="pd-title">${esc(proName(name))}</h2>
     <p>${esc(cap(longDate(ms[0].ts)))}</p>
@@ -362,6 +371,14 @@ function openPlayer(name) {
   dialogFoot(d, `spelers.html#${encodeURIComponent(name)}`, 'Naar de spelerspagina', { prev: step(order[at - 1]), next: step(order[at + 1]) });
   if (!d.open) d.showModal();
 }
+// Uitleg van de zes assen (de knop Assen bij Zo speelden we).
+$('#axes-btn')?.addEventListener('click', () => {
+  const d = $('#axes-dialog');
+  d.querySelector('.rd-body').innerHTML = `<h2 id="ax-title">Assen</h2><p>Elke as vergelijkt deze avond met al onze eigen avonden: groot is beter dan meestal, de gestippelde ring is een gewone avond.</p>
+    <ul class="axes-list">${RADAR_AXES.map(a => `<li><span class="ax-code">${a.code}</span><div><b>${a.label}</b><p>${a.about}</p></div></li>`).join('')}</ul>`;
+  d.showModal();
+});
+$('#axes-dialog').addEventListener('click', e => { if (e.target === e.currentTarget || e.target.closest('.rd-close')) e.currentTarget.close(); });
 $('#player-dialog').addEventListener('click', e => { if (e.target === e.currentTarget || e.target.closest('.rd-close')) e.currentTarget.close(); });
 
 onWidthChange(() => DATA && render());
@@ -481,7 +498,7 @@ async function shareImage({ ms, sm, quote, prow }) {
     g.textAlign = 'right'; mono(32, 700); g.fillStyle = '#ffd200'; g.fillText(f1(r.rH), 545, mid + 11);
     g.fillStyle = '#efeaf3'; mono(28, 600);
     const sum = f => rows.reduce((a, x) => a + (f(x.p) || 0), 0), relevant = ROLE_STATS[r.role] || [];
-    const val = { goals: sum(p => p.goals), assists: sum(p => p.assists), pass: st.pass === null ? '–' : `${Math.round(100 * st.pass)}%`,
+    const val = { goals: sum(p => p.goals), assists: sum(p => p.assists), pass: st.ppct === null ? '–' : `${Math.round(100 * st.ppct)}%`,
       won: rows.some(x => x.p.ev) ? sum(p => p.ev?.possession_won) : '–', duels: sum(p => p.tacklesMade) };
     cols.forEach(([, key], j) => { g.fillStyle = relevant.includes(key) ? '#ffffff' : '#7d7788'; mono(28, relevant.includes(key) ? 700 : 500); g.fillText(String(val[key]), colX[j], mid + 10); });
   }
