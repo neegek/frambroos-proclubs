@@ -148,8 +148,25 @@ function render() {
   for (const a of $('#s-podium').querySelectorAll('a')) a.addEventListener('click', e => { e.preventDefault(); openPlayer(a.dataset.n); });
   PlayerCard.reveal($('#s-podium'));
   SESSION_ID = s.id;
+  // Algemeen over deze avond (coach-logica §9a): dezelfde kaartjes als op het Clubhouse, met de cijfers van de avond.
+  const rated = prow.filter(r => r.rH !== null), wed = r => `${r.n} ${r.n === 1 ? 'wedstrijd' : 'wedstrijden'}`, who = 'Iedereen die deze avond meespeelde.';
+  rankCards($('#s-rank'), [
+    { key: 's-rating', label: 'Rating', about: 'De gemiddelde matchrating van EA over de wedstrijden van deze avond.', who, rows: [...rated].sort((a, b) => b.rH - a.rH || b.n - a.n).map(r => ({ name: r.name, main: f1(r.rH), sub: wed(r) })) },
+    { key: 's-goals', label: 'Goals', about: 'Doelpunten deze avond.', who, rows: [...prow].sort((a, b) => b.g - a.g || a.n - b.n).map(r => ({ name: r.name, main: String(r.g), sub: wed(r) })) },
+    { key: 's-assists', label: 'Assists', about: 'De laatste pass voor een doelpunt, deze avond.', who, rows: [...prow].sort((a, b) => b.a - a.a || a.n - b.n).map(r => ({ name: r.name, main: String(r.a), sub: wed(r) })) },
+    { key: 's-mom', label: 'Man of the match', about: 'Hoe vaak EA iemand deze avond tot man of the match koos.', who, rows: [...prow].sort((a, b) => b.mom - a.mom || a.n - b.n).map(r => ({ name: r.name, main: String(r.mom), sub: wed(r) })) },
+  ]);
   renderMatrix(ms, prow);
   renderRadar(s, ms);
+}
+
+// De uitspraak van één speler over deze avond (coach-logica §9): de quote van de avond als deze speler de beste was,
+// anders een eigen uitspraak over wat er bij deze speler het meest uitstak (personas.js).
+function playerQuote(name, sess, rows) {
+  const q = sessionQuote(sess);
+  if (q && q.who === proName(name)) return q.text;
+  const rest = DATA.matches.filter(m => m.session !== sess.id).map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p);
+  return quoteFor(name, standoutStat(rows, rest), sess.id);
 }
 
 // Sessiekaarten van alle spelers met plek, rating, groei en reeks (wat eerst *Spelers deze sessie* was). Nu niet op de
@@ -358,8 +375,12 @@ function openPlayer(name) {
   const table = me ? `<table class="pd-table"><thead><tr><th></th><th>Deze avond</th><th>Normaal</th></tr></thead><tbody>${RADAR_AXES.map(a => {
     const v = me.st[a.show], norm = normalOf(a.show, name, SESSION_ID);
     return `<tr><th scope="row">${a.label}</th><td>${v === null ? '–' : radarShow(a, v, me.n)}</td><td>${norm === null ? '–' : radarShowNorm(a, norm, me.n)}</td></tr>`; }).join('')}</tbody></table>` : '';
-  d.querySelector('.rd-body').innerHTML = `<h2 id="pd-title">${esc(proName(name))}</h2>
-    <p>${esc(cap(longDate(ms[0].ts)))}</p>
+  const portrait = PlayerCard.portrait(name), place = (SHARE?.prow || []).find(r => r.name === name)?.place;
+  d.querySelector('.rd-body').innerHTML = `<div class="pd-head">
+      <span class="pd-face">${portrait ? `<img src="${portrait}" alt="">` : `<span class="rd-face-icon">${esc(proName(name).charAt(0))}</span>`}</span>
+      <div><h2 id="pd-title">${esc(proName(name))}</h2><p>${esc(cap(longDate(ms[0].ts)))}${place ? ` · ${place === 1 ? 'beste van de avond' : `plek ${place}`}` : ''}</p></div>
+    </div>
+    <blockquote class="pd-quote">„${esc(playerQuote(name, sess, rows))}”</blockquote>
     <dl class="pd-facts">${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>
     ${ratingDots(rows)}
     ${me ? `<div class="pd-radar">${radarSvg(me, [team], SESSION_ID, `${esc(proName(name))} deze avond, het team vaag erachter`)}</div>${table}` : '<p class="cd-note">Eén wedstrijd: te weinig voor de radar.</p>'}

@@ -40,21 +40,25 @@ const PERSONAS = {
   },
   'Highnis 023': {
     pro: 'Mo van der Kamp',
-    achtergrond: 'Was een Nederlandse crimineel die geld witwaste; is in de gevangenis bekeerd tot de islam.',
-    stem: 'Straattaal uit de stad, verwijzingen naar het oude leven (witwassen, recherche, de cel) en naar het nieuwe '
-      + '(alhamdulillah, inshallah), altijd met respect voor het geloof. Rustig, een beetje wijs geworden.',
-    eigenschappen: ['oude gewoontes komen soms boven', 'nu rustig en dankbaar', 'denkt in boekhouding en bewijs'],
-    woorden: ['broer', 'alhamdulillah', 'inshallah', 'wallah'],
-    beelden: ['witwassen', 'de recherche', 'de cel', 'boekhouden'],
+    achtergrond: 'Komt van het woonwagenkamp en waste jaren geld wit; is in de cel bekeerd tot de islam en wil het oude '
+      + 'leven achter zich laten. Jamal, 2 november 2026: de bekering en de Koran vooraan, het kamp en het witwassen '
+      + 'komen alleen nog per ongeluk boven.',
+    stem: 'Rustig, dankbaar en wijs geworden; haalt de Koran aan (vrij vertaald, met soera en vers) en zegt alhamdulillah, '
+      + 'inshallah, subhanallah. Af en toe glipt er een oude uitdrukking van het kamp of uit het witwassen uit, meteen gevolgd '
+      + 'door een correctie (astaghfirullah, "dat zeg ik niet meer"). Nooit spottend over het geloof; de grap zit in de slip.',
+    eigenschappen: ['bekeerd en oprecht gelovig', 'citeert de Koran bij alles', 'oude woorden glippen er soms uit, en dat wil Mo niet',
+      'denkt nog in boekhouding en bewijs', 'rustig en dankbaar', 'trots op het kamp, maar niet op wat er gebeurde'],
+    woorden: ['broer', 'alhamdulillah', 'inshallah', 'subhanallah', 'astaghfirullah', 'wallah', 'het kamp', 'de briefjes'],
+    beelden: ['de Koran', 'het kamp', 'witwassen', 'de cel', 'boekhouden', 'de recherche'],
     stats: {
-      goals: ['Vroeger telde ik briefjes, nu tel ik ballen. Alhamdulillah.', 'Die ballen gingen er schoon in. Echt schoon, niet zoals vroeger.'],
-      assists: ['Ik regel het, een ander zet zijn naam eronder. Dat kennen we.', 'Ik geef de bal weg. Dat had ik vroeger met geld moeten doen.'],
-      mom: ['Man of the match. Eerste keer dat ik zonder advocaat in de krant kom.', 'Ze noemen mijn naam. Vroeger was dat slecht nieuws, broer.'],
-      passes: ['Alles kwam aan. Dat noem ik een sluitende boekhouding.', 'Elke pass moet ergens landen. Net als geld, anders vallen ze je lastig.'],
-      duels: ['Ik weet hoe het voelt als ze je komen halen. Nu ben ik degene die haalt.', 'Ik pak de bal af zonder dat iemand iets kan bewijzen.'],
-      balwinst: ['Wat van ons is, komt terug, inshallah.', 'Hun bal, onze bal. Vroeger heette dat iets anders.'],
-      schoten: ['Veel geschoten, weinig binnen. Sommige dingen kun je niet witwassen.', 'Ik bleef schieten. Geduld, broer. Alles staat geschreven.'],
-      rating: ['Netjes, en alles op de bon.', 'Geen gedoe, geen vragen. Gewoon voetballen, broer.'],
+      goals: ['Met de moeilijkheid komt de verlichting, soera 94. Vanavond kwam de verlichting via mijn rechter.', 'Vroeger telde ik briefjes, nu tel ik ballen. Alhamdulillah, deze zijn schoon.', 'Die ging erin als een tas met… nee. Astaghfirullah. Die ging er gewoon mooi in.'],
+      assists: ['Wie goed doet, krijgt het tienvoudig terug, soera 6. Eén pass, één goal, dat is al winst.', 'Ik regel het, een ander zet zijn naam eronder. Dat kende ik al van vroeger, maar nu is het halal.', 'Ik geef en vraag niks terug. Op het kamp noemden we dat anders, maar dit is beter.'],
+      mom: ['Man of the match. Eerste keer dat ik in de krant kom zonder advocaat. Alhamdulillah.', 'Wees niet trots, zegt soera 31. Dus ik zeg alleen: dank aan het team, en aan Hem.', 'Ze noemen mijn naam. Vroeger stond ik dan al in de bus naar het kamp. Nu blijf ik gewoon staan.'],
+      passes: ['Alles kwam aan. Een sluitende boekhouding, en deze keer echt sluitend.', 'Spreek het goede woord, soera 2. Een goede pass is ook een goed woord.', 'Elke pass moet ergens landen, net als geld vroeg… nee. Net als een gebed. Astaghfirullah.'],
+      duels: ['Ik weet hoe het voelt als ze je komen halen. Nu haal ik de bal, en verder niks, wallah.', 'Wees geduldig, Allah is met de geduldigen, soera 2. Geduld, en dan de tackle.', 'Op het kamp pakte je wat je pakken kon. Astaghfirullah. Vanavond alleen de bal.'],
+      balwinst: ['Wat van ons is, komt terug, inshallah.', 'Hun bal, onze bal. Vroeger heette dat anders. Nu heet het gewoon voetbal.', 'Alles keert terug naar waar het hoort, soera 2. De bal ook.'],
+      schoten: ['Veel geschoten, weinig binnen. Sommige dingen kun je niet witwassen, broer.', 'Allah belast niemand boven zijn vermogen, soera 2. Maar die keeper kwam dichtbij.', 'Ik bleef schieten. Geduld is de helft van het geloof. De andere helft is mikken.'],
+      rating: ['Netjes, en alles op de bon. Zo hoort het nu.', 'Geen gedoe, geen vragen. Gewoon voetballen, broer. Alhamdulillah.', 'Een gewone avond is ook een gave, soera 14: wie dankbaar is, krijgt meer.'],
     },
   },
   'GoodTimes 023': {

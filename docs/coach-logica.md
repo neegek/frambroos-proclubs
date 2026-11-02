@@ -478,11 +478,16 @@ niet actief, zodat een tik erop terug naar de lijst gaat (sinds 1 november 2026)
 tijd, uitslag, tegenstander, score en de beste speler van de wedstrijd (hoogste EA-rating, met een kroon als die ook man of
 the match was). Eerst de laatste twintig, de rest achter een knop.
 
-**Algemeen** (Clubhouse, sinds 2 november 2026, boven *Topspelers*): drie ranglijsten over de hele carrière bij de
-club volgens EA, dus ook van vóór deze app: **Rating** (gemiddelde, klein het aantal wedstrijden), **Man of the
-match** (totaal, klein het deel van de wedstrijden) en **Goals + assists** (totaal, klein per wedstrijd). Bij gelijk
-staat wie meer wedstrijden speelde hoger (rating) of wie het in minder wedstrijden deed (totalen). Een tik opent de
-hele lijst met uitleg, zoals bij Topspelers.
+**Algemeen** (Clubhouse; sinds 2 november 2026 één rij, *Topspelers* is erin opgegaan omdat het dubbel was): één rij
+ranglijstkaartjes (`rankCards` in `public/common.js`). De eerste vier over de hele carrière bij de club volgens EA,
+ook van vóór deze app: **Rating**, **Goals**, **Assists**, **Man of the match**. Daarna, achter *Alle ranglijsten*,
+over de gevolgde wedstrijden: Frambroos-index, betrokken bij goals, passnauwkeurigheid, balwinst, duels gewonnen.
+Op een kaartje staat alleen het getal, geen sublabel (wedstrijden, per wedstrijd); dat staat in het uitlegscherm
+dat een tik opent, samen met waar het op gebaseerd is en wie meetelt. Bij gelijk staat wie meer wedstrijden speelde
+hoger (rating) of wie het in minder wedstrijden deed (totalen).
+
+**Algemeen op een sessie**: dezelfde kaartjes (rating, goals, assists, man of the match), maar alleen over die avond
+en voor wie meespeelde, boven *Per wedstrijd*. Een tik opent dezelfde lijst met het aantal wedstrijden van die avond.
 
 **Sessiekop** (sinds 1 november 2026; daarvoor een scorebord zonder duidelijk middelpunt): één kaart met een
 **split**, zodat elk deel bij zijn soort hoort en het met de thema's meeschaalt.
@@ -532,6 +537,14 @@ per wedstrijd een rij (uitslag, shirt, score). Bovenaan per speler een **minikaa
 avond en de **naam in het kaartje**, in de kleur van de plek op dat gemiddelde (*Kleur van de plek*, zonder
 medaille); geen vergelijking met normaal (sinds 1 november 2026 weggehaald:
 te ingewikkeld voor wat het zei). De kolommen staan op volgorde van het gemiddelde.
+**Het spelersscherm** (een tik op een speler in het podium of de radar) begint met een kop: het portret in een
+rondje, de naam, de datum en de plek van de avond, en daaronder de **uitspraak van deze speler over deze avond**: de
+quote van de avond als deze speler de beste was, anders een eigen uitspraak over de statistiek die bij deze speler
+het meest uitstak (`playerQuote` in `sessie.js`, met `standoutStat` en `quoteFor` uit `personas.js`). Kort en
+raak: een punchline, geen analyse. Op telefoon is elk scherm een paneel dat van onderen omhoog schuift, bijna
+schermvullend met wat lucht bovenaan en een handvat; de knoppen onderin (vorige speler, naar de spelerspagina,
+volgende speler) zijn drie losse, omrande knoppen.
+
 **Een tik op een cijfer** opent wat die speler in die wedstrijd deed (sinds 1 november 2026): de rating, en waar die
 op rust: goals, assists, schoten, passes gelukt van pogingen, tackles gewonnen van pogingen, balwinst en balverlies
 (uit de events), reddingen bij een keeper, man of the match, en het archetype. EA zegt niet hoe de rating berekend

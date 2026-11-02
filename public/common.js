@@ -492,6 +492,24 @@ function oppBadge(opp) {
 }
 // Dialoog met een vaste balk onderaan (blijft staan bij scrollen): in het midden een rustige knop naar een andere pagina,
 // links en rechts eventueel kleine knoppen naar de vorige en volgende (nav.prev/next: { label, face, go }).
+// Ranglijstkaartjes (coach-logica §9a, Algemeen): per kaartje een label en alle spelers met één getal, zonder
+// sublabels; een tik opent #rank-dialog met de uitleg, wie meetelt en de hele lijst met het kleine cijfer erbij.
+// cards: [{ key, label, about, who, rows: [{ name, main, sub }] }]. Gedeeld door het Clubhouse en een sessie.
+function rankCards(container, cards) {
+  container.innerHTML = cards.map(c => `<button type="button" class="rank-card" data-key="${c.key}" aria-haspopup="dialog">
+      <span class="rank-card-label">${c.label}<span class="rank-more" aria-hidden="true">i</span></span>
+      <ol>${c.rows.map((r, i) => `<li><span>${i + 1}</span><span>${esc(proName(r.name))}</span><b>${r.main}</b></li>`).join('') || `<li class="empty">${c.empty || 'Nog te weinig wedstrijden.'}</li>`}</ol></button>`).join('');
+  for (const b of container.querySelectorAll('.rank-card')) b.addEventListener('click', () => openRankList(cards.find(c => c.key === b.dataset.key)));
+}
+function openRankList(c) {
+  const d = $('#rank-dialog'); if (!d) return;
+  d.querySelector('.rd-body').innerHTML = `<h2 id="rd-title">${c.label}</h2>
+    <h3>Waar het op gebaseerd is</h3><p>${c.about}</p>
+    <h3>Wie meetelt</h3><p>${c.who}</p>
+    <h3>De hele lijst</h3>
+    <ol class="rd-list">${c.rows.map((r, i) => `<li><span>${i + 1}</span><span>${esc(proName(r.name))}</span><b>${r.main}</b>${r.sub ? `<small>${esc(r.sub)}</small>` : ''}</li>`).join('') || `<li class="empty">${c.empty || 'Nog te weinig wedstrijden.'}</li>`}</ol>`;
+  d.showModal();
+}
 function dialogFoot(d, href, label, nav = {}) {
   let f = d.querySelector('.rd-foot');
   if (!f) { f = document.createElement('div'); f.className = 'rd-foot'; d.append(f); }
