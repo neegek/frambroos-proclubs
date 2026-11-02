@@ -157,6 +157,30 @@ function renderRanking(totals) {
   for (const b of $('#rank-cards').querySelectorAll('.rank-card')) b.addEventListener('click', () => openRank(RANKS.find(R => R.key === b.dataset.key), totals));
 }
 
+// Algemeen (coach-logica §9a): drie ranglijsten over de hele carrière bij de club volgens EA (DATA.members), met het
+// totaal groot en per wedstrijd klein. Gelijk: wie meer wedstrijden heeft, staat hoger. Een tik opent de hele lijst.
+const GEN_RANKS = [
+  { key: 'g-rating', label: 'Rating', v: m => m.ratingAve, tie: m => m.gamesPlayed, main: m => f1(m.ratingAve), sub: m => `${m.gamesPlayed} wedstrijden`, short: m => `${m.gamesPlayed} wedstr.`,
+    about: 'De gemiddelde matchrating over alle wedstrijden voor de club, zoals EA die bijhoudt (EA geeft één decimaal; bij gelijk telt wie meer wedstrijden speelde).' },
+  { key: 'g-mom', label: 'Man of the match', v: m => m.mom, tie: m => -m.gamesPlayed, main: m => String(m.mom), sub: m => `${m.gamesPlayed ? Math.round(100 * m.mom / m.gamesPlayed) : 0}% van de wedstrijden`, short: m => `${m.gamesPlayed ? Math.round(100 * m.mom / m.gamesPlayed) : 0}%`,
+    about: 'Hoe vaak EA iemand tot man of the match koos, met klein welk deel van de wedstrijden dat was.' },
+  { key: 'g-ga', label: 'Goals + assists', v: m => m.goals + m.assists, tie: m => -m.gamesPlayed, main: m => String(m.goals + m.assists), sub: m => `${f1((m.goals + m.assists) / Math.max(1, m.gamesPlayed))} per wedstrijd`, short: m => `${f1((m.goals + m.assists) / Math.max(1, m.gamesPlayed))} p/w`,
+    about: 'Goals en assists samen over de hele carrière bij de club, met klein het gemiddelde per wedstrijd.' },
+];
+const genRows = R => DATA.members.filter(m => m.gamesPlayed > 0 && R.v(m) !== null && R.v(m) !== undefined).sort((a, b) => R.v(b) - R.v(a) || R.tie(b) - R.tie(a));
+function renderGeneral() {
+  $('#gen-cards').innerHTML = GEN_RANKS.map(R => `<button type="button" class="rank-card gen" data-key="${R.key}" aria-haspopup="dialog">
+      <span class="rank-card-label">${R.label}<span class="rank-more" aria-hidden="true">i</span></span>
+      <ol>${genRows(R).map((m, i) => `<li><span>${i + 1}</span><span>${esc(proName(m.name))}</span><b>${R.main(m)}<small>${esc(R.short(m))}</small></b></li>`).join('') || '<li class="empty">Nog geen gegevens van EA.</li>'}</ol></button>`).join('');
+  for (const b of $('#gen-cards').querySelectorAll('.rank-card')) b.addEventListener('click', () => {
+    const R = GEN_RANKS.find(x => x.key === b.dataset.key), d = $('#rank-dialog');
+    d.querySelector('.rd-body').innerHTML = `<h2 id="rd-title">${R.label}</h2><h3>Waar het op gebaseerd is</h3><p>${R.about}</p>
+      <h3>Wie meetelt</h3><p>Iedereen in de selectie, over alle wedstrijden voor de club volgens EA (ook van vóór deze app).</p>
+      <h3>De hele lijst</h3><ol class="rd-list">${genRows(R).map((m, i) => `<li><span>${i + 1}</span><span>${esc(proName(m.name))}</span><b>${R.main(m)}</b><small>${esc(R.sub(m))}</small></li>`).join('')}</ol>`;
+    d.showModal();
+  });
+}
+
 function openRank(R, totals) {
   const rows = rankRows(R, totals), d = $('#rank-dialog');
   d.querySelector('.rd-body').innerHTML = `<h2 id="rd-title">${R.label}</h2>
@@ -178,6 +202,7 @@ function render() {
   $('#news').innerHTML = latest ? newsCard(latest, { lead: true }) : '<p class="empty">Nog geen nieuws: speel een avond, dan schrijft het zichzelf.</p>';
   PlayerCard.reveal($('#news'));
   $('#results').innerHTML = ms.slice(-4).reverse().map(m => matchCard(m, { own: DATA.snapshot?.skillRating })).join('') || '<p class="muted">Nog geen wedstrijden.</p>';
+  renderGeneral();
   renderRanking(playerTotals(ms));
 
   // Selectie als spelerskaarten (playercard.js), gesorteerd op vorm: tier, dan de rating van de laatste sessie, dan wedstrijden.

@@ -37,7 +37,7 @@
         </div>
       </section>
       <section class="card">
-        <div class="card-head"><div><h2>Zo speelden we</h2><p class="hint">Het team over de hele avond; tik een naam om die speler uit te lichten en nog eens om terug te gaan, met per as de vergelijking met al onze eigen avonden (de gestippelde ring is een gewone avond).</p></div></div>
+        <div class="card-head"><div><h2>Zo speelden we</h2><p class="hint">Het team over de hele avond; tik een naam om die speler uit te lichten en nog eens om terug te gaan, met per as de vergelijking met al onze eigen avonden (de gestippelde ring is een gewone avond).</p></div><button type="button" class="axes-btn" id="axes-btn" aria-haspopup="dialog">Assen</button></div>
         <div class="radar-wrap"><div id="s-radar" class="radar"></div><div class="radar-chips" id="s-radar-chips" role="group" aria-label="Speler uitlichten"></div></div>
       </section>
       <section class="card" id="per-wedstrijd">
@@ -49,6 +49,7 @@
 
   </main>
 </div>
+<dialog class="rank-dialog" id="axes-dialog" aria-labelledby="ax-title"><button type="button" class="icon-btn rd-close" aria-label="Sluiten">✕</button><div class="rd-body"></div></dialog>
 <dialog class="rank-dialog" id="player-dialog" aria-labelledby="pd-title"><button type="button" class="icon-btn rd-close" aria-label="Sluiten">✕</button><div class="rd-body"></div></dialog>
 <dialog class="rank-dialog" id="cell-dialog" aria-labelledby="cd-title"><button type="button" class="icon-btn rd-close" aria-label="Sluiten">✕</button><div class="rd-body"></div></dialog>
 <div id="tooltip" class="tooltip" hidden></div>

@@ -478,6 +478,12 @@ niet actief, zodat een tik erop terug naar de lijst gaat (sinds 1 november 2026)
 tijd, uitslag, tegenstander, score en de beste speler van de wedstrijd (hoogste EA-rating, met een kroon als die ook man of
 the match was). Eerst de laatste twintig, de rest achter een knop.
 
+**Algemeen** (Clubhouse, sinds 2 november 2026, boven *Topspelers*): drie ranglijsten over de hele carrière bij de
+club volgens EA, dus ook van vóór deze app: **Rating** (gemiddelde, klein het aantal wedstrijden), **Man of the
+match** (totaal, klein het deel van de wedstrijden) en **Goals + assists** (totaal, klein per wedstrijd). Bij gelijk
+staat wie meer wedstrijden speelde hoger (rating) of wie het in minder wedstrijden deed (totalen). Een tik opent de
+hele lijst met uitleg, zoals bij Topspelers.
+
 **Sessiekop** (sinds 1 november 2026; daarvoor een scorebord zonder duidelijk middelpunt): één kaart met een
 **split**, zodat elk deel bij zijn soort hoort en het met de thema's meeschaalt.
 - **Boven: het beeld** op het stadion van het Clubhouse (vaste kleuren, los van het thema): groot de **naam van de
@@ -547,14 +553,20 @@ met een naam gekozen is die speler het felst en de rest (het team ook) vaag. Zes
 het team deze avond met alle avonden van het team (minstens 2 wedstrijden); een spelersvlak vergelijkt die speler
 met alle avonden van al onze spelers. 50 is een gewone avond (de gestippelde ring), 100 de beste ooit. De assen:
 
-| As | Maat over de avond |
-|---|---|
-| Rating | gemiddelde EA-rating |
-| Scoren | goals per wedstrijd |
-| Creëren | assists plus tweede assists per wedstrijd |
-| Passen | passnauwkeurigheid (minstens 10 passes) |
-| Balwinst | veroverde ballen per wedstrijd (events 108–110) |
-| Duels | gewonnen tackles van de pogingen (minstens 3) |
+| As | Maat over de avond (voor de vorm) | Onder de titel |
+|---|---|---|
+| Rating | gemiddelde EA-rating | de rating |
+| Scoren | goals per wedstrijd + ½ × goals per schot; bij minder dan vijf schoten telt dat tweede deel naar rato minder | goals |
+| Creëren | (assists + 0,7 × tweede assists + 0,35 × steekpasses) per wedstrijd | assists |
+| Passen | geslaagde passes per wedstrijd × passnauwkeurigheid (minstens 10 passes) | passnauwkeurigheid |
+| Dribbelen | (tegenstanders uitgespeeld + geslaagde dribbels) per wedstrijd, uit de events | totaal |
+| Verdedigen | gewonnen tackles per wedstrijd × slagingspercentage + onderscheppingen per wedstrijd | gewonnen tackles + onderscheppingen |
+
+Sinds 2 november 2026 (daarvoor scoren, creëren, passnauwkeurigheid, balwinst en duels als losse cijfers): bredere
+maten die meer van het spel vangen en beter aansluiten bij wat de EA-rating draagt (goals, assists, dribbels,
+balafpakken; §3). Een knop **Assen** bij de radar opent de uitleg per as (code, naam, één zin). **Normaal** onder een
+as is het gemiddelde van dezelfde speler (of het team) over **alle andere** avonden, dus zonder deze avond zelf; bij
+aantallen omgerekend naar het aantal wedstrijden van deze avond.
 
 Ontbreekt een maat (te weinig pogingen), dan staat de speler daar op 0. Elke speler heeft een vaste kleur, het team
 de clubkleur. Onder elke **astitel staat het cijfer** van wat is uitgelicht, met daaronder klein het normaal. Bij

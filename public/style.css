@@ -1066,3 +1066,21 @@ a.ftok:hover .ftok-c { transform: translateY(-2px); }
   .radar-value { font-size: 23px; }
   .radar-norm { font-size: 18px; }
 }
+
+/* Uitleg van de radarassen (knop Assen). */
+.axes-btn { flex: none; min-height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--panel-border); background: none; color: var(--ink-2); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.axes-btn:hover { color: var(--ink); background: var(--surface-2); }
+.axes-list { list-style: none; margin: 14px 0 0; padding: 0; border: 1px solid var(--panel-border); border-radius: 16px; overflow: hidden; }
+.axes-list li { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 14px; align-items: center; padding: 14px 16px; border-top: 1px solid var(--grid); }
+.axes-list li:first-child { border-top: 0; }
+.ax-code { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 14px; background: var(--surface-2); color: var(--brand-text); font: 700 14px/1 var(--num-font); letter-spacing: 0.04em; }
+.axes-list b { font-size: 16px; }
+.rd-body .axes-list p { margin: 2px 0 0; font-size: 13.5px; color: var(--ink-2); }
+
+/* Algemeen op het Clubhouse: per regel groot het totaal en klein per wedstrijd. */
+.rank-card.gen li { align-items: center; }
+.rank-card.gen li b { display: grid; justify-items: end; line-height: 1.1; }
+.rank-card.gen li b small { font-family: inherit; font-size: 11px; font-weight: 500; color: var(--muted); white-space: nowrap; }
+@media (min-width: 601px) { .gen-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.card-head:has(.axes-btn) { flex-wrap: nowrap; align-items: center; }
+.card-head:has(.axes-btn) > div:first-child { flex: 1 1 auto; }
