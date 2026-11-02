@@ -496,6 +496,18 @@ als gemiddelde), zonder sublabel; onderaan elke lijst, zonder plek, het **Team**
 samen (bij goals alle goals van de uitslag, ook die van AI). Een tik op een kaartje opent de hele lijst met uitleg en
 het kleine cijfer (aantal wedstrijden, of de breuk bij percentages). Zo zie je hetzelfde als beeld en als lijst.
 
+**Club** (sinds 2 november 2026 heet het Clubhouse in het menu *Club*). Op telefoon staat de laatste sessie als
+**dezelfde kaart als in de sessielijst** (`sessionCardHtml` in `pack.js`) met het label *Huidige sessie* of *Laatste
+sessie*; het **nieuws** is daar een horizontale rij van de laatste vijf artikelen (op een groot scherm alleen het
+nieuwste). **Trofeeën** zijn alleen wat een seizoen oplevert volgens EA: kampioenschappen per divisie
+(`finishesInDivisionNGroup1`), de hoogste divisie ooit en promoties (geen degradaties), als horizontale rij kaartjes
+met een eigen beker; EA heeft geen trofee-afbeeldingen die we kunnen gebruiken, en kent alleen dit spel (wat een andere
+app over een vorig seizoen of FC26 laat zien, zit niet in deze data).
+**Pack**: de reveal (`pack.js`) speelt ook op de sessielijst en de Club, voor de nieuwste afgeronde sessie die deze
+kijker nog niet zag (en tijdelijk de testsessie bij elke verversing).
+**Ranglijstkaartjes**: elke regel even hoog, of er één of twee regels in staan. Bij een percentage klein de breuk
+zonder woorden: conversie *5 / 10* (goals / schoten), passes *gelukt / pogingen*.
+
 **Sessiekop** (sinds 1 november 2026; daarvoor een scorebord zonder duidelijk middelpunt): één kaart met een
 **split**, zodat elk deel bij zijn soort hoort en het met de thema's meeschaalt.
 - **Boven: het beeld** op het stadion van het Clubhouse (vaste kleuren, los van het thema): groot de **naam van de
