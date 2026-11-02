@@ -77,7 +77,7 @@ function playReveal(s, top, quote) {
   document.body.append(el);
   document.documentElement.classList.add('pr-open');
   PlayerCard.reveal(el);
-  const close = () => { markRevealed(s); el.classList.add('out'); document.documentElement.classList.remove('pr-open'); setTimeout(() => el.remove(), still ? 0 : 350); };
+  const close = () => { markRevealed(s); el.classList.add('out'); document.documentElement.classList.remove('pr-open'); setTimeout(() => { el.remove(); dispatchEvent(new Event('pack-closed')); }, still ? 0 : 350); };
   const open = () => { if (el.classList.contains('opening') || el.classList.contains('open')) return; markRevealed(s); el.classList.add('opening'); setTimeout(() => el.classList.replace('opening', 'open'), still ? 0 : 900); };
   el.querySelector('.pr-pack').addEventListener('click', open);
   el.querySelector('.pr-skip').addEventListener('click', close);
@@ -87,12 +87,15 @@ function playReveal(s, top, quote) {
 }
 
 
-// Op de sessielijst en de Club: het pack van de nieuwste afgeronde sessie die deze kijker nog niet zag (of de testsessie).
-function packOnLoad() {
-  const all = sessionsOf(DATA.matches), s = all.find(x => x.key === REVEAL_TEST) || all.find(x => revealPending(x, all));
-  if (!s) return;
+// Het pack met de hand openen (coach-logica §9a): op de sessielijst en de Club staat bij een sessie die nog dicht is
+// (of de testsessie) een knop; een tik speelt de reveal op dezelfde pagina, zonder te navigeren.
+const packReady = (s, all) => revealPending(s, all) || s.key === REVEAL_TEST;
+function openPack(key) {
+  const s = sessionsOf(DATA.matches).find(x => x.key === key); if (!s) return;
   playReveal(s, sessionRanking(s.matches).filter(r => r.rH !== null).slice(0, 3), sessionQuote(s));
 }
+document.addEventListener('keydown', e => { const t = (e.key === 'Enter' || e.key === ' ') && e.target.closest?.('[data-pack]'); if (t) { e.preventDefault(); openPack(t.dataset.pack); } }, true);
+document.addEventListener('click', e => { const t = e.target.closest('[data-pack]'); if (!t) return; e.preventDefault(); e.stopPropagation(); openPack(t.dataset.pack); }, true);
 
 // Eén sessiekaart (coach-logica §9a, Sessies), gedeeld door de sessielijst en de Club (op telefoon). kicker: een klein
 // label bovenaan, zoals "Laatste sessie".
@@ -104,10 +107,10 @@ function sessionCardHtml(s, sessions, { kicker = '' } = {}) {
     const ms = s.matches, sm = summarize(ms), ppg = ppgOf(ms); // punten per wedstrijd alleen voor de kleur van het kopvlak
     const tone = ppg >= 2 ? 'good' : ppg < 1 ? 'bad' : '';
     const team = avg(ms.flatMap(m => m.players.map(p => p.rating)).filter(v => v !== null));
-    const live = sessionLive(s), pending = !live && revealPending(s, sessions);
+    const live = sessionLive(s), pending = !live && packReady(s, sessions);
     const mvp = live || pending ? null : bestOfNight(ms), photo = mvp && PlayerCard.portrait(mvp.n); // rondje: altijd het portret; rand en achtergrond volgen de vorm
     const sealed = live ? `<span class="scard-pack live"><span class="pack-mini" aria-hidden="true"></span><span><b>Bezig</b><small>Het pack gaat open als de avond klaar is</small></span></span>`
-      : pending ? `<span class="scard-pack ready"><span class="pack-mini" aria-hidden="true"></span><span><b>Pack staat klaar</b><small>Tik om te zien wie de besten waren</small></span></span>` : '';
+      : pending ? `<span class="scard-pack ready" role="button" tabindex="0" data-pack="${s.key}"><span class="pack-mini" aria-hidden="true"></span><span><b>Pack staat klaar</b><small>Tik om het te openen</small></span><span class="scard-pack-btn">Openen</span></span>` : '';
     return `<a class="scard ${tone}${live ? ' is-live' : ''}${pending ? ' is-ready' : ''}" href="${sessionHref(s)}">
       <span class="scard-top">
         <span class="scard-head">${kicker ? `<span class="scard-kicker">${kicker}</span>` : ''}<span class="scard-date">${CAL}${packDay(ms[0].ts)}</span></span>

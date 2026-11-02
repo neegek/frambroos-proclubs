@@ -137,7 +137,7 @@ function render() {
   rankCards($('#s-rank'), axisCards(ms, prow));
   renderMatrix(ms, prow);
   renderRadar(s, ms);
-  if (revealPending(s, sessions) || s.key === REVEAL_TEST) playReveal(s, top, quote);
+  if (revealPending(s, sessions)) playReveal(s, top, quote); // de testsessie opent alleen met de hand (sessielijst, Club)
 }
 
 // Kaartjes onder de radar, in de volgorde van de assen. Per speler het totaal van de avond (percentages en rating als

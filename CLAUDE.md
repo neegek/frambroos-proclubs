@@ -94,7 +94,7 @@ alleen in Cloudflare.
   thema; coach-logica §9a, *Menu*); op telefoon (≤ 600 px) is het één balk onderin met de vier tabbladen (Wedstrijden
   heet daar *Games*, lange labels worden afgekapt) en de menuknop; geen tweede balk bovenaan. Alleen het menu heeft de paarse gloed (`--side-bg`), zonder kleurenbies.
   Kaarten, tegels en sessie-items zijn effen donkerpaars (`--panel`) met dezelfde rand (`--panel-border`) en
-  schaduw als het menu; in het uittenue wit. Pagina's zijn een strak raster van kaarten met 12 px tussenruimte. Titel en
+  schaduw als het menu; in het uittenue wit. Pagina's zijn een raster van kaarten met 20 px tussenruimte (16 px op telefoon). Titel en
   filters staan op één rij (filters rechts). Het Clubhouse heeft geen paginatitel maar een hero (stadion,
   groot logo, skill rating en divisie, de laatste 10 als rondjes zonder label), dan *Seizoen*, één nieuwskaart en de
   rest (coach-logica §9a). Niet alles hoeft benoemd te worden: geen labels die het beeld al zegt. Een
