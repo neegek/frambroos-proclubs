@@ -73,6 +73,7 @@ alleen in Cloudflare.
   build bepaalt wat goed is, iedereen dezelfde opbouw, samenvattingen kwalitatief in drie of vier zinnen.
 - Kleur van de plek (coach-logica §9c): bij kaartjes met `rank` volgen rand en, bij een gewone kaart (tier goud), ook het
   vlak de plek: goud, zilver, brons, leigrijs voor de rest (`faceOf` in `playercard.js`); in vorm en topvorm houden hun vlak.
+- `public/pack.js`: rangorde van een avond (`sessionRanking`, `roleOf`), de quote (`sessionQuote`), de pack-reveal (`playReveal`, `packOnLoad`) en de sessiekaart (`sessionCardHtml`); geladen door sessie, sessielijst en Club. In het menu heet de startpagina *Club*.
 - Horizontaal scrollen in een kaart: de rij loopt tot de rand van de kaart (negatieve marge en binnenruimte van `--px`),
   niet afgesneden door de binnenruimte. Tegenstanders met logo via `oppBadge(m.opponent)` (terugval: shirt).
 - Dialogen: sluitknop vast rechtsboven, onderaan een vaste balk met een rustige knop naar een andere pagina en eventueel
