@@ -8,7 +8,8 @@ function homeHero(ms) {
   const c = DATA.club, s = DATA.snapshot, k = c.kits;
   const kicker = k?.stadium ? esc(k.stadium) : '';
   const meta = [s?.skillRating ? `Skill rating ${s.skillRating}` : '', s?.currentDivision ? `Divisie ${s.currentDivision}` : ''].filter(Boolean).join(' · ');
-  $('#home-hero').innerHTML = `${stadiumSvg()}
+  // Kop (coach-logica §9a): clubkleuren in een verloop (paars en geel), logo, naam, en de balans van het seizoen erin.
+  $('#home-hero').innerHTML = `
     <div class="hh-body">
       <img class="hh-crest" src="crest.png" alt="Clublogo van ${esc(c.name)}" width="256" height="256">
       <div class="hh-id">
@@ -16,6 +17,7 @@ function homeHero(ms) {
         <h1 class="hh-name">${esc(c.name)}</h1>
         ${meta ? `<p class="hh-meta">${meta}</p>` : ''}
       </div>
+      <div class="hh-season season-top" id="season-top"></div>
       ${ms.length ? `<div class="hh-form" aria-label="Laatste ${Math.min(10, ms.length)} wedstrijden">${formDots(ms.slice(-10))}</div>` : ''}
     </div>`;
 }
@@ -70,32 +72,6 @@ function trophies() {
   el.innerHTML = items.join('') || '<li class="empty">Nog geen afgesloten seizoen.</li>';
 }
 
-// In het kort (coach-logica §9a): drie regels in woorden, elk één vergelijking met een duidelijke basis.
-function kort(ms) {
-  const lines = [];
-  const won = list => `${list.filter(m => m.result === 'W').length} van de ${list.length}`;
-  const pctW = list => Math.round(100 * list.filter(m => m.result === 'W').length / list.length);
-  const tone = (good, txt) => `<span class="kort-tag ${good === true ? 'up' : good === false ? 'down' : ''}">${txt}</span>`;
-  // 1. Laatste avond tegenover normaal
-  const sess = sessionsOf(ms), last = sess.at(-1);
-  if (last && last.matches.length >= 2) {
-    const rest = ms.filter(m => m.session !== last.id), a = summarize(last.matches), b = rest.length >= 3 ? summarize(rest) : null;
-    const d = b ? a.ppg - b.ppg : null;
-    lines.push({ label: 'Laatste avond', main: `${won(last.matches)} gewonnen`, tag: d === null ? '' : tone(d >= 0.3 ? true : d <= -0.3 ? false : null, d >= 0.3 ? 'beter dan normaal' : d <= -0.3 ? 'slechter dan normaal' : 'zoals normaal') });
-  }
-  // 2. Deze week tegenover vorige week
-  const now = ms.at(-1)?.ts ?? 0, week = 7 * 86400;
-  const thisW = ms.filter(m => m.ts > now - week), prevW = ms.filter(m => m.ts <= now - week && m.ts > now - 2 * week);
-  if (thisW.length >= 3) lines.push({ label: 'Deze week', main: `${pctW(thisW)}% gewonnen`, tag: prevW.length >= 3 ? tone(pctW(thisW) - pctW(prevW) >= 10 ? true : pctW(prevW) - pctW(thisW) >= 10 ? false : null, `vorige week ${pctW(prevW)}%`) : '' });
-  // 3. Tegen sterkere clubs tegenover de rest
-  const own = DATA.snapshot?.skillRating;
-  if (own) {
-    const strong = ms.filter(m => m.opponent.skillRating >= own + 100), rest = ms.filter(m => m.opponent.skillRating && m.opponent.skillRating < own + 100);
-    if (strong.length >= 3 && rest.length >= 3) lines.push({ label: 'Tegen sterkere clubs', main: `${pctW(strong)}% gewonnen`, tag: tone(null, `tegen de rest ${pctW(rest)}%`) });
-  }
-  // Compact: per regel één chip (label, wat er gebeurde, de vergelijking), naast elkaar.
-  $('#kort').innerHTML = lines.map(l => `<div class="kort-row"><span class="kort-label">${l.label}</span><b>${l.main}</b>${l.tag}</div>`).join('');
-}
 
 // ---------- per speler: totalen uit de gevolgde wedstrijden ----------
 function playerTotals(ms) {
@@ -159,7 +135,6 @@ function threats(ms) {
 function render() {
   const ms = DATA.matches;
   homeHero(ms);
-  kort(ms);
   seasonTop();
   lastSession();
   // Op telefoon dezelfde kaart als in de sessielijst, met een label (coach-logica §9a).

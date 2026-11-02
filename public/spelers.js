@@ -139,23 +139,18 @@ function renderSquad() {
   const fav = favorite(), ms = DATA.matches;
   const members = DATA.members.map(m => ({ m, t: PlayerCard.tier(m.name) }))
     .sort((a, b) => (b.m.name === fav) - (a.m.name === fav) || PlayerCard.TIER_RANK[b.t.tier] - PlayerCard.TIER_RANK[a.t.tier] || (b.t.level ?? 0) - (a.t.level ?? 0) || (b.m.gamesPlayed || 0) - (a.m.gamesPlayed || 0));
-  const tierLabel = { top: 'Topvorm', zwart: 'In vorm', goud: '' };
-  const firstSentence = t => t ? t.split(/(?<=[a-z0-9ëéïü)][.!?])\s/)[0] : ''; // niet afbreken na een voorletter (J. Wheatley)
-  const rowsHtml = members.map(({ m, t }) => {
-    const rows = rowsFor(ms, m.name), last = rows.slice(-5).map(r => r.m), won = last.filter(x => x.result === 'W').length;
+  // Per speler (coach-logica §9a, Selectie): de spelerskaart groter (daar staan de cijfers al op), rechts ervan de
+  // biografie. Geen losse cijfers, geen vorm per wedstrijd: dat staat al op de kaart of zegt weinig (iedereen speelt
+  // dezelfde wedstrijden).
+  const rowsHtml = members.map(({ m }) => {
     const p = typeof PERSONAS !== 'undefined' ? PERSONAS[m.name] : null, b = p?.bio;
-    const arch = [...rows].reverse().find(r => r.p.archetypeId)?.p.archetypeId;
-    const stat = (v, l) => `<span><b>${v ?? '–'}</b><small>${l}</small></span>`;
-    return `<a class="squad-row card" href="spelers.html#${encodeURIComponent(m.name)}">
+    const text = b ? b.tekst.slice(0, 2).join(' ') : p?.achtergrond || '';
+    return `<a class="squad-row card" href="spelers.html#${encodeURIComponent(m.name)}" aria-label="${esc(proName(m.name))}">
       <span class="fut-mini sq-card">${PlayerCard.html(m.name, { key: '-sq' })}</span>
-      <span class="sq-main">
-        <span class="sq-name"><b>${m.name === fav ? `<span class="fav-star">${STAR}</span>` : ''}${esc(proName(m.name))}</b>${tierLabel[t.tier] ? `<span class="sp-tier ${t.tier}">${tierLabel[t.tier]}</span>` : ''}</span>
-        <small class="sq-sub">${esc(m.name)}${arch ? ` · ${esc(archName(arch))}` : ''}</small>
-        <span class="sq-stats">${stat(m.gamesPlayed, 'wedstr.')}${stat(m.goals, 'goals')}${stat(m.assists, 'assists')}${stat(m.ratingAve === null || m.ratingAve === undefined ? '–' : Number(m.ratingAve).toFixed(1), 'rating')}</span>
-      </span>
       <span class="sq-side">
-        ${b || p?.achtergrond ? `<span class="sq-bio">${b ? `<b>${esc(b.titel)}</b> ` : ''}${esc(firstSentence(b ? b.tekst[0] : p.achtergrond))}</span>` : '<span class="sq-bio muted">Nog geen biografie.</span>'}
-        ${last.length ? `<span class="sq-form">${formDots(last, { links: false })}<small>${won} van de laatste ${last.length} gewonnen</small></span>` : ''}
+        ${b ? `<b class="sq-title">${m.name === fav ? `<span class="fav-star">${STAR}</span>` : ''}${esc(b.titel)}</b>` : m.name === fav ? `<span class="fav-star">${STAR}</span>` : ''}
+        ${text ? `<span class="sq-bio">${esc(text)}</span>` : '<span class="sq-bio muted">Nog geen biografie.</span>'}
+        <span class="sq-more">Naar het profiel</span>
       </span>
     </a>`;
   });
@@ -164,9 +159,7 @@ function renderSquad() {
   const aiSlots = ms.length ? ms.reduce((a, m) => a + (m.ai?.players ?? 0), 0) / ms.length : 0;
   rowsHtml.push(`<div class="squad-row card ai">
       <span class="sq-card sq-ai" aria-hidden="true">AI</span>
-      <span class="sq-main"><span class="sq-name"><b>De AI</b></span><small class="sq-sub">Gemiddeld ${f1(aiSlots)} plekken per wedstrijd</small>
-        <span class="sq-stats"><span><b>${aiGames}</b><small>wedstr.</small></span><span><b>${aiGoals}</b><small>goals</small></span></span></span>
-      <span class="sq-side"><span class="sq-bio"><b>De onzichtbare twaalfde man</b> Vult elke lege plek, klaagt nooit en komt nooit in de ranglijst. EA telt de goals niet apart: dit zijn goals die geen mens van ons maakte, soms ook een eigen doelpunt van de tegenstander.</span></span>
+      <span class="sq-side"><b class="sq-title">De AI, de onzichtbare twaalfde man</b><span class="sq-bio">Vult elke lege plek (gemiddeld ${f1(aiSlots)} per wedstrijd), klaagt nooit en komt nooit in de ranglijst. In ${aiGames} wedstrijden goed voor ${aiGoals} goals: goals die geen mens van ons maakte, soms ook een eigen doelpunt van de tegenstander.</span></span>
     </div>`);
   $('#squad-list').innerHTML = rowsHtml.join('');
   PlayerCard.reveal($('#squad-list'));
