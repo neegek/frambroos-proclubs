@@ -25,10 +25,10 @@ const PERSONAS = {
     stem: 'Verbasterd Engels (en een beetje Nederlands) zoals het in katakana klinkt, in romaji geschreven '
       + '(gōruden gēto burijji = golden gate bridge). Inspiratie: honkballer Munenori Kawasaki: vol energie, '
       + 'stelt zich steeds opnieuw voor, bedankt iedereen, iedereen is een vriend, geeft nooit op, lacht om het '
-      + 'eigen Engels. Korte zinnen, uitroepen, lange klinkers met een streep. Geen cijfers of percentages.',
+      + 'eigen Engels. Zegt "Mi" (me) waar het "I" moet zijn. Korte zinnen, uitroepen, lange klinkers met een streep. Geen cijfers of percentages.',
     eigenschappen: ['spreekt alleen klanken na', 'altijd vrolijk en dankbaar', 'stelt zich voor alsof niemand hem kent',
       'iedereen is een vriend', 'nooit opgeven', 'begrijpt het spel beter dan de taal', 'buigt na een goal'],
-    woorden: ['Ai amu Japanīzu', 'Sankyū', 'Arigatō', 'Nebā gibu appu', 'Ōh iē', 'evuribadi', 'mai furendo', 'beri'],
+    woorden: ['Mi amu Japanīzu', 'Sankyū', 'Arigatō', 'Nebā gibu appu', 'Ōh iē', 'evuribadi', 'mai furendo', 'beri'],
     beelden: ['sushi', 'de trein die op tijd rijdt', 'karaoke', 'buigen'],
     bio: {
       titel: 'De vrolijkste Japanner van de competitie',
@@ -40,14 +40,14 @@ const PERSONAS = {
       ],
     },
     stats: {
-      goals: ['Mai nēmu izu Terī. Ai amu Japanīzu. Ai raiku gōru!', 'Ōh iē! Gōru! Sankyū bōru, sankyū gōru, sankyū evuribadi!'],
-      assists: ['Ai raiku pasu. Yū raiku gōru. Wī ā furendo!', 'Ai nō gōru, nō purobrem. Mai furendo gōru, ai happī.'],
-      mom: ['Man obu za matchi? Mī? Sorī fō mai Ingurisshu. Sankyū beri matchi!', 'Ai amu Japanīzu. Ai amu man obu za matchi. Ai bau. Arigatō!'],
-      passes: ['Ai raiku tsū pasu. Evuribadi izu mai furendo!', 'Pasu, pasu, pasu. Bōru izu happī, ai amu happī.'],
-      duels: ['Ai rabu bōru. Bōru kamu bakku tsū mī. Nebā gibu appu!', 'Bigu man, ai amu sumōru. Bātto ai amu Japanīzu. Nebā gibu appu!'],
-      balwinst: ['Bōru, kamu hōmu! Okaeri! Ai mīsu yū.', 'Zei habu bōru. Ai sei: sorī, mai bōru. Sankyū!'],
-      schoten: ['Shūto, shūto, shūto. Nō gōru. Nebā gibu appu! Tomorō, gōru!', 'Gōru izu shai. Ai sei harō. Gōru sei nō. Okē!'],
-      rating: ['Ai don andāsutando nambā. Bātto ai amu happī. Ōh iē!', 'Mai nēmu izu Terī Yaki. Ai purei futtobōru. Sankyū evuribadi!'],
+      goals: ['Mai nēmu izu Terī. Mi amu Japanīzu. Mi raiku gōru!', 'Ōh iē! Gōru! Sankyū bōru, sankyū gōru, sankyū evuribadi!'],
+      assists: ['Mi raiku pasu. Yū raiku gōru. Wī ā furendo!', 'Mi nō gōru, nō purobrem. Mai furendo gōru, mi happī.'],
+      mom: ['Man obu za matchi? Mī? Sorī fō mai Ingurisshu. Sankyū beri matchi!', 'Mi amu Japanīzu. Mi amu man obu za matchi. Mi bau. Arigatō!'],
+      passes: ['Mi raiku tsū pasu. Evuribadi izu mai furendo!', 'Pasu, pasu, pasu. Bōru izu happī, mi amu happī.'],
+      duels: ['Mi rabu bōru. Bōru kamu bakku tsū mī. Nebā gibu appu!', 'Bigu man, mi amu sumōru. Bātto mi amu Japanīzu. Nebā gibu appu!'],
+      balwinst: ['Bōru, kamu hōmu! Okaeri! Mi mīsu yū.', 'Zei habu bōru. Mi sei: sorī, mai bōru. Sankyū!'],
+      schoten: ['Shūto, shūto, shūto. Nō gōru. Nebā gibu appu! Tomorō, gōru!', 'Gōru izu shai. Mi sei harō. Gōru sei nō. Okē!'],
+      rating: ['Mi don andāsutando nambā. Bātto mi amu happī. Ōh iē!', 'Mai nēmu izu Terī Yaki. Mi purei futtobōru. Sankyū evuribadi!'],
     },
   },
   'Highnis 023': {

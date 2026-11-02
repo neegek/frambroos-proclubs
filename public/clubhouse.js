@@ -54,12 +54,17 @@ function lastSession() {
 const CUP = `<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="cup-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff1bd"/><stop offset=".45" stop-color="#e2b649"/><stop offset="1" stop-color="#8d6c15"/></linearGradient></defs>
   <path d="M18 8h28v10c0 9-6 16-14 16S18 27 18 18z" fill="url(#cup-g)"/><path d="M18 12H9c0 8 4 13 11 14M46 12h9c0 8-4 13-11 14" fill="none" stroke="url(#cup-g)" stroke-width="4" stroke-linecap="round"/>
   <path d="M28 34h8v8h-8z" fill="url(#cup-g)"/><path d="M20 46h24l2 8H18z" fill="url(#cup-g)"/><path d="M26 14l3 6 6 1-5 4 2 6-6-3-6 3 2-6-5-4 6-1z" fill="#fff6d8" opacity=".55" transform="translate(3 -2) scale(.9)"/></svg>`;
-const ARROW_UP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+// Alleen trofeeën van het einde van een seizoen (sinds 2 november 2026): kampioenschappen, de hoogste divisie en
+// promoties; geen degradaties. Horizontaal scrollbaar, nieuwste eerst.
 function trophies() {
   const t = DATA.trophies, el = $('#trophies'); if (!t) { el.innerHTML = ''; return; }
-  const items = [...t.events].reverse().map(e => `<li class="trophy ${e.type}"><span class="tr-img">${e.type === 'promotie' ? CUP : ARROW_UP}</span>
-      <span class="tr-text"><b>${e.type === 'promotie' ? `Promotie ${e.nr}` : `Degradatie ${e.nr}`}</b><small>${esc(dayLabel(e.at))}${e.match ? ` · ${letter(e.match.result)} ${e.match.goals}–${e.match.goalsAgainst} tegen ${esc(e.match.opponent || 'onbekend')}` : ''}</small></span></li>`);
-  if (t.before.promotions) items.push(`<li class="trophy earlier"><span class="tr-img">${CUP}<i>${t.before.promotions}×</i></span><span class="tr-text"><b>${t.before.promotions} ${t.before.promotions === 1 ? 'promotie' : 'promoties'} eerder</b><small>Voordat deze app meekeek${t.bestDivision ? ` · hoogste divisie ooit: ${t.bestDivision}` : ''}</small></span></li>`);
+  const item = (cls, img, title, sub) => `<li class="trophy ${cls}"><span class="tr-img">${img}</span><span class="tr-text"><b>${title}</b><small>${sub}</small></span></li>`;
+  const items = [
+    ...Object.entries(t.titles || {}).sort((a, b) => a[0] - b[0]).map(([d, n]) => item('title', CUP, `Kampioen divisie ${d}`, n > 1 ? `${n} keer` : 'Einde seizoen, volgens EA')),
+    t.bestDivision ? item('best', CUP, `Divisie ${t.bestDivision}`, 'Hoogste divisie ooit') : '',
+    ...[...t.events].filter(e => e.type === 'promotie').reverse().map(e => item('promotie', CUP, 'Promotie', `${esc(dayLabel(e.at))}${e.match ? ` · ${letter(e.match.result)} ${e.match.goals}–${e.match.goalsAgainst} tegen ${esc(e.match.opponent || 'onbekend')}` : ''}`)),
+    t.before.promotions ? item('earlier', `${CUP}<i>${t.before.promotions}×</i>`, `${t.before.promotions} ${t.before.promotions === 1 ? 'promotie' : 'promoties'} eerder`, 'Voordat deze app meekeek') : '',
+  ].filter(Boolean);
   el.innerHTML = items.join('') || '<li class="empty">Nog geen trofeeën.</li>';
 }
 
@@ -189,12 +194,15 @@ function render() {
   kort(ms);
   seasonTop();
   lastSession();
-  PlayerCard.reveal($('#last-session'));
+  // Op telefoon dezelfde kaart als in de sessielijst, met een label (coach-logica §9a).
+  { const all = sessionsOf(DATA.matches), s = all.at(-1); $('#last-session-m').innerHTML = s ? sessionCardHtml(s, all, { kicker: sessionLive(s) ? 'Huidige sessie' : 'Laatste sessie' }) : ''; }
+  PlayerCard.reveal($('#last-session')); PlayerCard.reveal($('#last-session-m'));
   trophies();
   seasonFigs(ms);
   formChart($('#chart-form'), ms);
-  const latest = newsArticles()[0];
-  $('#news').innerHTML = latest ? newsCard(latest, { lead: true }) : '<p class="empty">Nog geen nieuws: speel een avond, dan schrijft het zichzelf.</p>';
+  // Op een groot scherm het nieuwste artikel; op telefoon de laatste vijf als horizontale rij.
+  const recent = newsArticles().slice(0, 5);
+  $('#news').innerHTML = recent.length ? recent.map((a, i) => newsCard(a, { lead: i === 0 })).join('') : '<p class="empty">Nog geen nieuws: speel een avond, dan schrijft het zichzelf.</p>';
   PlayerCard.reveal($('#news'));
   $('#results').innerHTML = ms.slice(-4).reverse().map(m => matchCard(m, { own: DATA.snapshot?.skillRating })).join('') || '<p class="muted">Nog geen wedstrijden.</p>';
   rankCards($('#rank-cards'), clubCards(playerTotals(ms)));
@@ -221,4 +229,4 @@ $('#rank-more').addEventListener('click', e => {
 
 onWidthChange(() => DATA && formChart($('#chart-form'), DATA.matches));
 window.rerender = () => render();
-Promise.all([loadData(), PlayerCard.load().catch(() => {})]).then(render).catch(showError);
+Promise.all([loadData(), PlayerCard.load().catch(() => {})]).then(() => { render(); packOnLoad(); }).catch(showError);

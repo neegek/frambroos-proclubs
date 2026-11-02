@@ -32,7 +32,7 @@ const API = STATIC ? { data: 'data.json', builds: 'builds.json', photos: 'photos
 const PAGE = location.pathname.split('/').pop() || 'index.html';
 const LOGO = '<span class="mark"><img src="crest.png" alt="" width="44" height="44"></span>';
 const NAV = [
-  { href: 'index.html', label: 'Clubhouse', icon: 'club' },
+  { href: 'index.html', label: 'Club', icon: 'club' },
   { href: 'sessies.html', label: 'Sessies', icon: 'sessions' },
   { href: 'wedstrijden.html', label: 'Wedstrijden', short: 'Games', icon: 'matches' },
   { href: 'spelers.html', label: 'Spelers', icon: 'players', group: true },

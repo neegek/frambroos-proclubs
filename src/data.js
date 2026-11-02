@@ -44,14 +44,20 @@ export function buildData(db = realDb) {
   const lastRun = db.prepare('SELECT * FROM collect_runs ORDER BY started_at DESC LIMIT 1').get();
   // Trofeeën (coach-logica §9a): elke promotie en degradatie die we zagen gebeuren, met het moment (het snapshot waarin
   // de teller van EA omhoog ging) en de laatste wedstrijd daarvoor. Wat er al was vóór het eerste snapshot telt als "eerder".
-  const snapRows = db.prepare('SELECT taken_at, promotions, relegations, best_division FROM club_snapshots WHERE club_id = ? ORDER BY taken_at').all(clubId);
+  const snapRows = db.prepare('SELECT taken_at, promotions, relegations, best_division, raw FROM club_snapshots WHERE club_id = ? ORDER BY taken_at').all(clubId);
+  const divOf = row => { try { return Number(JSON.parse(row.raw).currentDivision) || null; } catch { return null; } };
   const lastBefore = db.prepare(`SELECT m.ts, mc.goals, mc.goals_against, mc.result, c.name AS opponent FROM matches m JOIN match_clubs mc ON mc.match_id = m.match_id AND mc.club_id = ?
     LEFT JOIN clubs c ON c.club_id = mc.opponent_id WHERE m.ts <= ? ORDER BY m.ts DESC LIMIT 1`);
   const trophies = { events: [], before: { promotions: snapRows[0]?.promotions ?? 0, relegations: snapRows[0]?.relegations ?? 0 }, bestDivision: own?.best_division ?? null };
   for (let i = 1; i < snapRows.length; i++) for (const [k, type] of [['promotions', 'promotie'], ['relegations', 'degradatie']]) {
     const a = snapRows[i - 1][k], b = snapRows[i][k];
-    if (a !== null && b !== null && b > a) { const m = lastBefore.get(clubId, snapRows[i].taken_at); trophies.events.push({ type, nr: b, at: snapRows[i].taken_at, match: m ? { ts: m.ts, opponent: m.opponent, goals: m.goals, goalsAgainst: m.goals_against, result: m.result } : null }); }
+    if (a !== null && b !== null && b > a) { const m = lastBefore.get(clubId, snapRows[i].taken_at); trophies.events.push({ type, nr: b, at: snapRows[i].taken_at, division: divOf(snapRows[i]), match: m ? { ts: m.ts, opponent: m.opponent, goals: m.goals, goalsAgainst: m.goals_against, result: m.result } : null }); }
   }
+  // Einde seizoen volgens EA (docs/ea-data.md): kampioenschappen per divisie (finishesInDivisionNGroup1), de beste
+  // eindgroep en de hoogste divisie. Alleen wat EA geeft; geen geschiedenis per seizoen.
+  { let raw = {}; try { raw = JSON.parse(own?.raw || '{}'); } catch {}
+    trophies.titles = Object.fromEntries([1, 2, 3, 4, 5, 6].map(d => [d, Number(raw[`finishesInDivision${d}Group1`]) || 0]).filter(([, n]) => n > 0));
+    trophies.bestFinishGroup = Number(raw.bestFinishGroup) || null; trophies.currentDivision = Number(raw.currentDivision) || null; }
   const matchRows = db.prepare(`
     SELECT m.match_id, m.ts, m.match_type, m.raw, mc.goals, mc.goals_against, mc.result, mc.winner_by_dnf, mc.opponent_id, c.name AS opponent_name
     FROM matches m
