@@ -546,14 +546,15 @@ function oppBadge(opp) {
 // links en rechts eventueel kleine knoppen naar de vorige en volgende (nav.prev/next: { label, face, go }).
 // Ranglijstkaartjes (coach-logica §9a, Algemeen): per kaartje een label en alle spelers met één getal, zonder
 // sublabels; een tik opent #rank-dialog met de uitleg, wie meetelt en de hele lijst met het kleine cijfer erbij.
-// cards: [{ key, label, about, who, rows: [{ name, main, sub }], team?: { label, main, sub } }]. team staat onderaan,
-// zonder plek: het totaal of gemiddelde van het team. Gedeeld door het Clubhouse en een sessie.
+// cards: [{ key, label, about, who, rows: [{ name, main, sub, small, cls }], team?: { label, main, sub }, teams?: [...] }].
+// team (of teams, bij een wedstrijd beide ploegen) staat onderaan, zonder plek: het totaal of gemiddelde. cls kleurt
+// een regel (us/them bij een wedstrijd). Gedeeld door het Clubhouse, een sessie en een wedstrijd.
 function rankCards(container, cards) {
   // Een kaartje met small (bij een percentage het aantal) krijgt twee regels per speler: groot het getal, klein eronder.
   const val = r => `<b>${r.main}${r.small ? `<small>${esc(r.small)}</small>` : ''}</b>`;
   container.innerHTML = cards.map(c => `<button type="button" class="rank-card${c.rows.some(r => r.small) ? ' two' : ''}" data-key="${c.key}" aria-haspopup="dialog">
       <span class="rank-card-label">${c.label}<span class="rank-more" aria-hidden="true">i</span></span>
-      <ol>${c.rows.map((r, i) => `<li><span>${i + 1}</span><span>${esc(proName(r.name))}</span>${val(r)}</li>`).join('') || `<li class="empty">${c.empty || 'Nog te weinig wedstrijden.'}</li>`}${c.team ? `<li class="team"><span></span><span>${esc(c.team.label)}</span>${val(c.team)}</li>` : ''}</ol></button>`).join('');
+      <ol>${c.rows.map((r, i) => `<li class="${r.cls || ''}"><span>${i + 1}</span><span>${esc(proName(r.name))}</span>${val(r)}</li>`).join('') || `<li class="empty">${c.empty || 'Nog te weinig wedstrijden.'}</li>`}${(c.teams || (c.team ? [c.team] : [])).map(t => `<li class="team ${t.cls || ''}"><span></span><span>${esc(t.label)}</span>${val(t)}</li>`).join('')}</ol></button>`).join('');
   for (const b of container.querySelectorAll('.rank-card')) b.addEventListener('click', () => openRankList(cards.find(c => c.key === b.dataset.key)));
 }
 function openRankList(c) {
@@ -562,7 +563,7 @@ function openRankList(c) {
     <h3>Waar het op gebaseerd is</h3><p>${c.about}</p>
     <h3>Wie meetelt</h3><p>${c.who}</p>
     <h3>De hele lijst</h3>
-    <ol class="rd-list">${c.rows.map((r, i) => `<li><span>${i + 1}</span><span>${esc(proName(r.name))}</span><b>${r.main}</b>${r.sub ? `<small>${esc(r.sub)}</small>` : ''}</li>`).join('') || `<li class="empty">${c.empty || 'Nog te weinig wedstrijden.'}</li>`}${c.team ? `<li class="rd-club"><span></span><span>${esc(c.team.label)}</span><b>${c.team.main}</b>${c.team.sub ? `<small>${esc(c.team.sub)}</small>` : ''}</li>` : ''}</ol>`;
+    <ol class="rd-list">${c.rows.map((r, i) => `<li class="${r.cls || ''}"><span>${i + 1}</span><span>${esc(proName(r.name))}</span><b>${r.main}</b>${r.sub ? `<small>${esc(r.sub)}</small>` : ''}</li>`).join('') || `<li class="empty">${c.empty || 'Nog te weinig wedstrijden.'}</li>`}${(c.teams || (c.team ? [c.team] : [])).map(t => `<li class="rd-club ${t.cls || ''}"><span></span><span>${esc(t.label)}</span><b>${t.main}</b>${t.sub ? `<small>${esc(t.sub)}</small>` : ''}</li>`).join('')}</ol>`;
   d.showModal();
 }
 // Sluiten werkt overal hetzelfde, ook op telefoon: een tik op het kruisje of naast het scherm. Op pointerup én click,

@@ -13,23 +13,29 @@
 <div class="app">
   <aside class="sidebar" id="sidebar"></aside>
   <main class="content">
-    <section class="chips mobile-only" id="chips"></section>
+    <section class="squad" id="squad" hidden aria-labelledby="sq-title">
+      <header class="page-head"><div><h1 id="sq-title">Selectie</h1><p class="sub">Op vorm. Tik op een speler voor het profiel.</p></div></header>
+      <div class="squad-list" id="squad-list"><div class="skel card-row"></div><div class="skel card-row"></div><div class="skel card-row"></div></div>
+    </section>
+    <div class="player-view" id="player-view">
+    <div class="player-pick-row"><label class="filter player-pick" data-icon="players">Speler<select id="p-pick" aria-label="Kies een speler"></select></label></div>
     <section class="player-hero" id="player-hero" aria-label="Spelerskaart"><div class="pc-wrap"><div class="skel fut"></div></div></section>
-    <section class="card bio-card" id="p-bio" hidden></section>
+      <section class="card bio-card" id="p-bio" hidden></section>
 
-    <div class="stat-groups" id="p-stats" aria-label="Cijfers"><div class="skel block"></div><div class="skel block"></div><div class="skel block"></div><div class="skel block"></div></div>
+      <div class="stat-groups" id="p-stats" aria-label="Cijfers"><div class="skel block"></div><div class="skel block"></div><div class="skel block"></div><div class="skel block"></div></div>
 
-    <section class="card stat-group growth">
-      <h2>Groei</h2>
-      <p class="hint">Eerder is de carrière volgens EA min de gevolgde wedstrijden, nu zijn de gevolgde wedstrijden; groen of rood alleen als het verschil groter is dan toeval.</p>
-      <div id="p-growth"><div class="skel block"></div></div>
-    </section>
+      <section class="card stat-group growth">
+        <h2>Groei</h2>
+        <p class="hint">Eerder is de carrière volgens EA min de gevolgde wedstrijden, nu zijn de gevolgde wedstrijden; groen of rood alleen als het verschil groter is dan toeval.</p>
+        <div id="p-growth"><div class="skel block"></div></div>
+      </section>
 
-    <section class="card">
-      <h2>Wedstrijden van deze speler</h2>
-      <p class="hint">De laatste acht; klik op een wedstrijd voor alle cijfers.</p>
-      <div id="tbl-player-matches"><div class="skel tall"></div></div>
-    </section>
+      <section class="card">
+        <h2>Wedstrijden van deze speler</h2>
+        <p class="hint">De laatste acht; klik op een wedstrijd voor alle cijfers.</p>
+        <div id="tbl-player-matches"><div class="skel tall"></div></div>
+      </section>
+    </div>
   </main>
 </div>
 <dialog class="rank-dialog" id="rank-dialog" aria-labelledby="rd-title"><button type="button" class="icon-btn rd-close" aria-label="Sluiten">✕</button><div class="rd-body"></div></dialog>

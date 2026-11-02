@@ -163,10 +163,13 @@ function render() {
   rankCards($('#s-rank'), axisCards(ms, prow));
   renderMatrix(ms, prow);
   renderRadar(s, ms);
-  if (revealPending(s, sessions)) playReveal(s, top, quote);
+  if (revealPending(s, sessions) || s.key === REVEAL_TEST) playReveal(s, top, quote);
 }
 
 // ---------- reveal van het pack (coach-logica §9a) ----------
+// TIJDELIJK (Jamal, 3 november 2026): deze sessie speelt de reveal bij elke verversing, om de animatie te testen.
+// Weghalen (null) zodra het pack goed is.
+const REVEAL_TEST = '2026-10-26';
 // De nieuwste sessie, als die klaar is en deze kijker hem nog niet zag: een pack in clubkleuren; een tik opent het,
 // daarna komen drie, twee en één tevoorschijn, met als laatste de quote van de winnaar. Overslaan kan altijd.
 function playReveal(s, top, quote) {

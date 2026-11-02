@@ -131,15 +131,58 @@ function renderBio(name) {
   btn.addEventListener('click', () => { const open = body.classList.toggle('open'); btn.setAttribute('aria-expanded', String(open)); btn.querySelector('span').textContent = open ? 'Minder' : 'Lees meer'; });
 }
 
+// Selectie (coach-logica §9a, Spelers): de lijst van iedereen in het team, op vorm, met de kaart, de naam, wat
+// basiscijfers volgens EA, de vorm van de laatste vijf, en een stukje van de bio. Onderaan de AI, die altijd meedoet.
+function renderSquad() {
+  $('#squad').hidden = false; $('#player-view').hidden = true;
+  document.title = 'Selectie · Frambroos Coach';
+  const fav = favorite(), ms = DATA.matches;
+  const members = DATA.members.map(m => ({ m, t: PlayerCard.tier(m.name) }))
+    .sort((a, b) => (b.m.name === fav) - (a.m.name === fav) || PlayerCard.TIER_RANK[b.t.tier] - PlayerCard.TIER_RANK[a.t.tier] || (b.t.level ?? 0) - (a.t.level ?? 0) || (b.m.gamesPlayed || 0) - (a.m.gamesPlayed || 0));
+  const tierLabel = { top: 'Topvorm', zwart: 'In vorm', goud: '' };
+  const firstSentence = t => t ? t.split(/(?<=[a-z0-9ëéïü)][.!?])\s/)[0] : ''; // niet afbreken na een voorletter (J. Wheatley)
+  const rowsHtml = members.map(({ m, t }) => {
+    const rows = rowsFor(ms, m.name), last = rows.slice(-5).map(r => r.m), won = last.filter(x => x.result === 'W').length;
+    const p = typeof PERSONAS !== 'undefined' ? PERSONAS[m.name] : null, b = p?.bio;
+    const arch = [...rows].reverse().find(r => r.p.archetypeId)?.p.archetypeId;
+    const stat = (v, l) => `<span><b>${v ?? '–'}</b><small>${l}</small></span>`;
+    return `<a class="squad-row card" href="spelers.html#${encodeURIComponent(m.name)}">
+      <span class="fut-mini sq-card">${PlayerCard.html(m.name, { key: '-sq' })}</span>
+      <span class="sq-main">
+        <span class="sq-name"><b>${m.name === fav ? `<span class="fav-star">${STAR}</span>` : ''}${esc(proName(m.name))}</b>${tierLabel[t.tier] ? `<span class="sp-tier ${t.tier}">${tierLabel[t.tier]}</span>` : ''}</span>
+        <small class="sq-sub">${esc(m.name)}${arch ? ` · ${esc(archName(arch))}` : ''}</small>
+        <span class="sq-stats">${stat(m.gamesPlayed, 'wedstr.')}${stat(m.goals, 'goals')}${stat(m.assists, 'assists')}${stat(m.ratingAve === null || m.ratingAve === undefined ? '–' : Number(m.ratingAve).toFixed(1), 'rating')}</span>
+      </span>
+      <span class="sq-side">
+        ${b || p?.achtergrond ? `<span class="sq-bio">${b ? `<b>${esc(b.titel)}</b> ` : ''}${esc(firstSentence(b ? b.tekst[0] : p.achtergrond))}</span>` : '<span class="sq-bio muted">Nog geen biografie.</span>'}
+        ${last.length ? `<span class="sq-form">${formDots(last, { links: false })}<small>${won} van de laatste ${last.length} gewonnen</small></span>` : ''}
+      </span>
+    </a>`;
+  });
+  // De AI: niets per speler in de data, wel hoeveel plekken en welke goals (clubscore min de goals van de mensen).
+  const aiGames = ms.filter(m => (m.ai?.players ?? 0) > 0).length, aiGoals = ms.reduce((a, m) => a + Math.max(0, m.ai?.goals ?? 0), 0);
+  const aiSlots = ms.length ? ms.reduce((a, m) => a + (m.ai?.players ?? 0), 0) / ms.length : 0;
+  rowsHtml.push(`<div class="squad-row card ai">
+      <span class="sq-card sq-ai" aria-hidden="true">AI</span>
+      <span class="sq-main"><span class="sq-name"><b>De AI</b></span><small class="sq-sub">Gemiddeld ${f1(aiSlots)} plekken per wedstrijd</small>
+        <span class="sq-stats"><span><b>${aiGames}</b><small>wedstr.</small></span><span><b>${aiGoals}</b><small>goals</small></span></span></span>
+      <span class="sq-side"><span class="sq-bio"><b>De onzichtbare twaalfde man</b> Vult elke lege plek, klaagt nooit en komt nooit in de ranglijst. EA telt de goals niet apart: dit zijn goals die geen mens van ons maakte, soms ook een eigen doelpunt van de tegenstander.</span></span>
+    </div>`);
+  $('#squad-list').innerHTML = rowsHtml.join('');
+  PlayerCard.reveal($('#squad-list'));
+}
+
 function renderPlayer() {
+  $('#squad').hidden = true; $('#player-view').hidden = false;
   const ms = DATA.matches, players = DATA.players; // altijd alle gevolgde wedstrijden: geen filters meer
   // Zonder naam in het adres: de favoriet van wie de app gebruikt, anders Neegek. De favoriet staat vooraan met een ster.
   const fav = players.includes(favorite()) ? favorite() : null;
   if (!selected || !players.includes(selected)) selected = fav || (players.includes('Neegek') ? 'Neegek' : players[0]);
   location.hash = encodeURIComponent(selected);
   const order = fav ? [fav, ...players.filter(p => p !== fav)] : players;
-  $('#chips').innerHTML = order.map(p => `<button type="button" class="chip ${p === selected ? 'active' : ''}" data-p="${esc(p)}">${p === fav ? `<span class="fav-star">${STAR}</span>` : ''}${esc(proName(p))}</button>`).join('');
-  for (const b of $('#chips').querySelectorAll('.chip')) b.addEventListener('click', () => { selected = b.dataset.p; renderPlayer(); });
+  // Wisselen van speler met een keuzemenu bovenaan (geen pillen meer); de favoriet staat bovenaan met een ster.
+  $('#p-pick').innerHTML = order.map(p => `<option value="${esc(p)}"${p === selected ? ' selected' : ''}>${p === fav ? '★ ' : ''}${esc(proName(p))}</option>`).join('');
+  $('#p-pick').onchange = e => { location.hash = encodeURIComponent(e.target.value); };
 
   const rows = rowsFor(ms, selected);
   window.PlayerCard.render(selected);
@@ -168,10 +211,12 @@ function renderPlayer() {
 }
 const PM_SHOWN = 8;
 
-onWidthChange(() => DATA && renderPlayer());
+const route = () => { if (!DATA) return; if (location.hash.length > 1) renderPlayer(); else renderSquad(); };
+onWidthChange(route);
 $('#rank-dialog').addEventListener('click', e => { if (e.target === e.currentTarget || e.target.closest('.rd-close')) e.currentTarget.close(); });
 // Andere speler in het menu: meteen tekenen als de data er is, anders onthouden voor zodra die geladen is.
-addEventListener('hashchange', () => { const n = decodeURIComponent(location.hash.slice(1)); if (n && n !== selected) { selected = n; if (DATA) renderPlayer(); } });
+// Zonder naam in het adres: de selectie; met naam: die speler. Het keuzemenu en het menu zetten de naam in het adres.
+addEventListener('hashchange', () => { const n = decodeURIComponent(location.hash.slice(1)); if (n && n !== selected) selected = n; if (!n) selected = null; route(); scrollTo(0, 0); });
 selected = decodeURIComponent(location.hash.slice(1)) || null;
-window.rerender = () => renderPlayer(); // thema wisselen: kaart opnieuw in thuis- of uitkleuren
-Promise.all([loadData(), window.BuildTab.load(), window.PlayerCard.load()]).then(renderPlayer).catch(showError);
+window.rerender = route; // thema wisselen: kaart opnieuw in thuis- of uitkleuren
+Promise.all([loadData(), window.BuildTab.load(), window.PlayerCard.load()]).then(route).catch(showError);

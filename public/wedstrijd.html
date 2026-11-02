@@ -21,7 +21,6 @@
           <p class="ms-meta" id="m-meta"></p>
         </div>
         <div class="ms-pitch" id="m-pitches"><div class="skel tall"></div></div>
-        <p class="ms-goal" id="m-goal" hidden></p>
       </section>
 
       <section class="card">
@@ -31,15 +30,14 @@
       </section>
 
       <section class="card">
-        <h2>Spelers</h2>
-        <h3 id="m-ours-title">Frambroos</h3>
-        <div id="m-ours"></div>
-        <h3 id="m-theirs-title">Tegenstander</h3>
-        <div id="m-theirs"></div>
+        <div class="sec-head"><h2>Spelers</h2></div>
+        <p class="hint">Iedereen van beide kanten in één lijst per cijfer: blauw is van ons, oranje van hen; onderaan de ploegen. Tik op een kaartje voor de uitleg.</p>
+        <div class="rank-cards all" id="m-players"><div class="skel block"></div><div class="skel block"></div></div>
       </section>
     </div>
   </main>
 </div>
+<dialog class="rank-dialog" id="rank-dialog" aria-labelledby="rd-title"><button type="button" class="icon-btn rd-close" aria-label="Sluiten">✕</button><div class="rd-body"></div></dialog>
 <div id="tooltip" class="tooltip" hidden></div>
 <script src="common.js"></script>
 <script src="archetypes.js"></script>

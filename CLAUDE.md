@@ -146,11 +146,13 @@ alleen in Cloudflare.
   verandering: groen beter, rood slechter, grijs gelijk, met een `title` die zegt waartegen. Sessie: deze avond tegenover normaal. Speler: met tegenover zonder deze speler.
 - Lijngrafieken: vloeiend (monotone spline), hoofdlijn met `area: true` voor een zachte vlakvulling, geen vaste
   stippen (alleen bij hover). Klassenamen in componenten specifiek houden (bijv. `.pitch-line`, niet `.line`).
-- Menu: Clubhouse (startpagina, coach-logica §9a), Sessies, Wedstrijden, Spelers. De spelersnamen staan als knoppen
-  bovenaan de spelerspagina (`#chips`), niet in het menu. Op het Clubhouse staat boven *Topspelers* de kaart *Algemeen* (`renderGeneral`: rating, man of the match en goals + assists over de carrière volgens EA, groot totaal en klein per wedstrijd). Het Clubhouse heeft geen KPI-tegels maar één kaart *Seizoen*:
+- Menu: Clubhouse (startpagina, coach-logica §9a), Sessies, Wedstrijden, Spelers. De spelers staan in de selectie (lijst) en
+  op een profiel in het keuzemenu bovenaan, niet in het menu. Op het Clubhouse staat boven *Topspelers* de kaart *Algemeen* (`renderGeneral`: rating, man of the match en goals + assists over de carrière volgens EA, groot totaal en klein per wedstrijd). Het Clubhouse heeft geen KPI-tegels maar één kaart *Seizoen*:
   eerst *In het kort* (`.kort`: drie regels in woorden, coach-logica §9a), dan de totalen zonder badges
   (`.totals-band`) en de vormgrafiek (staafjes per wedstrijd plus één lijn: doelsaldo over vijf), met twee kerncijfers
   via `figsHtml` in de kop. Geen "verwacht" of "tov ons" op de startpagina. Geen aparte analysepagina. De app is bewust eenvoudig: liever één duidelijke kaart dan drie tabellen.
+- *Spelers* opent de selectie (`renderSquad` in `spelers.js`, met de AI onderaan); `spelers.html#<accountnaam>` is het
+  profiel, met een keuzemenu (`#p-pick`) om te wisselen, geen pillen.
 - Spelerspagina (coach-logica §9a): zonder tabbladen, filters, samenvatting en *Algemeen* (dat staat op de kaart);
   altijd over alle gevolgde wedstrijden. Kaart met alleen de vorm eronder; *Cijfers* in vier losse kaarten
   (`.stat-groups`: Aanvallen, Passen, Verdedigen, Discipline) met per regel de speler (kop: pro-naam) en de club, elk

@@ -568,7 +568,23 @@ tegenstander* (100 ratingpunten verschil, zoals overal). Geen terugknop, geen ti
 geen samenvatting en geen aantal mensen (dat zie je in het veld). Direct daaronder, in dezelfde kaart, het gras met de
 **opstelling**: per linie één rij (aanval bovenaan), wij links en zij rechts, elk in een eigen vlak met de rondjes in
 het midden, en de naam van de linie één keer in een vaste middenkolom op de gestippelde middenlijn, zodat alle linies
-recht onder elkaar staan. Onderaan, als die er is, *Zo viel de goal*. Man of the match is de ster bij de rating.
+recht onder elkaar staan. Het veld lijkt op een echt veld: banen in donker- en lichtgroen per linie (geen
+stippellijnen), de middenlijn, de middencirkel in het middenveld, en onderaan bij de keeper het strafschopgebied, het
+doelgebied en het doel. Geen teamnamen of aantallen mensen en AI in het veld (die staan in de kop en zie je aan de
+rondjes). Man of the match is de ster bij de rating. Geen *Zo viel de goal* meer.
+
+Daaronder *Wij tegen hen* (de ploegen naast elkaar) en **Spelers**: dezelfde ranglijstkaartjes als op het Clubhouse en
+bij een sessie, maar met iedereen van beide kanten in één lijst per cijfer (wij met een blauwe stip, zij oranje) en
+onderaan beide ploegen: Rating, Goals (bij de ploegen de stand), Assists, Conversie (klein de schoten), Passes (klein de
+gelukte passes), Dribbels (klein uitgespeeld), Balwinst, Tackles gewonnen (klein de pogingen) en Balverlies (wie het
+minst verloor bovenaan). Geen tabellen meer.
+
+**Spelers** (menu, sinds 3 november 2026): eerst de **selectie**, een lijst van iedereen op vorm (de favoriet bovenaan):
+links de kaart, de naam met het vormlabel, de accountnaam en het laatste archetype, en vier cijfers volgens EA
+(wedstrijden, goals, assists, rating); rechts het begin van de bio en de vorm van de laatste vijf wedstrijden met
+"x van de laatste 5 gewonnen". Onderaan **de AI**: hoeveel wedstrijden er AI meedeed, gemiddeld hoeveel plekken, en de
+goals die geen mens van ons maakte (soms ook een eigen doelpunt van de tegenstander). Een tik op een speler opent het
+profiel; daar wissel je van speler met een keuzemenu bovenaan (geen pillen meer).
 
 **Schermen** (menu, spelers, uitleg) openen en sluiten met een animatie: op telefoon schuiven ze van onder omhoog en
 weer omlaag, op een groot scherm vervagen ze; ook bij Esc of een tik ernaast.

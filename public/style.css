@@ -1360,3 +1360,65 @@ html.pr-open #s-podium, html.pr-open #s-quote { visibility: hidden; }
 .ss-titlebar { min-width: 0; }
 .ss-titlebar .ss-title { white-space: nowrap; min-width: 0; font-size: clamp(26px, 3.6vw, 48px); }
 @media (max-width: 1100px) and (min-width: 601px) { .sess-stage:not(.match-stage) .ss-title .t-long { display: none; } .sess-stage:not(.match-stage) .ss-title .t-short { display: inline; } }
+/* Het veld als een echt veld (coach-logica §9a, Wedstrijdpagina): banen in donker- en lichtgroen per linie in plaats van
+   stippellijnen, een middenlijn, de middencirkel in het middenveld, en onderaan bij de keeper het strafschopgebied,
+   het doelgebied en het doel. Teamnamen staan in de kop. */
+.ms-pitch { padding: 0; background: #1f5a2c; overflow: hidden; }
+.ms-pitch .pitch { margin: 0; isolation: isolate; }
+.ms-pitch .pitch::before { border-left: 2px solid rgba(255,255,255,0.5); }
+.ms-pitch .prow { border-bottom: 0; padding: 18px 18px; position: relative; }
+.ms-pitch .prow:nth-child(odd) { background: #236633; }
+.ms-pitch .prow:nth-child(even) { background: #1f5a2c; }
+.ms-pitch .prow > * { position: relative; z-index: 1; }
+.ms-pitch .prow.l-a { padding-top: 22px; }
+.ms-pitch .prow.l-m::after { content: ""; position: absolute; left: 50%; top: 50%; width: 120px; height: 120px; transform: translate(-50%, -50%); border: 2px solid rgba(255,255,255,0.5); border-radius: 50%; z-index: 0; pointer-events: none; }
+.ms-pitch .prow.l-m::before { content: ""; position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; transform: translate(-50%, -50%); border-radius: 50%; background: rgba(255,255,255,0.65); z-index: 0; }
+.ms-pitch .prow.l-g { padding-bottom: 30px; }
+.ms-pitch .prow.l-g::before { content: ""; position: absolute; left: 50%; bottom: 0; width: 46%; height: 78%; transform: translateX(-50%); border: 2px solid rgba(255,255,255,0.5); border-bottom: 0; z-index: 0; pointer-events: none; }
+.ms-pitch .prow.l-g::after { content: ""; position: absolute; left: 50%; bottom: 0; width: 20%; height: 32%; transform: translateX(-50%); border: 2px solid rgba(255,255,255,0.5); border-bottom: 0; z-index: 0; pointer-events: none; box-shadow: 0 6px 0 -2px rgba(255,255,255,0.0); }
+.ms-pitch .pitch::after { content: ""; position: absolute; left: 50%; bottom: -2px; width: 12%; height: 8px; transform: translateX(-50%); border: 3px solid rgba(255,255,255,0.85); border-bottom: 0; border-radius: 3px 3px 0 0; z-index: 2; pointer-events: none; }
+.ms-pitch .prow-label { background: rgba(10,30,14,0.8); }
+.ms-meta { font-size: 13px !important; font-weight: 500 !important; color: #d9d4e0 !important; }
+@media (max-width: 600px) { .ms-pitch .prow { padding: 12px 10px; } .ms-pitch .prow.l-m::after { width: 84px; height: 84px; } .ms-pitch .prow.l-g::before { width: 58%; } .ms-pitch .prow.l-g::after { width: 26%; } }
+/* Wedstrijd: spelers van beide kanten in één lijst; een stip in de teamkleur (wij blauw, zij oranje, zoals Wij tegen hen). */
+.rank-card li.us span:nth-child(2)::before, .rank-card li.them span:nth-child(2)::before, .rd-list li.us > span:nth-child(2)::before, .rd-list li.them > span:nth-child(2)::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; vertical-align: 1px; }
+.rank-card li.us span:nth-child(2)::before, .rd-list li.us > span:nth-child(2)::before { background: var(--s1); }
+.rank-card li.them span:nth-child(2)::before, .rd-list li.them > span:nth-child(2)::before { background: var(--s2); }
+.rank-card li.them span:nth-child(2) { color: var(--ink-2); font-weight: 500; }
+.rank-card li.team + li.team { border-top: 0; margin-top: 0; }
+.filter[data-icon="players"] { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='8' r='3.5'/%3E%3Cpath d='M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5'/%3E%3Cpath d='M16 4.5a3.5 3.5 0 0 1 0 7M18.5 14.8c1.6.8 2.7 2.6 3 5.2'/%3E%3C/svg%3E"); }
+
+/* ---------- Spelers: de selectie (coach-logica §9a) ---------- */
+.squad { display: grid; gap: 12px; }
+.squad[hidden], .player-view[hidden] { display: none; }
+.player-view { display: grid; gap: 12px; }
+.player-pick-row { display: flex; justify-content: flex-end; }
+.player-pick select { min-width: 200px; }
+.squad-list { display: grid; gap: 12px; }
+.squad-row { display: grid; grid-template-columns: auto minmax(0, 1fr) minmax(0, 1.2fr); align-items: center; gap: 14px 20px; color: inherit; text-decoration: none; padding: 12px 18px; }
+a.squad-row:hover { border-color: var(--brand); }
+.sq-card { --s: 0.3; }
+.sq-ai { display: grid; place-items: center; width: 90px; height: 129px; border-radius: 14px; border: 2px dashed var(--border-strong); color: var(--muted); font: 800 24px/1 var(--num-font); }
+.sq-main { display: grid; gap: 4px; min-width: 0; }
+.sq-name { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.sq-name b { font-size: 18px; font-weight: 750; letter-spacing: -0.01em; }
+.sq-name .fav-star svg { width: 15px; height: 15px; color: var(--brand); margin-right: 4px; vertical-align: -2px; }
+.sq-sub { font-size: 12.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sq-stats { display: flex; gap: 16px; margin-top: 4px; }
+.sq-stats span { display: grid; }
+.sq-stats b { font-family: var(--num-font); font-size: 18px; font-weight: 500; line-height: 1.1; }
+.sq-stats small { font-size: 11px; color: var(--muted); }
+.sq-side { display: grid; gap: 8px; min-width: 0; }
+.sq-bio { font-size: 13.5px; line-height: 1.5; color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.sq-bio b { color: var(--ink); font-weight: 650; }
+.sq-bio.muted { color: var(--muted); }
+.sq-form { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.sq-form .form-dots { justify-content: flex-start; }
+.sq-form small { font-size: 12px; color: var(--muted); }
+@media (max-width: 760px) {
+  .squad-row { grid-template-columns: auto minmax(0, 1fr); padding: 12px 14px; }
+  .sq-side { grid-column: 1 / -1; }
+  .sq-card { --s: 0.26; }
+  .sq-ai { width: 78px; height: 112px; }
+  .player-pick-row { justify-content: stretch; } .player-pick, .player-pick select { width: 100%; }
+}
