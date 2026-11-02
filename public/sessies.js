@@ -18,8 +18,11 @@ function renderCards() {
     const ms = s.matches, sm = summarize(ms), ppg = ppgOf(ms); // punten per wedstrijd alleen voor de kleur van het kopvlak
     const tone = ppg >= 2 ? 'good' : ppg < 1 ? 'bad' : '';
     const team = avg(ms.flatMap(m => m.players.map(p => p.rating)).filter(v => v !== null));
-    const mvp = bestOfNight(ms), photo = mvp && PlayerCard.portrait(mvp.n); // rondje: altijd het portret; rand en achtergrond volgen de vorm
-    return `<a class="scard ${tone}" href="${sessionHref(s)}">
+    const live = sessionLive(s), pending = !live && revealPending(s, sessions);
+    const mvp = live || pending ? null : bestOfNight(ms), photo = mvp && PlayerCard.portrait(mvp.n); // rondje: altijd het portret; rand en achtergrond volgen de vorm
+    const sealed = live ? `<span class="scard-pack live"><span class="pack-mini" aria-hidden="true"></span><span><b>Bezig</b><small>Het pack gaat open als de avond klaar is</small></span></span>`
+      : pending ? `<span class="scard-pack ready"><span class="pack-mini" aria-hidden="true"></span><span><b>Pack staat klaar</b><small>Tik om te zien wie de besten waren</small></span></span>` : '';
+    return `<a class="scard ${tone}${live ? ' is-live' : ''}${pending ? ' is-ready' : ''}" href="${sessionHref(s)}">
       <span class="scard-top">
         <span class="scard-head"><span class="scard-date">${CAL}${cap(longDate(ms[0].ts))}</span></span>
         <span class="scard-main">
@@ -28,6 +31,7 @@ function renderCards() {
         </span>
       </span>
       <span class="scard-line" aria-label="Uitslagen op volgorde">${ms.map(m => `<span class="tl-item" title="${esc(m.opponent.name)}"><span class="tl-dot ${m.result}">${letter(m.result)}</span>${oppBadge(m.opponent)}<b>${m.goals}-${m.goalsAgainst}</b></span>`).join('')}</span>
+      ${sealed}
       ${mvp ? `<span class="scard-mvp"><span class="mvp-avatar" data-tier="${PlayerCard.sessionTier(mvp.n, s.id).tier}">${photo ? `<img class="fade-img" src="${photo}" alt="">` : PERSON}</span><span class="mvp-who"><small>Speler van de sessie</small><b>${esc(proName(mvp.n))}</b></span><span class="mvp-stats"><b>${f1(mvp.v)}</b><small>${mvp.g} G · ${mvp.a} A${mvp.mom ? ` · ${mvp.mom}× MOTM` : ''}</small></span></span>` : ''}
     </a>`;
   }).join('');

@@ -9,6 +9,9 @@
 //   eigenschappen losse kenmerken om op te bouwen (karakter, gewoontes, verhaallijnen)
 //   woorden       typische woorden en uitdrukkingen
 //   beelden       waar de speler het mee vergelijkt
+//   bio           { titel, feiten: [[label, waarde]], tekst: [alinea's] }: de biografie zoals Jamal die aanlevert, op de
+//                 spelerspagina als kaartje; inspiratie voor quotes en verhalen. Zonder bio toont de app de achtergrond.
+//   maand         (optioneel) uitspraken voor één avond per maand: de eerste avond van een maand dat deze speler wint.
 //   stats         cruijffiaanse uitspraken per statistiek van de avond (zie quoteFor), twee of meer per maat. De
 //                 statistiek inspireert de zin, maar er staan geen letterlijke getallen of percentages in (sinds
 //                 1 november 2026). Plekhouders blijven mogelijk ({w}, {g2}), maar liever niet gebruiken.
@@ -99,7 +102,42 @@ const PERSONAS = {
     },
   },
   // Nog zonder achtergrond: neutrale cruijffiaanse zinnen (PERSONA_GENERIC) tot Jamal er een geeft.
-  Konijnenlover22: { pro: 'Petra Selie', achtergrond: null, stem: null, eigenschappen: [], woorden: [], beelden: [], stats: null },
+  Konijnenlover22: {
+    pro: 'Petra Selie',
+    achtergrond: 'Tweelingzus van Peter en jongere zus van Beter Selie; even goed als Peter maar nooit zo erkend, omdat ze een '
+      + 'vrouw is. Bij Frambroos om te laten zien wat ze waard is. Lesbisch, met een zwak voor Yan en Morena, al twijfelt ze '
+      + 'als Bennie zijn haar los draagt. Eén keer per maand ongesteld (maandbank).',
+    stem: 'Recht voor zijn raap, droog en een tikje grof; trash talk met een knipoog. Wil zich bewijzen tegenover haar '
+      + 'broers en iedereen die haar onderschatte. Korte zinnen, punchlines, af en toe een kattengeluid.',
+    eigenschappen: ['onderschat, nooit minder getalenteerd', 'tweelingzus van Peter (weer op de middelbare school)',
+      'zus van Beter (stratenmaker op zee)', 'single, maar niet zonder opties', 'zwak voor Yan en Morena', 'twijfelt bij Bennie met zijn haar los',
+      'grote mond, nog groter hart', 'één keer per maand ongesteld'],
+    woorden: ['miauw miauw', 'dubbel B', 'rust op de lijn', 'schat'],
+    beelden: ['Peter en Beter', 'een kat met klauwen', 'buitenspel', 'Bennie met zijn haar los'],
+    stats: {
+      goals: ['Liever 100x buitenspel met 10 kansen, dan 0x buitenspel met 0 kansen.', 'Peter scoort op het schoolplein. Ik scoor hier. Zoek de verschillen.', 'Ze zeiden: goed voor een meisje. Ik ben gewoon goed.'],
+      assists: ['The only way is dubbel B.', 'Ik leg hem klaar, Bennie maakt hem af. Met dat haar mag hij alles.', 'Een assist van een vrouw telt ook gewoon voor één. Niet schrikken.'],
+      mom: ['Man of the match? Woman of the match, schat.', 'Peter krijgt een sticker op school. Ik krijg dit.', 'Beter legt stenen op zee. Ik leg ze in het doel.'],
+      passes: ['Rust op de lijn speelt fijn.', 'Kort, zuiver, en niemand die vraagt of ik dat wel kan.'],
+      duels: ['Miauw miauw!', 'Ik wil niet kwaad spreken over je vrouw maar ik vind het een kankerhoer.', 'Ze dachten dat ik ging huilen. Ik ging erin.'],
+      balwinst: ['Miauw miauw! Die bal is van mij.', 'Afpakken en niet teruggeven. Zo ging het thuis ook met Peter.'],
+      schoten: ['Liever 100x buitenspel met 10 kansen, dan 0x buitenspel met 0 kansen.', 'Wheatley heeft me aangerand in de spelerstunnel. Daarom stond het vizier scheef.'],
+      rating: ['Rust op de lijn speelt fijn.', 'Onderschat? Prima. Dan schrik je straks harder.', 'Bennie had zijn haar los. Ik kon me even niet concentreren.'],
+    },
+    // Eén keer per maand, bij de eerste avond van die maand dat Petra wint (sessie.js, sessionQuote).
+    maand: ['Ongesteld en tóch de beste. Kom maar op met je smoesjes, jongens.', 'Krampen, chocola en de beste van de avond. Typisch maandje.', 'Eén keer per maand speel ik met een hormoonstorm. Dit was hem.'],
+    bio: {
+      titel: 'De onderschatte ster van Frambroos',
+      feiten: [['Familie', 'Tweelingzus van Peter Selie, jongere zus van Beter Selie'], ['Club', 'Frambroos'], ['Positie', 'Voetbalster'], ['Relatiestatus', 'Single (maar niet zonder opties)']],
+      tekst: [
+        'Petra Selie is misschien wel het grootste onontdekte voetbaltalent binnen de familie Selie. Als tweelingzus van Peter was ze van jongs af aan minstens even goed als haar broer. Toch kreeg ze nooit dezelfde erkenning. Niet vanwege haar voetbalkwaliteiten, maar simpelweg omdat ze een vrouw was. Waar Peter als talent werd gezien, moest Petra zich telkens opnieuw bewijzen.',
+        'Maar Petra laat zich niet zomaar aan de kant zetten. Inmiddels is ze onderdeel van Frambroos en vastbesloten om te laten zien wat ze waard is. Ze heeft het talent, het karakter en de ambitie. Nu de rest van het team nog.',
+        'Buiten het veld is Petra minstens zo interessant. Ze is lesbisch en heeft een zwak voor haar teamgenoten Yan en Morena. Of daar ooit iets uit voortkomt, is nog maar de vraag. Al is er één onverwachte concurrent: Bennie. Vooral wanneer hij zijn haar los draagt, begint Petra toch een beetje te twijfelen aan haar eigen voorkeuren.',
+        'Binnen de familie Selie heeft Petra een bijzondere positie. Haar tweelingbroer Peter zit inmiddels weer op de middelbare school, terwijl haar oudere broer Beter zijn voetbalschoenen aan de wilgen heeft gehangen en tegenwoordig als stratenmaker op zee werkt.',
+        'Petra Selie: jarenlang onderschat, nooit minder getalenteerd en absoluut niet van plan om nog langer in de schaduw van haar broers te staan.',
+      ],
+    },
+  },
   'KFH Guip 023': { pro: 'G. Snoek', achtergrond: null, stem: null, eigenschappen: [], woorden: [], beelden: [], stats: null },
 };
 

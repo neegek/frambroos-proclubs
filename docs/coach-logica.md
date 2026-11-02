@@ -543,10 +543,22 @@ avond en de **naam in het kaartje**, in de kleur van de plek op dat gemiddelde (
 medaille); geen vergelijking met normaal (sinds 1 november 2026 weggehaald:
 te ingewikkeld voor wat het zei). De kolommen staan op volgorde van het gemiddelde.
 **Het spelersscherm** (een tik op een speler in het podium of de radar) begint met een kop: het portret in een
-rondje, de naam, de datum en de plek van de avond, en daaronder de **uitspraak van deze speler over deze avond**: de
-quote van de avond als deze speler de beste was, anders een eigen uitspraak over de statistiek die bij deze speler
-het meest uitstak (`playerQuote` in `sessie.js`, met `standoutStat` en `quoteFor` uit `personas.js`). Kort en
-raak: een punchline, geen analyse. Op telefoon is elk scherm een paneel dat van onderen omhoog schuift, bijna
+rondje, de naam, de datum en de plek van de avond. Alleen bij de **winnaar** (plek 1) staat daaronder de quote van de
+avond (sinds 3 november 2026; even daarvoor had iedereen een eigen uitspraak). De quote is de beloning: kort en
+raak, een punchline, geen analyse.
+
+**Sessie bezig en de reveal** (sinds 3 november 2026, als een FUT-pack): een sessie is **bezig** zolang de laatste
+wedstrijd minder dan 3 uur geleden is (dezelfde grens als waarmee wedstrijden een sessie vormen, `SESSION_GAP`); daarna
+kan er niets meer bij en is hij **klaar**. Zolang een sessie bezig is, is alles wat een ranglijst is dicht: geen
+podium, geen quote, geen speler van de sessie, geen *Zo speelden we* of *Ratings per wedstrijd*, geen deelknop en geen
+nieuwsartikel. Wel zichtbaar: datum, W-G-V, goals, saldo en de wedstrijden zelf (die werken gewoon bij). Op de plek
+van het podium staat een dicht pack met "Gaat open als de avond klaar is". Op *Sessies* staat bij die avond "Bezig".
+Is de **nieuwste** sessie klaar en heeft deze kijker hem nog niet geopend, dan staat er op *Sessies* "Pack staat
+klaar" en speelt de sessiepagina eerst de **reveal**: een pack in clubkleuren, een tik opent het (trillen, lichtflits,
+stralen), dan komen nummer drie, twee en één één voor één tevoorschijn, met als laatste de quote van de winnaar en een
+knop *Bekijk de avond*. Overslaan kan altijd. Daarna is de sessie open zoals altijd. Alleen de nieuwste sessie en alleen
+de eerste keer (onthouden per kijker in de browser): wie een avond heeft gemist toen er alweer een nieuwe was, ziet
+die oudere gewoon open. Het nieuwsartikel van die avond verschijnt pas na de reveal, zodat het niets verklapt. Op telefoon is elk scherm een paneel dat van onderen omhoog schuift, bijna
 schermvullend met wat lucht bovenaan en een handvat; de knoppen onderin (vorige speler, naar de spelerspagina,
 volgende speler) zijn drie losse, omrande knoppen.
 

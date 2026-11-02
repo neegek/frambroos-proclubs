@@ -114,6 +114,20 @@ function growthCard(name, rows) {
     ${items.map(it => `<div class="stat-row growth-row"><span>${it.label}</span><span class="sv"><b>${f1(it.a)}</b></span><span class="sv ${tone(it)}"><b>${f1(it.b)}</b></span></div>`).join('')}`;
 }
 
+// Biografie (personas.js, coach-logica §9): ingeklapt een titel en de eerste zin; open de feiten en het hele verhaal.
+// Zonder bio de achtergrond als één regel; zonder beide een lege plek waar later een bio komt.
+function renderBio(name) {
+  const p = window.PERSONAS?.[name] ?? (typeof PERSONAS !== 'undefined' ? PERSONAS[name] : null), b = p?.bio, el = $('#p-bio');
+  el.hidden = false; el.open = false;
+  if (!b) {
+    el.innerHTML = `<summary><h2>Biografie</h2><span class="bio-teaser">${p?.achtergrond ? esc(p.achtergrond.split(/(?<=\.)\s/)[0]) : 'Nog geen biografie.'}</span></summary>${p?.achtergrond ? `<p class="bio-text">${esc(p.achtergrond)}</p>` : ''}`;
+    return;
+  }
+  el.innerHTML = `<summary><h2>Biografie</h2><span class="bio-teaser"><b>${esc(b.titel)}</b> ${esc(b.tekst[0].split(/(?<=\.)\s/)[0])}</span></summary>
+    <dl class="bio-facts">${b.feiten.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>
+    ${b.tekst.map(t => `<p class="bio-text">${esc(t)}</p>`).join('')}`;
+}
+
 function renderPlayer() {
   const ms = DATA.matches, players = DATA.players; // altijd alle gevolgde wedstrijden: geen filters meer
   // Zonder naam in het adres: de favoriet van wie de app gebruikt, anders Neegek. De favoriet staat vooraan met een ster.
@@ -126,6 +140,7 @@ function renderPlayer() {
 
   const rows = rowsFor(ms, selected);
   window.PlayerCard.render(selected);
+  renderBio(selected);
   const on = fav === selected;
   $('#player-hero').insertAdjacentHTML('afterbegin', `<button type="button" class="fav-btn" aria-pressed="${on}" aria-label="${on ? 'Favoriet, tik om weg te halen' : 'Maak favoriet'}" title="${on ? 'Favoriet: tik om weg te halen' : 'Maak deze speler je favoriet (er kan er één zijn)'}">${STAR}<span>${on ? 'Favoriet' : 'Favoriet maken'}</span></button>`);
   $('#player-hero .fav-btn').addEventListener('click', () => { setFavorite(on ? null : selected); renderPlayer(); });

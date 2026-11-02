@@ -69,7 +69,8 @@ function articleFor(sess, latest) {
 
 // Alle artikelen, nieuwste eerst: één per sessie van minstens twee wedstrijden.
 function newsArticles() {
-  const sess = sessionsOf(DATA.matches).filter(s => s.matches.length >= 2);
+  // Geen artikel over een avond die nog bezig is of die deze kijker nog niet heeft geopend: dat zou de reveal verklappen.
+  const all = sessionsOf(DATA.matches), sess = all.filter(s => s.matches.length >= 2 && !sessionLive(s) && !revealPending(s, all));
   return sess.map((s, i) => articleFor(s, i === sess.length - 1)).reverse();
 }
 

@@ -72,6 +72,9 @@ function sessionQuote(sess) {
       const stat = standoutStat(rowsOf(x.matches, best.n), rowsOf(DATA.matches.filter(m => m.session !== x.id), best.n));
       const k = `${best.n}|${stat.key}`, i = used.get(k) || 0; used.set(k, i + 1);
       q = { text: quoteFor(best.n, stat, i), who: proName(best.n), stat: stat.key };
+      // Eén keer per maand een uitspraak uit de maandbank (personas.js), bij de eerste avond van die maand dat die speler wint.
+      const month = `${best.n}|${new Date(x.matches[0].ts * 1000).toISOString().slice(0, 7)}`, bank = PERSONAS[best.n]?.maand;
+      if (bank?.length && !used.has(month)) { used.set(month, 1); q.text = bank[(used.get(`${best.n}|maand`) || 0) % bank.length]; used.set(`${best.n}|maand`, (used.get(`${best.n}|maand`) || 0) + 1); }
     }
     QUOTES.set(x.id, q);
   }
@@ -148,10 +151,48 @@ function render() {
   for (const a of $('#s-podium').querySelectorAll('a')) a.addEventListener('click', e => { e.preventDefault(); openPlayer(a.dataset.n); });
   PlayerCard.reveal($('#s-podium'));
   SESSION_ID = s.id;
+  // Bezig (coach-logica §9a): alles wat een ranglijst is blijft dicht; alleen de wedstrijden en de uitslag.
+  const live = sessionLive(s);
+  $('#session-detail').classList.toggle('is-live', live);
+  if (live) {
+    $('#s-podium').innerHTML = `<div class="ss-sealed"><span class="pack-big" aria-hidden="true"><img src="crest.png" alt=""></span><b>Het pack is nog dicht</b><small>Gaat open als de avond klaar is</small></div>`;
+    $('#s-quote').innerHTML = `<p class="ss-live-note">De avond is nog bezig. De wedstrijden werken bij; wie de besten waren, zie je zodra de avond klaar is.</p>`;
+    return;
+  }
   // De radar als lijst (coach-logica §9a): per as de onderliggende cijfers van de avond, uitgesplitst, met onderaan het team.
   rankCards($('#s-rank'), axisCards(ms, prow));
   renderMatrix(ms, prow);
   renderRadar(s, ms);
+  if (revealPending(s, sessions)) playReveal(s, top, quote);
+}
+
+// ---------- reveal van het pack (coach-logica §9a) ----------
+// De nieuwste sessie, als die klaar is en deze kijker hem nog niet zag: een pack in clubkleuren; een tik opent het,
+// daarna komen drie, twee en één tevoorschijn, met als laatste de quote van de winnaar. Overslaan kan altijd.
+function playReveal(s, top, quote) {
+  if (!top.length || document.querySelector('.pack-reveal')) return;
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const card = (r, i) => `<span class="pr-card p${i + 1}" style="--d:${[1.1, 0.55, 0][i]}s">${PlayerCard.tiny(r.name, { session: s.id, rank: r.place, label: proName(r.name), value: f1(r.rH), key: '-r' })}</span>`;
+  const el = document.createElement('div');
+  el.className = `pack-reveal${still ? ' still' : ''}`; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', `Pack van ${longDate(s.matches[0].ts)}`);
+  el.innerHTML = `<div class="pr-rays" aria-hidden="true"></div><div class="pr-flash" aria-hidden="true"></div>
+    <button type="button" class="pr-skip">Overslaan</button>
+    <div class="pr-stage">
+      <button type="button" class="pr-pack" aria-label="Open het pack"><span class="pr-foil" aria-hidden="true"></span><img src="crest.png" alt=""><b>Frambroos</b><small>${esc(cap(longDate(s.matches[0].ts)))}</small><em>Tik om te openen</em></button>
+      <div class="pr-cards">${[1, 0, 2].filter(i => top[i]).map(i => card(top[i], i)).join('')}</div>
+      ${quote ? `<blockquote class="pr-quote">„${esc(quote.text)}” <cite>— ${esc(quote.who)}</cite></blockquote>` : ''}
+      <button type="button" class="pr-done">Bekijk de avond</button>
+    </div>`;
+  document.body.append(el);
+  document.documentElement.classList.add('pr-open');
+  PlayerCard.reveal(el);
+  const close = () => { markRevealed(s); el.classList.add('out'); document.documentElement.classList.remove('pr-open'); setTimeout(() => el.remove(), still ? 0 : 350); };
+  const open = () => { if (el.classList.contains('opening') || el.classList.contains('open')) return; markRevealed(s); el.classList.add('opening'); setTimeout(() => el.classList.replace('opening', 'open'), still ? 0 : 900); };
+  el.querySelector('.pr-pack').addEventListener('click', open);
+  el.querySelector('.pr-skip').addEventListener('click', close);
+  el.querySelector('.pr-done').addEventListener('click', close);
+  addEventListener('keydown', function esc(e) { if (e.key === 'Escape' && el.isConnected) { close(); removeEventListener('keydown', esc); } });
+  el.querySelector('.pr-pack').focus();
 }
 
 // Kaartjes onder de radar, in de volgorde van de assen. Per speler het totaal van de avond (percentages en rating als
@@ -188,11 +229,10 @@ function axisCards(ms, prow) {
 
 // De uitspraak van één speler over deze avond (coach-logica §9): de quote van de avond als deze speler de beste was,
 // anders een eigen uitspraak over wat er bij deze speler het meest uitstak (personas.js).
-function playerQuote(name, sess, rows) {
+// Alleen de winnaar van de avond krijgt de quote (coach-logica §9a); de rest niets.
+function playerQuote(name, sess) {
   const q = sessionQuote(sess);
-  if (q && q.who === proName(name)) return q.text;
-  const rest = DATA.matches.filter(m => m.session !== sess.id).map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p);
-  return quoteFor(name, standoutStat(rows, rest), sess.id);
+  return q && q.who === proName(name) ? q.text : null;
 }
 
 // Sessiekaarten van alle spelers met plek, rating, groei en reeks (wat eerst *Spelers deze sessie* was). Nu niet op de
@@ -406,7 +446,7 @@ function openPlayer(name) {
       <span class="pd-face">${portrait ? `<img src="${portrait}" alt="">` : `<span class="rd-face-icon">${esc(proName(name).charAt(0))}</span>`}</span>
       <div><h2 id="pd-title">${esc(proName(name))}</h2><p>${esc(cap(longDate(ms[0].ts)))}${place ? ` · ${place === 1 ? 'beste van de avond' : `plek ${place}`}` : ''}</p></div>
     </div>
-    <blockquote class="pd-quote">„${esc(playerQuote(name, sess, rows))}”</blockquote>
+    ${playerQuote(name, sess) ? `<blockquote class="pd-quote">„${esc(playerQuote(name, sess))}”</blockquote>` : ''}
     <dl class="pd-facts">${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>
     ${ratingDots(rows)}
     ${me ? `<div class="pd-radar">${radarSvg(me, [team], SESSION_ID, `${esc(proName(name))} deze avond, het team vaag erachter`)}</div>${table}` : '<p class="cd-note">Eén wedstrijd: te weinig voor de radar.</p>'}

@@ -298,6 +298,13 @@ function enrich(matches) {
 const dayKey = ts => new Date(ts * 1000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Amsterdam' });
 const slugText = s => String(s || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const matchHref = m => `wedstrijd.html?id=${m.slug}`;
+// Sessie bezig (coach-logica §9a): de laatste wedstrijd is minder dan SESSION_GAP geleden, dus er kan nog iets bij.
+const sessionLive = s => Date.now() / 1000 - s.matches[s.matches.length - 1].ts < SESSION_GAP;
+// Reveal: alleen de nieuwste sessie, als die klaar is en deze kijker hem nog niet heeft geopend (onthouden in de browser).
+const revealKey = s => `reveal:${s.key}`;
+const revealSeen = s => { try { return !!localStorage.getItem(revealKey(s)); } catch { return true; } };
+const markRevealed = s => { try { localStorage.setItem(revealKey(s), String(Date.now())); } catch {} };
+const revealPending = (s, all) => s === all[all.length - 1] && !sessionLive(s) && !revealSeen(s);
 const sessionHref = s => `sessie.html?id=${s.key ?? s.matches?.[0]?.sessionKey ?? s.sessionKey}`;
 
 // Verwachtingsmodel: doelsaldo ~ a + b·(skillverschil/100) + c·(mensen tegenstander − eigen mensen).

@@ -126,6 +126,11 @@ alleen in Cloudflare.
   `nieuws.html` (een laag dieper, "Terug naar Clubhouse") toont ze allemaal. Een sessie toont de top drie van de avond als waaier van kleine
   spelerskaarten (`.podium`), met een anekdote en een Cruijff-quote in plaats van een tekst over wie de beste was.
   Geen tabellen waar een kaartje volstaat.
+- Sessie bezig of nog niet geopend (coach-logica §9a, *Sessie bezig en de reveal*): `sessionLive(s)` en
+  `revealPending(s, sessions)` uit `public/common.js`. Bezig: alleen wedstrijden en uitslag, alle ranglijsten dicht.
+  De nieuwste sessie krijgt na afloop één keer per kijker een pack-reveal (`playReveal` in `public/sessie.js`).
+- Biografie per speler: `bio` in `public/personas.js` (Jamal levert de tekst; verhaal, feiten, quotes en stem
+  bouwen erop), op de spelerspagina als ingeklapt kaartje onder de spelerskaart.
 - Geen vage verbanden: *Wat opvalt*, *Beste tweetallen*, *Wanneer het loopt*, *Patronen*, *Opvallend* (sessie) en
   *Impact* zijn op 27 oktober 2026 weggehaald (coach-logica §9d). Een nieuw verband eerst in coach-logica uitwerken.
 - Compact: kaarten 16 × 18 px binnenruimte, tegels 12 × 16 px, paginatitel 26 px met hooguit één korte regel eronder.
