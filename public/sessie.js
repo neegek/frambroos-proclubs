@@ -55,32 +55,6 @@ function anecdote(ms, sm, prow) {
   return c.reduce((best, x) => x.w >= best.w ? x : best);
 }
 
-// De quote van een avond (coach-logica §9, Sessie): de beste speler (hoogste gemiddelde rating) over de statistiek die
-// die avond het meest uitstak, in de eigen stem (personas.js). Elke sessie een nieuwe: komt dezelfde speler met dezelfde
-// maat terug, dan de volgende variant.
-const QUOTES = new Map();
-function sessionQuote(sess) {
-  if (QUOTES.has(sess.id)) return QUOTES.get(sess.id);
-  const used = new Map();
-  for (const x of sessions) {
-    const names = [...new Set(x.matches.flatMap(m => m.players.map(p => p.name)))];
-    const rowsOf = (list, n) => list.map(m => ({ m, p: m.players.find(p => p.name === n) })).filter(r => r.p);
-    const best = names.map(n => ({ n, r: avg(rowsOf(x.matches, n).map(r => r.p.rating).filter(v => v !== null)) }))
-      .filter(b => b.r !== null).sort((a, b) => b.r - a.r)[0];
-    let q = null;
-    if (best) {
-      const stat = standoutStat(rowsOf(x.matches, best.n), rowsOf(DATA.matches.filter(m => m.session !== x.id), best.n));
-      const k = `${best.n}|${stat.key}`, i = used.get(k) || 0; used.set(k, i + 1);
-      q = { text: quoteFor(best.n, stat, i), who: proName(best.n), stat: stat.key };
-      // Eén keer per maand een uitspraak uit de maandbank (personas.js), bij de eerste avond van die maand dat die speler wint.
-      const month = `${best.n}|${new Date(x.matches[0].ts * 1000).toISOString().slice(0, 7)}`, bank = PERSONAS[best.n]?.maand;
-      if (bank?.length && !used.has(month)) { used.set(month, 1); q.text = bank[(used.get(`${best.n}|maand`) || 0) % bank.length]; used.set(`${best.n}|maand`, (used.get(`${best.n}|maand`) || 0) + 1); }
-    }
-    QUOTES.set(x.id, q);
-  }
-  return QUOTES.get(sess.id);
-}
-
 function sessionSummary(ms, sm, opp, own, prow) {
   const parts = [];
   // 1. Karakter van de avond en tegenstand
@@ -166,38 +140,6 @@ function render() {
   if (revealPending(s, sessions) || s.key === REVEAL_TEST) playReveal(s, top, quote);
 }
 
-// ---------- reveal van het pack (coach-logica §9a) ----------
-// TIJDELIJK (Jamal, 3 november 2026): deze sessie speelt de reveal bij elke verversing, om de animatie te testen.
-// Weghalen (null) zodra het pack goed is.
-const REVEAL_TEST = '2026-10-26';
-// De nieuwste sessie, als die klaar is en deze kijker hem nog niet zag: een pack in clubkleuren; een tik opent het,
-// daarna komen drie, twee en één tevoorschijn, met als laatste de quote van de winnaar. Overslaan kan altijd.
-function playReveal(s, top, quote) {
-  if (!top.length || document.querySelector('.pack-reveal')) return;
-  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const card = (r, i) => `<span class="pr-card p${i + 1}" style="--d:${[1.1, 0.55, 0][i]}s">${PlayerCard.tiny(r.name, { session: s.id, rank: r.place, label: proName(r.name), value: f1(r.rH), key: '-r' })}</span>`;
-  const el = document.createElement('div');
-  el.className = `pack-reveal${still ? ' still' : ''}`; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', `Pack van ${longDate(s.matches[0].ts)}`);
-  el.innerHTML = `<div class="pr-rays" aria-hidden="true"></div><div class="pr-flash" aria-hidden="true"></div>
-    <button type="button" class="pr-skip">Overslaan</button>
-    <div class="pr-stage">
-      <button type="button" class="pr-pack" aria-label="Open het pack"><span class="pr-foil" aria-hidden="true"></span><img src="crest.png" alt=""><b>Frambroos</b><small>${esc(cap(longDate(s.matches[0].ts)))}</small><em>Tik om te openen</em></button>
-      <div class="pr-cards">${[1, 0, 2].filter(i => top[i]).map(i => card(top[i], i)).join('')}</div>
-      ${quote ? `<blockquote class="pr-quote">„${esc(quote.text)}” <cite>— ${esc(quote.who)}</cite></blockquote>` : ''}
-      <button type="button" class="pr-done">Bekijk de avond</button>
-    </div>`;
-  document.body.append(el);
-  document.documentElement.classList.add('pr-open');
-  PlayerCard.reveal(el);
-  const close = () => { markRevealed(s); el.classList.add('out'); document.documentElement.classList.remove('pr-open'); setTimeout(() => el.remove(), still ? 0 : 350); };
-  const open = () => { if (el.classList.contains('opening') || el.classList.contains('open')) return; markRevealed(s); el.classList.add('opening'); setTimeout(() => el.classList.replace('opening', 'open'), still ? 0 : 900); };
-  el.querySelector('.pr-pack').addEventListener('click', open);
-  el.querySelector('.pr-skip').addEventListener('click', close);
-  el.querySelector('.pr-done').addEventListener('click', close);
-  addEventListener('keydown', function esc(e) { if (e.key === 'Escape' && el.isConnected) { close(); removeEventListener('keydown', esc); } });
-  el.querySelector('.pr-pack').focus();
-}
-
 // Kaartjes onder de radar, in de volgorde van de assen. Per speler het totaal van de avond (percentages en rating als
 // gemiddelde); onderaan het team: het totaal of gemiddelde van iedereen samen, ook de goals van AI in de uitslag.
 function axisCards(ms, prow) {
@@ -218,11 +160,11 @@ function axisCards(ms, prow) {
       rows: prow.filter(r => r.rH !== null).sort((a, b) => b.rH - a.rH || b.n - a.n).map(r => ({ name: r.name, main: f1(r.rH), sub: wed(r.n) })),
       team: { label: 'Team', main: rated.length ? f1(avg(rated)) : '–', sub: 'gemiddelde van alle ratings' } },
     count('a-goals', 'Goals', 'Doelpunten deze avond (de as Scoren). Bij het team alle goals van de uitslag, ook die van AI.', r => s(r, p => p.goals), () => ms.reduce((a, m) => a + m.goals, 0)),
-    ratio('a-conv', 'Conversie', 'Goals per schot deze avond (de as Scoren kijkt naar goals én naar hoe vaak een schot raak was). Klein het aantal schoten.', r => s(r, p => p.goals), r => s(r, p => p.shots), 3, r => `${s(r, p => p.shots)} schoten`),
+    ratio('a-conv', 'Conversie', 'Goals per schot deze avond (de as Scoren kijkt naar goals én naar hoe vaak een schot raak was). Klein goals / schoten.', r => s(r, p => p.goals), r => s(r, p => p.shots), 3, r => `${s(r, p => p.goals)} / ${s(r, p => p.shots)}`),
     count('a-assists', 'Assists', 'De laatste pass voor een doelpunt (de as Creëren).', r => s(r, p => p.assists)),
     count('a-second', 'Tweede assists', 'De pass vóór de assist (telt voor 70% mee in Creëren).', r => e(r, 'second_assists')),
     count('a-through', 'Steekpasses', 'Passes in de ruimte achter de verdediging (tellen voor 35% mee in Creëren).', r => e(r, 'through_balls')),
-    ratio('a-pass', 'Passes', 'Geslaagde passes van alle passes (de as Passen). Klein het aantal gelukte passes.', r => s(r, p => p.passesMade), r => s(r, p => p.passAttempts), 10, r => `${s(r, p => p.passesMade)} passes`),
+    ratio('a-pass', 'Passes', 'Geslaagde passes van alle passes (de as Passen). Klein gelukt / pogingen.', r => s(r, p => p.passesMade), r => s(r, p => p.passAttempts), 10, r => `${s(r, p => p.passesMade)} / ${s(r, p => p.passAttempts)}`),
     { ...count('a-dribbles', 'Dribbels', 'Geslaagde dribbels (de as Dribbelen), met klein hoeveel tegenstanders daarbij voorbij werden gespeeld.', r => e(r, 'dribbles_completed')),
       rows: prow.map(r => { const rows = rowsOf(r.name); return { name: r.name, v: e(rows, 'dribbles_completed'), b: e(rows, 'players_beaten'), sub: wed(rows.length) }; }).sort((a, b) => b.v - a.v || b.b - a.b).map(x => ({ name: x.name, main: String(x.v), small: `${x.b} uitgespeeld`, sub: x.sub })),
       team: { label: 'Team', main: String(e(all, 'dribbles_completed')), small: `${e(all, 'players_beaten')} uitgespeeld`, sub: `samen in ${wed(ms.length)}` } },
@@ -242,20 +184,6 @@ function playerQuote(name, sess) {
 
 // Sessiekaarten van alle spelers met plek, rating, groei en reeks (wat eerst *Spelers deze sessie* was). Nu niet op de
 // pagina (dubbel met *Per wedstrijd*); bewaard voor het FUT-pack per sessie (coach-logica §9a, idee).
-// Rol van een speler op een avond (de positie die het vaakst voorkwam) en de rolmaat die bij precies hetzelfde
-// gemiddelde beslist (coach-logica §9a): aanval goals plus assists, middenveld passnauwkeurigheid, verdediging
-// gewonnen tackles van de pogingen, keeper reddingen; alles per wedstrijd.
-const ROLE_STATS = { forward: ['goals', 'assists'], midfielder: ['assists', 'pass', 'won'], defender: ['won', 'duels', 'pass'], goalkeeper: ['pass'] };
-function roleOf(ms, name) {
-  const ps = ms.map(m => m.players.find(p => p.name === name)).filter(Boolean), n = ps.length || 1, cnt = {};
-  for (const p of ps) cnt[p.pos] = (cnt[p.pos] || 0) + 1;
-  const role = Object.entries(cnt).sort((a, b) => b[1] - a[1])[0]?.[0] || 'midfielder', sum = f => ps.reduce((a, p) => a + (f(p) || 0), 0);
-  const ratio = (a, b) => b ? a / b : 0;
-  const tb = role === 'forward' ? (sum(p => p.goals) + sum(p => p.assists)) / n : role === 'defender' ? ratio(sum(p => p.tacklesMade), sum(p => p.tackleAttempts))
-    : role === 'goalkeeper' ? sum(p => p.saves) / n : ratio(sum(p => p.passesMade), sum(p => p.passAttempts));
-  return { role, tb };
-}
-
 function sessionCardsHtml(s, ms, prow) {
   return `<div class="splayers">${prow.map((r, i) => {
     const rows = ms.map(m => ({ m, p: m.players.find(p => p.name === r.name) })).filter(x => x.p);
