@@ -1622,3 +1622,12 @@ html, body { overflow-x: clip; overscroll-behavior-x: none; }
   .sq-side { grid-column: auto; }
   .squad-row .sq-bio { -webkit-line-clamp: 7; font-size: 13px; }
 }
+/* Selectie: favoriet als zwevend sterretje linksboven in de rij; vol als favoriet. */
+.squad-row { position: relative; }
+.sq-fav { position: absolute; top: 10px; left: 10px; z-index: 2; display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border-radius: 50%; border: 1px solid var(--panel-border); background: var(--panel); color: var(--muted); cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.25); }
+.sq-fav svg { width: 17px; height: 17px; }
+.sq-fav svg path { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; }
+.sq-fav[aria-pressed="true"] { color: #ffd200; border-color: color-mix(in srgb, #ffd200 50%, var(--panel-border)); }
+.sq-fav[aria-pressed="true"] svg path { fill: currentColor; }
+.sq-fav:hover { color: var(--ink); }
+.squad-row .sq-bio { -webkit-line-clamp: unset; display: block; }

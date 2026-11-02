@@ -144,11 +144,15 @@ function renderSquad() {
   // dezelfde wedstrijden).
   const rowsHtml = members.map(({ m }) => {
     const p = typeof PERSONAS !== 'undefined' ? PERSONAS[m.name] : null, b = p?.bio;
-    const text = b ? b.tekst.slice(0, 2).join(' ') : p?.achtergrond || '';
+    // Uit de biografie de eerste twee zinnen (niet afbreken na een voorletter zoals J. Wheatley).
+    const sentences = (b ? b.tekst.join(' ') : p?.achtergrond || '').split(/(?<=[\p{Ll}\d)][.!?])\s+/u);
+    const text = sentences.slice(0, 2).join(' ');
+    const on = m.name === fav;
     return `<a class="squad-row card" href="spelers.html#${encodeURIComponent(m.name)}" aria-label="${esc(proName(m.name))}">
+      <button type="button" class="sq-fav" data-fav="${esc(m.name)}" aria-pressed="${on}" aria-label="${on ? 'Favoriet, tik om weg te halen' : 'Maak favoriet'}" title="${on ? 'Je favoriet' : 'Maak favoriet'}">${STAR}</button>
       <span class="fut-mini sq-card">${PlayerCard.html(m.name, { key: '-sq' })}</span>
       <span class="sq-side">
-        ${b ? `<b class="sq-title">${m.name === fav ? `<span class="fav-star">${STAR}</span>` : ''}${esc(b.titel)}</b>` : m.name === fav ? `<span class="fav-star">${STAR}</span>` : ''}
+        ${b ? `<b class="sq-title">${esc(b.titel)}</b>` : ''}
         ${text ? `<span class="sq-bio">${esc(text)}</span>` : '<span class="sq-bio muted">Nog geen biografie.</span>'}
         <span class="sq-more">Naar het profiel</span>
       </span>
@@ -162,6 +166,8 @@ function renderSquad() {
       <span class="sq-side"><b class="sq-title">De AI, de onzichtbare twaalfde man</b><span class="sq-bio">Vult elke lege plek (gemiddeld ${f1(aiSlots)} per wedstrijd), klaagt nooit en komt nooit in de ranglijst. In ${aiGames} wedstrijden goed voor ${aiGoals} goals: goals die geen mens van ons maakte, soms ook een eigen doelpunt van de tegenstander.</span></span>
     </div>`);
   $('#squad-list').innerHTML = rowsHtml.join('');
+  // Favoriet met het sterretje linksboven in de rij, zonder het profiel te openen.
+  for (const btn of $('#squad-list').querySelectorAll('.sq-fav')) btn.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); setFavorite(btn.getAttribute('aria-pressed') === 'true' ? null : btn.dataset.fav); renderSquad(); });
   PlayerCard.reveal($('#squad-list'));
 }
 
