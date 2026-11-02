@@ -567,6 +567,20 @@ function openRankList(c) {
 }
 // Sluiten werkt overal hetzelfde, ook op telefoon: een tik op het kruisje of naast het scherm. Op pointerup én click,
 // zodat een tik in een omhoog geschoven paneel nooit verloren gaat (coach-logica §9a).
+// Sluiten met een animatie (coach-logica §9a): elk scherm schuift weg zoals het kwam (telefoon naar beneden, groot scherm
+// vervagend), ook bij Esc. Zonder beweging (prefers-reduced-motion) meteen dicht.
+const nativeClose = HTMLDialogElement.prototype.close;
+HTMLDialogElement.prototype.close = function (value) {
+  if (!this.open || this.classList.contains('closing') || matchMedia('(prefers-reduced-motion: reduce)').matches) return nativeClose.call(this, value);
+  this.classList.add('closing');
+  setTimeout(() => { this.classList.remove('closing'); nativeClose.call(this, value); }, 220);
+};
+document.addEventListener('cancel', e => { if (e.target instanceof HTMLDialogElement) { e.preventDefault(); e.target.close(); } }, true);
+// Ronde pijltjes naar de vorige en volgende (sessie, wedstrijd): één element, overal hetzelfde. Zonder doel een lege
+// plek, zodat de titel in het midden blijft.
+const NAV_PATH = { prev: 'M15 18l-6-6 6-6', next: 'M9 18l6-6-6-6' };
+const navArrow = (dir, href, label) => href ? `<a class="ss-nav ${dir}" href="${href}" aria-label="${esc(label)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${NAV_PATH[dir]}"/></svg></a>`
+  : `<span class="ss-nav ${dir} empty" aria-hidden="true"></span>`;
 // Na een tik die het scherm sloot, wordt de klik die erop volgt ingeslikt: anders raakt die wat eronder ligt.
 let swallowClick = 0;
 const closeDialog = e => { const d = e.target.closest?.('dialog'); if (!d?.open) return false; if (e.target.closest('.rd-close') || e.target === d) { e.preventDefault(); d.close(); return true; } return false; };

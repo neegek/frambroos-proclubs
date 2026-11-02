@@ -10,33 +10,6 @@ const resLetter = r => r === 'D' ? 'G' : r === 'L' ? 'V' : 'W';
 const side = (players, k) => players.reduce((a, p) => a + (p[k] || 0), 0);
 const sideEv = (players, k) => players.some(p => p.ev) ? players.reduce((a, p) => a + (p.ev?.[k] || 0), 0) : null;
 
-function matchSummary(m) {
-  const own = DATA.snapshot?.skillRating, d = m.goals - m.goalsAgainst, parts = [];
-  // 1. Uitslag, tegenstander, verwachting
-  let base = m.result === 'W' ? (m.winnerByDnf ? 'Een zege doordat de tegenstander opgaf' : d >= 3 ? 'Een ruime zege' : d === 1 ? 'Een nipte zege' : 'Een verdiende zege')
-    : m.result === 'D' ? (m.goals === 0 ? 'Een doelpuntloos gelijkspel' : 'Een gelijkspel')
-    : d <= -3 ? 'Een zware nederlaag' : d === -1 ? 'Een nipte nederlaag' : 'Een nederlaag';
-  const diff = m.opponent.skillRating && own ? m.opponent.skillRating - own : null;
-  const kind = diff === null ? '' : diff >= 250 ? ', een duidelijk sterkere club' : diff >= 100 ? ', een sterkere club' : diff <= -100 ? ', een zwakkere club' : ', een gelijkwaardige club';
-  let s1 = `${base}${kind ? ` tegen${kind.slice(1)}` : ''}`;
-  const hOpp = m.opponentPlayers.length, hUs = m.players.length;
-  if (hOpp <= 2 || hOpp >= hUs + 2) s1 += ` die met ${numWord(hOpp)} ${hOpp === 1 ? 'mens' : 'mensen'} speelde tegen jullie ${numWord(hUs)}`;
-  if (m.winnerByDnf) { /* bij een opgave zegt de verwachting niets */ }
-  else if (m.resid >= 1) s1 += m.result === 'W' ? ', en beter dan verwacht' : ', al was het beter dan verwacht';
-  else if (m.resid <= -1) s1 += ', terwijl er meer in zat';
-  parts.push(s1 + '.');
-  // 2. Verloop op basis van kansen
-  const sUs = side(m.players, 'shots'), sThem = side(m.opponentPlayers, 'shots');
-  if (m.result === 'W' && sUs < sThem) parts.push('Jullie kregen minder kansen, maar maakten ze wel af.');
-  else if (m.result === 'L' && sUs > sThem) parts.push(m.goals < sUs / 4 ? 'Jullie kregen meer kansen, maar de afwerking liet het afweten.' : 'Jullie kregen meer kansen, maar de tegenstander was effectiever.');
-  else if (m.result === 'W' && sUs >= Math.max(3, sThem * 1.5)) parts.push('Jullie waren de bovenliggende partij.');
-  else if (m.result === 'L' && sThem >= Math.max(3, sUs * 1.5)) parts.push('De tegenstander was duidelijk de betere ploeg.');
-  else if (m.result === 'W') parts.push('Een wedstrijd die alle kanten op kon, maar jullie trokken aan het langste eind.');
-  else if (m.result === 'L') parts.push('Een gelijkopgaande wedstrijd die net de verkeerde kant op viel.');
-  else parts.push('Een gelijkopgaande wedstrijd zonder duidelijke winnaar.');
-  return parts.join(' ');
-}
-
 // Opstelling (coach-logica §9a, Opstelling): één veld, de kaart zelf is het gras. Per linie één rij, aanval bovenaan:
 // wij links, zij rechts, met de naam van de linie één keer in het midden, op de stippellijn van de middenlijn.
 // Elke speler is een rondje met de rating eronder: bij ons het portret, bij de tegenstander het archetype-icoon.
@@ -132,26 +105,24 @@ function render() {
   if (id !== m.slug) history.replaceState(null, '', matchHref(m)); // altijd het leesbare adres
   const own = DATA.snapshot?.skillRating, kits = DATA.club.kits;
   document.title = `Frambroos tegen ${m.opponent.name} · Frambroos Coach`;
-  $('#page-title').textContent = `Frambroos tegen ${m.opponent.name}`;
-  $('#page-sub').textContent = `${cap(fmtDayLong(m.ts))} · ${fmtTime(m.ts)} · ${m.matchType === 'playoffMatch' ? 'playoff' : 'league'}`;
-  if (!$('#m-visual .hh-stadium')) $('#m-visual').insertAdjacentHTML('afterbegin', stadiumSvg());
-  // vorige en volgende wedstrijd, in volgorde van spelen
+  // Kop (coach-logica §9a, Wedstrijdpagina): de dag met de ronde pijltjes naar de vorige en volgende wedstrijd, zoals bij een sessie.
+  const d0 = new Date(m.ts * 1000), short = `${cap(fmtDayLong(m.ts).slice(0, 3))} ${d0.getDate()} ${d0.toLocaleDateString('nl-NL', { month: 'long' }).slice(0, 3)}`;
+  $('#page-title').innerHTML = `<span class="t-long">${cap(fmtDayLong(m.ts))}</span><span class="t-short" aria-hidden="true">${short}</span>`;
   const prev = DATA.matches[idx - 1], next = DATA.matches[idx + 1];
-  $('#m-nav').innerHTML = `${prev ? `<a class="more-link" href="${matchHref(prev)}">← Vorige: ${esc(prev.opponent.name)}</a>` : '<span></span>'}${next ? `<a class="more-link" href="${matchHref(next)}">Volgende: ${esc(next.opponent.name)} →</a>` : '<span></span>'}`;
+  $('#m-titlebar').querySelectorAll('.ss-nav').forEach(a => a.remove());
+  $('#page-title').insertAdjacentHTML('beforebegin', navArrow('prev', prev && matchHref(prev), prev ? `Vorige wedstrijd: ${prev.opponent.name}` : ''));
+  $('#page-title').insertAdjacentHTML('afterend', navArrow('next', next && matchHref(next), next ? `Volgende wedstrijd: ${next.opponent.name}` : ''));
+  if (!$('#m-visual .hh-stadium')) $('#m-visual').insertAdjacentHTML('afterbegin', stadiumSvg());
   $('#m-score').innerHTML = `<div class="sl-team"><img class="own-crest" src="crest.png" alt="Frambroos" width="72" height="72"><span>Frambroos</span></div>
     <div class="sl-score"><span>${m.goals}–${m.goalsAgainst}</span><span class="pill ${m.result}">${m.result === 'W' ? 'Gewonnen' : m.result === 'L' ? 'Verloren' : 'Gelijk'}</span></div>
     <div class="sl-team">${oppBadge(m.opponent)}<span>${esc(m.opponent.name)}</span></div>`;
+  // De tegenstander in woorden: hoeveel mensen er speelden, staat al in het veld.
   const diff = m.opponent.skillRating && own ? m.opponent.skillRating - own : null;
-  const str = diff === null ? '' : diff >= 250 ? 'veel sterker' : diff >= 100 ? 'sterker' : diff <= -100 ? 'zwakker' : 'gelijkwaardig';
-  $('#m-meta').textContent = [m.opponent.skillRating ? `Rating ${m.opponent.skillRating}${str ? `, ${str}` : ''}` : '', `${m.players.length} tegen ${m.opponentPlayers.length}`, m.winnerByDnf ? 'tegenstander gaf op' : ''].filter(Boolean).join(' · ');
-  // Man van de wedstrijd: wie EA koos, anders onze hoogste rating.
-  const motm = m.players.find(p => p.mom) || [...m.players].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))[0];
-  const photo = motm && PlayerCard.portrait(motm.name);
-  $('#m-motm').innerHTML = motm ? `<a class="ms-motm-card" href="spelers.html#${encodeURIComponent(motm.name)}"><span class="mvp-avatar">${photo ? `<img class="fade-img" src="${photo}" alt="">` : ''}</span><span><small>${motm.mom ? 'Man van de wedstrijd' : 'Beste van ons'}</small><b>${esc(proName(motm.name))}</b></span><span class="ms-motm-r"><b>${f1(motm.rating)}</b><small>${[motm.goals ? `${motm.goals} G` : '', motm.assists ? `${motm.assists} A` : ''].filter(Boolean).join(' · ')}</small></span></a>` : '';
-  $('#m-summary').innerHTML = matchSummary(m) + goalChain(m);
+  $('#m-meta').textContent = [diff === null ? '' : diff >= 100 ? 'Sterkere tegenstander' : diff <= -100 ? 'Zwakkere tegenstander' : 'Gelijkwaardige tegenstander', m.winnerByDnf ? 'gaf op' : ''].filter(Boolean).join(' · ');
+  const chain = goalChain(m);
+  $('#m-goal').hidden = !chain; $('#m-goal').innerHTML = chain;
   $('#m-pitches').innerHTML = lineup(m);
   PlayerCard.reveal($('#m-pitches'));
-  PlayerCard.reveal($('#m-motm'));
   $('#m-h2h').innerHTML = h2h(m);
   $('#m-theirs-title').textContent = m.opponent.name;
   playerTable($('#m-ours'), m.players, true);

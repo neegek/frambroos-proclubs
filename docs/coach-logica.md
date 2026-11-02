@@ -561,12 +561,17 @@ tegenstanders, spelers en sessies; de **modus** (alles, alleen league, alleen pl
 wordt per browser onthouden); de rating (nu alleen EA, *eigen* volgt); en thuis- of uittenue. Op telefoon heet
 Wedstrijden in de balk *Games*, zodat alles past.
 
-**Wedstrijdpagina** (sinds 3 november 2026): een kop als bij een sessie, met het stadion erachter: datum, tijd en
-soort; de twee logo's met de score; de rating van de tegenstander en hoeveel mensen per kant. Geen terugknop en geen
-titel "Tegen …" (dat zegt de score al). Daaronder een korte samenvatting zonder naam van de tegenstander, *Zo viel de
-goal*, en de **man van de wedstrijd** (wie EA koos, anders onze hoogste rating) als kaartje. De **opstelling** is een
-kaart die zelf het gras is: per linie één rij (aanval bovenaan), wij links en zij rechts, met de naam van de linie één
-keer in het midden, op de gestippelde middenlijn.
+**Wedstrijdpagina** (sinds 3 november 2026, één kaart): bovenin, met het stadion erachter, de dag als titel met de
+ronde pijltjes naar de vorige en volgende wedstrijd (hetzelfde element als bij een sessie, `navArrow` in
+`common.js`), de twee logo's met de score en de tegenstander in woorden: *sterkere*, *gelijkwaardige* of *zwakkere
+tegenstander* (100 ratingpunten verschil, zoals overal). Geen terugknop, geen titel "Tegen …", geen tijd of soort,
+geen samenvatting en geen aantal mensen (dat zie je in het veld). Direct daaronder, in dezelfde kaart, het gras met de
+**opstelling**: per linie één rij (aanval bovenaan), wij links en zij rechts, elk in een eigen vlak met de rondjes in
+het midden, en de naam van de linie één keer in een vaste middenkolom op de gestippelde middenlijn, zodat alle linies
+recht onder elkaar staan. Onderaan, als die er is, *Zo viel de goal*. Man of the match is de ster bij de rating.
+
+**Schermen** (menu, spelers, uitleg) openen en sluiten met een animatie: op telefoon schuiven ze van onder omhoog en
+weer omlaag, op een groot scherm vervagen ze; ook bij Esc of een tik ernaast.
 
 **Sessie bezig en de reveal** (sinds 3 november 2026, als een FUT-pack): een sessie is **bezig** zolang de laatste
 wedstrijd minder dan 3 uur geleden is (dezelfde grens als waarmee wedstrijden een sessie vormen, `SESSION_GAP`); daarna

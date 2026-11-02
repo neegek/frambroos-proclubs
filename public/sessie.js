@@ -115,10 +115,10 @@ function render() {
   if (!$('#s-visual .hh-stadium')) $('#s-visual').insertAdjacentHTML('afterbegin', stadiumSvg());
   // Vorige en volgende sessie (op telefoon): alleen een knop als die sessie bestaat.
   // Op telefoon naast de titel; een lege plek houdt de titel in het midden als er geen vorige of volgende is.
-  const at = sessions.indexOf(s), nav = (to, cls, label, d) => to ? `<a class="ss-nav ${cls}" href="${sessionHref(to)}" aria-label="${label}: ${esc(cap(longDate(to.matches[0].ts)))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg></a>` : `<span class="ss-nav ${cls} empty" aria-hidden="true"></span>`;
+  const at = sessions.indexOf(s), nav = (to, cls, label) => navArrow(cls, to ? sessionHref(to) : null, to ? `${label}: ${cap(longDate(to.matches[0].ts))}` : '');
   $('#s-titlebar').querySelectorAll('.ss-nav').forEach(a => a.remove());
-  $('#s-title').insertAdjacentHTML('beforebegin', nav(sessions[at - 1], 'prev', 'Vorige sessie', 'M15 18l-6-6 6-6'));
-  $('#s-title').insertAdjacentHTML('afterend', nav(sessions[at + 1], 'next', 'Volgende sessie', 'M9 18l6-6-6-6'));
+  $('#s-title').insertAdjacentHTML('beforebegin', nav(sessions[at - 1], 'prev', 'Vorige sessie'));
+  $('#s-title').insertAdjacentHTML('afterend', nav(sessions[at + 1], 'next', 'Volgende sessie'));
   const meta = `${cap(typeLabel(ms))} · ${plural(ms.length, 'wedstrijd', 'wedstrijden')} · ${names.length} spelers`; // alleen voor het kopiëren
 
   const opp = avg(ms.map(m => m.opponent.skillRating).filter(Boolean));

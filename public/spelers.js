@@ -114,14 +114,14 @@ function growthCard(name, rows) {
     ${items.map(it => `<div class="stat-row growth-row"><span>${it.label}</span><span class="sv"><b>${f1(it.a)}</b></span><span class="sv ${tone(it)}"><b>${f1(it.b)}</b></span></div>`).join('')}`;
 }
 
-// Biografie (personas.js, coach-logica §9): eerst een paar zinnen die naar de achtergrond vervagen, met *Lees meer*
+// Biografie (personas.js, coach-logica §9): de titel van de bio is de kop van het kaartje; eerst een paar zinnen die naar de achtergrond vervagen, met *Lees meer*
 // eronder; open de feiten en het hele verhaal. Zonder bio de achtergrond; zonder beide "Nog geen biografie".
 function renderBio(name) {
   const p = typeof PERSONAS !== 'undefined' ? PERSONAS[name] : null, b = p?.bio, el = $('#p-bio');
   el.hidden = false;
   const paras = b ? b.tekst : p?.achtergrond ? [p.achtergrond] : [];
   const chev = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
-  el.innerHTML = `<h2>Biografie</h2>${b?.titel ? `<p class="bio-title">${esc(b.titel)}</p>` : ''}
+  el.innerHTML = `<h2>${esc(b?.titel || 'Biografie')}</h2>
     ${paras.length ? `<div class="bio-body" id="bio-body">${b?.feiten ? `<dl class="bio-facts">${b.feiten.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>` : ''}${paras.map(t => `<p class="bio-text">${esc(t)}</p>`).join('')}</div>
       <button type="button" class="bio-more" aria-expanded="false" aria-controls="bio-body"><span>Lees meer</span>${chev}</button>` : '<p class="bio-text muted">Nog geen biografie.</p>'}`;
   const body = el.querySelector('.bio-body'), btn = el.querySelector('.bio-more');

@@ -994,7 +994,7 @@ a.ftok:hover .ftok-c { transform: translateY(-2px); }
 .ss-pick { display: grid; justify-items: center; width: 120px; min-width: 0; text-decoration: none; color: #fff; }
 .ss-pick.p1 { width: 156px; }
 /* Vorige en volgende sessie: alleen op telefoon, rond in de bovenhoeken van het beeld. */
-.ss-nav { display: none; flex: none; width: 40px; height: 40px; place-items: center; border-radius: 50%; border: 1px solid rgba(255,255,255,0.25); background: rgba(7,5,13,0.45); color: #fff; backdrop-filter: blur(4px); }
+.ss-nav { display: grid; flex: none; width: 40px; height: 40px; place-items: center; border-radius: 50%; border: 1px solid rgba(255,255,255,0.25); background: rgba(7,5,13,0.45); color: #fff; backdrop-filter: blur(4px); }
 .ss-nav svg { width: 18px; height: 18px; }
 .ss-nav.empty { visibility: hidden; }
 .ss-nav:hover { background: rgba(255,255,255,0.14); }
@@ -1313,16 +1313,16 @@ html.pr-open #s-podium, html.pr-open #s-quote { visibility: hidden; }
 .pitch-head { position: relative; z-index: 1; display: flex; justify-content: space-between; gap: 12px; padding-bottom: 10px; margin-bottom: 4px; border-bottom: 2px solid rgba(255,255,255,0.45); }
 .pitch-head .fh-team small { color: rgba(255,255,255,0.8); }
 .pitch-head .fh-team.right { text-align: right; }
-.prow { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 10px; padding: 14px 0; border-bottom: 1px dashed rgba(255,255,255,0.22); }
+.prow { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr) 118px minmax(0, 1fr); align-items: center; gap: 8px; padding: 14px 0; border-bottom: 1px dashed rgba(255,255,255,0.22); }
+.prow-label { justify-self: center; }
 .prow:last-child { border-bottom: 0; }
 .prow-label { padding: 3px 10px; border-radius: 999px; background: rgba(10,30,14,0.75); font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.9); }
 .pside { display: flex; flex-wrap: wrap; gap: 10px 8px; min-width: 0; }
-.pside.us { justify-content: flex-end; }
-.pside.them { justify-content: flex-start; }
+.pside { justify-content: center; } /* eigen vlak per kant, rondjes in het midden: elke linie staat recht onder de vorige */
 @media (max-width: 600px) {
   .ms-visual { padding: 26px 16px 22px; }
   .ms-score .opp-badge, .ms-score .own-crest { width: 52px; height: 52px; }
-  .prow { gap: 6px; padding: 10px 0; }
+  .prow { grid-template-columns: minmax(0, 1fr) 92px minmax(0, 1fr); gap: 4px; padding: 10px 0; }
   .prow-label { font-size: 9.5px; padding: 3px 7px; letter-spacing: 0.06em; }
   .pside { gap: 8px 4px; }
 }
@@ -1330,3 +1330,33 @@ html.pr-open #s-podium, html.pr-open #s-quote { visibility: hidden; }
 .ms-score .sl-team { display: grid; justify-items: center; gap: 6px; min-width: 0; grid-area: auto !important; }
 .ms-score .sl-team span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ms-score .sl-score { display: grid; justify-items: center; gap: 6px; grid-area: auto !important; }
+
+/* Wedstrijdkop met het veld in dezelfde kaart: eerst de dag, de score en de tegenstander, dan het gras. */
+.match-stage .ss-titlebar { justify-content: center; width: 100%; }
+.match-stage .ss-title { font-size: clamp(26px, 4vw, 40px); text-align: center; }
+.ms-pitch { padding: 14px 18px 16px; background: repeating-linear-gradient(180deg, #1f5a2c 0 56px, #236633 56px 112px); color: #fff; }
+.ms-pitch .pitch { margin-top: 0; }
+.ms-goal { margin: 0; padding: 12px 18px 16px; font-size: 14px; color: var(--ink-2); border-top: 1px solid var(--panel-border); }
+.ms-goal .goal-chain { margin: 0; }
+.ms-meta { font-size: 14px; font-weight: 600; color: #efeaf3; }
+@media (max-width: 600px) { .match-stage .ss-titlebar { justify-content: space-between; } .ms-pitch { padding: 12px 12px 14px; } }
+
+/* Schermen sluiten met een animatie: op telefoon naar beneden, op een groot scherm vervagend; ook de achtergrond. */
+.rank-dialog[open] { animation: dialog-in 0.2s ease both; }
+.rank-dialog.closing { animation: dialog-out 0.2s ease forwards; }
+.rank-dialog[open]::backdrop { animation: backdrop-in 0.2s ease both; }
+.rank-dialog.closing::backdrop { animation: backdrop-out 0.2s ease forwards; }
+@keyframes dialog-in { from { opacity: 0; transform: translateY(10px) scale(0.98); } }
+@keyframes dialog-out { to { opacity: 0; transform: translateY(10px) scale(0.98); } }
+@keyframes backdrop-in { from { opacity: 0; } }
+@keyframes backdrop-out { to { opacity: 0; } }
+@media (max-width: 600px) {
+  .rank-dialog[open] { animation: sheet-up 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  .rank-dialog.closing { animation: sheet-down 0.22s cubic-bezier(0.4, 0, 1, 1) forwards; }
+}
+@keyframes sheet-down { to { transform: translateY(100%); } }
+@media (prefers-reduced-motion: reduce) { .rank-dialog[open], .rank-dialog.closing, .rank-dialog[open]::backdrop, .rank-dialog.closing::backdrop { animation: none; } }
+/* De pijltjes staan nu overal naast de titel: de dag blijft op één regel. */
+.ss-titlebar { min-width: 0; }
+.ss-titlebar .ss-title { white-space: nowrap; min-width: 0; font-size: clamp(26px, 3.6vw, 48px); }
+@media (max-width: 1100px) and (min-width: 601px) { .sess-stage:not(.match-stage) .ss-title .t-long { display: none; } .sess-stage:not(.match-stage) .ss-title .t-short { display: inline; } }
