@@ -506,8 +506,8 @@ tackles plus onderscheppingen per wedstrijd; minstens vijf gevolgde wedstrijden)
 trofeeënkast, **Nieuws** (kleine kaartjes: beeld links, tekst rechts; op telefoon de laatste vijf als rij), laatste
 uitslagen, Algemeen en Selectie. Meer lucht tussen de kaarten (20 px). Op telefoon staat de laatste sessie als
 dezelfde kaart als in de sessielijst (`sessionCardHtml`) met het label *Huidige sessie* of *Laatste sessie*.
-**Selectie** (Spelers): per speler de spelerskaart groter, met rechts de titel en de eerste twee zinnen van de
-biografie (afgekort, geen eigen tekst); linksboven in de rij een zwevend sterretje om de favoriet te kiezen (vol als
+**Selectie** (Spelers): per speler de spelerskaart groter, met rechts de titel en de biografie, visueel afgekapt
+(twee regels op telefoon, drie op een tablet, vier op een groot scherm; geen eigen tekst); linksboven in de rij een zwevend sterretje om de favoriet te kiezen (vol als
 favoriet); geen losse
 cijfers ernaast (die staan op de kaart) en geen vorm per wedstrijd (iedereen speelt dezelfde wedstrijden).
 **Opstelling** (wedstrijd, sinds 2 november 2026): één staand veld met per linie **wij links en de tegenstander rechts**,
