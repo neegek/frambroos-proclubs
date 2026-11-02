@@ -22,6 +22,7 @@ const ICONS = {
   matches: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5l3.8 2.8-1.5 4.5h-4.6l-1.5-4.5z"/><path d="M12 3v4.5M15.8 10.3l4.6-1.5M14.3 14.8l2.8 3.9M9.7 14.8l-2.8 3.9M8.2 10.3L3.6 8.8"/></svg>',
   builds: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L3.5 17.3a1.8 1.8 0 0 0 2.5 2.5l5.8-5.8a4 4 0 0 0 5.2-5.4l-2.4 2.4-2.3-.6-.6-2.3z"/></svg>',
   analysis: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+  menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
   theme: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 0 0 17z" fill="currentColor" stroke="none"/></svg>',
 };
 // Paden zijn relatief, zodat de app ook als losse bestanden werkt (statische export, src/export.js).
@@ -33,7 +34,7 @@ const LOGO = '<span class="mark"><img src="crest.png" alt="" width="44" height="
 const NAV = [
   { href: 'index.html', label: 'Clubhouse', icon: 'club' },
   { href: 'sessies.html', label: 'Sessies', icon: 'sessions' },
-  { href: 'wedstrijden.html', label: 'Wedstrijden', icon: 'matches' },
+  { href: 'wedstrijden.html', label: 'Wedstrijden', short: 'Games', icon: 'matches' },
   { href: 'spelers.html', label: 'Spelers', icon: 'players', group: true },
 ];
 (function mountShell() {
@@ -41,9 +42,23 @@ const NAV = [
   // Een laag dieper: het tabblad erboven. Een sessie niet: daar is Sessies niet actief, zodat een tik terug naar de lijst gaat.
   const path = { 'wedstrijd.html': 'wedstrijden.html', 'nieuws.html': 'index.html' }[PAGE] || PAGE;
   side.innerHTML = `<a class="brand" href="index.html">${LOGO}<span>Frambroos<b>Coach</b></span></a>
-    <nav class="side-nav" aria-label="Hoofdmenu">${NAV.map(n => n.group ? `<div class="nav-group" id="nav-group-players"><a href="${n.href}" class="nav-group-head ${n.href === path ? 'in-group' : ''}" aria-controls="player-nav" aria-expanded="true">${ICONS[n.icon]}<span>${n.label}</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><div class="sub-nav" id="player-nav" aria-label="Spelers"></div></div>` : `<a href="${n.href}" class="${n.href === path ? 'active' : ''}"${n.href === path ? ' aria-current="page"' : ''}>${ICONS[n.icon]}<span>${n.label}</span></a>`).join('')}</nav>
+    <nav class="side-nav" aria-label="Hoofdmenu">${NAV.map(n => n.group ? `<div class="nav-group" id="nav-group-players"><a href="${n.href}" class="nav-group-head ${n.href === path ? 'in-group' : ''}" aria-controls="player-nav" aria-expanded="true">${ICONS[n.icon]}<span>${n.label}</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><div class="sub-nav" id="player-nav" aria-label="Spelers"></div></div>` : `<a href="${n.href}" class="${n.href === path ? 'active' : ''}${n.short ? ' has-short' : ''}"${n.href === path ? ' aria-current="page"' : ''}>${ICONS[n.icon]}<span class="nl-long">${n.label}</span>${n.short ? `<span class="nl-short" aria-hidden="true">${n.short}</span>` : ''}</a>`).join('')}</nav>
     <div class="side-foot"><div class="club" id="club-box"><div class="club-meta">Data laden…</div></div>
-    <button id="theme" class="icon-btn" type="button" title="Wissel tussen thuistenue (donker) en uittenue (licht)" aria-label="Wissel tussen thuistenue, donker, en uittenue, licht">${ICONS.theme}</button></div>`;
+    <button id="menu-btn" class="icon-btn" type="button" title="Menu: zoeken, modus en instellingen" aria-label="Menu" aria-haspopup="dialog">${ICONS.menu}</button></div>`;
+  // Het menu (coach-logica §9a, Menu): zoeken door wedstrijden, sessies en spelers, de modus, en instellingen.
+  document.body.insertAdjacentHTML('beforeend', `<dialog class="rank-dialog app-menu" id="app-menu" aria-labelledby="am-title"><button type="button" class="icon-btn rd-close" aria-label="Sluiten">✕</button>
+    <div class="rd-body"><h2 id="am-title">Menu</h2>
+      <label class="am-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input type="search" id="am-q" placeholder="Zoek een tegenstander, speler of datum" autocomplete="off" enterkeyhint="search"></label>
+      <ul class="am-results" id="am-results"></ul>
+      <h3>Modus</h3>
+      <div class="am-seg" role="radiogroup" aria-label="Modus">${[['all', 'Alles'], ['leagueMatch', 'League'], ['playoffMatch', 'Playoff']].map(([v, l]) => `<button type="button" role="radio" data-mode="${v}">${l}</button>`).join('')}</div>
+      <p class="am-note">Geldt voor de hele app: alleen die wedstrijden tellen mee.</p>
+      <h3>Rating</h3>
+      <div class="am-seg" role="radiogroup" aria-label="Rating"><button type="button" role="radio" aria-checked="true" class="on">EA</button><button type="button" role="radio" aria-checked="false" disabled>Eigen <small>binnenkort</small></button></div>
+      <h3>Weergave</h3>
+      <div class="am-seg" role="radiogroup" aria-label="Weergave"><button type="button" role="radio" data-theme-pick="dark">Thuis (donker)</button><button type="button" role="radio" data-theme-pick="light">Uit (licht)</button></div>
+      <p class="am-note" id="am-fresh"></p>
+    </div></dialog>`);
 })();
 // Spelersnamen onder het kopje Spelers in het menu; de actieve speler volgt de hash op de spelerspagina.
 function fillPlayerNav() {
@@ -363,6 +378,8 @@ async function loadDataInner() {
   DATA.matches = enrich(DATA.matches);
   DATA.model = fitModel(DATA.matches, DATA.snapshot?.skillRating);
   for (const m of DATA.matches) { m.expected = DATA.model.predict(m); m.resid = m.goalDiff - m.expected; }
+  // Modus uit het menu: alleen league of alleen playoff. Na het model en de sessies, zodat die op alles gerekend blijven.
+  const mode = getMode(); if (mode !== 'all') DATA.matches = DATA.matches.filter(m => m.matchType === mode);
   const counts = new Map();
   for (const m of DATA.matches) for (const p of m.players) counts.set(p.name, (counts.get(p.name) || 0) + 1);
   DATA.players = [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([name]) => name);
@@ -429,11 +446,39 @@ async function liveTrigger() {
   note.remove();
 }
 
+// ---------- menu: zoeken, modus en instellingen ----------
+// Modus: alle wedstrijden, alleen league of alleen playoff (onthouden per browser; loadData filtert erop).
+const MODE_KEY = 'mode';
+const getMode = () => { try { return localStorage.getItem(MODE_KEY) || 'all'; } catch { return 'all'; } };
+function syncMenu() {
+  const mode = getMode(), light = document.documentElement.dataset.theme === 'light';
+  for (const b of document.querySelectorAll('#app-menu [data-mode]')) { const on = b.dataset.mode === mode; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); }
+  for (const b of document.querySelectorAll('#app-menu [data-theme-pick]')) { const on = (b.dataset.themePick === 'light') === light; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); }
+  $('#menu-btn')?.classList.toggle('has-mode', mode !== 'all');
+  const f = $('#am-fresh'); if (f) f.textContent = DATA?.freshness ? `Data: ${DATA.freshness}.` : '';
+}
+// Zoeken: tegenstanders (wedstrijden), spelers (pro-naam of accountnaam) en datums (sessies), hooguit twaalf treffers.
+function menuSearch(q) {
+  const out = $('#am-results'); q = q.trim().toLowerCase();
+  if (!q || !DATA) { out.innerHTML = ''; return; }
+  const hits = [];
+  for (const name of DATA.players) if (proName(name).toLowerCase().includes(q) || name.toLowerCase().includes(q)) hits.push(`<li><a href="spelers.html#${encodeURIComponent(name)}"><span class="am-kind">Speler</span><b>${esc(proName(name))}</b></a></li>`);
+  for (const s of sessionsOf(DATA.matches).reverse()) { const d = dayLabel(s.matches[0].ts); if (d.toLowerCase().includes(q)) hits.push(`<li><a href="${sessionHref(s)}"><span class="am-kind">Sessie</span><b>${esc(d)}</b><small>${s.matches.length} ${s.matches.length === 1 ? 'wedstrijd' : 'wedstrijden'}</small></a></li>`); }
+  for (const m of [...DATA.matches].reverse()) if (m.opponent.name.toLowerCase().includes(q)) hits.push(`<li><a href="${matchHref(m)}"><span class="am-kind">${letter(m.result)}</span><b>${esc(m.opponent.name)}</b><small>${m.goals}–${m.goalsAgainst} · ${esc(dayLabel(m.ts))}</small></a></li>`);
+  out.innerHTML = hits.slice(0, 12).join('') || '<li class="empty">Niets gevonden.</li>';
+}
+$('#menu-btn')?.addEventListener('click', () => { syncMenu(); $('#app-menu').showModal(); });
+$('#am-q')?.addEventListener('input', e => menuSearch(e.target.value));
+for (const b of document.querySelectorAll('#app-menu [data-mode]')) b.addEventListener('click', () => {
+  try { b.dataset.mode === 'all' ? localStorage.removeItem(MODE_KEY) : localStorage.setItem(MODE_KEY, b.dataset.mode); } catch {}
+  location.reload(); // de hele app rekent opnieuw met de gekozen wedstrijden
+});
 // Standaard donker (thuistenue); licht (uittenue) wordt onthouden per browser.
-$('#theme').addEventListener('click', () => {
-  const root = document.documentElement, light = root.dataset.theme === 'light';
-  if (light) delete root.dataset.theme; else root.dataset.theme = 'light';
-  try { localStorage.setItem('theme', light ? 'dark' : 'light'); } catch {}
+for (const b of document.querySelectorAll('#app-menu [data-theme-pick]')) b.addEventListener('click', () => {
+  const root = document.documentElement, light = b.dataset.themePick === 'light';
+  if (light) root.dataset.theme = 'light'; else delete root.dataset.theme;
+  try { localStorage.setItem('theme', light ? 'light' : 'dark'); } catch {}
+  syncMenu();
   if (DATA && typeof window.rerender === 'function') window.rerender();
 });
 
@@ -504,9 +549,11 @@ function oppBadge(opp) {
 // cards: [{ key, label, about, who, rows: [{ name, main, sub }], team?: { label, main, sub } }]. team staat onderaan,
 // zonder plek: het totaal of gemiddelde van het team. Gedeeld door het Clubhouse en een sessie.
 function rankCards(container, cards) {
-  container.innerHTML = cards.map(c => `<button type="button" class="rank-card" data-key="${c.key}" aria-haspopup="dialog">
+  // Een kaartje met small (bij een percentage het aantal) krijgt twee regels per speler: groot het getal, klein eronder.
+  const val = r => `<b>${r.main}${r.small ? `<small>${esc(r.small)}</small>` : ''}</b>`;
+  container.innerHTML = cards.map(c => `<button type="button" class="rank-card${c.rows.some(r => r.small) ? ' two' : ''}" data-key="${c.key}" aria-haspopup="dialog">
       <span class="rank-card-label">${c.label}<span class="rank-more" aria-hidden="true">i</span></span>
-      <ol>${c.rows.map((r, i) => `<li><span>${i + 1}</span><span>${esc(proName(r.name))}</span><b>${r.main}</b></li>`).join('') || `<li class="empty">${c.empty || 'Nog te weinig wedstrijden.'}</li>`}${c.team ? `<li class="team"><span></span><span>${esc(c.team.label)}</span><b>${c.team.main}</b></li>` : ''}</ol></button>`).join('');
+      <ol>${c.rows.map((r, i) => `<li><span>${i + 1}</span><span>${esc(proName(r.name))}</span>${val(r)}</li>`).join('') || `<li class="empty">${c.empty || 'Nog te weinig wedstrijden.'}</li>`}${c.team ? `<li class="team"><span></span><span>${esc(c.team.label)}</span>${val(c.team)}</li>` : ''}</ol></button>`).join('');
   for (const b of container.querySelectorAll('.rank-card')) b.addEventListener('click', () => openRankList(cards.find(c => c.key === b.dataset.key)));
 }
 function openRankList(c) {

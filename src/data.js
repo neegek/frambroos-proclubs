@@ -42,6 +42,16 @@ export function buildData(db = realDb) {
   const memberTs = db.prepare('SELECT MAX(taken_at) AS t FROM member_snapshots WHERE club_id = ?').get(clubId)?.t;
   const members = memberTs ? db.prepare('SELECT * FROM member_snapshots WHERE club_id = ? AND taken_at = ?').all(clubId, memberTs) : [];
   const lastRun = db.prepare('SELECT * FROM collect_runs ORDER BY started_at DESC LIMIT 1').get();
+  // Trofeeën (coach-logica §9a): elke promotie en degradatie die we zagen gebeuren, met het moment (het snapshot waarin
+  // de teller van EA omhoog ging) en de laatste wedstrijd daarvoor. Wat er al was vóór het eerste snapshot telt als "eerder".
+  const snapRows = db.prepare('SELECT taken_at, promotions, relegations, best_division FROM club_snapshots WHERE club_id = ? ORDER BY taken_at').all(clubId);
+  const lastBefore = db.prepare(`SELECT m.ts, mc.goals, mc.goals_against, mc.result, c.name AS opponent FROM matches m JOIN match_clubs mc ON mc.match_id = m.match_id AND mc.club_id = ?
+    LEFT JOIN clubs c ON c.club_id = mc.opponent_id WHERE m.ts <= ? ORDER BY m.ts DESC LIMIT 1`);
+  const trophies = { events: [], before: { promotions: snapRows[0]?.promotions ?? 0, relegations: snapRows[0]?.relegations ?? 0 }, bestDivision: own?.best_division ?? null };
+  for (let i = 1; i < snapRows.length; i++) for (const [k, type] of [['promotions', 'promotie'], ['relegations', 'degradatie']]) {
+    const a = snapRows[i - 1][k], b = snapRows[i][k];
+    if (a !== null && b !== null && b > a) { const m = lastBefore.get(clubId, snapRows[i].taken_at); trophies.events.push({ type, nr: b, at: snapRows[i].taken_at, match: m ? { ts: m.ts, opponent: m.opponent, goals: m.goals, goalsAgainst: m.goals_against, result: m.result } : null }); }
+  }
   const matchRows = db.prepare(`
     SELECT m.match_id, m.ts, m.match_type, m.raw, mc.goals, mc.goals_against, mc.result, mc.winner_by_dnf, mc.opponent_id, c.name AS opponent_name
     FROM matches m
@@ -104,6 +114,7 @@ export function buildData(db = realDb) {
     snapshot: own ? { skillRating: own.skill_rating, gamesPlayed: own.games_played, wins: own.wins, losses: own.losses, ties: own.ties, goals: own.goals, goalsAgainst: own.goals_against, bestDivision: own.best_division, takenAt: own.taken_at, ...clubExtras(own.raw) } : null,
     members: members.map(m => ({ name: m.player_name, gamesPlayed: m.games_played, goals: m.goals, assists: m.assists, ratingAve: m.rating_ave, winRate: m.win_rate, mom: m.mom, proOverall: m.pro_overall, proName: m.pro_name, proHeight: Number(JSON.parse(m.raw).proHeight) || null, proPos: JSON.parse(m.raw).proPos ?? null, proNationality: Number(JSON.parse(m.raw).proNationality) || null, favoritePosition: m.favorite_position, passSuccessRate: m.pass_success_rate, shotSuccessRate: m.shot_success_rate, tackleSuccessRate: m.tackle_success_rate, passesMade: Number(JSON.parse(m.raw).passesMade) || 0, tacklesMade: Number(JSON.parse(m.raw).tacklesMade) || 0 })),
     lastRun,
+    trophies,
     matches,
     generatedAt: Math.floor(Date.now() / 1000),
   };

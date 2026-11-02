@@ -114,18 +114,21 @@ function growthCard(name, rows) {
     ${items.map(it => `<div class="stat-row growth-row"><span>${it.label}</span><span class="sv"><b>${f1(it.a)}</b></span><span class="sv ${tone(it)}"><b>${f1(it.b)}</b></span></div>`).join('')}`;
 }
 
-// Biografie (personas.js, coach-logica §9): ingeklapt een titel en de eerste zin; open de feiten en het hele verhaal.
-// Zonder bio de achtergrond als één regel; zonder beide een lege plek waar later een bio komt.
+// Biografie (personas.js, coach-logica §9): eerst een paar zinnen die naar de achtergrond vervagen, met *Lees meer*
+// eronder; open de feiten en het hele verhaal. Zonder bio de achtergrond; zonder beide "Nog geen biografie".
 function renderBio(name) {
-  const p = window.PERSONAS?.[name] ?? (typeof PERSONAS !== 'undefined' ? PERSONAS[name] : null), b = p?.bio, el = $('#p-bio');
-  el.hidden = false; el.open = false;
-  if (!b) {
-    el.innerHTML = `<summary><h2>Biografie</h2><span class="bio-teaser">${p?.achtergrond ? esc(p.achtergrond.split(/(?<=\.)\s/)[0]) : 'Nog geen biografie.'}</span></summary>${p?.achtergrond ? `<p class="bio-text">${esc(p.achtergrond)}</p>` : ''}`;
-    return;
-  }
-  el.innerHTML = `<summary><h2>Biografie</h2><span class="bio-teaser"><b>${esc(b.titel)}</b> ${esc(b.tekst[0].split(/(?<=\.)\s/)[0])}</span></summary>
-    <dl class="bio-facts">${b.feiten.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>
-    ${b.tekst.map(t => `<p class="bio-text">${esc(t)}</p>`).join('')}`;
+  const p = typeof PERSONAS !== 'undefined' ? PERSONAS[name] : null, b = p?.bio, el = $('#p-bio');
+  el.hidden = false;
+  const paras = b ? b.tekst : p?.achtergrond ? [p.achtergrond] : [];
+  const chev = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+  el.innerHTML = `<h2>Biografie</h2>${b?.titel ? `<p class="bio-title">${esc(b.titel)}</p>` : ''}
+    ${paras.length ? `<div class="bio-body" id="bio-body">${b?.feiten ? `<dl class="bio-facts">${b.feiten.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>` : ''}${paras.map(t => `<p class="bio-text">${esc(t)}</p>`).join('')}</div>
+      <button type="button" class="bio-more" aria-expanded="false" aria-controls="bio-body"><span>Lees meer</span>${chev}</button>` : '<p class="bio-text muted">Nog geen biografie.</p>'}`;
+  const body = el.querySelector('.bio-body'), btn = el.querySelector('.bio-more');
+  if (!body) return;
+  // Kort genoeg om in één keer te passen: geen vervaging en geen knop.
+  requestAnimationFrame(() => { if (body.scrollHeight <= body.clientHeight + 4) { body.classList.add('all'); btn.hidden = true; } });
+  btn.addEventListener('click', () => { const open = body.classList.toggle('open'); btn.setAttribute('aria-expanded', String(open)); btn.querySelector('span').textContent = open ? 'Minder' : 'Lees meer'; });
 }
 
 function renderPlayer() {

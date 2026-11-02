@@ -18,7 +18,7 @@ function matchSummary(m) {
     : d <= -3 ? 'Een zware nederlaag' : d === -1 ? 'Een nipte nederlaag' : 'Een nederlaag';
   const diff = m.opponent.skillRating && own ? m.opponent.skillRating - own : null;
   const kind = diff === null ? '' : diff >= 250 ? ', een duidelijk sterkere club' : diff >= 100 ? ', een sterkere club' : diff <= -100 ? ', een zwakkere club' : ', een gelijkwaardige club';
-  let s1 = `${base} tegen ${esc(m.opponent.name)}${kind}`;
+  let s1 = `${base}${kind ? ` tegen${kind.slice(1)}` : ''}`;
   const hOpp = m.opponentPlayers.length, hUs = m.players.length;
   if (hOpp <= 2 || hOpp >= hUs + 2) s1 += ` die met ${numWord(hOpp)} ${hOpp === 1 ? 'mens' : 'mensen'} speelde tegen jullie ${numWord(hUs)}`;
   if (m.winnerByDnf) { /* bij een opgave zegt de verwachting niets */ }
@@ -34,38 +34,29 @@ function matchSummary(m) {
   else if (m.result === 'W') parts.push('Een wedstrijd die alle kanten op kon, maar jullie trokken aan het langste eind.');
   else if (m.result === 'L') parts.push('Een gelijkopgaande wedstrijd die net de verkeerde kant op viel.');
   else parts.push('Een gelijkopgaande wedstrijd zonder duidelijke winnaar.');
-  // 3. Beste speler
-  const best = [...m.players].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))[0];
-  if (best) {
-    const bits = [best.goals ? `${numWord(best.goals)} ${best.goals === 1 ? 'doelpunt' : 'doelpunten'}` : '', best.assists ? `${numWord(best.assists)} ${best.assists === 1 ? 'assist' : 'assists'}` : ''].filter(Boolean);
-    parts.push(`<b>${esc(proName(best.name))}</b> was de beste man${bits.length ? `, met ${joinAnd(bits)}` : ''}${best.mom ? ', en werd man van de wedstrijd' : ''}.`);
-  }
   return parts.join(' ');
 }
 
-// Opstelling (coach-logica §9a, Opstelling): één veld met beide teams. Groot scherm: liggend, wij links van keeper naar
-// aanval en de tegenstander gespiegeld rechts. Telefoon: de teams naast elkaar in vier vlakken onder elkaar (css).
+// Opstelling (coach-logica §9a, Opstelling): één veld, de kaart zelf is het gras. Per linie één rij, aanval bovenaan:
+// wij links, zij rechts, met de naam van de linie één keer in het midden, op de stippellijn van de middenlijn.
 // Elke speler is een rondje met de rating eronder: bij ons het portret, bij de tegenstander het archetype-icoon.
-// Per linie het aantal mensen, per team het aantal AI; AI per linie geeft EA niet, dus een lege linie heet "AI".
-const LINE_KEY = { forward: 'a', midfielder: 'm', defender: 'd', goalkeeper: 'g' };
+// AI per linie geeft EA niet, dus een lege kant van een linie heet "AI".
 function lineup(m) {
-  const side = (players, us) => {
-    const by = Object.fromEntries(LINES.map(([k]) => [k, []]));
-    for (const p of players) (by[p.pos] || by.midfielder).push(p);
-    const token = p => {
-      const photo = us && PlayerCard.portrait(p.name), name = us ? proName(p.name) : p.name;
-      const face = photo ? `<img class="fade-img" src="${photo}" alt="">` : archIcon(p.archetypeId);
-      const inner = `<span class="ftok-c">${face}</span><b>${p.rating === null ? '–' : f1(p.rating)}${p.mom ? '<i title="Man of the match">★</i>' : ''}</b><small>${esc(name)}</small>`;
-      const title = `${esc(name)} · ${esc(archName(p.archetypeId))} · rating ${p.rating ?? '–'}`;
-      return us ? `<a class="ftok us" href="spelers.html#${encodeURIComponent(p.name)}" title="${title}">${inner}</a>` : `<span class="ftok" title="${title}">${inner}</span>`;
-    };
-    return LINES.map(([k, label]) => `<div class="zone ${us ? 'us' : 'them'} l-${LINE_KEY[k]}" style="grid-area:${us ? 'u' : 't'}${LINE_KEY[k]}">
-      <span class="zone-head"><span class="zone-label">${label}</span><span class="zone-count" title="${by[k].length} ${by[k].length === 1 ? 'mens' : 'mensen'}">${by[k].length}</span></span>
-      <span class="zone-toks">${by[k].length ? by[k].map(token).join('') : '<span class="ftok-ai">AI</span>'}</span></div>`).join('');
+  const by = players => { const o = Object.fromEntries(LINES.map(([k]) => [k, []])); for (const p of players) (o[p.pos] || o.midfielder).push(p); return o; };
+  const us = by(m.players), them = by(m.opponentPlayers);
+  const token = (p, mine) => {
+    const photo = mine && PlayerCard.portrait(p.name), name = mine ? proName(p.name) : p.name;
+    const face = photo ? `<img class="fade-img" src="${photo}" alt="">` : archIcon(p.archetypeId);
+    const inner = `<span class="ftok-c">${face}</span><b>${p.rating === null ? '–' : f1(p.rating)}${p.mom ? '<i title="Man of the match">★</i>' : ''}</b><small>${esc(name)}</small>`;
+    const title = `${esc(name)} · ${esc(archName(p.archetypeId))} · rating ${p.rating ?? '–'}`;
+    return mine ? `<a class="ftok us" href="spelers.html#${encodeURIComponent(p.name)}" title="${title}">${inner}</a>` : `<span class="ftok" title="${title}">${inner}</span>`;
   };
-  const head = (name, players, ai) => `<span class="fh-team"><b>${esc(name)}</b><small>${numWord(players.length)} ${players.length === 1 ? 'mens' : 'mensen'} · ${numWord(ai)} AI</small></span>`;
-  return `<div class="field-head">${head('Frambroos', m.players, m.ai.players)}${head(m.opponent.name, m.opponentPlayers, m.ai.opponentPlayers ?? Math.max(0, 11 - m.opponentPlayers.length))}</div>
-    <div class="field">${side(m.players, true)}${side(m.opponentPlayers, false)}<span class="field-mid" aria-hidden="true"></span></div>`;
+  const toks = (list, mine) => list.length ? list.map(p => token(p, mine)).join('') : '<span class="ftok-ai">AI</span>';
+  const head = (name, players, ai, right) => `<span class="fh-team${right ? ' right' : ''}"><b>${esc(name)}</b><small>${numWord(players.length)} ${players.length === 1 ? 'mens' : 'mensen'} · ${numWord(ai)} AI</small></span>`;
+  return `<div class="pitch">
+    <div class="pitch-head">${head('Frambroos', m.players, m.ai.players)}${head(m.opponent.name, m.opponentPlayers, m.ai.opponentPlayers ?? Math.max(0, 11 - m.opponentPlayers.length), true)}</div>
+    ${LINES.map(([k, label]) => `<div class="prow"><div class="pside us">${toks(us[k], true)}</div><span class="prow-label">${label}</span><div class="pside them">${toks(them[k], false)}</div></div>`).join('')}
+  </div>`;
 }
 
 function h2h(m) {
@@ -141,26 +132,30 @@ function render() {
   if (id !== m.slug) history.replaceState(null, '', matchHref(m)); // altijd het leesbare adres
   const own = DATA.snapshot?.skillRating, kits = DATA.club.kits;
   document.title = `Frambroos tegen ${m.opponent.name} · Frambroos Coach`;
-  $('#page-title').textContent = `Tegen ${m.opponent.name}`;
-  $('#page-sub').textContent = `${cap(fmtDayLong(m.ts))}, ${fmtTime(m.ts)} · ${m.matchType === 'playoffMatch' ? 'playoff' : 'league'}`;
+  $('#page-title').textContent = `Frambroos tegen ${m.opponent.name}`;
+  $('#page-sub').textContent = `${cap(fmtDayLong(m.ts))} · ${fmtTime(m.ts)} · ${m.matchType === 'playoffMatch' ? 'playoff' : 'league'}`;
+  if (!$('#m-visual .hh-stadium')) $('#m-visual').insertAdjacentHTML('afterbegin', stadiumSvg());
   // vorige en volgende wedstrijd, in volgorde van spelen
   const prev = DATA.matches[idx - 1], next = DATA.matches[idx + 1];
   $('#m-nav').innerHTML = `${prev ? `<a class="more-link" href="${matchHref(prev)}">← Vorige: ${esc(prev.opponent.name)}</a>` : '<span></span>'}${next ? `<a class="more-link" href="${matchHref(next)}">Volgende: ${esc(next.opponent.name)} →</a>` : '<span></span>'}`;
-  $('#m-score').innerHTML = `<div class="sl-team"><img class="own-crest" src="crest.png" alt="Frambroos" width="64" height="64"><span>Frambroos</span></div>
+  $('#m-score').innerHTML = `<div class="sl-team"><img class="own-crest" src="crest.png" alt="Frambroos" width="72" height="72"><span>Frambroos</span></div>
     <div class="sl-score"><span>${m.goals}–${m.goalsAgainst}</span><span class="pill ${m.result}">${m.result === 'W' ? 'Gewonnen' : m.result === 'L' ? 'Verloren' : 'Gelijk'}</span></div>
     <div class="sl-team">${oppBadge(m.opponent)}<span>${esc(m.opponent.name)}</span></div>`;
-  $('#m-meta').textContent = `Tegenstander rating ${m.opponent.skillRating ?? 'onbekend'}${m.opponent.skillRating && own ? ` (jullie ${own})` : ''} · mensen: jullie ${m.players.length}, zij ${m.opponentPlayers.length}${m.winnerByDnf ? ' · tegenstander gaf op' : ''}`;
+  const diff = m.opponent.skillRating && own ? m.opponent.skillRating - own : null;
+  const str = diff === null ? '' : diff >= 250 ? 'veel sterker' : diff >= 100 ? 'sterker' : diff <= -100 ? 'zwakker' : 'gelijkwaardig';
+  $('#m-meta').textContent = [m.opponent.skillRating ? `Rating ${m.opponent.skillRating}${str ? `, ${str}` : ''}` : '', `${m.players.length} tegen ${m.opponentPlayers.length}`, m.winnerByDnf ? 'tegenstander gaf op' : ''].filter(Boolean).join(' · ');
+  // Man van de wedstrijd: wie EA koos, anders onze hoogste rating.
+  const motm = m.players.find(p => p.mom) || [...m.players].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))[0];
+  const photo = motm && PlayerCard.portrait(motm.name);
+  $('#m-motm').innerHTML = motm ? `<a class="ms-motm-card" href="spelers.html#${encodeURIComponent(motm.name)}"><span class="mvp-avatar">${photo ? `<img class="fade-img" src="${photo}" alt="">` : ''}</span><span><small>${motm.mom ? 'Man van de wedstrijd' : 'Beste van ons'}</small><b>${esc(proName(motm.name))}</b></span><span class="ms-motm-r"><b>${f1(motm.rating)}</b><small>${[motm.goals ? `${motm.goals} G` : '', motm.assists ? `${motm.assists} A` : ''].filter(Boolean).join(' · ')}</small></span></a>` : '';
   $('#m-summary').innerHTML = matchSummary(m) + goalChain(m);
   $('#m-pitches').innerHTML = lineup(m);
   PlayerCard.reveal($('#m-pitches'));
+  PlayerCard.reveal($('#m-motm'));
   $('#m-h2h').innerHTML = h2h(m);
   $('#m-theirs-title').textContent = m.opponent.name;
   playerTable($('#m-ours'), m.players, true);
   playerTable($('#m-theirs'), m.opponentPlayers, false);
 }
 
-// Terug naar de lijst: gebruik de browsergeschiedenis als we daar vandaan kwamen (filters en scrollpositie blijven), anders een gewone link.
-$('#back-link').addEventListener('click', e => {
-  try { if (document.referrer && new URL(document.referrer).pathname.endsWith('/wedstrijden.html') && history.length > 1) { e.preventDefault(); history.back(); } } catch {}
-});
 Promise.all([loadData(), PlayerCard.load().catch(() => {})]).then(render).catch(showError);

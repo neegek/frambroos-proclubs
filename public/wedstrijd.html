@@ -13,25 +13,24 @@
 <div class="app">
   <aside class="sidebar" id="sidebar"></aside>
   <main class="content">
-    <a class="back-link" id="back-link" href="wedstrijden.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Terug naar wedstrijden</a>
-    <header class="page-head">
-      <div>
-        <h1 id="page-title">Wedstrijd</h1>
-        <p class="sub" id="page-sub"></p>
-      </div>
-    </header>
-
     <div class="match-detail" id="m-detail">
-      <section class="card">
-        <div class="scoreline" id="m-score"></div>
-        <div class="meta match-meta" id="m-meta"></div>
-        <p class="summary" id="m-summary"><span class="skel text"></span><span class="skel text short"></span></p>
-        <div class="match-nav" id="m-nav"></div>
+      <section class="sess-stage match-stage" aria-labelledby="page-title">
+        <div class="ss-visual ms-visual" id="m-visual">
+          <p class="ms-kicker" id="page-sub"></p>
+          <h1 class="sr-only" id="page-title">Wedstrijd</h1>
+          <div class="ms-score scoreline" id="m-score"><div class="skel block"></div></div>
+          <p class="ms-meta" id="m-meta"></p>
+        </div>
+        <div class="ss-panel ms-panel">
+          <p class="summary" id="m-summary"><span class="skel text"></span><span class="skel text short"></span></p>
+          <div class="ms-motm" id="m-motm"></div>
+          <div class="match-nav" id="m-nav"></div>
+        </div>
       </section>
 
-      <section class="card">
+      <section class="card pitch-card">
         <h2>Opstelling</h2>
-        <p class="hint">Beide teams op één veld: per linie de mensen met hun rating, per team het aantal AI-spelers; waar die stonden geeft EA niet.</p>
+        <p class="hint">Beide teams op één veld, wij links en zij rechts: per linie de mensen met hun rating, per team het aantal AI-spelers; waar die stonden geeft EA niet.</p>
         <div class="field-wrap" id="m-pitches"><div class="skel tall"></div></div>
       </section>
 

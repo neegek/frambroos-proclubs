@@ -89,8 +89,9 @@ alleen in Cloudflare.
 - Stijl: donker thuistenue (standaard) en licht uittenue; tokens staan bovenaan `public/style.css`. Nieuwe kleuren eerst
   op contrast controleren: tekst ≥ 4,5:1, grafische elementen ≥ 3:1. Datakleuren (winst blauw, verlies rood) niet aanpassen.
 - Opbouw: het menu is één zwevende balk **bovenaan** (afgeronde hoeken, eigen schaduw `--float`) los van de
-  paginarand, met logo, de vier tabbladen met labels, de versheid van de data en de themaknop; op telefoon (≤ 600 px)
-  is het één balk onderin met de vier tabbladen met labels en de themaknop; geen tweede balk bovenaan. Alleen het menu heeft de paarse gloed (`--side-bg`), zonder kleurenbies.
+  paginarand, met logo, de vier tabbladen met labels, de versheid van de data en de menuknop (zoeken, modus, rating,
+  thema; coach-logica §9a, *Menu*); op telefoon (≤ 600 px) is het één balk onderin met de vier tabbladen (Wedstrijden
+  heet daar *Games*, lange labels worden afgekapt) en de menuknop; geen tweede balk bovenaan. Alleen het menu heeft de paarse gloed (`--side-bg`), zonder kleurenbies.
   Kaarten, tegels en sessie-items zijn effen donkerpaars (`--panel`) met dezelfde rand (`--panel-border`) en
   schaduw als het menu; in het uittenue wit. Pagina's zijn een strak raster van kaarten met 12 px tussenruimte. Titel en
   filters staan op één rij (filters rechts). Het Clubhouse heeft geen paginatitel maar een hero (stadion,

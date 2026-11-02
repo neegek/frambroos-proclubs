@@ -1171,17 +1171,162 @@ html.pr-open #s-podium, html.pr-open #s-quote { visibility: hidden; }
 .pack-reveal.still *, .pack-reveal.still { animation: none !important; transition: none !important; }
 @media (prefers-reduced-motion: reduce) { .pack-big, .pack-mini::after, .pack-big::after, .scard.is-live .scard-date::after { animation: none; } }
 
-/* Biografie op de spelerspagina: ingeklapt een regel, open de feiten en het verhaal. */
-.bio-card > summary { cursor: pointer; list-style: none; display: grid; gap: 4px; }
-.bio-card > summary::-webkit-details-marker { display: none; }
-.bio-card > summary h2 { display: flex; align-items: center; justify-content: space-between; margin: 0; }
-.bio-card > summary h2::after { content: "+"; font-size: 20px; font-weight: 400; color: var(--brand-text); }
-.bio-card[open] > summary h2::after { content: "–"; }
-.bio-teaser { font-size: 14px; color: var(--ink-2); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.bio-card[open] .bio-teaser { display: none; }
-.bio-teaser b { color: var(--ink); font-weight: 650; }
-.bio-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px 18px; margin: 12px 0 6px; }
+/* Biografie op de spelerspagina: een paar zinnen die naar de achtergrond vervagen, met Lees meer eronder. */
+.bio-title { margin: 2px 0 0; font-weight: 650; color: var(--ink); }
+.bio-body { position: relative; max-height: 7.2em; overflow: hidden; line-height: 1.6; -webkit-mask-image: linear-gradient(180deg, #000 45%, transparent); mask-image: linear-gradient(180deg, #000 45%, transparent); }
+.bio-body.open, .bio-body.all { max-height: none; -webkit-mask-image: none; mask-image: none; }
+.bio-body:not(.open):not(.all) .bio-facts { display: none; }
+.bio-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px 18px; margin: 10px 0 4px; }
 .bio-facts div { display: grid; gap: 2px; }
 .bio-facts dt { font-size: 11.5px; font-weight: 650; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
 .bio-facts dd { margin: 0; font-size: 14px; }
-.bio-text { margin: 10px 0 0; font-size: 14.5px; line-height: 1.6; max-width: 72ch; }
+.bio-text { margin: 8px 0 0; font-size: 14.5px; line-height: 1.6; max-width: 72ch; }
+.bio-text.muted { color: var(--muted); }
+.bio-more { display: inline-flex; align-items: center; gap: 4px; min-height: 40px; margin-top: 2px; padding: 0; border: 0; background: none; color: var(--brand-text); font: inherit; font-size: 14px; font-weight: 650; cursor: pointer; }
+.bio-more svg { width: 16px; height: 16px; transition: transform 0.2s; }
+.bio-more[aria-expanded="true"] svg { transform: rotate(180deg); }
+
+/* ---------- menu (coach-logica §9a, Menu) ---------- */
+.nl-short { display: none; }
+.icon-btn.has-mode { position: relative; }
+.icon-btn.has-mode::after { content: ""; position: absolute; top: 7px; right: 7px; width: 8px; height: 8px; border-radius: 50%; background: var(--brand); }
+.am-search { display: flex; align-items: center; gap: 10px; margin: 12px 0 0; padding: 0 12px; min-height: 46px; border-radius: 12px; border: 1px solid var(--border-strong); background: var(--surface); }
+.am-search svg { width: 18px; height: 18px; flex: none; color: var(--muted); }
+.am-search input { flex: 1; min-width: 0; border: 0; background: none; color: var(--ink); font: inherit; font-size: 16px; outline: none; }
+.am-results { list-style: none; margin: 6px 0 0; padding: 0; }
+.am-results li a { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; align-items: center; gap: 10px; min-height: 44px; padding: 6px 4px; border-bottom: 1px solid var(--grid); color: inherit; text-decoration: none; }
+.am-results li a:hover { background: var(--surface-2); }
+.am-results b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.am-results small { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.am-kind { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.am-results .empty { padding: 10px 4px; color: var(--muted); font-size: 14px; }
+.am-seg { display: flex; border: 1px solid var(--border-strong); border-radius: 12px; overflow: hidden; }
+.am-seg button { flex: 1; min-height: 44px; padding: 0 8px; border: 0; background: none; color: var(--ink-2); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.am-seg button + button { border-left: 1px solid var(--border-strong); }
+.am-seg button.on { background: var(--brand-soft); color: var(--brand-text); }
+.am-seg button:disabled { cursor: default; opacity: 0.55; }
+.am-seg button small { font-weight: 500; font-size: 11px; }
+.am-note { margin-top: 6px !important; font-size: 12.5px !important; color: var(--muted) !important; }
+@media (max-width: 600px) {
+  .sidebar { box-sizing: border-box; min-width: 0; width: auto; max-width: none; } /* left en right 8 px bepalen de breedte */
+  .side-nav { min-width: 0; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .side-nav a, .nav-group-head { min-width: 0; }
+  .side-nav a span, .nav-group-head span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .has-short .nl-long { display: none !important; } .nl-short { display: block; }
+  .side-foot { flex: none; }
+}
+/* Kaartjes met twee regels per speler (percentage met aantal, dribbels met uitgespeeld). */
+.rank-card.two li { padding: 6px 0; }
+.rank-card.two li b { display: grid; justify-items: end; line-height: 1.1; }
+.rank-card.two li b small { font-family: inherit; font-size: 11px; font-weight: 500; color: var(--muted); white-space: nowrap; }
+
+/* ---------- Clubhouse: seizoen, laatste sessie, trofeeën (coach-logica §9a) ---------- */
+.season-top { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 18px 28px; align-items: center; margin: 4px 0 14px; }
+.st-nums { display: flex; align-items: baseline; gap: 6px; font-family: var(--num-font); font-size: clamp(40px, 6vw, 60px); font-weight: 600; letter-spacing: -0.05em; line-height: 1; }
+.st-nums .W { color: var(--pos-text); } .st-nums .D { color: var(--ink-2); } .st-nums .L { color: var(--neg-text); }
+.st-nums i { font-style: normal; color: var(--muted); font-weight: 400; }
+.st-bar { display: flex; height: 10px; margin: 12px 0 8px; border-radius: 999px; overflow: hidden; background: var(--grid); }
+.st-bar .W { background: var(--pos); } .st-bar .D { background: var(--neutral); } .st-bar .L { background: var(--neg); }
+.st-cap { font-size: 13px; color: var(--ink-2); }
+.st-cap b { color: var(--ink); font-weight: 650; }
+.st-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.st-stat { display: grid; gap: 2px; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border); }
+.st-stat b { font-family: var(--num-font); font-size: 26px; font-weight: 500; letter-spacing: -0.04em; line-height: 1.05; }
+.st-stat span { font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.st-stat small { font-size: 11.5px; color: var(--muted); }
+.season .kort { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0 0 4px; }
+.season .kort-row { display: grid; gap: 4px; align-content: start; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); }
+.season .kort-label { min-width: 0; font-size: 12px; font-weight: 600; color: var(--muted); }
+.season .kort-row b { font-size: 16px; }
+.season .kort-tag { justify-self: start; }
+.home-duo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+.last-session { display: grid; align-content: start; gap: 8px; color: inherit; text-decoration: none; background: linear-gradient(150deg, color-mix(in srgb, var(--brand) 16%, var(--panel)), var(--panel) 70%); }
+.last-session:hover { border-color: var(--brand); }
+.ls-kicker { font-size: 11.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brand-text); }
+.ls-date { font-size: 22px; font-weight: 750; letter-spacing: -0.02em; }
+.ls-rec { display: flex; align-items: baseline; gap: 4px; font-family: var(--num-font); font-size: 36px; font-weight: 600; letter-spacing: -0.05em; line-height: 1; }
+.ls-rec .W { color: var(--pos-text); } .ls-rec .D { color: var(--ink-2); } .ls-rec .L { color: var(--neg-text); }
+.ls-rec small { margin-left: 10px; font-size: 15px; font-weight: 500; letter-spacing: 0; color: var(--ink-2); }
+.ls-dots .form-dots { justify-content: flex-start; }
+.ls-pack { display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: var(--ink-2); }
+.ls-mvp { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; background: var(--surface-2); }
+.ls-mvp small { display: block; font-size: 11.5px; color: var(--ink-2); }
+.ls-mvp b { font-weight: 650; }
+.ls-mvp .mvp-avatar { width: 40px; height: 40px; }
+.ls-mvp-r { font-family: var(--num-font); font-size: 20px; color: var(--brand-text); }
+.ls-go { display: inline-flex; align-items: center; gap: 4px; margin-top: auto; font-weight: 650; color: var(--brand-text); }
+.ls-go svg { width: 16px; height: 16px; }
+.trophies { display: grid; grid-template-rows: auto auto minmax(0, 1fr); }
+.trophy-list { list-style: none; margin: 8px 0 0; padding: 0 4px 0 0; display: grid; gap: 8px; max-height: 300px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.trophy { display: grid; grid-template-columns: 56px minmax(0, 1fr); align-items: center; gap: 12px; padding: 8px 10px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border); }
+.tr-img { position: relative; display: grid; place-items: center; width: 56px; height: 56px; border-radius: 12px; background: radial-gradient(circle at 50% 35%, color-mix(in srgb, #e9c767 30%, var(--panel)), var(--panel)); }
+.tr-img svg { width: 42px; height: 42px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35)); }
+.trophy.degradatie .tr-img { background: var(--surface); color: var(--neg-text); } .trophy.degradatie .tr-img svg { transform: rotate(180deg); width: 26px; height: 26px; filter: none; }
+.tr-img i { position: absolute; right: -4px; bottom: -4px; padding: 1px 6px; border-radius: 999px; background: var(--brand); color: #1a1408; font: 700 11px/1.4 var(--num-font); font-style: normal; }
+.tr-text { display: grid; gap: 2px; min-width: 0; }
+.tr-text b { font-weight: 650; }
+.tr-text small { font-size: 12.5px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Nieuws compacter: één rij met beeld links en tekst rechts. */
+.news.news-one { grid-template-columns: minmax(0, 1fr); }
+.news-one .news-item.lead .news-visual { min-height: 0; height: 190px; }
+.news-one .news-item.lead .news-cards .fut-mini { --s: 0.5; }
+.news-one .news-text { padding: 16px 20px; }
+.news-one .news-item.lead .news-title { font-size: 21px; }
+.news-one .news-body { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+@media (max-width: 760px) {
+  .season-top { grid-template-columns: 1fr; }
+  .season .kort { grid-template-columns: 1fr; }
+  .home-duo { grid-template-columns: 1fr; }
+  .news-one .news-item.lead { grid-template-columns: minmax(0, 1fr); }
+  .news-one .news-item.lead .news-visual { height: 150px; }
+  .news-one .news-item.lead .news-cards .fut-mini { --s: 0.4; }
+}
+
+/* ---------- wedstrijdpagina (coach-logica §9a, Wedstrijd) ---------- */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.ms-visual { grid-template-columns: 1fr; justify-items: center; gap: 10px; padding: 34px 24px 28px; text-align: center; }
+.ms-visual::before { background: linear-gradient(0deg, rgba(7,5,13,0.88) 0%, rgba(7,5,13,0.45) 60%, rgba(7,5,13,0.25) 100%) !important; }
+.ms-kicker { margin: 0; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #ffd98a; }
+.ms-score { width: min(640px, 100%); }
+.ms-score .scoreline { color: #fff; }
+.ms-score .sl-team { color: #fff; }
+.ms-score .sl-team span { color: #fff; font-weight: 650; }
+.ms-score .sl-score > span:first-child { color: #fff; font-size: clamp(44px, 9vw, 72px); }
+.ms-score .opp-badge, .ms-score .own-crest { width: 72px; height: 72px; }
+.ms-meta { margin: 0; font-size: 13px; color: #d9d4e0; }
+.ms-panel .summary { margin: 0; }
+.ms-motm-card { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border); color: inherit; text-decoration: none; }
+.ms-motm-card:hover { border-color: var(--border-strong); }
+.ms-motm-card small { display: block; font-size: 11.5px; color: var(--ink-2); }
+.ms-motm-card b { font-weight: 650; }
+.ms-motm-card .mvp-avatar { width: 44px; height: 44px; }
+.ms-motm-r { display: grid; justify-items: end; }
+.ms-motm-r b { font-family: var(--num-font); font-size: 22px; color: var(--brand-text); }
+.ms-panel .match-nav { margin-top: 0; }
+/* Opstelling: de kaart is het gras. Per linie één rij met wij links en zij rechts, de linie in het midden op de stippellijn. */
+.pitch-card { background: repeating-linear-gradient(180deg, #1f5a2c 0 56px, #236633 56px 112px); border-color: #2e7a3e; color: #fff; }
+.pitch-card h2 { color: #fff; }
+.pitch-card .hint { color: rgba(255,255,255,0.85); }
+.pitch-card h2 .info { color: #fff; border-color: rgba(255,255,255,0.5); }
+.pitch { position: relative; display: grid; gap: 0; margin-top: 8px; }
+.pitch::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; border-left: 2px dashed rgba(255,255,255,0.45); z-index: 0; }
+.pitch-head { position: relative; z-index: 1; display: flex; justify-content: space-between; gap: 12px; padding-bottom: 10px; margin-bottom: 4px; border-bottom: 2px solid rgba(255,255,255,0.45); }
+.pitch-head .fh-team small { color: rgba(255,255,255,0.8); }
+.pitch-head .fh-team.right { text-align: right; }
+.prow { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 10px; padding: 14px 0; border-bottom: 1px dashed rgba(255,255,255,0.22); }
+.prow:last-child { border-bottom: 0; }
+.prow-label { padding: 3px 10px; border-radius: 999px; background: rgba(10,30,14,0.75); font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.9); }
+.pside { display: flex; flex-wrap: wrap; gap: 10px 8px; min-width: 0; }
+.pside.us { justify-content: flex-end; }
+.pside.them { justify-content: flex-start; }
+@media (max-width: 600px) {
+  .ms-visual { padding: 26px 16px 22px; }
+  .ms-score .opp-badge, .ms-score .own-crest { width: 52px; height: 52px; }
+  .prow { gap: 6px; padding: 10px 0; }
+  .prow-label { font-size: 9.5px; padding: 3px 7px; letter-spacing: 0.06em; }
+  .pside { gap: 8px 4px; }
+}
+.ms-score.scoreline { display: grid !important; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important; grid-template-areas: none !important; align-items: center; gap: 12px; }
+.ms-score .sl-team { display: grid; justify-items: center; gap: 6px; min-width: 0; grid-area: auto !important; }
+.ms-score .sl-team span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ms-score .sl-score { display: grid; justify-items: center; gap: 6px; grid-area: auto !important; }

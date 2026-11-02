@@ -21,14 +21,46 @@ function homeHero(ms) {
     </div>`;
 }
 
-// ---------- seizoen: totalen volgens EA en de vorm over de gevolgde wedstrijden ----------
-function totals() {
-  const s = DATA.snapshot; if (!s) { $('#totals').hidden = true; return; }
-  const items = [
-    ['Wedstrijden', s.gamesPlayed], ['Gewonnen', s.wins], ['Gelijk', s.ties], ['Verloren', s.losses],
-    ['Winst', s.gamesPlayed ? `${Math.round(100 * s.wins / s.gamesPlayed)}%` : '–'], ['Doelpunten', s.goals], ['Tegengoals', s.goalsAgainst], ['Clean sheets', s.cleanSheets ?? '–'],
-  ];
-  $('#totals').innerHTML = items.map(([l, v]) => `<div><dt>${l}</dt><dd>${v ?? '–'}</dd></div>`).join('');
+// ---------- seizoen (coach-logica §9a): de balans volgens EA ----------
+// Groot de W-G-V met een balk in de uitslagkleuren, daarnaast doelpunten, tegengoals en clean sheets.
+function seasonTop() {
+  const s = DATA.snapshot, el = $('#season-top'); if (!s) { el.innerHTML = ''; return; }
+  const g = s.gamesPlayed || 0, w = g ? 100 * s.wins / g : 0, d = g ? 100 * s.ties / g : 0;
+  const stat = (label, v, sub) => `<div class="st-stat"><b>${v}</b><span>${label}</span>${sub ? `<small>${sub}</small>` : ''}</div>`;
+  el.innerHTML = `<div class="st-record">
+      <div class="st-nums"><span class="W">${s.wins}</span><i>-</i><span class="D">${s.ties}</span><i>-</i><span class="L">${s.losses}</span></div>
+      <div class="st-bar" aria-hidden="true"><span class="W" style="width:${w}%"></span><span class="D" style="width:${d}%"></span><span class="L" style="width:${100 - w - d}%"></span></div>
+      <div class="st-cap"><b>${g ? Math.round(w) : '–'}% gewonnen</b> · ${g} wedstrijden · W-G-V</div>
+    </div>
+    <div class="st-stats">${stat('Doelpunten', s.goals, g ? `${f1(s.goals / g)} per wedstrijd` : '')}${stat('Tegen', s.goalsAgainst, g ? `${f1(s.goalsAgainst / g)} per wedstrijd` : '')}${stat('Saldo', `${s.goals - s.goalsAgainst > 0 ? '+' : ''}${s.goals - s.goalsAgainst}`, '')}${stat('Clean sheets', s.cleanSheets ?? '–', '')}</div>`;
+}
+
+// Laatste sessie: één tik naar de avond. Bezig of nog niet geopend: het pack, anders de speler van de sessie.
+function lastSession() {
+  const all = sessionsOf(DATA.matches), s = all.at(-1), el = $('#last-session'); if (!s) { el.innerHTML = '<p class="empty">Nog geen sessies.</p>'; return; }
+  const sm = summarize(s.matches), live = sessionLive(s), pending = !live && revealPending(s, all), mvp = live || pending ? null : bestOfNight(s.matches);
+  const photo = mvp && PlayerCard.portrait(mvp.n);
+  el.href = sessionHref(s);
+  el.innerHTML = `<span class="ls-kicker">${live ? 'Nu bezig' : 'Laatste sessie'}</span>
+    <span class="ls-date">${esc(dayLabel(s.matches[0].ts))}</span>
+    <span class="ls-rec"><span class="W">${sm.W}</span>-<span class="D">${sm.D}</span>-<span class="L">${sm.L}</span><small>${sm.gf}–${sm.ga}</small></span>
+    <span class="ls-dots">${formDots(s.matches, { links: false })}</span>
+    ${live || pending ? `<span class="ls-pack"><span class="pack-mini" aria-hidden="true"></span>${live ? 'Het pack gaat open als de avond klaar is' : 'Pack staat klaar: tik om te openen'}</span>`
+      : mvp ? `<span class="ls-mvp"><span class="mvp-avatar">${photo ? `<img class="fade-img" src="${photo}" alt="">` : ''}</span><span><small>Speler van de sessie</small><b>${esc(proName(mvp.n))}</b></span><b class="ls-mvp-r">${f1(mvp.v)}</b></span>` : ''}
+    <span class="ls-go">Naar de sessie <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></span>`;
+}
+
+// Trofeeën (coach-logica §9a): per promotie een beker met het moment en de wedstrijd ervoor; eerdere als één regel.
+const CUP = `<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="cup-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff1bd"/><stop offset=".45" stop-color="#e2b649"/><stop offset="1" stop-color="#8d6c15"/></linearGradient></defs>
+  <path d="M18 8h28v10c0 9-6 16-14 16S18 27 18 18z" fill="url(#cup-g)"/><path d="M18 12H9c0 8 4 13 11 14M46 12h9c0 8-4 13-11 14" fill="none" stroke="url(#cup-g)" stroke-width="4" stroke-linecap="round"/>
+  <path d="M28 34h8v8h-8z" fill="url(#cup-g)"/><path d="M20 46h24l2 8H18z" fill="url(#cup-g)"/><path d="M26 14l3 6 6 1-5 4 2 6-6-3-6 3 2-6-5-4 6-1z" fill="#fff6d8" opacity=".55" transform="translate(3 -2) scale(.9)"/></svg>`;
+const ARROW_UP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+function trophies() {
+  const t = DATA.trophies, el = $('#trophies'); if (!t) { el.innerHTML = ''; return; }
+  const items = [...t.events].reverse().map(e => `<li class="trophy ${e.type}"><span class="tr-img">${e.type === 'promotie' ? CUP : ARROW_UP}</span>
+      <span class="tr-text"><b>${e.type === 'promotie' ? `Promotie ${e.nr}` : `Degradatie ${e.nr}`}</b><small>${esc(dayLabel(e.at))}${e.match ? ` · ${letter(e.match.result)} ${e.match.goals}–${e.match.goalsAgainst} tegen ${esc(e.match.opponent || 'onbekend')}` : ''}</small></span></li>`);
+  if (t.before.promotions) items.push(`<li class="trophy earlier"><span class="tr-img">${CUP}<i>${t.before.promotions}×</i></span><span class="tr-text"><b>${t.before.promotions} ${t.before.promotions === 1 ? 'promotie' : 'promoties'} eerder</b><small>Voordat deze app meekeek${t.bestDivision ? ` · hoogste divisie ooit: ${t.bestDivision}` : ''}</small></span></li>`);
+  el.innerHTML = items.join('') || '<li class="empty">Nog geen trofeeën.</li>';
 }
 
 // Vormgrafiek (coach-logica §9a): per wedstrijd een staafje (doelsaldo, kleur = uitslag), met daardoorheen één lijn:
@@ -155,7 +187,10 @@ function render() {
   const ms = DATA.matches;
   homeHero(ms);
   kort(ms);
-  totals();
+  seasonTop();
+  lastSession();
+  PlayerCard.reveal($('#last-session'));
+  trophies();
   seasonFigs(ms);
   formChart($('#chart-form'), ms);
   const latest = newsArticles()[0];

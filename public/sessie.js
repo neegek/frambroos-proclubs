@@ -205,22 +205,24 @@ function axisCards(ms, prow) {
   const count = (key, label, about, f, teamF = f) => ({ key, label, about, who,
     rows: prow.map(r => { const rows = rowsOf(r.name); return { name: r.name, v: f(rows), sub: wed(rows.length) }; }).sort((a, b) => b.v - a.v).map(x => ({ name: x.name, main: String(x.v), sub: x.sub })),
     team: { label: 'Team', main: String(teamF(all)), sub: `samen in ${wed(ms.length)}` } });
-  const ratio = (key, label, about, num, den, min) => ({ key, label, about, who: `${who} Minstens ${min} pogingen.`,
-    rows: prow.map(r => { const rows = rowsOf(r.name), d = den(rows); return { name: r.name, v: d >= min ? num(rows) / d : null, sub: `${num(rows)} van ${d}` }; }).filter(x => x.v !== null).sort((a, b) => b.v - a.v).map(x => ({ name: x.name, main: `${Math.round(100 * x.v)}%`, sub: x.sub })),
-    team: { label: 'Team', main: den(all) ? `${Math.round(100 * num(all) / den(all))}%` : '–', sub: `${num(all)} van ${den(all)}` } });
+  // Percentage groot, met klein het aantal waar het om gaat (small): bij passes de gelukte passes, bij conversie de schoten.
+  const ratio = (key, label, about, num, den, min, small) => ({ key, label, about, who: `${who} Minstens ${min} pogingen.`,
+    rows: prow.map(r => { const rows = rowsOf(r.name), d = den(rows); return { name: r.name, v: d >= min ? num(rows) / d : null, sub: `${num(rows)} van ${d}`, small: small(rows) }; }).filter(x => x.v !== null).sort((a, b) => b.v - a.v).map(x => ({ name: x.name, main: `${Math.round(100 * x.v)}%`, sub: x.sub, small: x.small })),
+    team: { label: 'Team', main: den(all) ? `${Math.round(100 * num(all) / den(all))}%` : '–', sub: `${num(all)} van ${den(all)}`, small: small(all) } });
   const rated = all.map(r => r.p.rating).filter(v => v !== null);
   return [
     { key: 'a-rating', label: 'Rating', about: 'De gemiddelde matchrating van EA over de wedstrijden van deze avond (de as Rating).', who,
       rows: prow.filter(r => r.rH !== null).sort((a, b) => b.rH - a.rH || b.n - a.n).map(r => ({ name: r.name, main: f1(r.rH), sub: wed(r.n) })),
       team: { label: 'Team', main: rated.length ? f1(avg(rated)) : '–', sub: 'gemiddelde van alle ratings' } },
     count('a-goals', 'Goals', 'Doelpunten deze avond (de as Scoren). Bij het team alle goals van de uitslag, ook die van AI.', r => s(r, p => p.goals), () => ms.reduce((a, m) => a + m.goals, 0)),
-    count('a-shots', 'Schoten', 'Alle schoten deze avond (de as Scoren kijkt ook naar hoeveel daarvan raak waren).', r => s(r, p => p.shots)),
+    ratio('a-conv', 'Conversie', 'Goals per schot deze avond (de as Scoren kijkt naar goals én naar hoe vaak een schot raak was). Klein het aantal schoten.', r => s(r, p => p.goals), r => s(r, p => p.shots), 3, r => `${s(r, p => p.shots)} schoten`),
     count('a-assists', 'Assists', 'De laatste pass voor een doelpunt (de as Creëren).', r => s(r, p => p.assists)),
     count('a-second', 'Tweede assists', 'De pass vóór de assist (telt voor 70% mee in Creëren).', r => e(r, 'second_assists')),
     count('a-through', 'Steekpasses', 'Passes in de ruimte achter de verdediging (tellen voor 35% mee in Creëren).', r => e(r, 'through_balls')),
-    ratio('a-pass', 'Passes', 'Geslaagde passes van alle passes (de as Passen).', r => s(r, p => p.passesMade), r => s(r, p => p.passAttempts), 10),
-    count('a-dribbles', 'Dribbels', 'Geslaagde dribbels (de as Dribbelen).', r => e(r, 'dribbles_completed')),
-    count('a-beaten', 'Uitgespeeld', 'Tegenstanders voorbij gespeeld (de as Dribbelen).', r => e(r, 'players_beaten')),
+    ratio('a-pass', 'Passes', 'Geslaagde passes van alle passes (de as Passen). Klein het aantal gelukte passes.', r => s(r, p => p.passesMade), r => s(r, p => p.passAttempts), 10, r => `${s(r, p => p.passesMade)} passes`),
+    { ...count('a-dribbles', 'Dribbels', 'Geslaagde dribbels (de as Dribbelen), met klein hoeveel tegenstanders daarbij voorbij werden gespeeld.', r => e(r, 'dribbles_completed')),
+      rows: prow.map(r => { const rows = rowsOf(r.name); return { name: r.name, v: e(rows, 'dribbles_completed'), b: e(rows, 'players_beaten'), sub: wed(rows.length) }; }).sort((a, b) => b.v - a.v || b.b - a.b).map(x => ({ name: x.name, main: String(x.v), small: `${x.b} uitgespeeld`, sub: x.sub })),
+      team: { label: 'Team', main: String(e(all, 'dribbles_completed')), small: `${e(all, 'players_beaten')} uitgespeeld`, sub: `samen in ${wed(ms.length)}` } },
     count('a-tackles', 'Tackles gewonnen', 'Gewonnen tackles (de as Verdedigen, gewogen met hoe vaak het lukte).', r => s(r, p => p.tacklesMade)),
     count('a-inter', 'Onderscheppingen', 'Onderschepte passes (de as Verdedigen).', r => e(r, 'interceptions')),
     count('a-mom', 'Man of the match', 'Hoe vaak EA iemand deze avond tot man of the match koos.', r => s(r, p => p.mom)),

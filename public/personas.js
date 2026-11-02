@@ -30,6 +30,15 @@ const PERSONAS = {
       'iedereen is een vriend', 'nooit opgeven', 'begrijpt het spel beter dan de taal', 'buigt na een goal'],
     woorden: ['Ai amu Japanīzu', 'Sankyū', 'Arigatō', 'Nebā gibu appu', 'Ōh iē', 'evuribadi', 'mai furendo', 'beri'],
     beelden: ['sushi', 'de trein die op tijd rijdt', 'karaoke', 'buigen'],
+    bio: {
+      titel: 'De vrolijkste Japanner van de competitie',
+      feiten: [['Afkomst', 'Japan'], ['Talen', 'Geen Nederlands, geen Engels'], ['Voorbeeld', 'Munenori Kawasaki'], ['Specialiteit', 'Buigen na een goal']],
+      tekst: [
+        'Terry Yaki komt uit Japan en spreekt geen woord Nederlands of Engels. Wat hij zegt, klinkt als Engels zoals het in katakana wordt uitgesproken: gōru, pasu, sankyū. Toch begrijpt Terry het spel beter dan wie dan ook de taal.',
+        'Altijd vrolijk en dankbaar, na elke wedstrijd opnieuw voorstellen alsof niemand Terry kent, en iedereen is mai furendo. Opgeven bestaat niet: nebā gibu appu.',
+        'Na een goal volgt een buiging. Naar het publiek, naar de keeper, naar de bal. Iedereen krijgt een arigatō.',
+      ],
+    },
     stats: {
       goals: ['Mai nēmu izu Terī. Ai amu Japanīzu. Ai raiku gōru!', 'Ōh iē! Gōru! Sankyū bōru, sankyū gōru, sankyū evuribadi!'],
       assists: ['Ai raiku pasu. Yū raiku gōru. Wī ā furendo!', 'Ai nō gōru, nō purobrem. Mai furendo gōru, ai happī.'],
@@ -53,6 +62,15 @@ const PERSONAS = {
       'denkt nog in boekhouding en bewijs', 'rustig en dankbaar', 'trots op het kamp, maar niet op wat er gebeurde'],
     woorden: ['broer', 'alhamdulillah', 'inshallah', 'subhanallah', 'astaghfirullah', 'wallah', 'het kamp', 'de briefjes'],
     beelden: ['de Koran', 'het kamp', 'witwassen', 'de cel', 'boekhouden', 'de recherche'],
+    bio: {
+      titel: 'Van het kamp naar de moskee',
+      feiten: [['Afkomst', 'Het woonwagenkamp'], ['Verleden', 'Jarenlang geld witgewassen'], ['Bekeerd', 'In de cel, tot de islam'], ['Nu', 'Rustig, dankbaar, schoon']],
+      tekst: [
+        'Mo van der Kamp komt van het woonwagenkamp en waste jarenlang geld wit. In de cel vond Mo de islam, en sindsdien moet het oude leven niets meer met Mo te maken hebben.',
+        'Mo citeert de Koran bij alles, zegt alhamdulillah na elke goede pass en is rustig en wijs geworden. Maar soms glipt er nog een woord van vroeger uit, over briefjes, tassen of de recherche, en dan volgt meteen een astaghfirullah.',
+        'Het denken in boekhouding en bewijs is gebleven. Alleen is alles nu halal.',
+      ],
+    },
     stats: {
       goals: ['Met de moeilijkheid komt de verlichting, soera 94. Vanavond kwam de verlichting via mijn rechter.', 'Vroeger telde ik briefjes, nu tel ik ballen. Alhamdulillah, deze zijn schoon.', 'Die ging erin als een tas met… nee. Astaghfirullah. Die ging er gewoon mooi in.'],
       assists: ['Wie goed doet, krijgt het tienvoudig terug, soera 6. Eén pass, één goal, dat is al winst.', 'Ik regel het, een ander zet zijn naam eronder. Dat kende ik al van vroeger, maar nu is het halal.', 'Ik geef en vraag niks terug. Op het kamp noemden we dat anders, maar dit is beter.'],
@@ -72,6 +90,14 @@ const PERSONAS = {
     eigenschappen: ['geduldig', 'familieman', 'nuchter, laat zich niet opjagen'],
     woorden: ['pelan-pelan', 'santai', 'enak'],
     beelden: ['rijst koken', 'sambal', 'het verkeer in Jakarta', 'zijn moeder'],
+    bio: {
+      titel: 'De rustigste man van Jakarta',
+      feiten: [['Afkomst', 'Indonesië'], ['Karakter', 'Geduldig, nuchter'], ['Motto', 'Pelan-pelan'], ['Thuis', 'Rijst, sambal en moeder']],
+      tekst: [
+        'J. Wheatley is een gewone Indonesische man, en trots daarop. Opjagen lukt niemand: pelan-pelan, rustig aan, net als een scooter in het verkeer van Jakarta. Je komt er altijd.',
+        'Voetbal is voor Wheatley gewoon het dagelijks leven: rijst koken, sambal, familie. Een goede avond is ook gewoon een goede avond. Enak.',
+      ],
+    },
     stats: {
       goals: ['Mijn moeder zegt: niet te veel sambal. Ik luisterde niet.', 'Goals zijn als rijst: één korrel tegelijk, pelan-pelan.'],
       assists: ['Ik kook, een ander eet. Zo hoort het in de familie.', 'Goed geven is beter dan goed nemen. Enak.'],
@@ -90,6 +116,14 @@ const PERSONAS = {
     eigenschappen: ['vergelijkt zich met de broer', 'groeit zichtbaar', 'twijfelt hardop, eindigt zeker'],
     woorden: ['mijn broer', 'eigenlijk', 'toch'],
     beelden: ['de broer', 'een spiegel', 'een eerste keer'],
+    bio: {
+      titel: 'Steeds meer zichzelf',
+      feiten: [['Familie', 'Een broer die heel goed is'], ['Karakter', 'Twijfelt hardop, eindigt zeker'], ['Pad', 'Groei']],
+      tekst: [
+        'Bennie is opgegroeid in de schaduw van een broer die heel goed is. Dat maakte Bennie een beetje onzeker: wat zou mijn broer doen?',
+        'Maar Bennie is op een mooi pad van groei: vaak beginnen bij de broer en eindigen bij zichzelf, en elke avond wordt die conclusie zekerder. Met het haar los is Bennie bovendien gevaarlijker dan Bennie zelf denkt.',
+      ],
+    },
     stats: {
       goals: ['Mijn broer heeft er meer. Maar deze zijn van mij.', 'Ik dacht: wat zou mijn broer doen? Toen deed ik het zelf.'],
       assists: ['Ik hoef niet te scoren om er te zijn.', 'Mijn broer zoekt het doel. Ik zoek de ander. Ook een kunst.'],
@@ -101,7 +135,6 @@ const PERSONAS = {
       rating: ['Niet het cijfer van mijn broer. Het mijne.', 'Een gewone avond. Vroeger was dat voor mij al heel wat.'],
     },
   },
-  // Nog zonder achtergrond: neutrale cruijffiaanse zinnen (PERSONA_GENERIC) tot Jamal er een geeft.
   Konijnenlover22: {
     pro: 'Petra Selie',
     achtergrond: 'Tweelingzus van Peter en jongere zus van Beter Selie; even goed als Peter maar nooit zo erkend, omdat ze een '
@@ -125,7 +158,7 @@ const PERSONAS = {
       rating: ['Rust op de lijn speelt fijn.', 'Onderschat? Prima. Dan schrik je straks harder.', 'Bennie had zijn haar los. Ik kon me even niet concentreren.'],
     },
     // Eén keer per maand, bij de eerste avond van die maand dat Petra wint (sessie.js, sessionQuote).
-    maand: ['Ongesteld en tóch de beste. Kom maar op met je smoesjes, jongens.', 'Krampen, chocola en de beste van de avond. Typisch maandje.', 'Eén keer per maand speel ik met een hormoonstorm. Dit was hem.'],
+    maand: ['Ik bloed als een rund en ik ben nog steeds beter dan jullie. Huilen jullie maar.', 'Kramp in mijn buik, bloed in mijn broek en toch man of the match. Wie is hier nou het zwakke geslacht?', 'Ongesteld, chagrijnig en nergens zin in. Behalve in jullie kapotmaken.', 'Ik zat met een tampon zo dik als een duim in het veld. Jullie hadden alleen maar een excuus.'],
     bio: {
       titel: 'De onderschatte ster van Frambroos',
       feiten: [['Familie', 'Tweelingzus van Peter Selie, jongere zus van Beter Selie'], ['Club', 'Frambroos'], ['Positie', 'Voetbalster'], ['Relatiestatus', 'Single (maar niet zonder opties)']],
@@ -138,6 +171,7 @@ const PERSONAS = {
       ],
     },
   },
+  // Nog zonder achtergrond: neutrale cruijffiaanse zinnen (PERSONA_GENERIC) tot Jamal er een geeft.
   'KFH Guip 023': { pro: 'G. Snoek', achtergrond: null, stem: null, eigenschappen: [], woorden: [], beelden: [], stats: null },
 };
 

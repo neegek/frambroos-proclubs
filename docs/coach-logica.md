@@ -487,9 +487,11 @@ dat een tik opent, samen met waar het op gebaseerd is en wie meetelt. Bij gelijk
 hoger (rating) of wie het in minder wedstrijden deed (totalen).
 
 **Zo speelden we** (sessie, sinds 2 november 2026 één kaart): bovenin de radar, daaronder dezelfde assen als lijst,
-uitgesplitst in de cijfers die erin zitten, in de volgorde van de assen: Rating; Goals en Schoten (Scoren); Assists,
-Tweede assists en Steekpasses (Creëren); Passes in procent (Passen); Dribbels en Uitgespeeld (Dribbelen); Tackles
-gewonnen en Onderscheppingen (Verdedigen); Man of the match. Per speler het totaal van de avond (percentages en rating
+uitgesplitst in de cijfers die erin zitten, in de volgorde van de assen: Rating; Goals en Conversie (Scoren); Assists,
+Tweede assists en Steekpasses (Creëren); Passes (Passen); Dribbels (Dribbelen); Tackles gewonnen en Onderscheppingen
+(Verdedigen); Man of the match. Sinds 3 november 2026 hebben drie kaartjes twee regels per speler: Conversie (groot het
+percentage, klein het aantal schoten), Passes (groot het percentage, klein het aantal gelukte passes) en Dribbels
+(groot de geslaagde dribbels, klein hoeveel tegenstanders voorbij werden gespeeld). Per speler het totaal van de avond (percentages en rating
 als gemiddelde), zonder sublabel; onderaan elke lijst, zonder plek, het **Team**: het totaal of gemiddelde van iedereen
 samen (bij goals alle goals van de uitslag, ook die van AI). Een tik op een kaartje opent de hele lijst met uitleg en
 het kleine cijfer (aantal wedstrijden, of de breuk bij percentages). Zo zie je hetzelfde als beeld en als lijst.
@@ -546,6 +548,25 @@ te ingewikkeld voor wat het zei). De kolommen staan op volgorde van het gemiddel
 rondje, de naam, de datum en de plek van de avond. Alleen bij de **winnaar** (plek 1) staat daaronder de quote van de
 avond (sinds 3 november 2026; even daarvoor had iedereen een eigen uitspraak). De quote is de beloning: kort en
 raak, een punchline, geen analyse.
+
+**Clubhouse, seizoen** (sinds 3 november 2026): bovenin de balans volgens EA: groot W-G-V in de uitslagkleuren met
+een balk eronder en het winstpercentage, daarnaast doelpunten, tegengoals, saldo en clean sheets; dan *In het kort* als
+drie vakjes, dan de vormgrafiek. Daaronder naast elkaar **Laatste sessie** (één tik naar de avond: datum, W-G-V,
+rondjes, en de speler van de sessie of het dichte pack) en **Trofeeën**: per promotie (of degradatie) die we zagen
+gebeuren een beker met het moment en de wedstrijd ervoor (uit de snapshots: de teller van EA ging omhoog), plus één
+regel voor wat er al was voordat de app meekeek; verticaal te scrollen. Het nieuws is één compacte rij.
+
+**Menu** (sinds 3 november 2026): rechts in de menubalk een menuknop (op telefoon in de balk onderin) met zoeken door
+tegenstanders, spelers en sessies; de **modus** (alles, alleen league, alleen playoff; geldt voor de hele app en
+wordt per browser onthouden); de rating (nu alleen EA, *eigen* volgt); en thuis- of uittenue. Op telefoon heet
+Wedstrijden in de balk *Games*, zodat alles past.
+
+**Wedstrijdpagina** (sinds 3 november 2026): een kop als bij een sessie, met het stadion erachter: datum, tijd en
+soort; de twee logo's met de score; de rating van de tegenstander en hoeveel mensen per kant. Geen terugknop en geen
+titel "Tegen …" (dat zegt de score al). Daaronder een korte samenvatting zonder naam van de tegenstander, *Zo viel de
+goal*, en de **man van de wedstrijd** (wie EA koos, anders onze hoogste rating) als kaartje. De **opstelling** is een
+kaart die zelf het gras is: per linie één rij (aanval bovenaan), wij links en zij rechts, met de naam van de linie één
+keer in het midden, op de gestippelde middenlijn.
 
 **Sessie bezig en de reveal** (sinds 3 november 2026, als een FUT-pack): een sessie is **bezig** zolang de laatste
 wedstrijd minder dan 3 uur geleden is (dezelfde grens als waarmee wedstrijden een sessie vormen, `SESSION_GAP`); daarna
