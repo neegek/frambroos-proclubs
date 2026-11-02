@@ -81,7 +81,7 @@ function storeMatch(q, match, matchType) {
 async function snapshotClub(q, cid, maxAgeSeconds) {
   const last = q.lastClubSnapshot.get(cid)?.t ?? 0;
   // Eigen club: ook de velden uit de ranglijst (huidige divisie, clean sheets). Oudere snapshots missen die nog.
-  const own = cid === clubId, stale = own && last && !q.lastClubRaw.get(cid, last)?.raw.includes('currentDivision');
+  const own = cid === clubId, stale = own && last && !/currentDivision[\s\S]*playoffAchievements|playoffAchievements[\s\S]*currentDivision/.test(q.lastClubRaw.get(cid, last)?.raw || '');
   if (now() - last < maxAgeSeconds && !stale) return false;
   const stats = (await ea.overallStats(platform, cid))?.[0];
   if (!stats) return false;
@@ -91,6 +91,8 @@ async function snapshotClub(q, cid, maxAgeSeconds) {
     // Divisieregels (punten voor promotie, handhaving en titel) en de ranglijstpositie: bewaren voor later gebruik.
     if (entry?.rank !== undefined) stats.rank = entry.rank;
     try { const d = await ea.settings(platform); if (d) stats.divisions = d; } catch { /* niet essentieel */ }
+    // Trofeeënkast van EA (per seizoen divisie en eindgroep); leeg of niet bereikbaar is geen probleem.
+    try { const pa = await ea.playoffAchievements(platform, cid); stats.playoffAchievements = pa ?? []; } catch { stats.playoffAchievements = []; }
   }
   q.insClubSnapshot.run(now(), cid, num(stats.skillRating), num(stats.gamesPlayed), num(stats.wins), num(stats.losses), num(stats.ties),
     num(stats.goals), num(stats.goalsAgainst), num(stats.bestDivision), num(stats.promotions), num(stats.relegations), JSON.stringify(stats));

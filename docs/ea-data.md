@@ -17,7 +17,8 @@ Nieuw veld tonen: eerst hier kijken of het er al is, dan `src/data.js`.
 | `settings` | per divisie de punten voor promotie, handhaving en titel | sinds 27 okt 2026 in het eigen clubsnapshot (`divisions`) |
 | `allTimeLeaderboard` | top 100 clubs | niet gebruikt |
 | `clubs/matches` met `friendlyMatch` | leeg | — |
-| `clubs/seasonalStats`, `clubs/playoffAchievements`, `clubs/searchByName`, `seasonRankLeaderboard` | bestaan niet (404) | — |
+| `club/playoffAchievements` (enkelvoud, `clubId`) | trofeeënkast: per seizoen de hoogste divisie en eindgroep in de playoffs | sinds 2 nov 2026 in het eigen clubsnapshot (`playoffAchievements`) |
+| `clubs/seasonalStats`, `clubs/playoffAchievements` (meervoud), `clubs/searchByName`, `seasonRankLeaderboard` | bestaan niet (404) | — |
 
 ## Wat er niet is
 
