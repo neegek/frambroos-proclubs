@@ -486,8 +486,13 @@ Op een kaartje staat alleen het getal, geen sublabel (wedstrijden, per wedstrijd
 dat een tik opent, samen met waar het op gebaseerd is en wie meetelt. Bij gelijk staat wie meer wedstrijden speelde
 hoger (rating) of wie het in minder wedstrijden deed (totalen).
 
-**Algemeen op een sessie**: dezelfde kaartjes (rating, goals, assists, man of the match), maar alleen over die avond
-en voor wie meespeelde, boven *Per wedstrijd*. Een tik opent dezelfde lijst met het aantal wedstrijden van die avond.
+**Zo speelden we** (sessie, sinds 2 november 2026 één kaart): bovenin de radar, daaronder dezelfde assen als lijst,
+uitgesplitst in de cijfers die erin zitten, in de volgorde van de assen: Rating; Goals en Schoten (Scoren); Assists,
+Tweede assists en Steekpasses (Creëren); Passes in procent (Passen); Dribbels en Uitgespeeld (Dribbelen); Tackles
+gewonnen en Onderscheppingen (Verdedigen); Man of the match. Per speler het totaal van de avond (percentages en rating
+als gemiddelde), zonder sublabel; onderaan elke lijst, zonder plek, het **Team**: het totaal of gemiddelde van iedereen
+samen (bij goals alle goals van de uitslag, ook die van AI). Een tik op een kaartje opent de hele lijst met uitleg en
+het kleine cijfer (aantal wedstrijden, of de breuk bij percentages). Zo zie je hetzelfde als beeld en als lijst.
 
 **Sessiekop** (sinds 1 november 2026; daarvoor een scorebord zonder duidelijk middelpunt): één kaart met een
 **split**, zodat elk deel bij zijn soort hoort en het met de thema's meeschaalt.
@@ -544,6 +549,14 @@ het meest uitstak (`playerQuote` in `sessie.js`, met `standoutStat` en `quoteFor
 raak: een punchline, geen analyse. Op telefoon is elk scherm een paneel dat van onderen omhoog schuift, bijna
 schermvullend met wat lucht bovenaan en een handvat; de knoppen onderin (vorige speler, naar de spelerspagina,
 volgende speler) zijn drie losse, omrande knoppen.
+
+De kaart onder de radar heet **Ratings per wedstrijd** (de titel zegt wat eronder staat). In de sessiekop staan
+W-G-V, goals en het **saldo** (+5, 0, −2), niet meer de tegengoals.
+
+**Knoppen onderin een scherm**: vlakke knoppen die de hele balk vullen, alleen gescheiden door dunne lijnen; geen
+eigen achtergrond of rand per knop. Zonder vorige of volgende speler vult de middelste knop de ruimte. Sluiten werkt
+met het kruisje of een tik naast het scherm; op telefoon reageert het kruisje al bij loslaten en wordt de klik
+erna ingeslikt, zodat die niet op de pagina eronder belandt.
 
 **Een tik op een cijfer** opent wat die speler in die wedstrijd deed (sinds 1 november 2026): de rating, en waar die
 op rust: goals, assists, schoten, passes gelukt van pogingen, tackles gewonnen van pogingen, balwinst en balverlies

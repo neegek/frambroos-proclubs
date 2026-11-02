@@ -120,9 +120,9 @@ function render() {
 
   const opp = avg(ms.map(m => m.opponent.skillRating).filter(Boolean));
   // Sessiekop (coach-logica §9a): het podium als blikvanger, met de naam van de sessie en de uitslag in drie getallen
-  // (W-G-V, goals, tegengoals). Hoe we speelden staat in de radar eronder.
+  // (W-G-V, goals, saldo). Hoe we speelden staat in de radar eronder.
   $('#s-record').innerHTML = `<span class="ss-fig"><b class="ss-rec"><span class="W">${sm.W}</span>-<span class="D">${sm.D}</span>-<span class="L">${sm.L}</span></b><small>W-G-V</small></span>
-    <span class="ss-fig"><b>${sm.gf}</b><small>Goals</small></span><span class="ss-fig"><b>${sm.ga}</b><small>Tegen</small></span>`;
+    <span class="ss-fig"><b>${sm.gf}</b><small>Goals</small></span><span class="ss-fig"><b>${sm.gf - sm.ga > 0 ? '+' : ''}${sm.gf - sm.ga}</b><small>Saldo</small></span>`;
   $('#s-matches').innerHTML = ms.map(m => matchCard(m, { own })).join('');
 
   // Spelers: rating deze avond tegenover het eigen normaal (alle andere wedstrijden), goals, assists, man of the match.
@@ -148,16 +148,42 @@ function render() {
   for (const a of $('#s-podium').querySelectorAll('a')) a.addEventListener('click', e => { e.preventDefault(); openPlayer(a.dataset.n); });
   PlayerCard.reveal($('#s-podium'));
   SESSION_ID = s.id;
-  // Algemeen over deze avond (coach-logica §9a): dezelfde kaartjes als op het Clubhouse, met de cijfers van de avond.
-  const rated = prow.filter(r => r.rH !== null), wed = r => `${r.n} ${r.n === 1 ? 'wedstrijd' : 'wedstrijden'}`, who = 'Iedereen die deze avond meespeelde.';
-  rankCards($('#s-rank'), [
-    { key: 's-rating', label: 'Rating', about: 'De gemiddelde matchrating van EA over de wedstrijden van deze avond.', who, rows: [...rated].sort((a, b) => b.rH - a.rH || b.n - a.n).map(r => ({ name: r.name, main: f1(r.rH), sub: wed(r) })) },
-    { key: 's-goals', label: 'Goals', about: 'Doelpunten deze avond.', who, rows: [...prow].sort((a, b) => b.g - a.g || a.n - b.n).map(r => ({ name: r.name, main: String(r.g), sub: wed(r) })) },
-    { key: 's-assists', label: 'Assists', about: 'De laatste pass voor een doelpunt, deze avond.', who, rows: [...prow].sort((a, b) => b.a - a.a || a.n - b.n).map(r => ({ name: r.name, main: String(r.a), sub: wed(r) })) },
-    { key: 's-mom', label: 'Man of the match', about: 'Hoe vaak EA iemand deze avond tot man of the match koos.', who, rows: [...prow].sort((a, b) => b.mom - a.mom || a.n - b.n).map(r => ({ name: r.name, main: String(r.mom), sub: wed(r) })) },
-  ]);
+  // De radar als lijst (coach-logica §9a): per as de onderliggende cijfers van de avond, uitgesplitst, met onderaan het team.
+  rankCards($('#s-rank'), axisCards(ms, prow));
   renderMatrix(ms, prow);
   renderRadar(s, ms);
+}
+
+// Kaartjes onder de radar, in de volgorde van de assen. Per speler het totaal van de avond (percentages en rating als
+// gemiddelde); onderaan het team: het totaal of gemiddelde van iedereen samen, ook de goals van AI in de uitslag.
+function axisCards(ms, prow) {
+  const rowsOf = n => ms.map(m => ({ m, p: m.players.find(p => p.name === n) })).filter(r => r.p);
+  const all = ms.flatMap(m => m.players.map(p => ({ m, p })));
+  const s = (rows, f) => rows.reduce((a, r) => a + (f(r.p) || 0), 0), e = (rows, k) => s(rows, p => p.ev?.[k]);
+  const who = 'Iedereen die deze avond meespeelde; onderaan het team.', wed = n => `${n} ${n === 1 ? 'wedstrijd' : 'wedstrijden'}`;
+  const count = (key, label, about, f, teamF = f) => ({ key, label, about, who,
+    rows: prow.map(r => { const rows = rowsOf(r.name); return { name: r.name, v: f(rows), sub: wed(rows.length) }; }).sort((a, b) => b.v - a.v).map(x => ({ name: x.name, main: String(x.v), sub: x.sub })),
+    team: { label: 'Team', main: String(teamF(all)), sub: `samen in ${wed(ms.length)}` } });
+  const ratio = (key, label, about, num, den, min) => ({ key, label, about, who: `${who} Minstens ${min} pogingen.`,
+    rows: prow.map(r => { const rows = rowsOf(r.name), d = den(rows); return { name: r.name, v: d >= min ? num(rows) / d : null, sub: `${num(rows)} van ${d}` }; }).filter(x => x.v !== null).sort((a, b) => b.v - a.v).map(x => ({ name: x.name, main: `${Math.round(100 * x.v)}%`, sub: x.sub })),
+    team: { label: 'Team', main: den(all) ? `${Math.round(100 * num(all) / den(all))}%` : '–', sub: `${num(all)} van ${den(all)}` } });
+  const rated = all.map(r => r.p.rating).filter(v => v !== null);
+  return [
+    { key: 'a-rating', label: 'Rating', about: 'De gemiddelde matchrating van EA over de wedstrijden van deze avond (de as Rating).', who,
+      rows: prow.filter(r => r.rH !== null).sort((a, b) => b.rH - a.rH || b.n - a.n).map(r => ({ name: r.name, main: f1(r.rH), sub: wed(r.n) })),
+      team: { label: 'Team', main: rated.length ? f1(avg(rated)) : '–', sub: 'gemiddelde van alle ratings' } },
+    count('a-goals', 'Goals', 'Doelpunten deze avond (de as Scoren). Bij het team alle goals van de uitslag, ook die van AI.', r => s(r, p => p.goals), () => ms.reduce((a, m) => a + m.goals, 0)),
+    count('a-shots', 'Schoten', 'Alle schoten deze avond (de as Scoren kijkt ook naar hoeveel daarvan raak waren).', r => s(r, p => p.shots)),
+    count('a-assists', 'Assists', 'De laatste pass voor een doelpunt (de as Creëren).', r => s(r, p => p.assists)),
+    count('a-second', 'Tweede assists', 'De pass vóór de assist (telt voor 70% mee in Creëren).', r => e(r, 'second_assists')),
+    count('a-through', 'Steekpasses', 'Passes in de ruimte achter de verdediging (tellen voor 35% mee in Creëren).', r => e(r, 'through_balls')),
+    ratio('a-pass', 'Passes', 'Geslaagde passes van alle passes (de as Passen).', r => s(r, p => p.passesMade), r => s(r, p => p.passAttempts), 10),
+    count('a-dribbles', 'Dribbels', 'Geslaagde dribbels (de as Dribbelen).', r => e(r, 'dribbles_completed')),
+    count('a-beaten', 'Uitgespeeld', 'Tegenstanders voorbij gespeeld (de as Dribbelen).', r => e(r, 'players_beaten')),
+    count('a-tackles', 'Tackles gewonnen', 'Gewonnen tackles (de as Verdedigen, gewogen met hoe vaak het lukte).', r => s(r, p => p.tacklesMade)),
+    count('a-inter', 'Onderscheppingen', 'Onderschepte passes (de as Verdedigen).', r => e(r, 'interceptions')),
+    count('a-mom', 'Man of the match', 'Hoe vaak EA iemand deze avond tot man of the match koos.', r => s(r, p => p.mom)),
+  ];
 }
 
 // De uitspraak van één speler over deze avond (coach-logica §9): de quote van de avond als deze speler de beste was,

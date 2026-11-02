@@ -494,11 +494,12 @@ function oppBadge(opp) {
 // links en rechts eventueel kleine knoppen naar de vorige en volgende (nav.prev/next: { label, face, go }).
 // Ranglijstkaartjes (coach-logica §9a, Algemeen): per kaartje een label en alle spelers met één getal, zonder
 // sublabels; een tik opent #rank-dialog met de uitleg, wie meetelt en de hele lijst met het kleine cijfer erbij.
-// cards: [{ key, label, about, who, rows: [{ name, main, sub }] }]. Gedeeld door het Clubhouse en een sessie.
+// cards: [{ key, label, about, who, rows: [{ name, main, sub }], team?: { label, main, sub } }]. team staat onderaan,
+// zonder plek: het totaal of gemiddelde van het team. Gedeeld door het Clubhouse en een sessie.
 function rankCards(container, cards) {
   container.innerHTML = cards.map(c => `<button type="button" class="rank-card" data-key="${c.key}" aria-haspopup="dialog">
       <span class="rank-card-label">${c.label}<span class="rank-more" aria-hidden="true">i</span></span>
-      <ol>${c.rows.map((r, i) => `<li><span>${i + 1}</span><span>${esc(proName(r.name))}</span><b>${r.main}</b></li>`).join('') || `<li class="empty">${c.empty || 'Nog te weinig wedstrijden.'}</li>`}</ol></button>`).join('');
+      <ol>${c.rows.map((r, i) => `<li><span>${i + 1}</span><span>${esc(proName(r.name))}</span><b>${r.main}</b></li>`).join('') || `<li class="empty">${c.empty || 'Nog te weinig wedstrijden.'}</li>`}${c.team ? `<li class="team"><span></span><span>${esc(c.team.label)}</span><b>${c.team.main}</b></li>` : ''}</ol></button>`).join('');
   for (const b of container.querySelectorAll('.rank-card')) b.addEventListener('click', () => openRankList(cards.find(c => c.key === b.dataset.key)));
 }
 function openRankList(c) {
@@ -507,14 +508,22 @@ function openRankList(c) {
     <h3>Waar het op gebaseerd is</h3><p>${c.about}</p>
     <h3>Wie meetelt</h3><p>${c.who}</p>
     <h3>De hele lijst</h3>
-    <ol class="rd-list">${c.rows.map((r, i) => `<li><span>${i + 1}</span><span>${esc(proName(r.name))}</span><b>${r.main}</b>${r.sub ? `<small>${esc(r.sub)}</small>` : ''}</li>`).join('') || `<li class="empty">${c.empty || 'Nog te weinig wedstrijden.'}</li>`}</ol>`;
+    <ol class="rd-list">${c.rows.map((r, i) => `<li><span>${i + 1}</span><span>${esc(proName(r.name))}</span><b>${r.main}</b>${r.sub ? `<small>${esc(r.sub)}</small>` : ''}</li>`).join('') || `<li class="empty">${c.empty || 'Nog te weinig wedstrijden.'}</li>`}${c.team ? `<li class="rd-club"><span></span><span>${esc(c.team.label)}</span><b>${c.team.main}</b>${c.team.sub ? `<small>${esc(c.team.sub)}</small>` : ''}</li>` : ''}</ol>`;
   d.showModal();
 }
+// Sluiten werkt overal hetzelfde, ook op telefoon: een tik op het kruisje of naast het scherm. Op pointerup én click,
+// zodat een tik in een omhoog geschoven paneel nooit verloren gaat (coach-logica §9a).
+// Na een tik die het scherm sloot, wordt de klik die erop volgt ingeslikt: anders raakt die wat eronder ligt.
+let swallowClick = 0;
+const closeDialog = e => { const d = e.target.closest?.('dialog'); if (!d?.open) return false; if (e.target.closest('.rd-close') || e.target === d) { e.preventDefault(); d.close(); return true; } return false; };
+document.addEventListener('pointerup', e => { if (e.pointerType !== 'mouse' && closeDialog(e)) swallowClick = Date.now(); });
+document.addEventListener('click', e => { if (Date.now() - swallowClick < 600) { e.preventDefault(); e.stopPropagation(); swallowClick = 0; return; } closeDialog(e); }, true);
 function dialogFoot(d, href, label, nav = {}) {
   let f = d.querySelector('.rd-foot');
   if (!f) { f = document.createElement('div'); f.className = 'rd-foot'; d.append(f); }
   const arrow = dir => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${dir === 'prev' ? 'M15 18l-6-6 6-6' : 'M9 18l6-6-6-6'}"/></svg>`;
-  const side = dir => { const x = nav[dir]; return x ? `<button type="button" class="rd-foot-nav ${dir}" aria-label="${dir === 'prev' ? 'Vorige' : 'Volgende'}: ${esc(x.label)}" title="${esc(x.label)}">${dir === 'prev' ? arrow(dir) : ''}<span class="rd-face">${x.face}</span>${dir === 'next' ? arrow(dir) : ''}</button>` : `<span class="rd-foot-nav ${dir} empty" aria-hidden="true"></span>`; };
+  // Vlakke knoppen die de hele balk vullen, met alleen scheidingslijnen; zonder vorige of volgende vult de middelste knop de ruimte.
+  const side = dir => { const x = nav[dir]; return x ? `<button type="button" class="rd-foot-nav ${dir}" aria-label="${dir === 'prev' ? 'Vorige' : 'Volgende'}: ${esc(x.label)}" title="${esc(x.label)}">${dir === 'prev' ? arrow(dir) : ''}<span class="rd-face">${x.face}</span>${dir === 'next' ? arrow(dir) : ''}</button>` : ''; };
   const any = href || nav.prev || nav.next;
   f.hidden = !any;
   f.innerHTML = any ? `${side('prev')}${href ? `<a class="rd-foot-btn" href="${href}">${label}</a>` : '<span></span>'}${side('next')}` : '';
