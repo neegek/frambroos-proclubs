@@ -10,10 +10,9 @@ const resLetter = r => r === 'D' ? 'G' : r === 'L' ? 'V' : 'W';
 const side = (players, k) => players.reduce((a, p) => a + (p[k] || 0), 0);
 const sideEv = (players, k) => players.some(p => p.ev) ? players.reduce((a, p) => a + (p.ev?.[k] || 0), 0) : null;
 
-// Opstelling (coach-logica §9a, Opstelling): één veld, de kaart zelf is het gras. Per linie één rij, aanval bovenaan:
-// wij links, zij rechts, met de naam van de linie één keer in het midden, op de stippellijn van de middenlijn.
+// Opstelling (coach-logica §9a, Opstelling): één staand veld met beide teams, de tegenstander boven en wij onder.
 // Elke speler is een rondje met de rating eronder: bij ons het portret, bij de tegenstander het archetype-icoon.
-// AI per linie geeft EA niet, dus een lege kant van een linie heet "AI".
+// AI per linie geeft EA niet, dus een lege linie heet "AI".
 const LINE_KEY = { forward: 'a', midfielder: 'm', defender: 'd', goalkeeper: 'g' };
 function lineup(m) {
   const by = players => { const o = Object.fromEntries(LINES.map(([k]) => [k, []])); for (const p of players) (o[p.pos] || o.midfielder).push(p); return o; };
@@ -26,33 +25,51 @@ function lineup(m) {
     return mine ? `<a class="ftok us" href="spelers.html#${encodeURIComponent(p.name)}" title="${title}">${inner}</a>` : `<span class="ftok" title="${title}">${inner}</span>`;
   };
   const toks = (list, mine) => list.length ? list.map(p => token(p, mine)).join('') : '<span class="ftok-ai">AI</span>';
-  // Geen teamnamen of aantallen in het veld: die staan in de kop en zie je aan de rondjes. Lijnen van een echt veld:
-  // de middencirkel in het middenveld, het strafschopgebied en het doel bij de keeper (css).
-  return `<div class="pitch">
-    ${LINES.map(([k, label]) => `<div class="prow l-${LINE_KEY[k]}"><div class="pside us">${toks(us[k], true)}</div><span class="prow-label">${label}</span><div class="pside them">${toks(them[k], false)}</div></div>`).join('')}
-  </div>`;
+  // Een echt veld (coach-logica §9a, Opstelling): staand, de tegenstander boven (keeper bij het bovenste doel), wij
+  // onder (keeper bij het onderste doel), de aanvallers tegenover elkaar bij de middenlijn. Lijnen: zijlijnen, middenlijn,
+  // middencirkel en -stip, en aan beide kanten het strafschopgebied met stip en boog, het doelgebied en het doel.
+  const order = ['goalkeeper', 'defender', 'midfielder', 'forward'];
+  const rows = [...order.map(k => `<div class="frow them l-${LINE_KEY[k]}">${toks(them[k], false)}</div>`),
+    ...[...order].reverse().map(k => `<div class="frow us l-${LINE_KEY[k]}">${toks(us[k], true)}</div>`)];
+  const marks = ['pm-half', 'pm-circle', 'pm-spot', ...['top', 'bot'].flatMap(e => [`pm-box ${e}`, `pm-six ${e}`, `pm-goal ${e}`, `pm-pen ${e}`, `pm-arc ${e}`])]
+    .map(c => `<span class="${c}" aria-hidden="true"></span>`).join('');
+  return `<div class="pfield" role="img" aria-label="Opstelling: ${esc(m.opponent.name)} boven, Frambroos onder">${marks}${rows.join('')}</div>`;
 }
 
+// Wij tegen hen (coach-logica §9a, Wedstrijdpagina): per cijfer één regel met het totaal van beide kanten en een
+// verdeelde balk; een tik klapt de regel open met iedereen van beide kanten als balkjes (wij blauw, zij oranje),
+// de beste bovenaan. Zo vergelijk je per cijfer zowel de ploegen als de spelers. Nieuwe cijfers: één regel in VS_STATS.
+const VS_STATS = [
+  { key: 'rating', label: 'Rating', p: p => p.rating, team: ps => { const r = ps.map(p => p.rating).filter(v => v !== null); return r.length ? avg(r) : null; }, fmt: v => f1(v) },
+  { key: 'goals', label: 'Goals', p: p => p.goals, teamUs: m => m.goals, teamThem: m => m.goalsAgainst },
+  { key: 'assists', label: 'Assists', p: p => p.assists },
+  { key: 'shots', label: 'Schoten', p: p => p.shots },
+  { key: 'pass', label: 'Passnauwkeurigheid', p: p => p.passAttempts ? 100 * p.passesMade / p.passAttempts : null, team: ps => { const a = side(ps, 'passAttempts'); return a ? 100 * side(ps, 'passesMade') / a : null; }, fmt: v => `${Math.round(v)}%` },
+  { key: 'drib', label: 'Dribbels', ev: 'dribbles_completed' },
+  { key: 'won', label: 'Balwinst', ev: 'possession_won' },
+  { key: 'tackles', label: 'Tackles gewonnen', p: p => p.tacklesMade },
+  { key: 'inter', label: 'Onderscheppingen', ev: 'interceptions' },
+  { key: 'lost', label: 'Balverlies', ev: 'possession_lost', lower: true },
+  { key: 'fouls', label: 'Overtredingen', ev: 'fouls_conceded_total', lower: true },
+];
 function h2h(m) {
   const us = m.players, them = m.opponentPlayers;
-  const pctOf = (a, b) => b ? Math.round(100 * a / b) : null;
-  const out = (us.length ? us : them).length;
-  const rows = [
-    ['Doelpunten', m.goals, m.goalsAgainst, true],
-    ['Schoten', side(us, 'shots'), side(them, 'shots'), true],
-    ['Passnauwkeurigheid', pctOf(side(us, 'passesMade'), side(us, 'passAttempts')), pctOf(side(them, 'passesMade'), side(them, 'passAttempts')), true, '%'],
-    ['Balwinst', sideEv(us, 'possession_won'), sideEv(them, 'possession_won'), true],
-    ['Balverlies', sideEv(us, 'possession_lost'), sideEv(them, 'possession_lost'), false],
-    ['Geslaagde dribbels', sideEv(us, 'dribbles_completed'), sideEv(them, 'dribbles_completed'), true],
-    ['Overtredingen', sideEv(us, 'fouls_conceded_total'), sideEv(them, 'fouls_conceded_total'), false],
-  ].filter(r => r[1] !== null && r[2] !== null);
-  void out;
-  return `<div class="legend"><span style="--c:var(--s1)">Frambroos</span><span style="--c:var(--s2)">${esc(m.opponent.name)}</span></div>
-    <div class="h2h">${rows.map(([label, a, b, hib, unit = '']) => {
-      const tot = (a || 0) + (b || 0), wa = tot ? 100 * (a || 0) / tot : 50;
-      const better = a === b ? 0 : (hib ? a > b : a < b) ? 1 : -1;
-      return `<div class="h2h-row"><span class="h2h-val ${better > 0 ? 'lead' : ''}">${a}${unit}</span><div class="h2h-mid"><span class="h2h-label">${label}</span><div class="h2h-bar"><span style="width:${wa}%"></span><span style="width:${100 - wa}%"></span></div></div><span class="h2h-val ${better < 0 ? 'lead' : ''}">${b}${unit}</span></div>`;
-    }).join('')}</div>`;
+  const val = (st, p) => st.ev ? (p.ev ? p.ev[st.ev] ?? 0 : null) : st.p(p);
+  const team = (st, ps, mine) => mine && st.teamUs ? st.teamUs(m) : !mine && st.teamThem ? st.teamThem(m) : st.team ? st.team(ps) : st.ev ? sideEv(ps, st.ev) : ps.reduce((a, p) => a + (st.p(p) || 0), 0);
+  const fmt = (st, v) => v === null || v === undefined ? '–' : st.fmt ? st.fmt(v) : String(Math.round(v * 10) / 10);
+  return `<div class="vs-legend"><span class="us">Frambroos</span><span class="them">${esc(m.opponent.name)}</span></div>
+    <div class="vs-list">${VS_STATS.map((st, i) => {
+      const a = team(st, us, true), b = team(st, them, false); if (a === null && b === null) return '';
+      const tot = (a || 0) + (b || 0), wa = tot ? 100 * (a || 0) / tot : 50, better = a === b || a === null || b === null ? 0 : (st.lower ? a < b : a > b) ? 1 : -1;
+      const people = [...us.map(p => ({ p, us: true })), ...them.map(p => ({ p, us: false }))].map(x => ({ ...x, v: val(st, x.p) })).filter(x => x.v !== null)
+        .sort((x, y) => st.lower ? x.v - y.v : y.v - x.v);
+      const max = Math.max(...people.map(x => x.v), 0.0001);
+      return `<div class="vs-item${i === 0 ? ' open' : ''}">
+        <button type="button" class="vs-row" aria-expanded="${i === 0}"><span class="vs-val ${better > 0 ? 'lead' : ''}">${fmt(st, a)}</span>
+          <span class="vs-mid"><span class="vs-label">${st.label}${st.lower ? ' <small>minder is beter</small>' : ''}</span><span class="vs-split"><i style="width:${wa}%"></i><i style="width:${100 - wa}%"></i></span></span>
+          <span class="vs-val ${better < 0 ? 'lead' : ''}">${fmt(st, b)}</span></button>
+        <div class="vs-detail">${people.map(x => `<div class="vs-p ${x.us ? 'us' : 'them'}"><span class="vs-name">${esc(x.us ? proName(x.p.name) : x.p.name)}</span><span class="vs-track"><i style="width:${Math.max(2, 100 * x.v / max)}%"></i></span><b>${fmt(st, x.v)}</b></div>`).join('') || '<p class="empty">Geen gegevens van EA.</p>'}</div>
+      </div>`; }).join('')}</div>`;
 }
 
 // Zo viel de goal: alleen bij precies één eigen doelpunt is de keten scorer, assist en tweede assist te
@@ -70,38 +87,6 @@ function goalChain(m) {
   return `<span class="goal-chain"><span class="adv-label">Zo viel de goal</span>${steps.length ? `${steps.join(', ')}, en ` : ''}${goal}${tail}.</span>`;
 }
 
-// Spelers van beide kanten (coach-logica §9a, Wedstrijdpagina): per cijfer één lijst met iedereen, wij blauw en zij
-// oranje, en onderaan beide ploegen. Zelfde kaartjes als op het Clubhouse en bij een sessie (rankCards).
-function playerCards(m) {
-  const all = [...m.players.map(p => ({ p, us: true })), ...m.opponentPlayers.map(p => ({ p, us: false }))];
-  const ev = (p, k) => p.ev?.[k] ?? 0, pct = (a, b) => b ? `${Math.round(100 * a / b)}%` : '–';
-  const side = us => all.filter(x => x.us === us).map(x => x.p);
-  const teams = (main, small) => [[true, 'Frambroos'], [false, m.opponent.name]].map(([us, label]) => ({ label, cls: us ? 'us' : 'them', main: main(side(us)), small: small ? small(side(us)) : '' }));
-  const sum = (ps, f) => ps.reduce((a, p) => a + (f(p) || 0), 0);
-  const who = 'Alle menselijke spelers van beide kanten; AI-spelers staan niet in de data.';
-  const card = (key, label, about, v, main, small, team, lower = false) => ({ key, label, about, who,
-    rows: all.map(x => ({ x, v: v(x.p) })).filter(r => r.v !== null).sort((a, b) => lower ? a.v - b.v : b.v - a.v)
-      .map(({ x }) => ({ name: x.us ? x.p.name : x.p.name, cls: x.us ? 'us' : 'them', main: main(x.p), small: small ? small(x.p) : '' })),
-    teams: team });
-  return [
-    card('m-rating', 'Rating', 'De matchrating die EA na de wedstrijd gaf.', p => p.rating, p => f1(p.rating), null,
-      teams(ps => { const r = ps.map(p => p.rating).filter(v => v !== null); return r.length ? f1(avg(r)) : '–'; })),
-    card('m-goals', 'Goals', 'Doelpunten. Bij de ploegen de stand: ook goals van AI tellen mee.', p => p.goals, p => String(p.goals), null,
-      [{ label: 'Frambroos', cls: 'us', main: String(m.goals) }, { label: m.opponent.name, cls: 'them', main: String(m.goalsAgainst) }]),
-    card('m-assists', 'Assists', 'De laatste pass voor een doelpunt.', p => p.assists, p => String(p.assists), null, teams(ps => String(sum(ps, p => p.assists)))),
-    card('m-conv', 'Conversie', 'Goals per schot, met klein goals / schoten.', p => p.shots ? p.goals / p.shots : null, p => pct(p.goals, p.shots), p => `${p.goals} / ${p.shots}`,
-      teams(ps => pct(sum(ps, p => p.goals), sum(ps, p => p.shots)), ps => `${sum(ps, p => p.goals)} / ${sum(ps, p => p.shots)}`)),
-    card('m-pass', 'Passes', 'Geslaagde passes van alle passes, met klein gelukt / pogingen.', p => p.passAttempts ? p.passesMade / p.passAttempts : null, p => pct(p.passesMade, p.passAttempts), p => `${p.passesMade} / ${p.passAttempts}`,
-      teams(ps => pct(sum(ps, p => p.passesMade), sum(ps, p => p.passAttempts)), ps => `${sum(ps, p => p.passesMade)} / ${sum(ps, p => p.passAttempts)}`)),
-    card('m-drib', 'Dribbels', 'Geslaagde dribbels, met klein hoeveel tegenstanders voorbij werden gespeeld.', p => p.ev ? ev(p, 'dribbles_completed') : null, p => String(ev(p, 'dribbles_completed')), p => `${ev(p, 'players_beaten')} uitgespeeld`,
-      teams(ps => String(sum(ps, p => ev(p, 'dribbles_completed'))), ps => `${sum(ps, p => ev(p, 'players_beaten'))} uitgespeeld`)),
-    card('m-won', 'Balwinst', 'Hoe vaak iemand de bal veroverde.', p => p.ev ? ev(p, 'possession_won') : null, p => String(ev(p, 'possession_won')), null, teams(ps => String(sum(ps, p => ev(p, 'possession_won'))))),
-    card('m-tackles', 'Tackles gewonnen', 'Gewonnen tackles, met klein het aantal pogingen.', p => p.tacklesMade, p => String(p.tacklesMade), p => `van ${p.tackleAttempts}`,
-      teams(ps => String(sum(ps, p => p.tacklesMade)), ps => `van ${sum(ps, p => p.tackleAttempts)}`)),
-    card('m-lost', 'Balverlies', 'Hoe vaak iemand de bal kwijtraakte; hier staat wie het minst verloor bovenaan.', p => p.ev ? ev(p, 'possession_lost') : null, p => String(ev(p, 'possession_lost')), null,
-      teams(ps => String(sum(ps, p => ev(p, 'possession_lost')))), true),
-  ];
-}
 
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -131,7 +116,7 @@ function render() {
   $('#m-pitches').innerHTML = lineup(m);
   PlayerCard.reveal($('#m-pitches'));
   $('#m-h2h').innerHTML = h2h(m);
-  rankCards($('#m-players'), playerCards(m));
+  for (const b of $('#m-h2h').querySelectorAll('.vs-row')) b.addEventListener('click', () => { const it = b.parentElement, open = !it.classList.contains('open'); it.classList.toggle('open', open); b.setAttribute('aria-expanded', String(open)); });
 }
 
 Promise.all([loadData(), PlayerCard.load().catch(() => {})]).then(render).catch(showError);

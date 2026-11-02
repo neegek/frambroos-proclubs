@@ -496,15 +496,23 @@ als gemiddelde), zonder sublabel; onderaan elke lijst, zonder plek, het **Team**
 samen (bij goals alle goals van de uitslag, ook die van AI). Een tik op een kaartje opent de hele lijst met uitleg en
 het kleine cijfer (aantal wedstrijden, of de breuk bij percentages). Zo zie je hetzelfde als beeld en als lijst.
 
-**Club** (sinds 2 november 2026 heet het Clubhouse in het menu *Club*; opgeschoond: geen vormgrafiek meer, meer lucht
-tussen de kaarten, 20 px). Volgorde: hero, **Seizoen** op één rij (W-G-V met balk en winstpercentage, rechts goals,
-tegen, saldo en de nul; daaronder *In het kort* als kleine chips), **Gevaarlijkste spelers** (vier kleurige tegels, niet
-scrollbaar: topscorer in goals per wedstrijd, afmaker in conversie (minstens 15 schoten), kansenmaker in assists per
-wedstrijd (gekozen op assists plus 0,7 × tweede assists) en muur in gewonnen tackles plus onderscheppingen per
-wedstrijd; telkens minstens vijf gevolgde wedstrijden), de laatste sessie en de trofeeënkast, compact nieuws (beeld
-klein links, tekst rechts; op telefoon de laatste vijf als rij), laatste uitslagen, Algemeen en Selectie. Op telefoon
-staat de laatste sessie als **dezelfde kaart als in de sessielijst** (`sessionCardHtml` in `pack.js`) met het label
-*Huidige sessie* of *Laatste sessie*.
+**Club** (sinds 2 november 2026 heet het Clubhouse in het menu *Club*). Elke sectie is een eigen kaart met de titel
+erin, ook het nieuws. Volgorde: de **kop** in clubkleuren (een verloop van paars naar geel, geen stadion) met logo,
+naam, skill rating en divisie, daarin de **balans van het seizoen** (W-G-V groot met balk en winstpercentage; goals,
+tegen, saldo en de nul) en de laatste tien als rondjes; geen aparte kaart *Seizoen* en geen chips *In het kort* meer.
+Dan **Gevaarlijkste spelers** (vier kleurige tegels: topscorer in goals per wedstrijd, afmaker in conversie (minstens
+15 schoten), kansenmaker in assists per wedstrijd (gekozen op assists plus 0,7 × tweede assists), muur in gewonnen
+tackles plus onderscheppingen per wedstrijd; minstens vijf gevolgde wedstrijden), de laatste sessie en de
+trofeeënkast, **Nieuws** (kleine kaartjes: beeld links, tekst rechts; op telefoon de laatste vijf als rij), laatste
+uitslagen, Algemeen en Selectie. Meer lucht tussen de kaarten (20 px). Op telefoon staat de laatste sessie als
+dezelfde kaart als in de sessielijst (`sessionCardHtml`) met het label *Huidige sessie* of *Laatste sessie*.
+**Selectie** (Spelers): per speler de spelerskaart groter, met rechts de titel en het begin van de biografie; geen losse
+cijfers ernaast (die staan op de kaart) en geen vorm per wedstrijd (iedereen speelt dezelfde wedstrijden).
+**Opstelling** (wedstrijd): één staand veld, de tegenstander boven en wij onder, met alle lijnen van een echt veld:
+zijlijnen, middenlijn, middencirkel en -stip, en aan beide kanten strafschopgebied, stip, boog, doelgebied en doel.
+**Wij tegen hen** (wedstrijd): per cijfer één regel met beide totalen en een verdeelde balk; een tik klapt de regel
+open met alle spelers van beide kanten als balkjes (wij blauw, zij oranje), de beste bovenaan. Vervangt de losse
+ranglijstkaartjes *Spelers* op de wedstrijdpagina. Nieuwe cijfers: één regel in `VS_STATS` (`wedstrijd.js`).
 **Trofeeënkast**: wat EA per afgesloten seizoen bewaart (`club/playoffAchievements`): de divisie met EA's eigen
 divisiebadge (`divisioncrest<n>.png` op EA's CDN, met onze beker als terugval) en hoe ver we kwamen (eindgroep 1
 *Kampioen*, 6 *Deelnemer*, daartussen *Eindgroep n*), plus de beste divisie ooit. EA's schaal begint bij Elite: 1 is
