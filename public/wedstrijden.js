@@ -5,9 +5,12 @@ let showAll = false;
 function render() {
   const type = $('#type').value, res = $('#result').value;
   try { sessionStorage.setItem('matchFilters', JSON.stringify({ type, res })); } catch {}
-  const list = DATA.matches.filter(m => (type === 'all' || m.matchType === type) && (res === 'all' || m.result === res));
-  const own = DATA.snapshot?.skillRating;
-  $('#page-sub').textContent = list.length === DATA.matches.length ? `${list.length} wedstrijden` : `${list.length} van ${DATA.matches.length} wedstrijden`;
+  // Vriendschappelijk staat apart (coach-logica §9a): bij Alles erbij (tenzij het menu op league of playoff staat), anders alleen bij dat filter.
+  const pool = type === 'friendlyMatch' ? DATA.friendlies : type === 'all' && getMode() === 'all' ? [...DATA.matches, ...DATA.friendlies].sort((a, b) => a.ts - b.ts) : DATA.matches;
+  const list = pool.filter(m => (type === 'all' || m.matchType === type) && (res === 'all' || m.result === res));
+  const own = DATA.snapshot?.skillRating, total = DATA.matches.length + (getMode() === 'all' ? DATA.friendlies.length : 0);
+  $('#page-sub').textContent = list.length === total ? `${list.length} wedstrijden` : `${list.length} van ${total} wedstrijden`;
+  if (!list.length && type === 'friendlyMatch') { $('#match-list').innerHTML = '<p class="empty">Nog geen vriendschappelijke wedstrijden. Speel er een, dan staat hij hier na de volgende verzamelrun.</p>'; return; }
   if (!list.length) { $('#match-list').innerHTML = '<p class="empty">Geen wedstrijden met deze filters.</p>'; return; }
   // Eén lijst, nieuwste eerst; eerst de laatste twintig, de rest achter de knop (coach-logica §9a, Wedstrijden).
   const rows = [...list].reverse(), shown = showAll ? rows : rows.slice(0, 20);

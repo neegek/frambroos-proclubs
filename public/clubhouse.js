@@ -77,10 +77,11 @@ function trophies() {
 function playerTotals(ms) {
   const out = new Map();
   for (const m of ms) for (const p of m.players) {
-    const t = out.get(p.name) || { name: p.name, n: 0, nEv: 0, g: 0, a: 0, sa: 0, mom: 0, ratings: [], pm: 0, pa: 0, tm: 0, ta: 0, won: 0, shots: 0, inter: 0 };
+    const t = out.get(p.name) || { name: p.name, n: 0, nEv: 0, g: 0, a: 0, sa: 0, mom: 0, ratings: [], pm: 0, pa: 0, tm: 0, ta: 0, won: 0, shots: 0, inter: 0, beaten: 0, through: 0, air: 0 };
     t.n++; t.g += p.goals || 0; t.a += p.assists || 0; t.mom += p.mom || 0; if (p.rating !== null) t.ratings.push(p.rating);
     t.pm += p.passesMade || 0; t.pa += p.passAttempts || 0; t.tm += p.tacklesMade || 0; t.ta += p.tackleAttempts || 0; t.shots += p.shots || 0;
-    if (p.ev) { t.nEv++; t.sa += p.ev.second_assists || 0; t.won += p.ev.possession_won || 0; t.inter += p.ev.interceptions || 0; }
+    if (p.ev) { t.nEv++; t.sa += p.ev.second_assists || 0; t.won += p.ev.possession_won || 0; t.inter += p.ev.interceptions || 0;
+      t.beaten += p.ev.players_beaten || 0; t.through += p.ev.through_balls || 0; t.air += (p.ev.aerial_duels_won_attacking || 0) + (p.ev.aerial_duels_won_defending || 0); }
     out.set(p.name, t);
   }
   return [...out.values()].map(t => ({ ...t, involved: t.g + t.a + t.sa, rating: avg(t.ratings) }));
@@ -91,45 +92,41 @@ function playerTotals(ms) {
 const per = (x, n) => n ? (x / n).toFixed(1) : '–'; // sorteren gebeurt op het exacte getal (v)
 const count = (key, label, total, games, { about, who = 'Minstens 3 wedstrijden.' }) => ({ key, label, about, who, v: t => games(t) ? total(t) / games(t) : null, main: t => per(total(t), games(t)), sub: t => `${total(t)} in ${games(t)}` });
 // about: waar de score op gebaseerd is; who: wie meetelt. Staat in het uitlegscherm van elke ranglijst.
-// Algemeen (coach-logica §9a): één rij kaartjes. De eerste vier over de hele carrière bij de club volgens EA
-// (rating, goals, assists, man of the match; ook van vóór deze app), de rest over de gevolgde wedstrijden. Op het
+// Algemeen (coach-logica §9a): één rij van vier kaartjes over de hele carrière bij de club volgens EA
+// (rating, goals, assists, man of the match; ook van vóór deze app). Op het
 // kaartje alleen het getal; het kleine cijfer staat in het uitlegscherm. Gelijk: wie meer wedstrijden speelde hoger
 // (rating), wie het in minder wedstrijden deed hoger (totalen).
-const BASE = 'Alleen de wedstrijden die deze app volgt, niet de hele EA-carrière.';
 const CAREER = 'Iedereen in de selectie, over alle wedstrijden voor de club volgens EA, ook van vóór deze app.';
 const career = (key, label, about, v, main, sub, tie) => ({ key, label, about, who: CAREER,
   rows: DATA.members.filter(m => m.gamesPlayed > 0 && v(m) !== null && v(m) !== undefined).sort((a, b) => v(b) - v(a) || tie(b) - tie(a)).map(m => ({ name: m.name, main: main(m), sub: sub(m) })) });
-const tracked = (key, label, about, who, totals, v, main, sub) => ({ key, label, about, who: `${who} ${BASE}`,
-  rows: totals.filter(t => t.n >= 3).map(t => ({ t, v: v(t) })).filter(x => x.v !== null && x.v !== undefined).sort((a, b) => b.v - a.v).map(x => ({ name: x.t.name, main: main(x.t), sub: sub(x.t) })) });
-function clubCards(totals) {
+function clubCards() {
   const per = (x, n) => n ? (x / n).toFixed(2) : '–';
   return [
     career('rating', 'Rating', 'De gemiddelde matchrating over alle wedstrijden voor de club, zoals EA die bijhoudt (één decimaal; bij gelijk telt wie meer wedstrijden speelde).', m => m.ratingAve, m => f1(m.ratingAve), m => `${m.gamesPlayed} wedstrijden`, m => m.gamesPlayed),
     career('goals', 'Goals', 'Doelpunten over de hele carrière bij de club volgens EA.', m => m.goals, m => String(m.goals), m => `${per(m.goals, m.gamesPlayed)} per wedstrijd`, m => -m.gamesPlayed),
     career('assists', 'Assists', 'De laatste pass voor een doelpunt, over de hele carrière bij de club volgens EA.', m => m.assists, m => String(m.assists), m => `${per(m.assists, m.gamesPlayed)} per wedstrijd`, m => -m.gamesPlayed),
     career('mom', 'Man of the match', 'Hoe vaak EA iemand tot man of the match koos, over de hele carrière bij de club.', m => m.mom, m => String(m.mom), m => `${m.gamesPlayed ? Math.round(100 * m.mom / m.gamesPlayed) : 0}% van de wedstrijden`, m => -m.gamesPlayed),
-    tracked('index', 'Frambroos-index', 'Wat iemand zelf bijdraagt, los van de uitslag. Per wedstrijd vier onderdelen: afronden, creëren, aan de bal en verdedigen. Elk cijfer wordt vergeleken met alle spelers op dezelfde positie die we tegenkwamen, tegenstanders inbegrepen, en de onderdelen tellen mee naar de build van die wedstrijd. 50 is gemiddeld voor de rol; bij weinig wedstrijden wordt de score naar 50 getrokken.', 'Minstens 3 wedstrijden van 45 minuten of langer.', totals, t => DATA.fi[t.name]?.score ?? null, t => fiFmt(DATA.fi[t.name].score), t => fiLabel(DATA.fi[t.name].score)),
-    tracked('involved', 'Betrokken bij goals', 'Goals, assists en tweede assists (de pass vóór de assist) samen, per wedstrijd. Zo telt ook wie de aanval opzet.', 'Minstens 3 wedstrijden.', totals, t => t.n ? t.involved / t.n : null, t => per(t.involved, t.n), t => `${t.involved} in ${t.n} wedstrijden`),
-    tracked('pass', 'Passnauwkeurigheid', 'Geslaagde passes gedeeld door alle passes. Wie veel risico neemt met steekpasses komt lager uit dan wie vooral breed speelt; kijk dus ook naar de rol.', 'Minstens 3 wedstrijden en 40 passes.', totals, t => t.pa >= 40 ? t.pm / t.pa : null, t => `${Math.round(100 * t.pm / t.pa)}%`, t => `${t.pm} van ${t.pa}`),
-    tracked('won', 'Balwinst', 'Hoe vaak iemand de bal verovert per wedstrijd: onderscheppingen, gewonnen duels en losse ballen volgens de gebeurtenissen die EA meegeeft.', 'Minstens 3 wedstrijden waarvan EA de gebeurtenissen meegaf.', totals, t => t.nEv ? t.won / t.nEv : null, t => per(t.won, t.nEv), t => `${t.won} in ${t.nEv} wedstrijden`),
-    tracked('duels', 'Duels gewonnen', 'Gewonnen tackles gedeeld door alle tackles.', 'Minstens 3 wedstrijden en 15 tackles.', totals, t => t.ta >= 15 ? t.tm / t.ta : null, t => `${Math.round(100 * t.tm / t.ta)}%`, t => `${t.tm} van ${t.ta}`),
   ];
 }
 
-// Gevaarlijkste spelers (coach-logica §9a): vier kleurige tegels, per tegel de beste over de gevolgde wedstrijden
-// (minstens vijf; afronden minstens vijftien schoten), met het getal per wedstrijd en klein de basis.
+// Gevaarlijkste spelers (coach-logica §9a): zes kleurige tegels, niet alleen scoren. Per tegel de beste over de
+// gevolgde wedstrijden (minstens vijf), met het getal per wedstrijd en klein de basis. Eventcijfers per wedstrijd
+// waarvan EA de gebeurtenissen gaf.
 function threats(ms) {
   const T = playerTotals(ms).filter(t => t.n >= 5);
   const best = (f, ok = () => true) => T.filter(ok).map(t => ({ t, v: f(t) })).filter(x => x.v !== null).sort((a, b) => b.v - a.v)[0];
+  const ev = t => t.nEv >= 5;
   const tiles = [
-    { cls: 'scorer', label: 'Topscorer', x: best(t => t.g / t.n), main: x => f1(x.v), unit: 'goals p/w', sub: x => `${x.t.g} in ${x.t.n}` },
-    { cls: 'finisher', label: 'Afmaker', x: best(t => t.g / t.shots, t => t.shots >= 15), main: x => `${Math.round(100 * x.v)}%`, unit: 'raak', sub: x => `${x.t.g} / ${x.t.shots}` },
-    { cls: 'creator', label: 'Kansenmaker', x: best(t => (t.a + 0.7 * t.sa) / t.n), main: x => f1(x.t.a / x.t.n), unit: 'assists p/w', sub: x => `${x.t.a} assists, ${x.t.sa} tweede` },
-    { cls: 'wall', label: 'Muur', x: best(t => t.tm / t.n + (t.nEv ? t.inter / t.nEv : 0)), main: x => f1(x.v), unit: 'afgepakt p/w', sub: x => `${x.t.tm} tackles, ${x.t.inter} onderschept` },
+    { cls: 'scorer', label: 'Topscorer', x: best(t => t.g / t.n), main: x => f1(x.v), unit: 'goals', sub: x => `${x.t.g} in ${x.t.n}${x.t.shots ? ` · ${Math.round(100 * x.t.g / x.t.shots)}% raak` : ''}` },
+    { cls: 'creator', label: 'Kansenmaker', x: best(t => (t.a + 0.7 * t.sa) / t.n), main: x => f1(x.t.a / x.t.n), unit: 'assists', sub: x => `${x.t.a} assists, ${x.t.sa} tweede` },
+    { cls: 'dribbler', label: 'Dribbelaar', x: best(t => t.beaten / t.nEv, ev), main: x => f1(x.v), unit: 'voorbij', sub: x => `${x.t.beaten} in ${x.t.nEv}` },
+    { cls: 'passer', label: 'Steekpasser', x: best(t => t.through / t.nEv, ev), main: x => f1(x.v), unit: 'steekpasses', sub: x => `${x.t.through} in ${x.t.nEv}` },
+    { cls: 'aerial', label: 'Kopsterk', x: best(t => t.air / t.nEv, ev), main: x => f1(x.v), unit: 'kopduels', sub: x => `${x.t.air} in ${x.t.nEv}` },
+    { cls: 'wall', label: 'Muur', x: best(t => t.tm / t.n + (t.nEv ? t.inter / t.nEv : 0)), main: x => f1(x.v), unit: 'afgepakt', sub: x => `${x.t.tm} duels, ${x.t.inter} onderschept` },
   ];
   $('#threats').innerHTML = tiles.map(k => k.x ? `<a class="threat ${k.cls}" href="spelers.html#${encodeURIComponent(k.x.t.name)}">
       <span class="th-label">${k.label}</span><b class="th-name">${esc(proName(k.x.t.name))}</b>
-      <span class="th-val"><b>${k.main(k.x)}</b><small>${k.unit}</small></span><small class="th-sub">${esc(k.sub(k.x))}</small></a>` : '').join('');
+      <span class="th-val"><b>${k.main(k.x)}</b><small>${k.unit} p/w</small></span><small class="th-sub">${esc(k.sub(k.x))}</small></a>` : '').join('');
 }
 
 function render() {
@@ -147,7 +144,7 @@ function render() {
   $('#news').innerHTML = recent.length ? recent.map((a, i) => newsCard(a, { lead: i === 0 })).join('') : '<p class="empty">Nog geen nieuws: speel een avond, dan schrijft het zichzelf.</p>';
   PlayerCard.reveal($('#news'));
   $('#results').innerHTML = ms.slice(-4).reverse().map(m => matchCard(m, { own: DATA.snapshot?.skillRating })).join('') || '<p class="muted">Nog geen wedstrijden.</p>';
-  rankCards($('#rank-cards'), clubCards(playerTotals(ms)));
+  rankCards($('#rank-cards'), clubCards());
 
   // Selectie als spelerskaarten (playercard.js), gesorteerd op vorm: tier, dan de rating van de laatste sessie, dan wedstrijden.
   // De favoriet van wie de app gebruikt vooraan (coach-logica §9a), daarna op vorm.
@@ -161,13 +158,6 @@ function render() {
 
 // Uitlegscherm van een ranglijst: sluiten met de knop, Esc of een tik naast het scherm.
 $('#rank-dialog').addEventListener('click', e => { if (e.target === e.currentTarget || e.target.closest('.rd-close')) e.currentTarget.close(); });
-
-// Topspelers: de eerste vier ranglijsten open, de rest achter de knop.
-$('#rank-more').addEventListener('click', e => {
-  const open = $('#rank-cards').classList.toggle('all');
-  e.currentTarget.setAttribute('aria-expanded', String(open));
-  e.currentTarget.textContent = open ? 'Minder ranglijsten' : 'Alle ranglijsten';
-});
 
 window.rerender = () => render();
 Promise.all([loadData(), PlayerCard.load().catch(() => {})]).then(render).catch(showError);

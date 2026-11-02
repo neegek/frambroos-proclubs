@@ -125,7 +125,8 @@ export async function collectInto(db, { backfill = true, log = console.log } = {
       if (fixed) { changed = true; log(`${fixed} eventstrings aangevuld vanuit de ruwe JSON`); }
     }
     const opponents = new Set();
-    for (const matchType of ['leagueMatch', 'playoffMatch']) {
+    // Vriendschappelijk ook (docs/ea-data.md): apart bewaard, telt niet mee in de cijfers.
+    for (const matchType of ['leagueMatch', 'playoffMatch', 'friendlyMatch']) {
       const matches = (await ea.matches(platform, clubId, matchType)) || [];
       // EA geeft maximaal 10 wedstrijden per type. Zijn ze allemaal nieuw terwijl we dit type al kenden,
       // dan kan er tussen deze en de vorige run iets tussenuit gevallen zijn.

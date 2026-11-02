@@ -23,7 +23,7 @@ export function openDb(path = resolve(ROOT, config.dbPath)) {
     CREATE TABLE IF NOT EXISTS matches (
       match_id TEXT PRIMARY KEY,
       ts INTEGER NOT NULL,               -- unix seconds, einde van de wedstrijd
-      match_type TEXT NOT NULL,          -- leagueMatch | playoffMatch
+      match_type TEXT NOT NULL,          -- leagueMatch | playoffMatch | friendlyMatch
       platform TEXT NOT NULL,
       collected_at INTEGER NOT NULL,
       raw TEXT NOT NULL

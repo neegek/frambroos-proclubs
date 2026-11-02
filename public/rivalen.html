@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rivalen · Frambroos Coach</title>
+<link rel="icon" href="crest.png">
+<meta name="theme-color" content="#090b0d">
+<script>try { if (localStorage.getItem('theme') === 'light') document.documentElement.dataset.theme = 'light'; } catch (e) {}</script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="content">
+    <a class="back-link" href="wedstrijden.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Terug naar wedstrijden</a>
+    <header class="page-head">
+      <div>
+        <h1>Rivalen</h1>
+        <p class="sub" id="page-sub">Tegen wie we verliezen, en de clubs die we vaker tegenkwamen.</p>
+      </div>
+    </header>
+
+    <section class="card lose-card">
+      <h2>Waar we verliezen</h2>
+      <p class="hint">Winst tegen teams met en zonder een kenmerk, over league en playoff; de kenmerken overlappen, dus het zijn signalen, geen oorzaken.</p>
+      <div id="lose"><div class="skel block"></div></div>
+    </section>
+
+    <section class="card">
+      <h2>Rivalen</h2>
+      <p class="hint">Elke club waar we vaker dan één keer tegen speelden, vriendschappelijk inbegrepen. Tik voor de onderlinge stand.</p>
+      <div class="rival-rows" id="rivals"><div class="skel card-row"></div><div class="skel card-row"></div></div>
+    </section>
+  </main>
+</div>
+<dialog class="rank-dialog rival-dialog" id="rival-dialog" aria-labelledby="rv-title">
+  <button type="button" class="icon-btn rd-close" aria-label="Sluiten">✕</button>
+  <div class="rd-body"></div>
+</dialog>
+<div id="tooltip" class="tooltip" hidden></div>
+<script src="common.js"></script>
+<script src="rivalen.js"></script>
+</body>
+</html>

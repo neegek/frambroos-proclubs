@@ -25,7 +25,7 @@ for (const s of db.prepare('SELECT * FROM club_snapshots ORDER BY taken_at').all
 const ours = snap[CLUB];
 
 const matches = db.prepare(`SELECT m.match_id, m.ts, m.match_type, m.raw, mc.opponent_id, mc.goals, mc.goals_against, mc.result, mc.winner_by_dnf
-  FROM matches m JOIN match_clubs mc ON mc.match_id = m.match_id AND mc.club_id = ? ORDER BY m.ts`).all(CLUB).map(m => {
+  FROM matches m JOIN match_clubs mc ON mc.match_id = m.match_id AND mc.club_id = ? WHERE m.match_type != 'friendlyMatch' ORDER BY m.ts`).all(CLUB).map(m => {
   const raw = JSON.parse(m.raw);
   const players = Object.values(raw.players?.[CLUB] || {}).map(p => ({ name: p.playername, pos: p.pos, min: num(p.secondsPlayed) / 60, rating: num(p.rating), mom: num(p.mom), goals: num(p.goals), assists: num(p.assists), d: decodeEvents(fullEventString(p)) })).filter(p => p.min >= 1); // 0 minuten = niet gespeeld
   const oppPlayers = Object.values(raw.players?.[m.opponent_id] || {});

@@ -91,16 +91,18 @@ const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 function render() {
   const id = new URLSearchParams(location.search).get('id');
   // Adres: wedstrijd.html?id=2026-11-01-war-team (datum en tegenstander); een oud adres met het EA-nummer werkt ook nog.
-  const idx = DATA.matches.findIndex(x => x.slug === id || x.matchId === id);
-  if (idx < 0) { $('#page-title').textContent = 'Wedstrijd niet gevonden'; $('#page-sub').textContent = 'Deze wedstrijd staat niet (meer) in de data.'; $('#m-detail').hidden = true; return; }
-  const m = DATA.matches[idx];
+  // Vriendschappelijk heeft een eigen lijst (DATA.friendlies); vorige en volgende blijven binnen die lijst.
+  const find = list => list.findIndex(x => x.slug === id || x.matchId === id);
+  const pool = find(DATA.matches) >= 0 ? DATA.matches : DATA.friendlies, idx = find(pool);
+  if (idx < 0) { $('#m-detail').innerHTML = '<header class="page-head"><div><h1>Wedstrijd niet gevonden</h1><p class="sub">Deze wedstrijd staat niet (meer) in de data.</p></div></header>'; return; }
+  const m = pool[idx];
   if (id !== m.slug) history.replaceState(null, '', matchHref(m)); // altijd het leesbare adres
   const own = DATA.snapshot?.skillRating, kits = DATA.club.kits;
   document.title = `Frambroos tegen ${m.opponent.name} · Frambroos Coach`;
   // Kop (coach-logica §9a, Wedstrijdpagina): de dag met de ronde pijltjes naar de vorige en volgende wedstrijd, zoals bij een sessie.
   const d0 = new Date(m.ts * 1000), short = `${cap(fmtDayLong(m.ts).slice(0, 3))} ${d0.getDate()} ${d0.toLocaleDateString('nl-NL', { month: 'long' }).slice(0, 3)}`;
   $('#page-title').innerHTML = `<span class="t-long">${cap(fmtDayLong(m.ts))}</span><span class="t-short" aria-hidden="true">${short}</span>`;
-  const prev = DATA.matches[idx - 1], next = DATA.matches[idx + 1];
+  const prev = pool[idx - 1], next = pool[idx + 1];
   $('#m-titlebar').querySelectorAll('.ss-nav').forEach(a => a.remove());
   $('#page-title').insertAdjacentHTML('beforebegin', navArrow('prev', prev && matchHref(prev), prev ? `Vorige wedstrijd: ${prev.opponent.name}` : ''));
   $('#page-title').insertAdjacentHTML('afterend', navArrow('next', next && matchHref(next), next ? `Volgende wedstrijd: ${next.opponent.name}` : ''));

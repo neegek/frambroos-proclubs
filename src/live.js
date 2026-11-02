@@ -26,7 +26,7 @@ async function fetchLive() {
     const res = await Promise.race([collectInto(db, { backfill: false, log: () => {} }), timeout]);
     const data = buildData(db);
     const fresh = new Set(res.newIds);
-    for (const m of data.matches) if (fresh.has(m.matchId)) m.live = true;
+    for (const m of [...data.matches, ...data.friendlies]) if (fresh.has(m.matchId)) m.live = true;
     data.live = { at: Math.floor(Date.now() / 1000), newMatches: res.newMatches, error: res.error };
     return data;
   } finally {

@@ -373,7 +373,7 @@ op de clubpagina's van de Premier League). Van boven naar beneden:
    wel op voor als dat ooit kan.
 3. **Nieuws**: één kaart met het nieuwste artikel en een link naar de nieuwspagina (`nieuws.html`) met alle artikelen.
 4. **Laatste uitslagen**: de laatste vier wedstrijden als `matchCard`, met een link naar alle wedstrijden.
-5. **Topspelers**: vier ranglijstkaartjes (Frambroos-index, rating, goals, assists); de andere vijf achter een knop.
+5. **Topspelers**: opgegaan in *Algemeen* (vier ranglijstkaartjes over de carrière; zie verderop).
    Een tik op een kaartje opent geen speler maar een **uitlegscherm** over die ranglijst: waar de score op gebaseerd
    is, wie meetelt (minimaal aantal wedstrijden of pogingen) en de hele lijst met de onderliggende aantallen.
 6. **Selectie**: de leden als spelerskaarten.
@@ -404,10 +404,9 @@ Geen reeksen: die staan al in de rondjes bovenaan.
 
 - **Clubcijfers** komen uit EA (`overallStats` en `allTimeLeaderboard/search`, samen in het clubsnapshot). Alles over
   spelers en vorm komt uit onze eigen gevolgde wedstrijden, met het aantal erbij.
-- **Ranglijst** (*Topspelers*): negen stats die iedereen snapt, elk een kaartje met **alle** spelers (minimaal 3
-  wedstrijden) erop; de eerste vier staan open, de rest achter *Alle ranglijsten*: Frambroos-index, rating, goals, assists, betrokken bij goals (goals + assists + tweede assists),
-  man of the match, passnauwkeurigheid, balwinst, duels gewonnen. Tellende stats per wedstrijd, met het totaal
-  eronder. Voor percentages de minimale aantallen uit §4.
+- **Ranglijst** (*Algemeen*): vier kaartjes met **alle** spelers erop (rating, goals, assists, man of the match over
+  de carrière volgens EA); de ranglijsten over de gevolgde wedstrijden staan sinds 2 november 2026 alleen nog achter
+  de regels op de spelerspagina.
 - **Leden**: elk lid als spelerskaart (§9c), **gesorteerd op vorm**: eerst topvorm, dan in vorm, dan de rest; binnen
   een tier op de rating van de laatste sessie, dan op aantal wedstrijden.
 
@@ -476,12 +475,44 @@ niet actief, zodat een tik erop terug naar de lijst gaat (sinds 1 november 2026)
 
 **Wedstrijden** is één lijst van alle wedstrijden, nieuwste eerst, niet per avond verdeeld. Per wedstrijd: datum en
 tijd, uitslag, tegenstander, score en de beste speler van de wedstrijd (hoogste EA-rating, met een kroon als die ook man of
-the match was). Eerst de laatste twintig, de rest achter een knop.
+the match was). Eerst de laatste twintig, de rest achter een knop. Filters (sinds 2 november 2026): type *Alles*, *League*, *Playoff*,
+*Vriendschappelijk*, en de uitslag. Vriendschappelijke wedstrijden haalt de verzamelaar sinds 2 november 2026 ook op
+(`friendlyMatch`; EA gaf er op 27 oktober nog niets, mogelijk omdat we er toen geen hadden gespeeld). Ze staan apart in
+`DATA.friendlies` en tellen **nergens** mee: niet in cijfers, vorm, sessies, ranglijsten of het advies. Alleen in de
+lijst (bij *Alles* en *Vriendschappelijk*) en op hun eigen wedstrijdpagina. Naast de filters een knop *Rivalen*.
+
+**Rivalen** (`rivalen.html`, een laag dieper, "Terug naar wedstrijden"; sinds 2 november 2026). Eerst de kaart
+**Waar we verliezen**, dan de lijst **Rivalen**: elke club waar we vaker dan één keer tegen speelden (alle typen,
+vriendschappelijk inbegrepen, want het gaat om de onderlinge stand), meeste wedstrijden eerst, dan de laatste. Per club
+het logo, de naam, de stand (W-G-V) en de doelpunten. Een tik opent een dialoog: de stand groot, goals voor en tegen,
+het grootste verschil (beste winst, zwaarste nederlaag), hun skill rating en aantal mensen gemiddeld, en alle
+wedstrijden als `matchRow`, nieuwste eerst. Onderaan een knop naar de laatste wedstrijd en vorige/volgende rivaal.
+
+**Waar we verliezen** (advies over de tegenstander). Per kenmerk van de tegenstander het winstpercentage mét tegenover
+zónder dat kenmerk, over league en playoff (niet vriendschappelijk), alleen wedstrijden waarvan EA de tegenstanders
+meegaf. Kenmerken, alleen wat EA geeft (mensen en hun ingestelde positie; AI per linie geeft EA niet):
+- meer mensen dan wij; minder mensen dan wij;
+- een menselijke keeper; minstens één menselijke verdediger;
+- minstens twee menselijke aanvallers; minstens drie menselijke middenvelders;
+- sterker volgens EA (skill rating ≥ 100 hoger dan de onze nu).
+
+Een kenmerk telt pas als beide groepen minstens acht wedstrijden hebben. Duidelijk verschil: minstens 15
+procentpunt. De duidelijke slechte kenmerken staan bovenaan (rood, hooguit drie open, de grootste verschillen eerst), elk met één praktische tip; duidelijk goede
+(blauw) daarna als *Hier halen we punten*; de rest, zonder duidelijk verschil, achter een knop. Eerlijk erbij (achter de
+i-knop): de kenmerken overlappen (wie meer mensen heeft, heeft vaker een menselijke verdediger), dus het zijn signalen,
+geen oorzaken. Geen kenmerk duidelijk: dat zeggen, niets verzinnen. In het kort bovenaan één zin met de twee grootste. De tips:
+- meer mensen: korter en sneller spelen, niet blijven dribbelen in een vol veld;
+- menselijke keeper: laag en in de hoek afronden, niet hard op de keeper;
+- menselijke verdediger: de steekpass wordt gelezen; eerst combineren, de bal ook laten lopen naar de flank;
+- twee of meer menselijke aanvallers: een middenvelder blijft achter de bal, niet met z'n allen mee naar voren;
+- drie of meer menselijke middenvelders: het midden zit dicht; sneller over de flank en in de diepte;
+- sterker: eerst de nul houden, compacter staan, minder risico op eigen helft.
 
 **Algemeen** (Clubhouse; sinds 2 november 2026 één rij, *Topspelers* is erin opgegaan omdat het dubbel was): één rij
 ranglijstkaartjes (`rankCards` in `public/common.js`). De eerste vier over de hele carrière bij de club volgens EA,
-ook van vóór deze app: **Rating**, **Goals**, **Assists**, **Man of the match**. Daarna, achter *Alle ranglijsten*,
-over de gevolgde wedstrijden: Frambroos-index, betrokken bij goals, passnauwkeurigheid, balwinst, duels gewonnen.
+ook van vóór deze app: **Rating**, **Goals**, **Assists**, **Man of the match**. Sinds 2 november 2026 alleen die
+vier: de knop *Alle ranglijsten* met de ranglijsten over de gevolgde wedstrijden is weg (deed te weinig; de
+spelerspagina heeft per maat al een ranglijst achter elke regel, en *Gevaarlijkste spelers* toont de uitschieters).
 Op een kaartje staat alleen het getal, geen sublabel (wedstrijden, per wedstrijd); dat staat in het uitlegscherm
 dat een tik opent, samen met waar het op gebaseerd is en wie meetelt. Bij gelijk staat wie meer wedstrijden speelde
 hoger (rating) of wie het in minder wedstrijden deed (totalen).
@@ -500,9 +531,12 @@ het kleine cijfer (aantal wedstrijden, of de breuk bij percentages). Zo zie je h
 erin, ook het nieuws. Volgorde: de **kop** in clubkleuren (een verloop van paars naar geel, geen stadion) met logo,
 naam, skill rating en divisie, daarin de **balans van het seizoen** (W-G-V groot met balk en winstpercentage; goals,
 tegen, saldo en de nul) en de laatste tien als rondjes; geen aparte kaart *Seizoen* en geen chips *In het kort* meer.
-Dan **Gevaarlijkste spelers** (vier kleurige tegels: topscorer in goals per wedstrijd, afmaker in conversie (minstens
-15 schoten), kansenmaker in assists per wedstrijd (gekozen op assists plus 0,7 × tweede assists), muur in gewonnen
-tackles plus onderscheppingen per wedstrijd; minstens vijf gevolgde wedstrijden), de laatste sessie en de
+Dan **Gevaarlijkste spelers** (sinds 2 november 2026 zes kleurige tegels, niet alleen scoren: topscorer in goals per
+wedstrijd (klein de conversie), kansenmaker in assists per wedstrijd (gekozen op assists plus 0,7 × tweede assists),
+dribbelaar in uitgespeelde tegenstanders per wedstrijd, steekpasser in geslaagde steekpasses per wedstrijd, kopsterk in
+gewonnen luchtduels per wedstrijd (aanvallend en verdedigend), muur in gewonnen tackles plus onderscheppingen per
+wedstrijd; minstens vijf gevolgde wedstrijden; de eventcijfers per wedstrijd waarvan EA de gebeurtenissen gaf, alleen
+codes die in docs/event-codes.md *waarschijnlijk* zijn; drie naast elkaar, op telefoon twee), de laatste sessie en de
 trofeeënkast, **Nieuws** (kleine kaartjes: beeld links, tekst rechts; op telefoon de laatste vijf als rij), laatste
 uitslagen, Algemeen en Selectie. Meer lucht tussen de kaarten (20 px). Op telefoon staat de laatste sessie als
 dezelfde kaart als in de sessielijst (`sessionCardHtml`) met het label *Huidige sessie* of *Laatste sessie*.

@@ -121,8 +121,7 @@ alleen in Cloudflare.
   in `public/sessie.js`): assen als percentiel tegenover onze eigen avonden, onder elke astitel de waarde en ons normaal.
   Metaalkleuren (goud/zilver/brons/ijzer: `.metal-*`/`.rim-*`) zijn vlak met een zachte glans, geen felle verlopen; de spelerspagina heeft drie kaartjes
   (Highlights met per wedstrijd en precisie naast elkaar, Frambroos-index met balkjes, Resultaat met deze speler); de ranglijst op het Clubhouse
-  (*Topspelers*) is een raster van `.rank-card`-kaartjes met per stat **alle** spelers, vier open en de rest achter een
-  knop; een tik op een kaartje opent geen speler maar het uitlegscherm van die ranglijst (`#rank-dialog`: waar de score
+  (*Algemeen*) is een rij van vier `.rank-card`-kaartjes (carrière volgens EA) met per stat **alle** spelers, zonder knop voor meer; een tik op een kaartje opent geen speler maar het uitlegscherm van die ranglijst (`#rank-dialog`: waar de score
   op gebaseerd is, wie meetelt, de hele lijst); de leden (*Selectie*) staan in een swipebare rij als kleine spelerskaarten, gesorteerd op vorm. Nieuws: één artikel per
   sessie (`public/news.js`, coach-logica §9a); het Clubhouse toont het nieuwste als één `.news-item`-kaart, de pagina
   `nieuws.html` (een laag dieper, "Terug naar Clubhouse") toont ze allemaal. Een sessie toont de top drie van de avond als waaier van kleine
@@ -189,7 +188,10 @@ alleen in Cloudflare.
 - Favoriet: één speler per browser (`favorite()`/`setFavorite()` in `public/common.js`, localStorage), te kiezen met de
   ster rechtsboven in het vlak van de spelerskaart; opent standaard bij *Spelers*, staat vooraan bij de namen en in de Selectie. Opnieuw tekenen
   bij een andere breedte gaat via `onWidthChange(fn)`, nooit via een kale resize (adresbalk op telefoon).
-- Wedstrijden is alleen de lijst (eerst twintig, de rest achter een knop); een wedstrijd opent op `wedstrijd.html?id=<datum>-<tegenstander>` (bijv. `2026-11-01-war-team`, altijd via `matchHref(m)`; een laag dieper) met
+- Wedstrijden is de lijst (eerst twintig, de rest achter een knop) met filters type (Alles, League, Playoff, Vriendschappelijk)
+  en uitslag, en een knop *Rivalen* naar `rivalen.html` (een laag dieper): eerst *Waar we verliezen* (winst% per kenmerk
+  van de tegenstander, coach-logica §9a), dan elke club waar we vaker dan één keer tegen speelden; een tik opent `#rival-dialog`.
+  Vriendschappelijke wedstrijden staan apart in `DATA.friendlies` en tellen nergens mee, alleen in die lijst; een wedstrijd opent op `wedstrijd.html?id=<datum>-<tegenstander>` (bijv. `2026-11-01-war-team`, altijd via `matchHref(m)`; een laag dieper) met
   "Terug naar wedstrijden" bovenaan. Link naar wedstrijden en sessies altijd via `matchHref`/`sessionHref` (leesbare adressen; oude nummers worden omgezet).
 
 ## Controleren na een wijziging

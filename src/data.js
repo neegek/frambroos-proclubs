@@ -47,7 +47,7 @@ export function buildData(db = realDb) {
   const snapRows = db.prepare('SELECT taken_at, promotions, relegations, best_division, raw FROM club_snapshots WHERE club_id = ? ORDER BY taken_at').all(clubId);
   const divOf = row => { try { return Number(JSON.parse(row.raw).currentDivision) || null; } catch { return null; } };
   const lastBefore = db.prepare(`SELECT m.ts, mc.goals, mc.goals_against, mc.result, c.name AS opponent FROM matches m JOIN match_clubs mc ON mc.match_id = m.match_id AND mc.club_id = ?
-    LEFT JOIN clubs c ON c.club_id = mc.opponent_id WHERE m.ts <= ? ORDER BY m.ts DESC LIMIT 1`);
+    LEFT JOIN clubs c ON c.club_id = mc.opponent_id WHERE m.ts <= ? AND m.match_type != 'friendlyMatch' ORDER BY m.ts DESC LIMIT 1`);
   const trophies = { events: [], before: { promotions: snapRows[0]?.promotions ?? 0, relegations: snapRows[0]?.relegations ?? 0 }, bestDivision: own?.best_division ?? null };
   for (let i = 1; i < snapRows.length; i++) for (const [k, type] of [['promotions', 'promotie'], ['relegations', 'degradatie']]) {
     const a = snapRows[i - 1][k], b = snapRows[i][k];
@@ -108,7 +108,7 @@ export function buildData(db = realDb) {
       opponentPlayers: m.opponent.id ? Math.max(0, 11 - m.opponentPlayers.length) : null, opponentGoals: m.opponent.id ? Math.max(0, m.goalsAgainst - human(m.opponentPlayers)) : null };
   }
   // Tenues en clubkleur uit de meest recente wedstrijd (EA geeft kleuren als decimale RGB).
-  const lastRaw = db.prepare('SELECT m.raw FROM matches m JOIN match_clubs mc ON mc.match_id = m.match_id AND mc.club_id = ? ORDER BY m.ts DESC LIMIT 1').get(clubId);
+  const lastRaw = db.prepare(`SELECT m.raw FROM matches m JOIN match_clubs mc ON mc.match_id = m.match_id AND mc.club_id = ? WHERE m.match_type != 'friendlyMatch' ORDER BY m.ts DESC LIMIT 1`).get(clubId);
   let kits = null;
   if (lastRaw) {
     const k = JSON.parse(lastRaw.raw).clubs?.[clubId]?.details?.customKit;
@@ -124,7 +124,9 @@ export function buildData(db = realDb) {
     members: members.map(m => ({ name: m.player_name, gamesPlayed: m.games_played, goals: m.goals, assists: m.assists, ratingAve: m.rating_ave, winRate: m.win_rate, mom: m.mom, proOverall: m.pro_overall, proName: m.pro_name, proHeight: Number(JSON.parse(m.raw).proHeight) || null, proPos: JSON.parse(m.raw).proPos ?? null, proNationality: Number(JSON.parse(m.raw).proNationality) || null, favoritePosition: m.favorite_position, passSuccessRate: m.pass_success_rate, shotSuccessRate: m.shot_success_rate, tackleSuccessRate: m.tackle_success_rate, passesMade: Number(JSON.parse(m.raw).passesMade) || 0, tacklesMade: Number(JSON.parse(m.raw).tacklesMade) || 0 })),
     lastRun,
     trophies,
-    matches,
+    // Vriendschappelijke wedstrijden apart: alleen in de lijst Wedstrijden, nergens in cijfers, vorm of sessies.
+    matches: matches.filter(m => m.matchType !== 'friendlyMatch'),
+    friendlies: matches.filter(m => m.matchType === 'friendlyMatch'),
     generatedAt: Math.floor(Date.now() / 1000),
   };
 }
