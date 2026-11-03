@@ -1469,10 +1469,10 @@ a.squad-row:hover { border-color: var(--brand); }
   .season .kort-label { min-width: 0; font-size: 12px; }
 }
 /* Gevaarlijkste spelers: vier kleurige tegels, niet scrollbaar. */
-.threat-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 8px; }
+.threat-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 8px; }
 .threat { --c: #c9a548; display: grid; gap: 2px; align-content: start; padding: 12px 14px; border-radius: 14px; text-decoration: none; color: var(--ink);
   background: linear-gradient(160deg, color-mix(in srgb, var(--c) 30%, var(--panel)), color-mix(in srgb, var(--c) 8%, var(--panel))); border: 1px solid color-mix(in srgb, var(--c) 45%, var(--panel-border)); min-width: 0; }
-.threat.att { --c: #e2574c; } .threat.pas { --c: #3f8be0; } .threat.def { --c: #2fa36b; } .threat.all { --c: #e0a526; }
+.threat.goals { --c: #e0a526; } .threat.assists { --c: #23a8b8; } .threat.att { --c: #e2574c; } .threat.cre { --c: #3f8be0; } .threat.def { --c: #2fa36b; } .threat.all { --c: #a477e8; }
 button.threat { font: inherit; text-align: left; cursor: pointer; }
 .th-label { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); }
 .th-name { font-size: 16px; font-weight: 750; letter-spacing: -0.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

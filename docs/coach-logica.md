@@ -535,26 +535,38 @@ Dan **Gevaarlijkste spelers** (zie hieronder), de laatste sessie en de
 trofeeënkast, **Nieuws** (kleine kaartjes: beeld links, tekst rechts; op telefoon de laatste vijf als rij), Algemeen
 en Selectie. *Laatste uitslagen* is sinds 3 november 2026 weg: de laatste sessie toont ze al.
 
-**Gevaarlijkste spelers** (sinds 3 november 2026). Vier tegels, elk een domein, en elk domein uit meerdere facetten,
-zodat één cijfer (veel steekpasses) niet genoeg is. Per facet een score tegenover onze eigen spelers: 50 is de
-gemiddelde Frambroos-speler, 10 punten is één standaardafwijking (begrensd op 20 en 80). Het domein is het gewogen
-gemiddelde van zijn facetten; een facet zonder genoeg basis telt niet mee en de rest weegt dan zwaarder. Wie meetelt:
-minstens vijf gevolgde wedstrijden, waarvan vijf met gebeurtenissen van EA. Alleen eventcodes die in
-docs/event-codes.md *waarschijnlijk* zijn.
-- **Aanvallend**: goals p/w (×2), schoten op doel p/w, conversie (goals / schoten, vanaf 15 schoten), tegenstanders
-  voorbij p/w, gewonnen kopduels voorin p/w (×0,5).
-- **Passen**: assists plus tweede assists p/w (×2), passes p/w (hoeveel loopt via deze speler), passnauwkeurigheid
-  (vanaf 40 passes), geslaagde steekpasses p/w, aandeel steekpasses in alle passes (×0,5; risico), en rendement:
-  assists plus tweede assists per steekpass (vanaf 40 steekpasses, anders telt toeval te zwaar). Zo telt risico mee, maar ook of het iets oplevert
-  en of de rest van het spel klopt.
-- **Verdedigend**: gewonnen tackles p/w (×1,5), tacklesucces (vanaf 15 tackles), onderscheppingen p/w (×1,5), balwinst
-  p/w, gewonnen kopduels achterin p/w (×0,5).
-- **Compleet**: de drie domeinen samen, waarbij het zwakste dubbel telt ((A + P + V + zwakste) / 4): wie overal goed is,
-  wint het van wie in één ding uitblinkt.
+**Gevaarlijkste spelers** (herzien op 3 november 2026). Zes tegels: **Topscorer** en **Topassist** (meeste goals en
+assists over de gevolgde wedstrijden, klein per wedstrijd), dan vier scores: **Aanvallend**, **Creëren**,
+**Verdedigend** en **Compleet**.
 
-Op de tegel: het domein, de naam, de score groot en klein de twee facetten die het meest bijdragen (gewicht maal afstand tot 50), in
-gewone getallen. Een tik opent het uitlegscherm (`#rank-dialog`) met de facetten en de hele lijst, per speler de
-score en alle facetten in getallen. Meer lucht tussen de kaarten (20 px). Op telefoon staat de laatste sessie als
+*Hoe een score ontstaat* (zoals fantasy football, daarna een percentiel zoals scoutingsites):
+1. Per wedstrijd punten, met vaste waarden die iedereen kan narekenen:
+   - Aanvallend: goal 3, schot op doel 1, tegenstander voorbij ½.
+   - Creëren: assist 3, tweede assist 2, geslaagde steekpass ½, mislukte pass −0,2 (risico telt mee, maar kost wat).
+   - Verdedigend: gewonnen tackle, onderschepping, kopduel achterin, blok en wegwerken elk 1; balverlies op eigen
+     helft (eigen derde) −1.
+2. Die punten vergelijken we met elke keer dat een mens in onze wedstrijden speelde, wij én de tegenstanders
+   (ruim 650 keer; alleen met gebeurtenissen van EA en minstens 45 minuten). Per wedstrijd: beter dan hoeveel procent
+   van al die spelers (gelijk telt half).
+3. De score is het gemiddelde daarvan over alle wedstrijden van de speler: **64 = in een gemiddelde wedstrijd beter
+   dan 64 van de 100 spelers op het veld; 50 is gemiddeld.** Compleet is het gemiddelde van de drie scores.
+Wie meetelt: minstens vijf zulke wedstrijden.
+
+*Waarom zo* (getoetst op 77 wedstrijden met gebeurtenissen, samenhang van teamtotalen met het doelsaldo):
+- Goals (0,77), assists (0,69), schoten op doel (0,52) en tweede assists (0,46) hangen sterk samen met winnen;
+  steekpasses (0,22) en tegenstanders voorbij (0,16) zwak. Vandaar de hoge en lage waarden.
+- Veel passen hangt níét samen met winnen (−0,16); het aantal passes telt daarom niet mee, wel mislukte passes als kosten.
+- Verdedigende acties (tackles, onderscheppingen) hangen op teamniveau **niet** samen met minder tegengoals (r ≈ 0):
+  wie veel verdedigt, heeft vaak ook de tegenstander vaak aan de bal. De verdedigende score meet dus geslaagd
+  verdedigend werk, niet of er goals zijn voorkomen. Dat staat er eerlijk bij.
+- Balwinst in het algemeen (ook hoog op het veld, druk zetten) telt niet als verdedigen: dat liet eerder wie veel
+  druk zet bovenaan staan als verdediger. Kopduels achterin en balverlies op eigen helft wel.
+- Vervallen: de eerste versie (3 november) gaf per cijfer een score tegenover alleen onze zes spelers (50 + 10 per
+  standaardafwijking). Lastig uit te leggen, en zes spelers is geen vergelijking.
+
+Op de tegel: domein, naam, de score groot met *van 100*, klein de twee onderdelen die de meeste punten gaven (bij Compleet: "aanvallend, creëren en verdedigend samen"). Een tik
+opent het uitlegscherm (`#rank-dialog`) met hoe de punten werken en de hele lijst: per speler de score, de punten per
+wedstrijd en de onderdelen in gewone getallen. Meer lucht tussen de kaarten (20 px). Op telefoon staat de laatste sessie als
 dezelfde kaart als in de sessielijst (`sessionCardHtml`) met het label *Huidige sessie* of *Laatste sessie*.
 **Selectie** (Spelers): per speler de spelerskaart groter, met rechts de titel en de biografie, visueel afgekapt
 (twee regels op telefoon, drie op een tablet, vier op een groot scherm; geen eigen tekst); linksboven in de rij een zwevend sterretje om de favoriet te kiezen (vol als
