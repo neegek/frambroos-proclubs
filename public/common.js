@@ -360,6 +360,20 @@ function fitModel(matches, ownRating) {
   return { coef, fitted, n: rows.length, predict };
 }
 
+// Kenmerken van de tegenstander (coach-logica §9a, Waar we verliezen; gedeeld met Waar het schuurde op de sessie).
+// Alleen wat EA geeft: mensen en hun ingestelde positie, skill rating. tip = één praktische zin.
+const oppPos = (m, pos) => m.opponentPlayers.filter(p => p.pos === pos).length;
+const OPP_TRAITS = [
+  { key: 'more', label: 'Meer mensen dan wij', phrase: 'meer mensen dan wij', test: m => m.opponentPlayers.length > m.players.length, cruijff: 'Meer mensen is niet meer voetbal: laat de bal het werk doen.', tip: 'Korter en sneller spelen; niet blijven dribbelen in een vol veld.' },
+  { key: 'fewer', label: 'Minder mensen dan wij', phrase: 'minder mensen dan wij', test: m => m.opponentPlayers.length < m.players.length, cruijff: 'Tegen AI moet je geduld hebben: de ruimte komt vanzelf, als je de bal maar laat lopen.', tip: 'Tegen AI de bal laten rondgaan tot er een mens uit positie staat.' },
+  { key: 'gk', label: 'Een menselijke keeper', phrase: 'een menselijke keeper', test: m => oppPos(m, 'goalkeeper') > 0, cruijff: 'Een keeper die meedenkt, versla je alleen in de hoek.', tip: 'Laag en in de hoek afronden, niet hard op de keeper.' },
+  { key: 'def', label: 'Een menselijke verdediger', phrase: 'een menselijke verdediger', test: m => oppPos(m, 'defender') > 0, cruijff: 'Hun verdediger las de steekpass. Wie voorspelbaar is, wordt gelezen.', tip: 'De steekpass wordt gelezen: eerst combineren, de bal ook naar de flank laten lopen.' },
+  { key: 'fwd', label: 'Twee of meer menselijke aanvallers', phrase: 'twee of meer menselijke aanvallers', test: m => oppPos(m, 'forward') >= 2, cruijff: 'Als iedereen aanvalt, verdedigt niemand: één man blijft achter de bal.', tip: 'Eén middenvelder blijft achter de bal; niet met z’n allen mee naar voren.' },
+  { key: 'fwddef', label: 'Twee of meer aanvallers en een verdediger', phrase: 'veel mensen voorin en een mens achterin', test: m => oppPos(m, 'forward') >= 2 && oppPos(m, 'defender') > 0, cruijff: 'Als zij met velen aanvallen, moet er bij ons één blijven staan. En voorin eerst combineren: hun man achterin leest de steekpass.', tip: 'Eén middenvelder blijft achter de bal, en voorin eerst combineren: hun verdediger leest de steekpass.' },
+  { key: 'mid', label: 'Drie of meer menselijke middenvelders', phrase: 'drie of meer mensen op het middenveld', test: m => oppPos(m, 'midfielder') >= 3, cruijff: 'Is het midden dicht, dan speel je eromheen.', tip: 'Het midden zit dicht: sneller over de flank en in de diepte.' },
+  { key: 'strong', label: 'Sterker volgens EA', phrase: 'een skill rating van 100 of meer boven de onze', test: (m, own) => own && m.opponent.skillRating ? m.opponent.skillRating - own >= 100 : null, cruijff: 'Van betere tegenstanders kun je leren.', tip: 'Eerst de nul houden: compacter staan, minder risico op eigen helft.' },
+];
+
 function filtered() {
   const range = $('#range')?.value || 'all', type = $('#type')?.value || 'all';
   const since = range === 'all' ? 0 : Date.now() / 1000 - Number(range) * 86400;
@@ -558,21 +572,35 @@ function oppBadge(opp) {
 // cards: [{ key, label, about, who, rows: [{ name, main, sub, small, cls }], team?: { label, main, sub }, teams?: [...] }].
 // team (of teams, bij een wedstrijd beide ploegen) staat onderaan, zonder plek: het totaal of gemiddelde. cls kleurt
 // een regel (us/them bij een wedstrijd). Gedeeld door het Clubhouse, een sessie en een wedstrijd.
-function rankCards(container, cards) {
+// Altijd alle spelers (coach-logica §9a, Ranglijstkaartjes): wie op één kaartje van de rij staat, staat op alle. Een
+// rij zonder getal (main null: te weinig pogingen of wedstrijden) of zonder regel komt onderaan met een streepje, zonder plek.
+// roster: extra namen die er altijd bij horen (bijv. de hele selectie).
+const NO_VALUE = 'te weinig om te tellen';
+function withRoster(c, names) {
+  const have = new Set(c.rows.map(r => r.name));
+  const rows = [...c.rows.filter(r => r.main !== null && r.main !== undefined), ...c.rows.filter(r => r.main === null || r.main === undefined),
+    ...names.filter(n => !have.has(n)).map(name => ({ name }))];
+  return { ...c, rows: rows.map(r => r.main === null || r.main === undefined ? { ...r, main: '–', sub: r.sub || NO_VALUE, small: r.small ?? (c.rows.some(x => x.small) ? ' ' : undefined), none: true } : r) };
+}
+function rankCards(container, cards, roster = []) {
+  const names = [...new Set([...roster, ...cards.flatMap(c => c.rows.map(r => r.name))])];
+  cards = cards.map(c => withRoster(c, names));
   // Een kaartje met small (bij een percentage het aantal) krijgt twee regels per speler: groot het getal, klein eronder.
   const val = r => `<b>${r.main}${r.small ? `<small>${esc(r.small)}</small>` : ''}</b>`;
-  container.innerHTML = cards.map(c => `<button type="button" class="rank-card${c.rows.some(r => r.small) ? ' two' : ''}" data-key="${c.key}" aria-haspopup="dialog">
+  container.innerHTML = cards.map(c => { let i = 0; return `<button type="button" class="rank-card${c.rows.some(r => r.small && r.small.trim()) ? ' two' : ''}" data-key="${c.key}" aria-haspopup="dialog">
       <span class="rank-card-label">${c.label}<span class="rank-more" aria-hidden="true">i</span></span>
-      <ol>${c.rows.map((r, i) => `<li class="${r.cls || ''}"><span>${i + 1}</span><span>${esc(proName(r.name))}</span>${val(r)}</li>`).join('') || `<li class="empty">${c.empty || 'Nog te weinig wedstrijden.'}</li>`}${(c.teams || (c.team ? [c.team] : [])).map(t => `<li class="team ${t.cls || ''}"><span></span><span>${esc(t.label)}</span>${val(t)}</li>`).join('')}</ol></button>`).join('');
+      <ol>${c.rows.map(r => `<li class="${r.cls || ''}${r.none ? ' none' : ''}"><span>${r.none ? '' : ++i}</span><span>${esc(proName(r.name))}</span>${val(r)}</li>`).join('') || `<li class="empty">${c.empty || 'Nog te weinig wedstrijden.'}</li>`}${(c.teams || (c.team ? [c.team] : [])).map(t => `<li class="team ${t.cls || ''}"><span></span><span>${esc(t.label)}</span>${val(t)}</li>`).join('')}</ol></button>`; }).join('');
   for (const b of container.querySelectorAll('.rank-card')) b.addEventListener('click', () => openRankList(cards.find(c => c.key === b.dataset.key)));
 }
-function openRankList(c) {
+function openRankList(c, roster = null) {
   const d = $('#rank-dialog'); if (!d) return;
+  if (roster) c = withRoster(c, roster);
+  let i = 0;
   d.querySelector('.rd-body').innerHTML = `<h2 id="rd-title">${c.label}</h2>
     <h3>Waar het op gebaseerd is</h3><p>${c.about}</p>
     <h3>Wie meetelt</h3><p>${c.who}</p>
     <h3>De hele lijst</h3>
-    <ol class="rd-list">${c.rows.map((r, i) => `<li class="${r.cls || ''}"><span>${i + 1}</span><span>${esc(proName(r.name))}</span><b>${r.main}</b>${r.sub ? `<small>${esc(r.sub)}</small>` : ''}</li>`).join('') || `<li class="empty">${c.empty || 'Nog te weinig wedstrijden.'}</li>`}${(c.teams || (c.team ? [c.team] : [])).map(t => `<li class="rd-club ${t.cls || ''}"><span></span><span>${esc(t.label)}</span><b>${t.main}</b>${t.sub ? `<small>${esc(t.sub)}</small>` : ''}</li>`).join('')}</ol>`;
+    <ol class="rd-list">${c.rows.map(r => `<li class="${r.cls || ''}${r.none ? ' none' : ''}"><span>${r.none ? '' : ++i}</span><span>${esc(proName(r.name))}</span><b>${r.main}</b>${r.sub ? `<small>${esc(r.sub)}</small>` : ''}</li>`).join('') || `<li class="empty">${c.empty || 'Nog te weinig wedstrijden.'}</li>`}${(c.teams || (c.team ? [c.team] : [])).map(t => `<li class="rd-club ${t.cls || ''}"><span></span><span>${esc(t.label)}</span><b>${t.main}</b>${t.sub ? `<small>${esc(t.sub)}</small>` : ''}</li>`).join('')}</ol>`;
   d.showModal();
 }
 // Sluiten werkt overal hetzelfde, ook op telefoon: een tik op het kruisje of naast het scherm. Op pointerup én click,

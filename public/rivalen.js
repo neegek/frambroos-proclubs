@@ -2,40 +2,36 @@
 // waar we vaker dan één keer tegen speelden; een tik opent de onderlinge stand in #rival-dialog.
 
 const pctOf = list => list.length ? 100 * list.filter(m => m.result === 'W').length / list.length : null;
-const posCount = (m, pos) => m.opponentPlayers.filter(p => p.pos === pos).length;
 
-// Kenmerken: alleen wat EA geeft (mensen en hun ingestelde positie, skill rating). tip = één praktische zin.
-const TRAITS = [
-  { key: 'more', label: 'Meer mensen dan wij', phrase: 'meer mensen dan wij', test: m => m.opponentPlayers.length > m.players.length, tip: 'Korter en sneller spelen; niet blijven dribbelen in een vol veld.' },
-  { key: 'fewer', label: 'Minder mensen dan wij', phrase: 'minder mensen dan wij', test: m => m.opponentPlayers.length < m.players.length, tip: 'Tegen AI de bal laten rondgaan tot er een mens uit positie staat.' },
-  { key: 'gk', label: 'Een menselijke keeper', phrase: 'een menselijke keeper', test: m => posCount(m, 'goalkeeper') > 0, tip: 'Laag en in de hoek afronden, niet hard op de keeper.' },
-  { key: 'def', label: 'Een menselijke verdediger', phrase: 'een menselijke verdediger', test: m => posCount(m, 'defender') > 0, tip: 'De steekpass wordt gelezen: eerst combineren, de bal ook naar de flank laten lopen.' },
-  { key: 'fwd', label: 'Twee of meer menselijke aanvallers', phrase: 'twee of meer menselijke aanvallers', test: m => posCount(m, 'forward') >= 2, tip: 'Eén middenvelder blijft achter de bal; niet met z’n allen mee naar voren.' },
-  { key: 'mid', label: 'Drie of meer menselijke middenvelders', phrase: 'drie of meer menselijke middenvelders', test: m => posCount(m, 'midfielder') >= 3, tip: 'Het midden zit dicht: sneller over de flank en in de diepte.' },
-  { key: 'strong', label: 'Sterker volgens EA', phrase: 'een skill rating van 100 of meer boven de onze', test: (m, own) => own && m.opponent.skillRating ? m.opponent.skillRating - own >= 100 : null, tip: 'Eerst de nul houden: compacter staan, minder risico op eigen helft.' },
-];
-const MIN_N = 8, CLEAR = 15;
+// Kenmerken: OPP_TRAITS in common.js. Oordeel op het doelsaldo tov verwachting (coach-logica §9a en §9e): gecorrigeerd
+// voor sterkte en mensen. Duidelijk = minstens een halve goal verschil en minstens twee standaardfouten.
+const TRAITS = OPP_TRAITS.filter(t => t.key !== 'fwddef');
+const MIN_N = 8, CLEAR_GOALS = 0.5, CLEAR_SE = 2;
+const sdOf = xs => { const m = avg(xs); return Math.sqrt(xs.reduce((a, x) => a + (x - m) ** 2, 0) / Math.max(1, xs.length - 1)); };
 
 function loseAdvice() {
   const own = DATA.snapshot?.skillRating;
-  const ms = DATA.matches.filter(m => m.opponent.id && m.opponentPlayers.length);
+  const ms = DATA.matches.filter(m => m.opponent.id && m.opponentPlayers.length && !m.winnerByDnf);
   const rows = TRAITS.map(t => {
     const known = ms.filter(m => t.test(m, own) !== null), w = known.filter(m => t.test(m, own)), wo = known.filter(m => !t.test(m, own));
     const a = pctOf(w), b = pctOf(wo);
-    return { ...t, w, wo, a, b, gap: a !== null && b !== null ? a - b : null, ok: w.length >= MIN_N && wo.length >= MIN_N };
-  }).filter(r => r.ok).sort((x, y) => x.gap - y.gap);
-  const bad = rows.filter(r => r.gap <= -CLEAR), good = rows.filter(r => r.gap >= CLEAR).reverse(), rest = rows.filter(r => Math.abs(r.gap) < CLEAR);
+    const rw = w.map(m => m.resid), ro = wo.map(m => m.resid);
+    const adj = rw.length && ro.length ? avg(rw) - avg(ro) : null, se = rw.length > 1 && ro.length > 1 ? Math.sqrt(sdOf(rw) ** 2 / rw.length + sdOf(ro) ** 2 / ro.length) : null;
+    const clear = adj !== null && se !== null && Math.abs(adj) >= CLEAR_GOALS && Math.abs(adj) >= CLEAR_SE * se;
+    return { ...t, w, wo, a, b, gap: a !== null && b !== null ? a - b : null, adj, clear, ok: w.length >= MIN_N && wo.length >= MIN_N };
+  }).filter(r => r.ok).sort((x, y) => x.adj - y.adj);
+  const bad = rows.filter(r => r.clear && r.adj < 0), good = rows.filter(r => r.clear && r.adj > 0).reverse(), rest = rows.filter(r => !r.clear).sort((x, y) => x.gap - y.gap);
   const pct = v => `${Math.round(v)}%`;
   const row = (r, tone) => `<div class="lose-row ${tone}">
       <div class="lr-head"><b>${r.label}</b><span class="lr-n">in ${r.w.length} van ${r.w.length + r.wo.length}</span></div>
       <div class="lr-bars">
         <span class="lr-bar with"><i style="width:${r.a}%"></i><em>Met</em><b>${pct(r.a)}</b></span>
         <span class="lr-bar without"><i style="width:${r.b}%"></i><em>Zonder</em><b>${pct(r.b)}</b></span>
-      </div>${tone === 'bad' ? `<p class="lr-tip">${r.tip}</p>` : ''}</div>`;
-  // In het kort: de twee duidelijkste, in woorden. Niets duidelijk: dat zeggen.
+      </div>${tone === 'bad' ? `<p class="lr-tip">${r.tip}</p>` : !r.clear && Math.abs(r.gap) >= 15 && r.key !== 'strong' ? '<p class="lr-note">Het verschil in winst komt door hoe sterk ze waren.</p>' : ''}</div>`;
+  // In het kort: de twee duidelijkste, in woorden. Niets duidelijk: dat zeggen, en wat dan wel telt.
   const kort = bad.length
-    ? `We winnen het minst tegen teams met ${bad.slice(0, 2).map(r => `${r.phrase} (${pct(r.a)} winst, zonder ${pct(r.b)})`).join(' en ')}.`
-    : 'Geen kenmerk van de tegenstander maakt een duidelijk verschil: we verliezen niet van één soort team.';
+    ? `Ook als je rekent met hoe sterk ze waren, gaat het minder tegen teams met ${bad.slice(0, 2).map(r => `${r.phrase} (${pct(r.a)} winst, zonder ${pct(r.b)})`).join(' en ')}.`
+    : 'Geen soort tegenstander maakt een duidelijk verschil als je rekent met hoe sterk ze waren: we verliezen van betere teams, niet van een bepaalde opstelling.';
   $('#lose').innerHTML = rows.length ? `<p class="lose-kort">${kort}</p>
     ${bad.slice(0, 3).map(r => row(r, 'bad')).join('')}
     ${good.length ? `<h3>Hier halen we punten</h3>${good.map(r => row(r, 'good')).join('')}` : ''}

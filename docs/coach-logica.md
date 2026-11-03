@@ -329,6 +329,24 @@ Daarnaast *Positiespel en keuzes* en *Al sterk*.
   je winnen, maar je kan wel van ze verliezen." · verloren met veel schoten: "Toeval is logisch." · ver boven normaal:
   "Je gaat het pas zien als je het doorhebt." · ver onder normaal: "Elk nadeel heb z'n voordeel." · monsterscore en
   overig: "Voetbal is simpel, maar het moeilijkste wat er is, is simpel voetballen."
+- **Sessie, waar het schuurde** (sinds 3 november 2026): een kaart direct onder de sessiekop met **hooguit twee
+  regels** over waar we die avond moeite mee hadden, cruijffiaans: kort, simpel, een beetje paradoxaal, in de
+  jullie-vorm ("Jullie hadden moeite met …"). Alleen maten met een verband (§9e), steeds deze avond tegenover het
+  normaal over alle andere wedstrijden, per mens per wedstrijd:
+  1. *Kansen tegen*: schoten op doel van de tegenstander.
+  2. *Eigen kansen*: onze schoten op doel.
+  3. *Afronding*: goals per schot op doel (minstens acht schoten op doel die avond), want genoeg kansen zonder goals is
+     iets anders dan geen kansen.
+  4. *Luchtduels achterin* (zwak verband, alleen bij een grote afwijking): onze gewonnen koppen achterin min die van hen.
+  Een maat telt als hij in de slechte richting minstens 25 % afwijkt én minstens 1,5 standaardfout (spreiding per
+  wedstrijd / √aantal wedstrijden). De sterkste twee winnen.
+  Daarnaast **tegen wie**: hadden de niet-gewonnen potten van de avond (minstens twee) een kenmerk van de tegenstander
+  gemeen (§9a, *Waar we verliezen*, plus *twee of meer menselijke aanvallers én een menselijke verdediger*) dat in de
+  gewonnen potten veel minder voorkwam (minstens de helft minder vaak, of er waren geen zeges), dan staat dat erbij. Waren
+  die tegenstanders gemiddeld sterker (100 of meer), dan zeggen we dat in plaats van het kenmerk: na correctie voor
+  sterkte maken kenmerken geen verschil (§9e). Het is een beschrijving van de avond, geen oorzaak.
+  Niets gevonden: "Geen zwak punt te vinden. Als het goed gaat, moet je niets veranderen." Bij een sessie die bezig
+  is, staat de kaart er niet. Achter de i-knop: waarmee vergeleken is en waarom alleen deze maten.
 - **Wedstrijd**: uitslag, sterkte en mensen van de tegenstander; verloop op basis van kansen; beste speler. Niet meer:
   het verschil met normaal.
 - **Speler, algemeen** (sinds 28 oktober 2026, twee of drie zinnen, geen afgeleide "rollen" meer):
@@ -496,8 +514,12 @@ meegaf. Kenmerken, alleen wat EA geeft (mensen en hun ingestelde positie; AI per
 - minstens twee menselijke aanvallers; minstens drie menselijke middenvelders;
 - sterker volgens EA (skill rating ≥ 100 hoger dan de onze nu).
 
-Een kenmerk telt pas als beide groepen minstens acht wedstrijden hebben. Duidelijk verschil: minstens 15
-procentpunt. De duidelijke slechte kenmerken staan bovenaan (rood, hooguit drie open, de grootste verschillen eerst), elk met één praktische tip; duidelijk goede
+Een kenmerk telt pas als beide groepen minstens acht wedstrijden hebben. Sinds 3 november 2026 (§9e) beslist niet
+het winstpercentage maar het **doelsaldo tov verwachting** (§3, dus gecorrigeerd voor sterkte en mensen): duidelijk is
+een verschil van minstens een halve goal per wedstrijd dat ook minstens twee keer zo groot is als de onzekerheid
+(standaardfout van het verschil). De balken tonen nog wel het winstpercentage met en zonder, want dat snapt iedereen;
+is het verschil in winst groot maar na correctie niet duidelijk, dan staat erbij *komt door hoe sterk ze waren*.
+Vroeger (tot 3 november 2026): duidelijk bij minstens 15 procentpunt winst, zonder correctie. De duidelijke slechte kenmerken staan bovenaan (rood, hooguit drie open, de grootste verschillen eerst), elk met één praktische tip; duidelijk goede
 (blauw) daarna als *Hier halen we punten*; de rest, zonder duidelijk verschil, achter een knop. Eerlijk erbij (achter de
 i-knop): de kenmerken overlappen (wie meer mensen heeft, heeft vaker een menselijke verdediger), dus het zijn signalen,
 geen oorzaken. Geen kenmerk duidelijk: dat zeggen, niets verzinnen. In het kort bovenaan één zin met de twee grootste. De tips:
@@ -536,8 +558,10 @@ trofeeënkast, **Nieuws** (kleine kaartjes: beeld links, tekst rechts; op telefo
 en Selectie. *Laatste uitslagen* is sinds 3 november 2026 weg: de laatste sessie toont ze al.
 
 **Gevaarlijkste spelers** (herzien op 3 november 2026). Zes tegels: **Topscorer** en **Topassist** (meeste goals en
-assists over de gevolgde wedstrijden, klein per wedstrijd), dan vier scores: **Aanvallend**, **Creëren**,
-**Verdedigend** en **Compleet**.
+assists over de **hele carrière bij de club volgens EA**, dezelfde totalen als *Algemeen*, klein per wedstrijd; sinds
+3 november 2026, daarvoor alleen de gevolgde wedstrijden, waardoor op één pagina twee verschillende aantallen goals
+stonden), dan vier scores: **Aanvallend**, **Creëren**, **Verdedigend** en **Compleet**. Elk uitlegscherm toont
+**alle** spelers van de selectie; wie te weinig wedstrijden heeft, staat onderaan met een streepje.
 
 *Hoe een score ontstaat* (zoals fantasy football, daarna een percentiel zoals scoutingsites):
 1. Per wedstrijd punten, met vaste waarden die iedereen kan narekenen:
@@ -546,8 +570,9 @@ assists over de gevolgde wedstrijden, klein per wedstrijd), dan vier scores: **A
    - Verdedigend: gewonnen tackle, onderschepping, kopduel achterin, blok en wegwerken elk 1; balverlies op eigen
      helft (eigen derde) −1.
 2. Die punten vergelijken we met elke keer dat een mens in onze wedstrijden speelde, wij én de tegenstanders
-   (ruim 650 keer; alleen met gebeurtenissen van EA en minstens 45 minuten). Per wedstrijd: beter dan hoeveel procent
-   van al die spelers (gelijk telt half).
+   (ruim 650 keer; alleen met gebeurtenissen van EA en minstens 45 minuten), **in een team met evenveel mensen**
+   (twee of drie, vier, vijf, zes of meer; §9e, *Teamgrootte*). Per wedstrijd: beter dan hoeveel procent van die
+   spelers (gelijk telt half).
 3. De score is het gemiddelde daarvan over alle wedstrijden van de speler: **64 = in een gemiddelde wedstrijd beter
    dan 64 van de 100 spelers op het veld; 50 is gemiddeld.** Compleet is het gemiddelde van de drie scores.
 Wie meetelt: minstens vijf zulke wedstrijden.
@@ -560,7 +585,9 @@ Wie meetelt: minstens vijf zulke wedstrijden.
   wie veel verdedigt, heeft vaak ook de tegenstander vaak aan de bal. De verdedigende score meet dus geslaagd
   verdedigend werk, niet of er goals zijn voorkomen. Dat staat er eerlijk bij.
 - Balwinst in het algemeen (ook hoog op het veld, druk zetten) telt niet als verdedigen: dat liet eerder wie veel
-  druk zet bovenaan staan als verdediger. Kopduels achterin en balverlies op eigen helft wel.
+  druk zet bovenaan staan als verdediger. Kopduels achterin en balverlies op eigen helft wel. Druk zetten valt ook
+  onder geen ander domein: het hangt niet samen met winnen (§9e). Het uitlegscherm van Verdedigend zegt dat.
+- Herzien met de methode van §9e (3 november 2026): de waarden blijven, de vergelijking gaat per teamgrootte.
 - Vervallen: de eerste versie (3 november) gaf per cijfer een score tegenover alleen onze zes spelers (50 + 10 per
   standaardafwijking). Lastig uit te leggen, en zes spelers is geen vergelijking.
 
@@ -581,7 +608,11 @@ telefoon smallere banen en rondjes zonder naam.
 **Wij tegen hen** (wedstrijd): per cijfer één regel met beide totalen en een verdeelde balk; een tik klapt de regel
 open met alle spelers van beide kanten als balkjes (wij blauw, zij oranje), de beste bovenaan. Vervangt de losse
 ranglijstkaartjes *Spelers* op de wedstrijdpagina. Nieuwe cijfers: één regel in `VS_STATS` (`wedstrijd.js`).
-**Trofeeënkast**: wat EA per afgesloten seizoen bewaart (`club/playoffAchievements`): de divisie met EA's eigen
+**Trofeeënkast** (stijl sinds 3 november 2026): geen kaartjes, want die lijken aan te tikken en dat zijn ze niet. Elke
+prijs staat als voorwerp in de kast: EA's gouden badge in een **gouden schaal** (een getekende erebord-schaal met rand
+en spiegel, vaste kleuren los van het thema), op een smal plankje, met eronder gegraveerd het seizoen, de divisie en
+hoe ver we kwamen. Geen rand, geen achtergrond, geen hover.
+Inhoud: wat EA per afgesloten seizoen bewaart (`club/playoffAchievements`): de divisie met EA's eigen
 divisiebadge (`divisioncrest<n>.png` op EA's CDN, met onze beker als terugval) en hoe ver we kwamen (eindgroep 1
 *Kampioen*, 6 *Deelnemer*, daartussen *Eindgroep n*), plus de beste divisie ooit. EA's schaal begint bij Elite: 1 is
 Elite, 2 is Divisie 1 (zoals andere apps het tonen). Seizoen 1: Divisie 1, deelnemer. Promoties en degradaties staan
@@ -589,7 +620,10 @@ niet in de kast.
 **Pack**: de reveal (`pack.js`) speelt op de sessiepagina één keer voor de nieuwste afgeronde sessie die deze kijker
 nog niet zag. Op de sessielijst en de Club staat bij zo'n sessie (en bij de testsessie) een knop *Openen*: een tik speelt
 de reveal op dezelfde pagina; verversen speelt hem niet opnieuw af.
-**Ranglijstkaartjes**: elke regel even hoog, of er één of twee regels in staan. Het totaal (team) staat onderaan over de
+**Ranglijstkaartjes**: **altijd alle spelers** (sinds 3 november 2026): elk kaartje in een rij toont iedereen die op
+één van de kaartjes in die rij staat (bij een sessie iedereen die meespeelde, bij *Algemeen* de hele selectie). Wie
+voor een maat te weinig heeft (te weinig pogingen of wedstrijden), staat onderaan met een streepje en zonder plek, zodat
+er nooit ineens een speler ontbreekt. Elke regel even hoog, of er één of twee regels in staan. Het totaal (team) staat onderaan over de
 hele breedte van het kaartje, met een lijn erboven en een net iets lichtere achtergrond. Bij een percentage klein de breuk
 zonder woorden: conversie *5 / 10* (goals / schoten), passes *gelukt / pogingen*.
 
@@ -875,6 +909,56 @@ Dezelfde kaart staat klein (56 %) in de ledenrij op het Clubhouse en in de top d
 daar iets groter gezet zodat ze klein leesbaar blijven. Eén functie (`PlayerCard.html`) maakt beide, met SVG-ids per speler.
 
 De tier staat ook als `title` op de kaart, met de sessie waarop hij rust.
+
+## 9e. Verbanden: methode en uitkomst (3 november 2026)
+
+**Methode** (zo toetsen we elk nieuw verband, en zo is dit gedaan):
+1. **Eenheid is de wedstrijd**, uitkomst het doelsaldo. Alleen league en playoff, geen opgave, alleen wedstrijden met
+   bekende tegenstanders en gebeurtenissen (68 wedstrijden).
+2. **Geen uitkomst als verklaring**: goals en assists doen niet mee (die zíjn het doelsaldo). Alleen procesmaten.
+3. **Wij min zij, per mens**: EA telt alleen mensen, dus een team met meer mensen telt vanzelf meer. Elke maat is het
+   gemiddelde per mens, en het verschil met de tegenstander haalt het tempo van de wedstrijd eruit (wie veel verdedigt,
+   heeft de tegenstander vaak aan de bal).
+4. **Corrigeren voor sterkte en mensen**: partiële rangcorrelatie (Spearman) met het ratingverschil en het verschil in
+   mensen eruit gehaald. Zonder die correctie lijkt alles wat bij sterke tegenstanders hoort een oorzaak.
+5. **Onzekerheid**: 95%-interval met bootstrap; **Benjamini-Hochberg** over alle ~90 toetsen (q < 0,1), anders vind je
+   bij zoveel maten altijd wel iets.
+6. **Herhaling**: de even en oneven wedstrijden apart moeten dezelfde kant op wijzen.
+Alleen wat alle zes doorstaat, noemen we een verband. De rest heet *geen duidelijk verband*, hoe aannemelijk het ook klinkt.
+
+**Uitkomst (teamniveau, partieel)**:
+| Maat | Samenhang met doelsaldo | Oordeel |
+|---|---|---|
+| Schoten op doel, wij min zij | 0,60 (helften 0,62 en 0,54) | **verband** |
+| Schoten, wij min zij | 0,56 | **verband** |
+| Schoten op doel tegen | −0,55 | **verband** |
+| Sterkte tegenstander (rating) | −0,46 | **verband** |
+| Eigen schoten op doel | 0,38 | **verband** |
+| Luchtduels achterin, wij min zij | 0,34 (q 0,05; helften 0,23 en 0,45) | zwak verband |
+| Steekpasses, wij min zij; balwinst op het middenveld | 0,29 (q 0,14) | aanwijzing, geen verband |
+| Passnauwkeurigheid, aantal passes, dribbels, uitgespeeld, balverlies (elk derde), uit positie, geen goede optie | tussen −0,15 en 0,15 | geen verband |
+| **Balwinst op hun helft (druk zetten)** | 0,01 tot 0,05 | geen verband |
+| Tackles, onderscheppingen | 0,12 tot 0,19 | geen verband |
+
+**Kenmerken van de tegenstander** (*Waar we verliezen*): zonder correctie lijkt er veel te spelen (twee of meer menselijke
+aanvallers 41% winst tegen 71% zonder; meer mensen 33% tegen 56%). Na correctie voor sterkte en mensen (doelsaldo tov
+verwachting, §3) is **geen enkel kenmerk** duidelijk (alle p > 0,4). Het verschil in winst komt door hoe sterk ze zijn,
+niet door hoe ze zijn opgesteld. Daarom oordeelt *Waar we verliezen* sinds 3 november 2026 op het doelsaldo tov verwachting.
+
+**Spelersniveau** (608 keer een mens met 45+ minuten, doelsaldo van het eigen team, gecorrigeerd voor sterkte, mensen
+en teamgrootte): goals 0,28, assists 0,29, tweede assists 0,18, schoten op doel 0,17, steekpasses 0,12, luchtduels
+achterin 0,12, uitgespeeld 0,09; tackles, onderscheppingen, blokken en balwinst in welk derde ook rond 0. De
+puntwaarden van *Gevaarlijkste spelers* sluiten daar goed op aan en blijven; mislukte passes kosten (−0,2) of niet
+verandert de samenhang nauwelijks (0,31 tegen 0,29).
+
+**Teamgrootte** (logische fout tot 3 november 2026): punten per wedstrijd hangen sterk af van met hoeveel mensen je
+speelt. Aanvallend: 4,2 per wedstrijd met drie mensen, 3,0 met zes. Wie vaak in een klein team speelt, kreeg daardoor een
+te hoge score. Sinds 3 november 2026 vergelijkt de score elke wedstrijd alleen met spelers uit een team van dezelfde
+grootte (twee of drie, vier, vijf, zes of meer mensen; elke groep 95 keer of meer).
+
+**Druk zetten** (balwinst op hun helft) staat bewust in geen enkele score: het hangt in onze wedstrijden niet samen met
+winnen, op team- noch spelersniveau. Een tackle of onderschepping hoog op het veld telt wél mee bij Verdedigend, want
+daar maakt de plek niet uit.
 
 ## 9d. Verbanden: weggehaald, eerst naar de tekentafel
 

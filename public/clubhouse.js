@@ -61,10 +61,25 @@ const CUP = `<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient i
 const DIV_CREST = n => `https://media.contentapi.ea.com/content/dam/eacom/fc/pro-clubs/divisioncrest${n}.png`;
 const divName = n => !n ? '–' : n === 1 ? 'Elite' : `Divisie ${n - 1}`;
 const finishName = g => !g ? '' : g === 1 ? 'Kampioen' : g >= 6 ? 'Deelnemer' : `Eindgroep ${g}`;
+// De gouden schaal (coach-logica §9a, Trofeeënkast): rand met kraaltjes, een verdiepte spiegel en een glans, vaste
+// kleuren los van het thema. EA's badge ligt in het midden. Ids per schaal, zodat de verlopen niet botsen.
+const PLATE = i => `<svg class="tr-plate-svg" viewBox="0 0 120 120" aria-hidden="true"><defs>
+    <linearGradient id="pl-rim${i}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff3c4"/><stop offset=".35" stop-color="#e6bd57"/><stop offset=".7" stop-color="#a77c1f"/><stop offset="1" stop-color="#5f430c"/></linearGradient>
+    <radialGradient id="pl-well${i}" cx=".5" cy=".42" r=".6"><stop offset="0" stop-color="#fbe7a4"/><stop offset=".55" stop-color="#d4a73f"/><stop offset="1" stop-color="#7a5812"/></radialGradient>
+    <linearGradient id="pl-shine${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
+  <circle cx="60" cy="60" r="58" fill="url(#pl-rim${i})"/>
+  <circle cx="60" cy="60" r="58" fill="none" stroke="#3d2a05" stroke-opacity=".45" stroke-width="1"/>
+  ${Array.from({ length: 36 }, (_, k) => { const a = k * Math.PI / 18; return `<circle cx="${(60 + 52.5 * Math.cos(a)).toFixed(2)}" cy="${(60 + 52.5 * Math.sin(a)).toFixed(2)}" r="1.5" fill="#fff4cc" fill-opacity=".8"/>`; }).join('')}
+  <circle cx="60" cy="60" r="47" fill="#6b4c0f"/>
+  <circle cx="60" cy="61" r="45" fill="url(#pl-well${i})"/>
+  <circle cx="60" cy="60" r="45" fill="none" stroke="#fff4cc" stroke-opacity=".35" stroke-width="1"/>
+  <path d="M18 46a44 44 0 0 1 84 0a52 30 0 0 0-84 0z" fill="url(#pl-shine${i})"/></svg>`;
 function trophies() {
   const t = DATA.trophies, el = $('#trophies'); if (!t) { el.innerHTML = ''; return; }
-  const badge = n => `<span class="tr-crest"><img src="${DIV_CREST(n)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add('no-img')">${CUP}</span>`;
-  const item = (cls, img, title, sub, kicker) => `<li class="trophy ${cls}"><span class="tr-img">${img}</span><span class="tr-text">${kicker ? `<small class="tr-kicker">${kicker}</small>` : ''}<b>${title}</b><small>${sub}</small></span></li>`;
+  let i = 0;
+  const badge = n => `<span class="tr-plate">${PLATE(i++)}<span class="tr-crest"><img src="${DIV_CREST(n)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add('no-img')">${CUP}</span></span>`;
+  // Een voorwerp in de kast, geen kaartje: niets om op te tikken (coach-logica §9a).
+  const item = (cls, img, title, sub, kicker) => `<li class="trophy ${cls}">${img}<span class="tr-shelf" aria-hidden="true"></span><span class="tr-text">${kicker ? `<small class="tr-kicker">${kicker}</small>` : ''}<b>${title}</b><small>${sub}</small></span></li>`;
   const items = [
     ...[...(t.seasons || [])].sort((a, b) => b.season - a.season).map(x => item('season', badge(x.division), divName(x.division), finishName(x.group), `Seizoen ${x.season ?? '?'}`)),
     t.bestDivision ? item('best', badge(t.bestDivision), divName(t.bestDivision), 'Beste divisie ooit', 'Record') : '',
@@ -72,21 +87,6 @@ function trophies() {
   el.innerHTML = items.join('') || '<li class="empty">Nog geen afgesloten seizoen.</li>';
 }
 
-
-// ---------- per speler: totalen uit de gevolgde wedstrijden ----------
-function playerTotals(ms) {
-  const out = new Map();
-  for (const m of ms) for (const p of m.players) {
-    const t = out.get(p.name) || { name: p.name, n: 0, nEv: 0, g: 0, a: 0, sa: 0, mom: 0, ratings: [], pm: 0, pa: 0, tm: 0, ta: 0, won: 0, shots: 0, inter: 0, beaten: 0, through: 0, airA: 0, airD: 0, sot: 0, paEv: 0, aEv: 0 };
-    t.n++; t.g += p.goals || 0; t.a += p.assists || 0; t.mom += p.mom || 0; if (p.rating !== null) t.ratings.push(p.rating);
-    t.pm += p.passesMade || 0; t.pa += p.passAttempts || 0; t.tm += p.tacklesMade || 0; t.ta += p.tackleAttempts || 0; t.shots += p.shots || 0;
-    if (p.ev) { t.nEv++; t.sa += p.ev.second_assists || 0; t.won += p.ev.possession_won || 0; t.inter += p.ev.interceptions || 0;
-      t.beaten += p.ev.players_beaten || 0; t.through += p.ev.through_balls || 0; t.airA += p.ev.aerial_duels_won_attacking || 0; t.airD += p.ev.aerial_duels_won_defending || 0;
-      t.sot += p.ev.shots_on_target || 0; t.paEv += p.passAttempts || 0; t.aEv += p.assists || 0; }
-    out.set(p.name, t);
-  }
-  return [...out.values()].map(t => ({ ...t, involved: t.g + t.a + t.sa, rating: avg(t.ratings) }));
-}
 
 // Ranglijst: negen stats die iedereen snapt (coach-logica §9a). v = waarde om op te sorteren, main = wat er staat,
 // sub = het totaal eronder. null = niet genoeg data.
@@ -101,7 +101,7 @@ const CAREER = 'Iedereen in de selectie, over alle wedstrijden voor de club volg
 const career = (key, label, about, v, main, sub, tie) => ({ key, label, about, who: CAREER,
   rows: DATA.members.filter(m => m.gamesPlayed > 0 && v(m) !== null && v(m) !== undefined).sort((a, b) => v(b) - v(a) || tie(b) - tie(a)).map(m => ({ name: m.name, main: main(m), sub: sub(m) })) });
 function clubCards() {
-  const per = (x, n) => n ? (x / n).toFixed(2) : '–';
+  const per = (x, n) => n ? f1(x / n) : '–'; // één decimaal, zoals overal (coach-logica §9)
   return [
     career('rating', 'Rating', 'De gemiddelde matchrating over alle wedstrijden voor de club, zoals EA die bijhoudt (één decimaal; bij gelijk telt wie meer wedstrijden speelde).', m => m.ratingAve, m => f1(m.ratingAve), m => `${m.gamesPlayed} wedstrijden`, m => m.gamesPlayed),
     career('goals', 'Goals', 'Doelpunten over de hele carrière bij de club volgens EA.', m => m.goals, m => String(m.goals), m => `${per(m.goals, m.gamesPlayed)} per wedstrijd`, m => -m.gamesPlayed),
@@ -136,27 +136,33 @@ const DOMAINS = [
 ];
 const pointsOf = (dom, p) => dom.parts.reduce((a, x) => a + x.w * x.v(p), 0);
 const countsForScore = p => p.ev && (p.secondsPlayed ?? 5400) >= 2700; // gebeurtenissen van EA en minstens 45 minuten
+// Teamgrootte (coach-logica §9e): wie met minder mensen speelt, krijgt meer ballen en dus meer punten. Elke wedstrijd
+// vergelijken we daarom alleen met spelers uit een team met evenveel mensen.
+const sizeGroup = n => n <= 3 ? 3 : n >= 6 ? 6 : n;
 function dangerScores(ms) {
-  const ref = Object.fromEntries(DOMAINS.map(d => [d.key, []]));
-  for (const m of ms) for (const p of [...m.players, ...m.opponentPlayers]) if (countsForScore(p)) for (const d of DOMAINS) ref[d.key].push(pointsOf(d, p));
-  const pctl = (k, v) => { let lo = 0, eq = 0; for (const x of ref[k]) { if (x < v) lo++; else if (x === v) eq++; } return 100 * (lo + eq / 2) / ref[k].length; };
+  const ref = {};
+  const refOf = (k, g) => (ref[`${k}${g}`] ||= []);
+  for (const m of ms) for (const side of [m.players, m.opponentPlayers]) { const g = sizeGroup(side.length); for (const p of side) if (countsForScore(p)) for (const d of DOMAINS) refOf(d.key, g).push(pointsOf(d, p)); }
+  const pctl = (k, g, v) => { const list = refOf(k, g); let lo = 0, eq = 0; for (const x of list) { if (x < v) lo++; else if (x === v) eq++; } return 100 * (lo + eq / 2) / list.length; };
   const by = new Map();
-  for (const m of ms) for (const p of m.players) if (countsForScore(p)) {
+  for (const m of ms) { const g = sizeGroup(m.players.length); for (const p of m.players) if (countsForScore(p)) {
     const b = by.get(p.name) || { name: p.name, n: 0, d: Object.fromEntries(DOMAINS.map(d => [d.key, { pct: 0, pts: 0, parts: d.parts.map(() => 0) }])) };
-    b.n++; for (const d of DOMAINS) { const x = b.d[d.key], pts = pointsOf(d, p); x.pct += pctl(d.key, pts); x.pts += pts; d.parts.forEach((q, i) => { x.parts[i] += q.v(p); }); }
+    b.n++; for (const d of DOMAINS) { const x = b.d[d.key], pts = pointsOf(d, p); x.pct += pctl(d.key, g, pts); x.pts += pts; d.parts.forEach((q, i) => { x.parts[i] += q.v(p); }); }
     by.set(p.name, b);
-  }
-  const out = [...by.values()].filter(b => b.n >= 5);
+  } }
+  const all = [...by.values()], out = all.filter(b => b.n >= 5);
   for (const b of out) { for (const d of DOMAINS) { const x = b.d[d.key]; x.score = x.pct / b.n; x.pts /= b.n; x.parts = x.parts.map(v => v / b.n); } b.d.all = { score: DOMAINS.reduce((a, d) => a + b.d[d.key].score, 0) / DOMAINS.length }; }
-  return { out, refN: ref.att.length };
+  return { out, refN: Object.keys(ref).filter(k => k.startsWith('att')).reduce((a, k) => a + ref[k].length, 0), few: all.filter(b => b.n < 5) };
 }
 function threats(ms) {
-  const { out: S, refN } = dangerScores(ms);
-  const T = playerTotals(ms).filter(t => t.n >= 3);
-  const top = key => [...T].sort((a, b) => b[key] - a[key] || a.n - b.n);
+  const { out: S, refN, few } = dangerScores(ms);
+  // Topscorer en topassist: de carrièretotalen van EA, dezelfde als Algemeen (coach-logica §9a, Gevaarlijkste spelers).
+  const C = DATA.members.filter(m => m.gamesPlayed > 0).map(m => ({ name: m.name, n: m.gamesPlayed, g: m.goals || 0, a: m.assists || 0 }));
+  const top = key => [...C].sort((a, b) => b[key] - a[key] || a.n - b.n);
   const totalTile = (cls, label, key, unit) => { const t = top(key)[0]; return t && t[key] ? `<button type="button" class="threat ${cls}" data-dom="${key}">
       <span class="th-label">${label}</span><b class="th-name">${esc(proName(t.name))}</b>
       <span class="th-val"><b>${t[key]}</b><small>${unit}</small></span><small class="th-sub">${f1(t[key] / t.n)} per wedstrijd, in ${t.n}</small></button>` : ''; };
+  const roster = DATA.members.map(m => m.name);
   const doms = [...DOMAINS, { key: 'all', label: 'Compleet' }];
   const ranked = k => [...S].sort((a, b) => b.d[k].score - a.d[k].score);
   // Klein op de tegel: de twee onderdelen die de meeste punten gaven (bij Compleet de drie scores).
@@ -166,16 +172,17 @@ function threats(ms) {
     + doms.map(k => { const b = ranked(k.key)[0]; return b ? `<button type="button" class="threat ${k.key}" data-dom="${k.key}">
       <span class="th-label">${k.label}</span><b class="th-name">${esc(proName(b.name))}</b>
       <span class="th-val"><b>${Math.round(b.d[k.key].score)}</b><small>van 100</small></span><small class="th-sub">${esc(k.key === 'all' ? 'aanvallend, creëren en verdedigend samen' : subOf(b, k.key))}</small></button>` : ''; }).join('');
-  const explain = `Die punten vergelijken we met alle ${refN} keer dat een mens in onze wedstrijden speelde, wij én de tegenstanders (minstens 45 minuten). De score is het gemiddelde over alle wedstrijden: 64 betekent dat deze speler in een gemiddelde wedstrijd meer punten haalt dan 64 van de 100 spelers op het veld. 50 is gemiddeld.`;
+  const explain = `Die punten vergelijken we met alle ${refN} keer dat een mens in onze wedstrijden speelde, wij én de tegenstanders (minstens 45 minuten), en dan alleen met spelers uit een team met evenveel mensen: met minder mensen krijg je vanzelf meer ballen. De score is het gemiddelde over alle wedstrijden: 64 betekent dat deze speler in een gemiddelde wedstrijd meer punten haalt dan 64 van de 100 spelers op het veld. 50 is gemiddeld.`;
+  const fewRows = few.map(b => ({ name: b.name, main: null, sub: `${b.n} ${b.n === 1 ? 'wedstrijd' : 'wedstrijden'}, minstens vijf nodig` }));
   $('#threats').onclick = e => {
     const btn = e.target.closest('.threat'); if (!btn) return; const k = btn.dataset.dom;
-    if (k === 'g' || k === 'a') return openRankList({ label: k === 'g' ? 'Topscorer' : 'Topassist', about: `Het aantal ${k === 'g' ? 'goals' : 'assists'} over de gevolgde wedstrijden. Bij gelijk staat wie het in minder wedstrijden deed hoger.`, who: 'Minstens 3 gevolgde wedstrijden.',
-      rows: top(k).map(t => ({ name: t.name, main: String(t[k]), sub: `${f1(t[k] / t.n)} per wedstrijd, in ${t.n}` })) });
+    if (k === 'g' || k === 'a') return openRankList({ label: k === 'g' ? 'Topscorer' : 'Topassist', about: `Het aantal ${k === 'g' ? 'goals' : 'assists'} over de hele carrière bij de club volgens EA, ook van vóór deze app (dezelfde totalen als bij Algemeen). Bij gelijk staat wie het in minder wedstrijden deed hoger.`, who: CAREER,
+      rows: top(k).map(t => ({ name: t.name, main: String(t[k]), sub: `${f1(t[k] / t.n)} per wedstrijd, in ${t.n}` })) }, roster);
     const d = DOMAINS.find(x => x.key === k);
     openRankList({ label: k === 'all' ? 'Compleet' : `${d.label}`,
-      about: k === 'all' ? `Het gemiddelde van de scores voor aanvallend, creëren en verdedigend. Elk domein geeft per wedstrijd punten (tik op die tegel voor de waarden). ${explain}` : `Punten per wedstrijd: ${d.how}. ${explain}${k === 'def' ? ' Let op: dit meet geslaagd verdedigend werk, niet of er goals zijn voorkomen; dat hangt in onze wedstrijden nauwelijks samen.' : ''}`,
+      about: k === 'all' ? `Het gemiddelde van de scores voor aanvallend, creëren en verdedigend. Elk domein geeft per wedstrijd punten (tik op die tegel voor de waarden). ${explain}` : `Punten per wedstrijd: ${d.how}. ${explain}${k === 'def' ? ' Let op: dit meet geslaagd verdedigend werk, niet of er goals zijn voorkomen; dat hangt in onze wedstrijden nauwelijks samen. Balwinst op hun helft (druk zetten) telt in geen enkele score: in onze wedstrijden hangt het niet samen met winnen. Een tackle of onderschepping hoog op het veld telt hier wel.' : ''}`,
       who: 'Minstens vijf gevolgde wedstrijden van 45 minuten of langer met gebeurtenissen van EA.',
-      rows: ranked(k).map(b => ({ name: b.name, main: String(Math.round(b.d[k].score)), sub: k === 'all' ? subOf(b, 'all') : `${f1(b.d[k].pts)} punten p/w: ${d.parts.map((q, i) => q.fmt(b.d[k].parts[i])).join(' · ')}` })) });
+      rows: [...ranked(k).map(b => ({ name: b.name, main: String(Math.round(b.d[k].score)), sub: k === 'all' ? subOf(b, 'all') : `${f1(b.d[k].pts)} punten p/w: ${d.parts.map((q, i) => q.fmt(b.d[k].parts[i])).join(' · ')}` })), ...fewRows] }, roster);
   };
 }
 
@@ -193,7 +200,7 @@ function render() {
   const recent = newsArticles().slice(0, 5);
   $('#news').innerHTML = recent.length ? recent.map((a, i) => newsCard(a, { lead: i === 0 })).join('') : '<p class="empty">Nog geen nieuws: speel een avond, dan schrijft het zichzelf.</p>';
   PlayerCard.reveal($('#news'));
-  rankCards($('#rank-cards'), clubCards());
+  rankCards($('#rank-cards'), clubCards(), DATA.members.map(m => m.name)); // altijd de hele selectie
 
   // Selectie als spelerskaarten (playercard.js), gesorteerd op vorm: tier, dan de rating van de laatste sessie, dan wedstrijden.
   // De favoriet van wie de app gebruikt vooraan (coach-logica §9a), daarna op vorm.

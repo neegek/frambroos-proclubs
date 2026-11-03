@@ -113,7 +113,9 @@ alleen in Cloudflare.
   ronde knoppen naar de vorige en volgende sessie (`.ss-nav`, alleen als die bestaat); onder een paneel (`.ss-panel`, themakleuren) met W-G-V, Goals en
   Tegen (rechts uitgelijnd), rechts op dezelfde regel een ingetogen deelknop met menu (afbeelding delen of downloaden, afbeelding
   kopiëren, gegevens kopiëren als tekst),
-  en de wedstrijden als scrollbare `matchCard`-rij. De deelafbeelding
+  en de wedstrijden als scrollbare `matchCard`-rij. Daaronder *Waar het schuurde* (`renderStruggles` in `sessie.js`,
+  coach-logica §9: hooguit twee cruijffiaanse regels, alleen maten met een verband uit §9e, tegenstanderkenmerken uit
+  `OPP_TRAITS` in `common.js`, gedeeld met *Waar we verliezen*). De deelafbeelding
   (`shareSession`) tekent dezelfde kop; dan *Zo speelden we*: de radar met alle vlakken zichtbaar, standaard het team het felst, aantallen als totaal van de
   avond, assen Rating, Scoren, Creëren, Passen, Dribbelen, Verdedigen met uitleg achter de knop *Assen*; een tik op een naam licht die speler uit, nog een tik zet hem uit (eerst de knop *Team*); dan *Per wedstrijd* (`renderMatrix`: kolommen spelers met een minikaartje (foto, gemiddelde, naam in het kaartje, kleur van de plek zonder medaille; geen normaal), rijen
   wedstrijden, cellen in goud/zilver/brons/ijzer naar de plek in die rij, een tik op een cel opent `#cell-dialog` met wat de speler die wedstrijd deed; *Spelers deze sessie* is weg, de kaarten
@@ -132,6 +134,9 @@ alleen in Cloudflare.
   De nieuwste sessie krijgt na afloop één keer per kijker een pack-reveal (`playReveal` in `public/sessie.js`).
 - Biografie per speler: `bio` in `public/personas.js` (Jamal levert de tekst; verhaal, feiten, quotes en stem
   bouwen erop), op de spelerspagina als ingeklapt kaartje onder de spelerskaart.
+- Verbanden: eerst toetsen volgens coach-logica §9e (per mens, wij min zij, gecorrigeerd voor sterkte en mensen,
+  Benjamini-Hochberg, herhaling in twee helften). Ranglijstkaartjes tonen altijd alle spelers (`rankCards(el, cards,
+  roster)`; zonder getal onderaan met een streepje). Trofeeën zijn voorwerpen (gouden schaal, `PLATE` in `clubhouse.js`), geen kaartjes.
 - Geen vage verbanden: *Wat opvalt*, *Beste tweetallen*, *Wanneer het loopt*, *Patronen*, *Opvallend* (sessie) en
   *Impact* zijn op 27 oktober 2026 weggehaald (coach-logica §9d). Een nieuw verband eerst in coach-logica uitwerken.
 - Compact: kaarten 16 × 18 px binnenruimte, tegels 12 × 16 px, paginatitel 26 px met hooguit één korte regel eronder.
