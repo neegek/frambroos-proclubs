@@ -77,11 +77,12 @@ function trophies() {
 function playerTotals(ms) {
   const out = new Map();
   for (const m of ms) for (const p of m.players) {
-    const t = out.get(p.name) || { name: p.name, n: 0, nEv: 0, g: 0, a: 0, sa: 0, mom: 0, ratings: [], pm: 0, pa: 0, tm: 0, ta: 0, won: 0, shots: 0, inter: 0, beaten: 0, through: 0, air: 0 };
+    const t = out.get(p.name) || { name: p.name, n: 0, nEv: 0, g: 0, a: 0, sa: 0, mom: 0, ratings: [], pm: 0, pa: 0, tm: 0, ta: 0, won: 0, shots: 0, inter: 0, beaten: 0, through: 0, airA: 0, airD: 0, sot: 0, paEv: 0, aEv: 0 };
     t.n++; t.g += p.goals || 0; t.a += p.assists || 0; t.mom += p.mom || 0; if (p.rating !== null) t.ratings.push(p.rating);
     t.pm += p.passesMade || 0; t.pa += p.passAttempts || 0; t.tm += p.tacklesMade || 0; t.ta += p.tackleAttempts || 0; t.shots += p.shots || 0;
     if (p.ev) { t.nEv++; t.sa += p.ev.second_assists || 0; t.won += p.ev.possession_won || 0; t.inter += p.ev.interceptions || 0;
-      t.beaten += p.ev.players_beaten || 0; t.through += p.ev.through_balls || 0; t.air += (p.ev.aerial_duels_won_attacking || 0) + (p.ev.aerial_duels_won_defending || 0); }
+      t.beaten += p.ev.players_beaten || 0; t.through += p.ev.through_balls || 0; t.airA += p.ev.aerial_duels_won_attacking || 0; t.airD += p.ev.aerial_duels_won_defending || 0;
+      t.sot += p.ev.shots_on_target || 0; t.paEv += p.passAttempts || 0; t.aEv += p.assists || 0; }
     out.set(p.name, t);
   }
   return [...out.values()].map(t => ({ ...t, involved: t.g + t.a + t.sa, rating: avg(t.ratings) }));
@@ -109,24 +110,65 @@ function clubCards() {
   ];
 }
 
-// Gevaarlijkste spelers (coach-logica §9a): zes kleurige tegels, niet alleen scoren. Per tegel de beste over de
-// gevolgde wedstrijden (minstens vijf), met het getal per wedstrijd en klein de basis. Eventcijfers per wedstrijd
-// waarvan EA de gebeurtenissen gaf.
+// Gevaarlijkste spelers (coach-logica §9a): vier domeinen, elk uit meerdere facetten. Per facet een score tegenover
+// onze eigen spelers (50 = gemiddeld, 10 = één standaardafwijking, begrensd op 20–80); het domein is het gewogen
+// gemiddelde. Compleet: de drie domeinen, het zwakste telt dubbel. v = waarde (null = te weinig basis), fmt = in getallen.
+const pct0 = v => `${Math.round(100 * v)}%`;
+const DOMAINS = [
+  { key: 'att', cls: 'att', label: 'Aanvallend', about: 'Gevaar voor het doel, uit vijf facetten: goals per wedstrijd (telt dubbel), schoten op doel per wedstrijd, conversie (goals per schot, vanaf 15 schoten), tegenstanders voorbij per wedstrijd en gewonnen kopduels voorin (telt half).', facets: [
+    { label: 'goals', w: 2, v: t => t.g / t.n, fmt: v => `${f1(v)} goals` },
+    { label: 'op doel', w: 1, v: t => t.sot / t.nEv, fmt: v => `${f1(v)} op doel` },
+    { label: 'conversie', w: 1, v: t => t.shots >= 15 ? t.g / t.shots : null, fmt: v => `${pct0(v)} raak` },
+    { label: 'voorbij', w: 1, v: t => t.beaten / t.nEv, fmt: v => `${f1(v)} voorbij` },
+    { label: 'kopduels', w: 0.5, v: t => t.airA / t.nEv, fmt: v => `${f1(v)} kopduels` },
+  ] },
+  { key: 'pas', cls: 'pas', label: 'Passen', about: 'Gevaar met de bal aan de voet, uit zes facetten: assists plus tweede assists per wedstrijd (telt dubbel), passes per wedstrijd (hoeveel via deze speler loopt), passnauwkeurigheid, steekpasses per wedstrijd, het aandeel steekpasses in alle passes (risico, telt half) en het rendement: assists plus tweede assists per steekpass (vanaf 40 steekpasses).', facets: [
+    { label: 'assists', w: 2, v: t => (t.a + t.sa) / t.n, fmt: v => `${f1(v)} (tweede) assists` },
+    { label: 'passes', w: 1, v: t => t.pa / t.n, fmt: v => `${f1(v)} passes` },
+    { label: 'nauwkeurig', w: 1, v: t => t.pa >= 40 ? t.pm / t.pa : null, fmt: v => `${pct0(v)} passes goed` },
+    { label: 'steekpasses', w: 1, v: t => t.through / t.nEv, fmt: v => `${f1(v)} steekpasses` },
+    { label: 'risico', w: 0.5, v: t => t.paEv ? t.through / t.paEv : null, fmt: v => `${pct0(v)} steekpass` },
+    { label: 'rendement', w: 1, v: t => t.through >= 40 ? (t.aEv + t.sa) / t.through : null, fmt: v => `${f1(10 * v)} assists per 10 steekpasses` },
+  ] },
+  { key: 'def', cls: 'def', label: 'Verdedigend', about: 'Gevaar zonder bal, uit vijf facetten: gewonnen tackles per wedstrijd en onderscheppingen per wedstrijd (allebei anderhalf keer), tacklesucces (vanaf 15 tackles), balwinst per wedstrijd en gewonnen kopduels achterin (telt half).', facets: [
+    { label: 'tackles', w: 1.5, v: t => t.tm / t.n, fmt: v => `${f1(v)} tackles` },
+    { label: 'tacklesucces', w: 1, v: t => t.ta >= 15 ? t.tm / t.ta : null, fmt: v => `${pct0(v)} tackles raak` },
+    { label: 'onderschept', w: 1.5, v: t => t.inter / t.nEv, fmt: v => `${f1(v)} onderschept` },
+    { label: 'balwinst', w: 1, v: t => t.won / t.nEv, fmt: v => `${f1(v)} balwinst` },
+    { label: 'kopduels', w: 0.5, v: t => t.airD / t.nEv, fmt: v => `${f1(v)} kopduels` },
+  ] },
+];
+function dangerScores(ms) {
+  const T = playerTotals(ms).filter(t => t.n >= 5 && t.nEv >= 5);
+  const out = T.map(t => ({ t, d: {} }));
+  for (const dom of DOMAINS) {
+    for (const r of out) r.d[dom.key] = { s: 0, w: 0, f: [] };
+    for (const f of dom.facets) {
+      const xs = out.map(r => ({ r, v: f.v(r.t) })).filter(x => x.v !== null && Number.isFinite(x.v));
+      if (xs.length < 2) continue;
+      const mu = xs.reduce((a, x) => a + x.v, 0) / xs.length, sd = Math.sqrt(xs.reduce((a, x) => a + (x.v - mu) ** 2, 0) / xs.length) || 1;
+      for (const { r, v } of xs) { const z = Math.max(20, Math.min(80, 50 + 10 * (v - mu) / sd)); const c = r.d[dom.key]; c.s += f.w * z; c.w += f.w; c.f.push({ f, v, z }); }
+    }
+    for (const r of out) { const c = r.d[dom.key]; c.score = c.w ? c.s / c.w : null; }
+  }
+  for (const r of out) { const s = DOMAINS.map(d => r.d[d.key].score); r.d.all = { score: s.includes(null) ? null : (s.reduce((a, b) => a + b, 0) + Math.min(...s)) / 4 }; }
+  return out;
+}
 function threats(ms) {
-  const T = playerTotals(ms).filter(t => t.n >= 5);
-  const best = (f, ok = () => true) => T.filter(ok).map(t => ({ t, v: f(t) })).filter(x => x.v !== null).sort((a, b) => b.v - a.v)[0];
-  const ev = t => t.nEv >= 5;
-  const tiles = [
-    { cls: 'scorer', label: 'Topscorer', x: best(t => t.g / t.n), main: x => f1(x.v), unit: 'goals', sub: x => `${x.t.g} in ${x.t.n}${x.t.shots ? ` · ${Math.round(100 * x.t.g / x.t.shots)}% raak` : ''}` },
-    { cls: 'creator', label: 'Kansenmaker', x: best(t => (t.a + 0.7 * t.sa) / t.n), main: x => f1(x.t.a / x.t.n), unit: 'assists', sub: x => `${x.t.a} assists, ${x.t.sa} tweede` },
-    { cls: 'dribbler', label: 'Dribbelaar', x: best(t => t.beaten / t.nEv, ev), main: x => f1(x.v), unit: 'voorbij', sub: x => `${x.t.beaten} in ${x.t.nEv}` },
-    { cls: 'passer', label: 'Steekpasser', x: best(t => t.through / t.nEv, ev), main: x => f1(x.v), unit: 'steekpasses', sub: x => `${x.t.through} in ${x.t.nEv}` },
-    { cls: 'aerial', label: 'Kopsterk', x: best(t => t.air / t.nEv, ev), main: x => f1(x.v), unit: 'kopduels', sub: x => `${x.t.air} in ${x.t.nEv}` },
-    { cls: 'wall', label: 'Muur', x: best(t => t.tm / t.n + (t.nEv ? t.inter / t.nEv : 0)), main: x => f1(x.v), unit: 'afgepakt', sub: x => `${x.t.tm} duels, ${x.t.inter} onderschept` },
-  ];
-  $('#threats').innerHTML = tiles.map(k => k.x ? `<a class="threat ${k.cls}" href="spelers.html#${encodeURIComponent(k.x.t.name)}">
-      <span class="th-label">${k.label}</span><b class="th-name">${esc(proName(k.x.t.name))}</b>
-      <span class="th-val"><b>${k.main(k.x)}</b><small>${k.unit} p/w</small></span><small class="th-sub">${esc(k.sub(k.x))}</small></a>` : '').join('');
+  const S = dangerScores(ms);
+  const doms = [...DOMAINS, { key: 'all', cls: 'all', label: 'Compleet', about: 'Wie op alle fronten gevaarlijk is: de scores voor aanvallend, passen en verdedigend samen, waarbij het zwakste domein dubbel telt. Wie overal goed is, wint het van wie in één ding uitblinkt.' }];
+  const subOf = (r, k) => k === 'all' ? DOMAINS.map(d => `${d.label.toLowerCase()} ${Math.round(r.d[d.key].score)}`).join(' · ')
+    : [...r.d[k].f].sort((a, b) => b.f.w * (b.z - 50) - a.f.w * (a.z - 50)).slice(0, 2).map(x => x.f.fmt(x.v)).join(' · ');
+  const ranked = k => S.filter(r => r.d[k].score !== null).sort((a, b) => b.d[k].score - a.d[k].score);
+  $('#threats').innerHTML = doms.map(k => { const r = ranked(k.key)[0]; return r ? `<button type="button" class="threat ${k.cls}" data-dom="${k.key}">
+      <span class="th-label">${k.label}</span><b class="th-name">${esc(proName(r.t.name))}</b>
+      <span class="th-val"><b>${Math.round(r.d[k.key].score)}</b><small>score</small></span><small class="th-sub">${esc(subOf(r, k.key))}</small></button>` : ''; }).join('');
+  $('#threats').onclick = e => {
+    const b = e.target.closest('.threat'); if (!b) return; const k = doms.find(x => x.key === b.dataset.dom);
+    openRankList({ label: `${k.label} gevaarlijk`, about: `${k.about} Per facet een score tegenover onze eigen spelers: 50 is de gemiddelde Frambroos-speler.`,
+      who: 'Minstens vijf gevolgde wedstrijden, waarvan vijf met gebeurtenissen van EA. Alleen de wedstrijden die deze app volgt.',
+      rows: ranked(k.key).map(r => ({ name: r.t.name, main: String(Math.round(r.d[k.key].score)), sub: k.key === 'all' ? subOf(r, 'all') : r.d[k.key].f.map(x => x.f.fmt(x.v)).join(' · ') })) });
+  };
 }
 
 function render() {
@@ -143,7 +185,6 @@ function render() {
   const recent = newsArticles().slice(0, 5);
   $('#news').innerHTML = recent.length ? recent.map((a, i) => newsCard(a, { lead: i === 0 })).join('') : '<p class="empty">Nog geen nieuws: speel een avond, dan schrijft het zichzelf.</p>';
   PlayerCard.reveal($('#news'));
-  $('#results').innerHTML = ms.slice(-4).reverse().map(m => matchCard(m, { own: DATA.snapshot?.skillRating })).join('') || '<p class="muted">Nog geen wedstrijden.</p>';
   rankCards($('#rank-cards'), clubCards());
 
   // Selectie als spelerskaarten (playercard.js), gesorteerd op vorm: tier, dan de rating van de laatste sessie, dan wedstrijden.

@@ -372,7 +372,7 @@ op de clubpagina's van de Premier League). Van boven naar beneden:
    uitslagen (1 = winst, 2 = verlies, 3 = gelijk, −1 = leeg), geen seizoensstand; de divisieregels (`settings`) slaan we
    wel op voor als dat ooit kan.
 3. **Nieuws**: één kaart met het nieuwste artikel en een link naar de nieuwspagina (`nieuws.html`) met alle artikelen.
-4. **Laatste uitslagen**: de laatste vier wedstrijden als `matchCard`, met een link naar alle wedstrijden.
+4. **Laatste uitslagen**: weg sinds 3 november 2026 (de laatste sessie toont ze al).
 5. **Topspelers**: opgegaan in *Algemeen* (vier ranglijstkaartjes over de carrière; zie verderop).
    Een tik op een kaartje opent geen speler maar een **uitlegscherm** over die ranglijst: waar de score op gebaseerd
    is, wie meetelt (minimaal aantal wedstrijden of pogingen) en de hele lijst met de onderliggende aantallen.
@@ -531,14 +531,30 @@ het kleine cijfer (aantal wedstrijden, of de breuk bij percentages). Zo zie je h
 erin, ook het nieuws. Volgorde: de **kop** in clubkleuren (een verloop van paars naar geel, geen stadion) met logo,
 naam, skill rating en divisie, daarin de **balans van het seizoen** (W-G-V groot met balk en winstpercentage; goals,
 tegen, saldo en de nul) en de laatste tien als rondjes; geen aparte kaart *Seizoen* en geen chips *In het kort* meer.
-Dan **Gevaarlijkste spelers** (sinds 2 november 2026 zes kleurige tegels, niet alleen scoren: topscorer in goals per
-wedstrijd (klein de conversie), kansenmaker in assists per wedstrijd (gekozen op assists plus 0,7 × tweede assists),
-dribbelaar in uitgespeelde tegenstanders per wedstrijd, steekpasser in geslaagde steekpasses per wedstrijd, kopsterk in
-gewonnen luchtduels per wedstrijd (aanvallend en verdedigend), muur in gewonnen tackles plus onderscheppingen per
-wedstrijd; minstens vijf gevolgde wedstrijden; de eventcijfers per wedstrijd waarvan EA de gebeurtenissen gaf, alleen
-codes die in docs/event-codes.md *waarschijnlijk* zijn; drie naast elkaar, op telefoon twee), de laatste sessie en de
-trofeeënkast, **Nieuws** (kleine kaartjes: beeld links, tekst rechts; op telefoon de laatste vijf als rij), laatste
-uitslagen, Algemeen en Selectie. Meer lucht tussen de kaarten (20 px). Op telefoon staat de laatste sessie als
+Dan **Gevaarlijkste spelers** (zie hieronder), de laatste sessie en de
+trofeeënkast, **Nieuws** (kleine kaartjes: beeld links, tekst rechts; op telefoon de laatste vijf als rij), Algemeen
+en Selectie. *Laatste uitslagen* is sinds 3 november 2026 weg: de laatste sessie toont ze al.
+
+**Gevaarlijkste spelers** (sinds 3 november 2026). Vier tegels, elk een domein, en elk domein uit meerdere facetten,
+zodat één cijfer (veel steekpasses) niet genoeg is. Per facet een score tegenover onze eigen spelers: 50 is de
+gemiddelde Frambroos-speler, 10 punten is één standaardafwijking (begrensd op 20 en 80). Het domein is het gewogen
+gemiddelde van zijn facetten; een facet zonder genoeg basis telt niet mee en de rest weegt dan zwaarder. Wie meetelt:
+minstens vijf gevolgde wedstrijden, waarvan vijf met gebeurtenissen van EA. Alleen eventcodes die in
+docs/event-codes.md *waarschijnlijk* zijn.
+- **Aanvallend**: goals p/w (×2), schoten op doel p/w, conversie (goals / schoten, vanaf 15 schoten), tegenstanders
+  voorbij p/w, gewonnen kopduels voorin p/w (×0,5).
+- **Passen**: assists plus tweede assists p/w (×2), passes p/w (hoeveel loopt via deze speler), passnauwkeurigheid
+  (vanaf 40 passes), geslaagde steekpasses p/w, aandeel steekpasses in alle passes (×0,5; risico), en rendement:
+  assists plus tweede assists per steekpass (vanaf 40 steekpasses, anders telt toeval te zwaar). Zo telt risico mee, maar ook of het iets oplevert
+  en of de rest van het spel klopt.
+- **Verdedigend**: gewonnen tackles p/w (×1,5), tacklesucces (vanaf 15 tackles), onderscheppingen p/w (×1,5), balwinst
+  p/w, gewonnen kopduels achterin p/w (×0,5).
+- **Compleet**: de drie domeinen samen, waarbij het zwakste dubbel telt ((A + P + V + zwakste) / 4): wie overal goed is,
+  wint het van wie in één ding uitblinkt.
+
+Op de tegel: het domein, de naam, de score groot en klein de twee facetten die het meest bijdragen (gewicht maal afstand tot 50), in
+gewone getallen. Een tik opent het uitlegscherm (`#rank-dialog`) met de facetten en de hele lijst, per speler de
+score en alle facetten in getallen. Meer lucht tussen de kaarten (20 px). Op telefoon staat de laatste sessie als
 dezelfde kaart als in de sessielijst (`sessionCardHtml`) met het label *Huidige sessie* of *Laatste sessie*.
 **Selectie** (Spelers): per speler de spelerskaart groter, met rechts de titel en de biografie, visueel afgekapt
 (twee regels op telefoon, drie op een tablet, vier op een groot scherm; geen eigen tekst); linksboven in de rij een zwevend sterretje om de favoriet te kiezen (vol als

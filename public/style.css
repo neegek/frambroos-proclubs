@@ -1469,10 +1469,11 @@ a.squad-row:hover { border-color: var(--brand); }
   .season .kort-label { min-width: 0; font-size: 12px; }
 }
 /* Gevaarlijkste spelers: vier kleurige tegels, niet scrollbaar. */
-.threat-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 8px; }
+.threat-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 8px; }
 .threat { --c: #c9a548; display: grid; gap: 2px; align-content: start; padding: 12px 14px; border-radius: 14px; text-decoration: none; color: var(--ink);
   background: linear-gradient(160deg, color-mix(in srgb, var(--c) 30%, var(--panel)), color-mix(in srgb, var(--c) 8%, var(--panel))); border: 1px solid color-mix(in srgb, var(--c) 45%, var(--panel-border)); min-width: 0; }
-.threat.scorer { --c: #e0a526; } .threat.aerial { --c: #e2574c; } .threat.dribbler { --c: #a477e8; } .threat.passer { --c: #23a8b8; } .threat.creator { --c: #3f8be0; } .threat.wall { --c: #2fa36b; }
+.threat.att { --c: #e2574c; } .threat.pas { --c: #3f8be0; } .threat.def { --c: #2fa36b; } .threat.all { --c: #e0a526; }
+button.threat { font: inherit; text-align: left; cursor: pointer; }
 .th-label { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); }
 .th-name { font-size: 16px; font-weight: 750; letter-spacing: -0.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .th-val { display: flex; align-items: baseline; gap: 6px; margin-top: 4px; }
@@ -1480,7 +1481,8 @@ a.squad-row:hover { border-color: var(--brand); }
 .th-val small { font-size: 11.5px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .th-sub { font-size: 11.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .threat:hover { border-color: color-mix(in srgb, var(--c) 70%, var(--panel-border)); }
-@media (max-width: 760px) { .threat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .th-sub { white-space: normal; } }
+.th-sub { white-space: normal; }
+@media (max-width: 760px) { .threat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 /* Nieuws op de Club: klein, beeld links en tekst rechts; geen grote vlakken. */
 #news .news-item, #news .news-item.lead { grid-template-columns: 120px minmax(0, 1fr); grid-template-rows: auto; }
 #news .news-item .news-visual, #news .news-item.lead .news-visual { min-height: 0; height: 100%; padding: 8px; }
@@ -1660,7 +1662,8 @@ html, body { overflow-x: clip; overscroll-behavior-x: none; }
 .rival-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 8px 4px; border: 0; border-top: 1px solid var(--border); background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .rival-row:first-child { border-top: 0; }
 .rival-row:hover .rv-name b { color: var(--brand-text); }
-.rv-badge .shirt, .rv-badge .opp-badge { width: 34px; height: 32px; display: block; }
+.rv-badge > .shirt, .rv-badge .opp-badge { width: 34px; height: 32px; }
+.rv-badge { display: grid; }
 .rv-name { display: grid; min-width: 0; }
 .rv-name b { font-weight: 620; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rv-name small { font-size: 12px; color: var(--muted); }

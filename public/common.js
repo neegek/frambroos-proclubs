@@ -544,9 +544,12 @@ const numWord = n => NUM_WORD[n] ?? String(n);
 // een echt clublogo het teamId. Laadt het niet, dan het shirt in de clubkleuren.
 const CREST_URL = id => `https://eafc24.content.easports.com/fifa/fltOnlineAssets/24B23FDE-7835-41C2-87A2-F453DFDB2E82/2024/fcweb/crests/256x256/l${id}.png`;
 function oppBadge(opp) {
-  const id = opp?.club?.crestAssetId || opp?.club?.teamId;
-  if (!id) return kitShirt(opp?.kit, opp?.name || '');
-  return `<span class="opp-badge"><img src="${CREST_URL(id)}" alt="${esc(opp.name)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add('no-crest')">${kitShirt(opp.kit, opp.name)}</span>`;
+  // Altijd het logo: eerst het eigen clublogo (crestAssetId), lukt dat niet dan het echte clublogo (teamId); pas als
+  // beide niet laden het shirt. Nooit logo en shirt tegelijk.
+  const ids = [...new Set([opp?.club?.crestAssetId, opp?.club?.teamId].filter(Boolean).map(String))];
+  if (!ids.length) return kitShirt(opp?.kit, opp?.name || '');
+  const alt = ids[1] ? ` data-alt="${CREST_URL(ids[1])}"` : '';
+  return `<span class="opp-badge"><img src="${CREST_URL(ids[0])}"${alt} alt="${esc(opp.name)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="if(this.dataset.alt){this.src=this.dataset.alt;this.removeAttribute('data-alt')}else this.parentNode.classList.add('no-crest')">${kitShirt(opp.kit, opp.name)}</span>`;
 }
 // Dialoog met een vaste balk onderaan (blijft staan bij scrollen): in het midden een rustige knop naar een andere pagina,
 // links en rechts eventueel kleine knoppen naar de vorige en volgende (nav.prev/next: { label, face, go }).
