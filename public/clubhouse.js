@@ -110,79 +110,52 @@ function clubCards() {
   ];
 }
 
-// Gevaarlijkste spelers (coach-logica §9a): topscorer en topassist, dan vier scores. Per wedstrijd punten (zoals
-// fantasy football), vergeleken met elke keer dat een mens in onze wedstrijden speelde (wij en tegenstanders): het
-// percentiel. De score is het gemiddelde percentiel: 64 = in een gemiddelde wedstrijd beter dan 64 van de 100 spelers.
+// Gevaarlijkste spelers (coach-logica §9a, sinds 4 november 2026): zes gewone statistieken, geen punten, geen
+// weging, geen percentielen. Elke tegel is één getal dat je in het spel zelf ook zou tellen.
 const evOf = (p, k) => p.ev?.[k] || 0;
-const DOMAINS = [
-  { key: 'att', label: 'Aanvallend', how: 'goal 3, schot op doel 1, tegenstander voorbij ½', parts: [
-    { w: 3, v: p => p.goals || 0, fmt: v => `${f1(v)} goals` },
-    { w: 1, v: p => evOf(p, 'shots_on_target'), fmt: v => `${f1(v)} op doel` },
-    { w: 0.5, v: p => evOf(p, 'players_beaten'), fmt: v => `${f1(v)} voorbij` },
-  ] },
-  { key: 'cre', label: 'Creëren', how: 'assist 3, tweede assist 2, geslaagde steekpass ½, mislukte pass −0,2', parts: [
-    { w: 3, v: p => p.assists || 0, fmt: v => `${f1(v)} assists` },
-    { w: 2, v: p => evOf(p, 'second_assists'), fmt: v => `${f1(v)} tweede assists` },
-    { w: 0.5, v: p => evOf(p, 'through_balls'), fmt: v => `${f1(v)} steekpasses` },
-    { w: -0.2, v: p => Math.max(0, (p.passAttempts || 0) - (p.passesMade || 0)), fmt: v => `${f1(v)} mislukte passes` },
-  ] },
-  { key: 'def', label: 'Verdedigend', how: 'gewonnen tackle, onderschepping, kopduel achterin, blok en wegwerken elk 1, balverlies op eigen helft −1', parts: [
-    { w: 1, v: p => p.tacklesMade || 0, fmt: v => `${f1(v)} tackles` },
-    { w: 1, v: p => evOf(p, 'interceptions'), fmt: v => `${f1(v)} onderschept` },
-    { w: 1, v: p => evOf(p, 'aerial_duels_won_defending'), fmt: v => `${f1(v)} kopduels` },
-    { w: 1, v: p => evOf(p, 'blocks') + evOf(p, 'clearances'), fmt: v => `${f1(v)} blok of weg` },
-    { w: -1, v: p => evOf(p, 'possession_lost_def_third'), fmt: v => `${f1(v)} balverlies achterin` },
-  ] },
+const STATS = [
+  { key: 'conv', cls: 'att', label: 'Afmaker', unit: 'raak', min: 20, minLabel: 'minstens 20 schoten',
+    about: 'Goals per schot over de gevolgde wedstrijden: welk deel van je schoten erin gaat.',
+    num: p => p.goals || 0, den: p => p.shots || 0, fmt: (n, d) => `${Math.round(100 * n / d)}%`, sub: (n, d) => `${n} goals uit ${d} schoten` },
+  { key: 'thr', cls: 'cre', label: 'Steekpasses', unit: 'per wedstrijd', min: 5, minLabel: 'minstens vijf wedstrijden',
+    about: 'Geslaagde steekpasses per wedstrijd, over de gevolgde wedstrijden.',
+    num: p => evOf(p, 'through_balls') },
+  { key: 'def', cls: 'def', label: 'Verdedigen', unit: 'per wedstrijd', min: 5, minLabel: 'minstens vijf wedstrijden',
+    about: 'Geslaagde verdedigende acties per wedstrijd: gewonnen tackles, onderscheppingen, kopduels achterin, blokken en wegwerken bij elkaar opgeteld.',
+    num: p => (p.tacklesMade || 0) + evOf(p, 'interceptions') + evOf(p, 'aerial_duels_won_defending') + evOf(p, 'blocks') + evOf(p, 'clearances') },
+  { key: 'press', cls: 'all', label: 'Druk zetten', unit: 'per wedstrijd', min: 5, minLabel: 'minstens vijf wedstrijden',
+    about: 'Balwinst in het laatste derde van de tegenstander per wedstrijd: de bal terugwinnen door hoog druk te zetten.',
+    num: p => evOf(p, 'possession_won_att_third') },
 ];
-const pointsOf = (dom, p) => dom.parts.reduce((a, x) => a + x.w * x.v(p), 0);
-const countsForScore = p => p.ev && (p.secondsPlayed ?? 5400) >= 2700; // gebeurtenissen van EA en minstens 45 minuten
-// Teamgrootte (coach-logica §9e): wie met minder mensen speelt, krijgt meer ballen en dus meer punten. Elke wedstrijd
-// vergelijken we daarom alleen met spelers uit een team met evenveel mensen.
-const sizeGroup = n => n <= 3 ? 3 : n >= 6 ? 6 : n;
-function dangerScores(ms) {
-  const ref = {};
-  const refOf = (k, g) => (ref[`${k}${g}`] ||= []);
-  for (const m of ms) for (const side of [m.players, m.opponentPlayers]) { const g = sizeGroup(side.length); for (const p of side) if (countsForScore(p)) for (const d of DOMAINS) refOf(d.key, g).push(pointsOf(d, p)); }
-  const pctl = (k, g, v) => { const list = refOf(k, g); let lo = 0, eq = 0; for (const x of list) { if (x < v) lo++; else if (x === v) eq++; } return 100 * (lo + eq / 2) / list.length; };
+function statRows(ms, s) {
   const by = new Map();
-  for (const m of ms) { const g = sizeGroup(m.players.length); for (const p of m.players) if (countsForScore(p)) {
-    const b = by.get(p.name) || { name: p.name, n: 0, d: Object.fromEntries(DOMAINS.map(d => [d.key, { pct: 0, pts: 0, parts: d.parts.map(() => 0) }])) };
-    b.n++; for (const d of DOMAINS) { const x = b.d[d.key], pts = pointsOf(d, p); x.pct += pctl(d.key, g, pts); x.pts += pts; d.parts.forEach((q, i) => { x.parts[i] += q.v(p); }); }
-    by.set(p.name, b);
-  } }
-  const all = [...by.values()], out = all.filter(b => b.n >= 5);
-  for (const b of out) { for (const d of DOMAINS) { const x = b.d[d.key]; x.score = x.pct / b.n; x.pts /= b.n; x.parts = x.parts.map(v => v / b.n); } b.d.all = { score: DOMAINS.reduce((a, d) => a + b.d[d.key].score, 0) / DOMAINS.length }; }
-  return { out, refN: Object.keys(ref).filter(k => k.startsWith('att')).reduce((a, k) => a + ref[k].length, 0), few: all.filter(b => b.n < 5) };
+  for (const m of ms) for (const p of m.players) if (p.ev) {
+    const b = by.get(p.name) || { name: p.name, n: 0, num: 0, den: 0 };
+    b.n++; b.num += s.num(p); b.den += s.den ? s.den(p) : 1; by.set(p.name, b);
+  }
+  const all = [...by.values()], ok = b => (s.den ? b.den : b.n) >= s.min;
+  const rows = all.filter(ok).sort((x, y) => y.num / y.den - x.num / x.den || y.den - x.den)
+    .map(b => ({ name: b.name, v: b.num / b.den, main: s.fmt ? s.fmt(b.num, b.den) : f1(b.num / b.den), sub: s.sub ? s.sub(b.num, b.den) : `${b.num} in ${plural(b.n, 'wedstrijd', 'wedstrijden')}` }));
+  return [...rows, ...all.filter(b => !ok(b)).map(b => ({ name: b.name, main: null, sub: s.den ? `${b.den} schoten, ${s.minLabel}` : `${plural(b.n, 'wedstrijd', 'wedstrijden')}, ${s.minLabel}` }))];
 }
 function threats(ms) {
-  const { out: S, refN, few } = dangerScores(ms);
-  // Topscorer en topassist: de carrièretotalen van EA, dezelfde als Algemeen (coach-logica §9a, Gevaarlijkste spelers).
+  // Topscorer en topassist: de carrièretotalen van EA, dezelfde als Algemeen.
   const C = DATA.members.filter(m => m.gamesPlayed > 0).map(m => ({ name: m.name, n: m.gamesPlayed, g: m.goals || 0, a: m.assists || 0 }));
   const top = key => [...C].sort((a, b) => b[key] - a[key] || a.n - b.n);
-  const totalTile = (cls, label, key, unit) => { const t = top(key)[0]; return t && t[key] ? `<button type="button" class="threat ${cls}" data-dom="${key}">
-      <span class="th-label">${label}</span><b class="th-name">${esc(proName(t.name))}</b>
-      <span class="th-val"><b>${t[key]}</b><small>${unit}</small></span><small class="th-sub">${f1(t[key] / t.n)} per wedstrijd, in ${t.n}</small></button>` : ''; };
+  const tile = (cls, key, label, name, val, unit, sub) => `<button type="button" class="threat ${cls}" data-dom="${key}">
+      <span class="th-label">${label}</span><b class="th-name">${esc(proName(name))}</b>
+      <span class="th-val"><b>${val}</b><small>${unit}</small></span><small class="th-sub">${esc(sub)}</small></button>`;
+  const totalTile = (cls, label, key, unit) => { const t = top(key)[0]; return t && t[key] ? tile(cls, key, label, t.name, t[key], unit, `${f1(t[key] / t.n)} per wedstrijd, in ${t.n}`) : ''; };
   const roster = DATA.members.map(m => m.name);
-  const doms = [...DOMAINS, { key: 'all', label: 'Compleet' }];
-  const ranked = k => [...S].sort((a, b) => b.d[k].score - a.d[k].score);
-  // Klein op de tegel: de twee onderdelen die de meeste punten gaven (bij Compleet de drie scores).
-  const subOf = (b, k) => k === 'all' ? DOMAINS.map(d => `${d.label.toLowerCase()} ${Math.round(b.d[d.key].score)}`).join(' · ')
-    : DOMAINS.find(d => d.key === k).parts.map((q, i) => ({ q, v: b.d[k].parts[i] })).filter(x => x.q.w > 0).sort((x, y) => y.q.w * y.v - x.q.w * x.v).slice(0, 2).map(x => x.q.fmt(x.v)).join(' · ');
+  const R = Object.fromEntries(STATS.map(s => [s.key, statRows(ms, s)]));
   $('#threats').innerHTML = totalTile('goals', 'Topscorer', 'g', 'goals') + totalTile('assists', 'Topassist', 'a', 'assists')
-    + doms.map(k => { const b = ranked(k.key)[0]; return b ? `<button type="button" class="threat ${k.key}" data-dom="${k.key}">
-      <span class="th-label">${k.label}</span><b class="th-name">${esc(proName(b.name))}</b>
-      <span class="th-val"><b>${Math.round(b.d[k.key].score)}</b><small>van 100</small></span><small class="th-sub">${esc(k.key === 'all' ? 'aanvallend, creëren en verdedigend samen' : subOf(b, k.key))}</small></button>` : ''; }).join('');
-  const explain = `Die punten vergelijken we met alle ${refN} keer dat een mens in onze wedstrijden speelde, wij én de tegenstanders (minstens 45 minuten), en dan alleen met spelers uit een team met evenveel mensen: met minder mensen krijg je vanzelf meer ballen. De score is het gemiddelde over alle wedstrijden: 64 betekent dat deze speler in een gemiddelde wedstrijd meer punten haalt dan 64 van de 100 spelers op het veld. 50 is gemiddeld.`;
-  const fewRows = few.map(b => ({ name: b.name, main: null, sub: `${b.n} ${b.n === 1 ? 'wedstrijd' : 'wedstrijden'}, minstens vijf nodig` }));
+    + STATS.map(s => { const r = R[s.key][0]; return r && r.main !== null ? tile(s.cls, s.key, s.label, r.name, r.main, s.unit, r.sub) : ''; }).join('');
   $('#threats').onclick = e => {
     const btn = e.target.closest('.threat'); if (!btn) return; const k = btn.dataset.dom;
     if (k === 'g' || k === 'a') return openRankList({ label: k === 'g' ? 'Topscorer' : 'Topassist', about: `Het aantal ${k === 'g' ? 'goals' : 'assists'} over de hele carrière bij de club volgens EA, ook van vóór deze app (dezelfde totalen als bij Algemeen). Bij gelijk staat wie het in minder wedstrijden deed hoger.`, who: CAREER,
       rows: top(k).map(t => ({ name: t.name, main: String(t[k]), sub: `${f1(t[k] / t.n)} per wedstrijd, in ${t.n}` })) }, roster);
-    const d = DOMAINS.find(x => x.key === k);
-    openRankList({ label: k === 'all' ? 'Compleet' : `${d.label}`,
-      about: k === 'all' ? `Het gemiddelde van de scores voor aanvallend, creëren en verdedigend. Elk domein geeft per wedstrijd punten (tik op die tegel voor de waarden). ${explain}` : `Punten per wedstrijd: ${d.how}. ${explain}${k === 'def' ? ' Let op: dit meet geslaagd verdedigend werk, niet of er goals zijn voorkomen; dat hangt in onze wedstrijden nauwelijks samen. Balwinst op hun helft (druk zetten) telt in geen enkele score: in onze wedstrijden hangt het niet samen met winnen. Een tackle of onderschepping hoog op het veld telt hier wel.' : ''}`,
-      who: 'Minstens vijf gevolgde wedstrijden van 45 minuten of langer met gebeurtenissen van EA.',
-      rows: [...ranked(k).map(b => ({ name: b.name, main: String(Math.round(b.d[k].score)), sub: k === 'all' ? subOf(b, 'all') : `${f1(b.d[k].pts)} punten p/w: ${d.parts.map((q, i) => q.fmt(b.d[k].parts[i])).join(' · ')}` })), ...fewRows] }, roster);
+    const s = STATS.find(x => x.key === k);
+    openRankList({ label: s.label, about: s.about, who: `Gevolgde wedstrijden met gebeurtenissen van EA; ${s.minLabel}.`, rows: R[k] }, roster);
   };
 }
 

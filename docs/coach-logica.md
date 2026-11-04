@@ -557,43 +557,29 @@ Dan **Gevaarlijkste spelers** (zie hieronder), de laatste sessie en de
 trofeeënkast, **Nieuws** (kleine kaartjes: beeld links, tekst rechts; op telefoon de laatste vijf als rij), Algemeen
 en Selectie. *Laatste uitslagen* is sinds 3 november 2026 weg: de laatste sessie toont ze al.
 
-**Gevaarlijkste spelers** (herzien op 3 november 2026). Zes tegels: **Topscorer** en **Topassist** (meeste goals en
-assists over de **hele carrière bij de club volgens EA**, dezelfde totalen als *Algemeen*, klein per wedstrijd; sinds
-3 november 2026, daarvoor alleen de gevolgde wedstrijden, waardoor op één pagina twee verschillende aantallen goals
-stonden), dan vier scores: **Aanvallend**, **Creëren**, **Verdedigend** en **Compleet**. Elk uitlegscherm toont
-**alle** spelers van de selectie; wie te weinig wedstrijden heeft, staat onderaan met een streepje.
+**Gevaarlijkste spelers** (herzien op 4 november 2026: zo simpel mogelijk). Zes tegels, elk **één gewone statistiek**,
+zonder punten, weging of percentielen:
+| Tegel | Wat | Over | Wie telt mee |
+|---|---|---|---|
+| Topscorer | goals | hele carrière bij de club volgens EA (zoals *Algemeen*) | iedereen |
+| Topassist | assists | idem | iedereen |
+| Afmaker | goals per schot (%) | gevolgde wedstrijden | minstens 20 schoten |
+| Steekpasses | geslaagde steekpasses per wedstrijd | gevolgde wedstrijden met gebeurtenissen | minstens vijf wedstrijden |
+| Verdedigen | gewonnen tackles + onderscheppingen + kopduels achterin + blokken + wegwerken, per wedstrijd | idem | idem |
+| Druk zetten | balwinst in het laatste derde van de tegenstander per wedstrijd | idem | idem |
+Elk uitlegscherm toont **alle** spelers van de selectie; wie de drempel niet haalt, staat onderaan met een streepje.
+Op de tegel: naam, het getal groot, klein waar het op rust (bijv. *36 goals uit 103 schoten*).
 
-*Hoe een score ontstaat* (zoals fantasy football, daarna een percentiel zoals scoutingsites):
-1. Per wedstrijd punten, met vaste waarden die iedereen kan narekenen:
-   - Aanvallend: goal 3, schot op doel 1, tegenstander voorbij ½.
-   - Creëren: assist 3, tweede assist 2, geslaagde steekpass ½, mislukte pass −0,2 (risico telt mee, maar kost wat).
-   - Verdedigend: gewonnen tackle, onderschepping, kopduel achterin, blok en wegwerken elk 1; balverlies op eigen
-     helft (eigen derde) −1.
-2. Die punten vergelijken we met elke keer dat een mens in onze wedstrijden speelde, wij én de tegenstanders
-   (ruim 650 keer; alleen met gebeurtenissen van EA en minstens 45 minuten), **in een team met evenveel mensen**
-   (twee of drie, vier, vijf, zes of meer; §9e, *Teamgrootte*). Per wedstrijd: beter dan hoeveel procent van die
-   spelers (gelijk telt half).
-3. De score is het gemiddelde daarvan over alle wedstrijden van de speler: **64 = in een gemiddelde wedstrijd beter
-   dan 64 van de 100 spelers op het veld; 50 is gemiddeld.** Compleet is het gemiddelde van de drie scores.
-Wie meetelt: minstens vijf zulke wedstrijden.
+*Waarom zo*: de vorige versie (punten per wedstrijd, omgerekend naar een percentiel per teamgrootte, en *Compleet*)
+was niet na te rekenen en bevoordeelde wie veel dribbelt: Terry Yaki stond bovenaan Aanvallend door "tegenstander
+voorbij ½", terwijl Petra Selie meer scoort en Bennie en G. Snoek een hogere conversie hebben. Een gewone statistiek
+zegt precies wat hij zegt. Druk zetten is actief werk en krijgt daarom een eigen tegel; het staat los van
+Verdedigen, zodat een tackle hoog op het veld niet dubbel telt en de verdedigingslijst een verdedigingslijst blijft.
+Of een statistiek samenhangt met winnen, staat in §9e; dat is geen reden om actief werk niet te tonen.
+Vervallen (4 november 2026): de scores Aanvallend, Creëren, Verdedigend en Compleet (3 november 2026), en daarvoor
+een score tegenover alleen onze zes spelers.
 
-*Waarom zo* (getoetst op 77 wedstrijden met gebeurtenissen, samenhang van teamtotalen met het doelsaldo):
-- Goals (0,77), assists (0,69), schoten op doel (0,52) en tweede assists (0,46) hangen sterk samen met winnen;
-  steekpasses (0,22) en tegenstanders voorbij (0,16) zwak. Vandaar de hoge en lage waarden.
-- Veel passen hangt níét samen met winnen (−0,16); het aantal passes telt daarom niet mee, wel mislukte passes als kosten.
-- Verdedigende acties (tackles, onderscheppingen) hangen op teamniveau **niet** samen met minder tegengoals (r ≈ 0):
-  wie veel verdedigt, heeft vaak ook de tegenstander vaak aan de bal. De verdedigende score meet dus geslaagd
-  verdedigend werk, niet of er goals zijn voorkomen. Dat staat er eerlijk bij.
-- Balwinst in het algemeen (ook hoog op het veld, druk zetten) telt niet als verdedigen: dat liet eerder wie veel
-  druk zet bovenaan staan als verdediger. Kopduels achterin en balverlies op eigen helft wel. Druk zetten valt ook
-  onder geen ander domein: het hangt niet samen met winnen (§9e). Het uitlegscherm van Verdedigend zegt dat.
-- Herzien met de methode van §9e (3 november 2026): de waarden blijven, de vergelijking gaat per teamgrootte.
-- Vervallen: de eerste versie (3 november) gaf per cijfer een score tegenover alleen onze zes spelers (50 + 10 per
-  standaardafwijking). Lastig uit te leggen, en zes spelers is geen vergelijking.
-
-Op de tegel: domein, naam, de score groot met *van 100*, klein de twee onderdelen die de meeste punten gaven (bij Compleet: "aanvallend, creëren en verdedigend samen"). Een tik
-opent het uitlegscherm (`#rank-dialog`) met hoe de punten werken en de hele lijst: per speler de score, de punten per
-wedstrijd en de onderdelen in gewone getallen. Meer lucht tussen de kaarten (20 px). Op telefoon staat de laatste sessie als
+Meer lucht tussen de kaarten (20 px). Op telefoon staat de laatste sessie als
 dezelfde kaart als in de sessielijst (`sessionCardHtml`) met het label *Huidige sessie* of *Laatste sessie*.
 **Selectie** (Spelers): per speler de spelerskaart groter, met rechts de titel en de biografie, visueel afgekapt
 (twee regels op telefoon, drie op een tablet, vier op een groot scherm; geen eigen tekst); linksboven in de rij een zwevend sterretje om de favoriet te kiezen (vol als
@@ -947,18 +933,15 @@ niet door hoe ze zijn opgesteld. Daarom oordeelt *Waar we verliezen* sinds 3 nov
 
 **Spelersniveau** (608 keer een mens met 45+ minuten, doelsaldo van het eigen team, gecorrigeerd voor sterkte, mensen
 en teamgrootte): goals 0,28, assists 0,29, tweede assists 0,18, schoten op doel 0,17, steekpasses 0,12, luchtduels
-achterin 0,12, uitgespeeld 0,09; tackles, onderscheppingen, blokken en balwinst in welk derde ook rond 0. De
-puntwaarden van *Gevaarlijkste spelers* sluiten daar goed op aan en blijven; mislukte passes kosten (−0,2) of niet
-verandert de samenhang nauwelijks (0,31 tegen 0,29).
+achterin 0,12, uitgespeeld 0,09; tackles, onderscheppingen, blokken en balwinst in welk derde ook rond 0.
 
-**Teamgrootte** (logische fout tot 3 november 2026): punten per wedstrijd hangen sterk af van met hoeveel mensen je
-speelt. Aanvallend: 4,2 per wedstrijd met drie mensen, 3,0 met zes. Wie vaak in een klein team speelt, kreeg daardoor een
-te hoge score. Sinds 3 november 2026 vergelijkt de score elke wedstrijd alleen met spelers uit een team van dezelfde
-grootte (twee of drie, vier, vijf, zes of meer mensen; elke groep 95 keer of meer).
+**Teamgrootte**: aantallen per wedstrijd hangen af van met hoeveel mensen je speelt (aanvalsacties 4,2 per wedstrijd
+met drie mensen, 3,0 met zes). Bij onze spelers scheelt het weinig (gemiddeld 4,8 tot 5,3 mensen), dus de gewone
+statistieken van *Gevaarlijkste spelers* corrigeren er niet voor; bij een vergelijking met tegenstanders wel.
 
-**Druk zetten** (balwinst op hun helft) staat bewust in geen enkele score: het hangt in onze wedstrijden niet samen met
-winnen, op team- noch spelersniveau. Een tackle of onderschepping hoog op het veld telt wél mee bij Verdedigend, want
-daar maakt de plek niet uit.
+**Samenhang is geen voorwaarde om te tonen** (4 november 2026): tackles, onderscheppingen en druk zetten hangen niet
+samen met winnen, maar zijn wel actief werk. Ze staan daarom gewoon als statistiek in de app. Samenhang bepaalt alleen
+wat we als *verband* of oorzaak brengen (samenvattingen, *Waar het schuurde*, *Waar we verliezen*).
 
 ## 9d. Verbanden: weggehaald, eerst naar de tekentafel
 
