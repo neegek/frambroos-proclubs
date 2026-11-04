@@ -109,9 +109,10 @@ function clubCards() {
 // weging, geen percentielen. Elke tegel is één getal dat je in het spel zelf ook zou tellen.
 const evOf = (p, k) => p.ev?.[k] || 0;
 const STATS = [
-  { key: 'thr', cls: 'cre', label: 'Steekpasses', unit: 'per wedstrijd', min: 5, minLabel: 'minstens vijf wedstrijden',
-    about: 'Geslaagde steekpasses per wedstrijd, over de gevolgde wedstrijden.',
-    num: p => evOf(p, 'through_balls') },
+  { key: 'pass', cls: 'cre', label: 'Passes', unit: 'per wedstrijd', min: 5, minLabel: 'minstens vijf wedstrijden',
+    about: 'Geslaagde passes per wedstrijd, over de gevolgde wedstrijden; klein eronder welk deel van al je passes aankomt. Het aantal alleen beloont wie veel aan de bal is, het percentage alleen wie veilig breed speelt; daarom allebei.',
+    num: p => evOf(p, 'passes_completed'), also: p => evOf(p, 'passes_completed') + evOf(p, 'passes_failed'),
+    sub: (b) => `${Math.round(100 * b.num / Math.max(1, b.also))}% komt aan, in ${plural(b.n, 'wedstrijd', 'wedstrijden')}` },
   { key: 'def', cls: 'def', label: 'Verdedigen', unit: 'per wedstrijd', min: 5, minLabel: 'minstens vijf wedstrijden',
     about: 'Geslaagde verdedigende acties per wedstrijd: gewonnen tackles, onderscheppingen, kopduels achterin, blokken en wegwerken bij elkaar opgeteld.',
     num: p => (p.tacklesMade || 0) + evOf(p, 'interceptions') + evOf(p, 'aerial_duels_won_defending') + evOf(p, 'blocks') + evOf(p, 'clearances') },
@@ -119,12 +120,12 @@ const STATS = [
 function statRows(ms, s) {
   const by = new Map();
   for (const m of ms) for (const p of m.players) if (p.ev) {
-    const b = by.get(p.name) || { name: p.name, n: 0, num: 0, den: 0 };
-    b.n++; b.num += s.num(p); b.den += s.den ? s.den(p) : 1; by.set(p.name, b);
+    const b = by.get(p.name) || { name: p.name, n: 0, num: 0, den: 0, also: 0 };
+    b.n++; b.num += s.num(p); b.den += s.den ? s.den(p) : 1; if (s.also) b.also += s.also(p); by.set(p.name, b);
   }
   const all = [...by.values()], ok = b => (s.den ? b.den : b.n) >= s.min;
   const rows = all.filter(ok).sort((x, y) => y.num / y.den - x.num / x.den || y.den - x.den)
-    .map(b => ({ name: b.name, v: b.num / b.den, main: s.fmt ? s.fmt(b.num, b.den) : f1(b.num / b.den), sub: s.sub ? s.sub(b.num, b.den) : `${b.num} in ${plural(b.n, 'wedstrijd', 'wedstrijden')}` }));
+    .map(b => ({ name: b.name, v: b.num / b.den, main: s.fmt ? s.fmt(b.num, b.den) : f1(b.num / b.den), sub: s.sub ? s.sub(b) : `${b.num} in ${plural(b.n, 'wedstrijd', 'wedstrijden')}` }));
   return [...rows, ...all.filter(b => !ok(b)).map(b => ({ name: b.name, main: null, sub: s.den ? `${b.den} schoten, ${s.minLabel}` : `${plural(b.n, 'wedstrijd', 'wedstrijden')}, ${s.minLabel}` }))];
 }
 function threats(ms) {
@@ -139,22 +140,23 @@ function threats(ms) {
   const R = Object.fromEntries(STATS.map(s => [s.key, statRows(ms, s)]));
   // Goals + assists per wedstrijd over de carrière: wie het meest bijdraagt aan doelpunten.
   R.ga = top('ga').map(t => ({ name: t.name, v: t.ga, main: f1(t.ga), sub: `${t.g} goals + ${t.a} assists in ${t.n}` }));
-  // Compleet: de plek bij goals + assists plus de plek bij verdedigen; de laagste som wint (bij gelijk: de beste plek).
-  const placeIn = (rows, name) => { const i = rows.findIndex(r => r.name === name && r.main !== null); return i < 0 ? null : i + 1; };
-  R.all = roster.map(name => ({ name, a: placeIn(R.ga, name), d: placeIn(R.def, name) }))
-    .map(x => ({ ...x, sum: x.a && x.d ? x.a + x.d : null }))
-    .sort((x, y) => (x.sum ?? 99) - (y.sum ?? 99) || Math.min(x.a ?? 99, x.d ?? 99) - Math.min(y.a ?? 99, y.d ?? 99) || (x.a ?? 99) - (y.a ?? 99))
-    .map(x => ({ name: x.name, main: x.sum === null ? null : `${x.a}e + ${x.d}e`, sub: x.sum === null ? 'niet in beide lijsten' : `${x.a}e bij goals + assists, ${x.d}e bij verdedigen` }));
-  const tileOf = (cls, key, label, unit) => { const r = R[key][0]; return r && r.main !== null ? tile(cls, key, label, r.name, r.main, unit, r.sub) : ''; };
+  // Frambroos-index (coach-logica §9b): alles samen, voor de rol die de speler die wedstrijd had. 50 = gemiddeld voor die rol.
+  const roleName = r => FI_ROLES[r]?.label || r;
+  R.all = roster.map(name => ({ name, f: DATA.fi?.[name] })).filter(x => x.f)
+    .sort((x, y) => (y.f.score ?? -1) - (x.f.score ?? -1))
+    .map(({ name, f }) => ({ name, main: f.score === null ? null : String(Math.round(f.score)),
+      sub: f.score === null ? `${plural(f.n, 'wedstrijd', 'wedstrijden')}, minstens drie nodig` : `${roleName(f.role)} · ${FI_PARTS.map(q => `${q.label.toLowerCase()} ${Math.round(f.parts[q.key])}`).join(' · ')}` }));
+  const allSub = r => { const f = DATA.fi[r.name]; return `${fiLabel(f.score)} als ${roleName(f.role)}`; };
+  const tileOf = (cls, key, label, unit, subOf) => { const r = R[key][0]; return r && r.main !== null ? tile(cls, key, label, r.name, r.main, unit, subOf ? subOf(r) : r.sub) : ''; };
   $('#threats').innerHTML = totalTile('goals', 'Topscorer', 'g', 'goals') + totalTile('assists', 'Topassist', 'a', 'assists')
-    + tileOf('att', 'ga', 'Goals + assists', 'per wedstrijd') + tileOf('cre', 'thr', 'Steekpasses', 'per wedstrijd')
-    + tileOf('def', 'def', 'Verdedigen', 'per wedstrijd') + tileOf('all', 'all', 'Compleet', '');
+    + tileOf('att', 'ga', 'Goals + assists', 'per wedstrijd') + tileOf('cre', 'pass', 'Passes', 'per wedstrijd')
+    + tileOf('def', 'def', 'Verdedigen', 'per wedstrijd') + tileOf('all', 'all', 'Frambroos-index', '', allSub);
   $('#threats').onclick = e => {
     const btn = e.target.closest('.threat'); if (!btn) return; const k = btn.dataset.dom;
     if (k === 'g' || k === 'a') return openRankList({ label: k === 'g' ? 'Topscorer' : 'Topassist', about: `Het aantal ${k === 'g' ? 'goals' : 'assists'} over de hele carrière bij de club volgens EA, ook van vóór deze app (dezelfde totalen als bij Algemeen). Bij gelijk staat wie het in minder wedstrijden deed hoger.`, who: CAREER,
       rows: top(k).map(t => ({ name: t.name, main: String(t[k]), sub: `${f1(t[k] / t.n)} per wedstrijd, in ${t.n}` })) }, roster);
     if (k === 'ga') return openRankList({ label: 'Goals + assists', about: 'Goals plus assists per wedstrijd, over de hele carrière bij de club volgens EA: wie het meest bijdraagt aan doelpunten.', who: CAREER, rows: R.ga }, roster);
-    if (k === 'all') return openRankList({ label: 'Compleet', about: 'Wie aan aanvallen én verdedigen het meest bijdraagt: de plek bij goals + assists per wedstrijd plus de plek bij verdedigen per wedstrijd. De laagste som wint; bij gelijk beslist de beste plek.', who: 'Iedereen die in beide lijsten staat.', rows: R.all }, roster);
+    if (k === 'all') return openRankList({ label: 'Frambroos-index', about: 'Alles wat een speler zelf doet, in vijf onderdelen: afronden, creëren, passen, aan de bal (balverlies en uitspelen, de benadering van onder druk) en verdedigen (ook druk zetten). Elk cijfer vergelijken we met alle mensen op dezelfde positie die we ooit tegenkwamen, tegenstanders inbegrepen. De onderdelen tellen zwaar of licht naar de rol van die wedstrijd: bij een verdedigende middenvelder weegt verdedigen zwaar en afronden licht, bij een spits andersom. 50 is gemiddeld voor de rol. De rol komt uit waar we echt staan (met of zonder G. Snoek, met hoeveel we zijn), niet uit de archetype.', who: 'Gevolgde wedstrijden van 45 minuten of langer met gebeurtenissen van EA; minstens drie. Bij weinig wedstrijden trekken we het getal naar 50.', rows: R.all }, roster);
     const s = STATS.find(x => x.key === k);
     openRankList({ label: s.label, about: s.about, who: `Gevolgde wedstrijden met gebeurtenissen van EA; ${s.minLabel}.`, rows: R[k] }, roster);
   };
