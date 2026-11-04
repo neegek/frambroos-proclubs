@@ -140,23 +140,23 @@ function threats(ms) {
   const R = Object.fromEntries(STATS.map(s => [s.key, statRows(ms, s)]));
   // Goals + assists per wedstrijd over de carrière: wie het meest bijdraagt aan doelpunten.
   R.ga = top('ga').map(t => ({ name: t.name, v: t.ga, main: f1(t.ga), sub: `${t.g} goals + ${t.a} assists in ${t.n}` }));
-  // Frambroos-index (coach-logica §9b): alles samen, voor de rol die de speler die wedstrijd had. 50 = gemiddeld voor die rol.
-  const roleName = r => FI_ROLES[r]?.label || r;
+  // Compleet (coach-logica §9b): het gemiddelde van vier fronten, elk tegenover alle mensen. 50 = gemiddeld.
   R.all = roster.map(name => ({ name, f: DATA.fi?.[name] })).filter(x => x.f)
     .sort((x, y) => (y.f.score ?? -1) - (x.f.score ?? -1))
     .map(({ name, f }) => ({ name, main: f.score === null ? null : String(Math.round(f.score)),
-      sub: f.score === null ? `${plural(f.n, 'wedstrijd', 'wedstrijden')}, minstens drie nodig` : `${roleName(f.role)} · ${FI_PARTS.map(q => `${q.label.toLowerCase()} ${Math.round(f.parts[q.key])}`).join(' · ')}` }));
-  const allSub = r => { const f = DATA.fi[r.name]; return `${fiLabel(f.score)} als ${roleName(f.role)}`; };
+      sub: f.score === null ? `${plural(f.n, 'wedstrijd', 'wedstrijden')}, minstens drie nodig` : FI_PARTS.map(q => `${q.label.toLowerCase()} ${Math.round(f.parts[q.key])}`).join(' · ') }));
+  // Op de tegel het zwakste front: compleet is zo sterk als je zwakste kant.
+  const allSub = r => { const f = DATA.fi[r.name], low = [...FI_PARTS].sort((a, b) => f.parts[a.key] - f.parts[b.key])[0]; return `zwakst: ${low.label.toLowerCase()} ${Math.round(f.parts[low.key])}`; };
   const tileOf = (cls, key, label, unit, subOf) => { const r = R[key][0]; return r && r.main !== null ? tile(cls, key, label, r.name, r.main, unit, subOf ? subOf(r) : r.sub) : ''; };
   $('#threats').innerHTML = totalTile('goals', 'Topscorer', 'g', 'goals') + totalTile('assists', 'Topassist', 'a', 'assists')
     + tileOf('att', 'ga', 'Goals + assists', 'per wedstrijd') + tileOf('cre', 'pass', 'Passes', 'per wedstrijd')
-    + tileOf('def', 'def', 'Verdedigen', 'per wedstrijd') + tileOf('all', 'all', 'Frambroos-index', '', allSub);
+    + tileOf('def', 'def', 'Verdedigen', 'per wedstrijd') + tileOf('all', 'all', 'Compleet', '', allSub);
   $('#threats').onclick = e => {
     const btn = e.target.closest('.threat'); if (!btn) return; const k = btn.dataset.dom;
     if (k === 'g' || k === 'a') return openRankList({ label: k === 'g' ? 'Topscorer' : 'Topassist', about: `Het aantal ${k === 'g' ? 'goals' : 'assists'} over de hele carrière bij de club volgens EA, ook van vóór deze app (dezelfde totalen als bij Algemeen). Bij gelijk staat wie het in minder wedstrijden deed hoger.`, who: CAREER,
       rows: top(k).map(t => ({ name: t.name, main: String(t[k]), sub: `${f1(t[k] / t.n)} per wedstrijd, in ${t.n}` })) }, roster);
     if (k === 'ga') return openRankList({ label: 'Goals + assists', about: 'Goals plus assists per wedstrijd, over de hele carrière bij de club volgens EA: wie het meest bijdraagt aan doelpunten.', who: CAREER, rows: R.ga }, roster);
-    if (k === 'all') return openRankList({ label: 'Frambroos-index', about: 'Alles wat een speler zelf doet, in vijf onderdelen: afronden, creëren, passen, aan de bal (balverlies en uitspelen, de benadering van onder druk) en verdedigen (ook druk zetten). Elk cijfer vergelijken we met alle mensen op dezelfde positie die we ooit tegenkwamen, tegenstanders inbegrepen. De onderdelen tellen zwaar of licht naar de rol van die wedstrijd: bij een verdedigende middenvelder weegt verdedigen zwaar en afronden licht, bij een spits andersom. 50 is gemiddeld voor de rol. De rol komt uit waar we echt staan (met of zonder G. Snoek, met hoeveel we zijn), niet uit de archetype.', who: 'Gevolgde wedstrijden van 45 minuten of langer met gebeurtenissen van EA; minstens drie. Bij weinig wedstrijden trekken we het getal naar 50.', rows: R.all }, roster);
+    if (k === 'all') return openRankList({ label: 'Compleet', about: 'Hoe hoog je op elk front scoort, allemaal even zwaar: aanvallen (goals + assists), passen (geslaagde passes), balbehoud (balverlies per keer aan de bal, lager is beter) en verdedigen (tackles, onderscheppingen, kopduels achterin, blokken, wegwerken en balwinst, ook door druk zetten). Per wedstrijd per front: beter dan zoveel procent van alle mensen die we ooit tegenkwamen, tegenstanders inbegrepen. Compleet is het gemiddelde van de vier. 50 is gemiddeld.', who: 'Gevolgde wedstrijden van 45 minuten of langer met gebeurtenissen van EA; minstens drie. Bij weinig wedstrijden trekken we het getal naar 50.', rows: R.all }, roster);
     const s = STATS.find(x => x.key === k);
     openRankList({ label: s.label, about: s.about, who: `Gevolgde wedstrijden met gebeurtenissen van EA; ${s.minLabel}.`, rows: R[k] }, roster);
   };

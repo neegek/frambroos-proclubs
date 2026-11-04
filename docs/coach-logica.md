@@ -567,9 +567,9 @@ zonder punten, weging of percentielen:
 | Topscorer | goals | hele carrière bij de club volgens EA (zoals *Algemeen*) | iedereen |
 | Topassist | assists | idem | iedereen |
 | Goals + assists | goals plus assists per wedstrijd | hele carrière bij de club volgens EA | iedereen |
-| Steekpasses | geslaagde steekpasses per wedstrijd | gevolgde wedstrijden met gebeurtenissen | minstens vijf wedstrijden |
 | Verdedigen | gewonnen tackles + onderscheppingen + kopduels achterin + blokken + wegwerken, per wedstrijd | idem | idem |
-| Compleet | plek bij goals + assists plus plek bij verdedigen; laagste som wint, bij gelijk de beste plek | beide lijsten | wie in beide lijsten staat |
+| Passes | geslaagde passes per wedstrijd, klein het deel dat aankomt | gevolgde wedstrijden | minstens vijf wedstrijden |
+| Compleet | Frambroos-index (§9b): gemiddelde van vier fronten | gevolgde wedstrijden | minstens drie |
 Elk uitlegscherm toont **alle** spelers van de selectie; wie de drempel niet haalt, staat onderaan met een streepje.
 Op de tegel: naam, het getal groot, klein waar het op rust (bijv. *36 goals uit 103 schoten*).
 
@@ -791,64 +791,38 @@ de keten te reconstrueren: wie scoorde, wie de assist gaf en wie de tweede assis
 als *Zo viel de goal*. Ontbreekt een schakel, dan zeggen we dat (geen assist, of een AI-speler gaf hem: AI-spelers
 staan niet in de data). Bij meer goals verbinden we niets.
 
-## 9b. Frambroos-index
+## 9b. Frambroos-index (Compleet)
 
-Eén getal per speler (en per speler per wedstrijd) voor wat iemand zelf bijdraagt, **los van de uitslag**, **voor de rol
-die de speler die wedstrijd had**. 50 is gemiddeld voor die rol; hoger is beter. Herzien op 4 november 2026: vijf
-onderdelen in plaats van vier, en de rol komt uit waar we echt staan in plaats van uit de archetype. Op het Clubhouse is
-het de tegel *Frambroos-index* (vervangt *Compleet*).
+Eén getal per speler (en per speler per wedstrijd): **hoe hoog iemand op elk front scoort**, los van de uitslag. 50 is
+gemiddeld; hoger is beter. Op het Clubhouse de tegel *Compleet*. Versimpeld op 4 november 2026 op verzoek van Jamal:
+geen rollen, geen gewichten, vier fronten met elk één gewoon getal.
 
-**Rol per wedstrijd** (`rolOf` in `frambroos-index.js`). EA geeft alleen vier posities, en bijna iedereen staat als
-middenvelder; een CDM en een CAM zijn voor EA hetzelfde. Daarom:
-1. EA-positie keeper, verdediger of aanvaller → *keeper*, *verdediger*, *spits*.
-2. Middenvelder: de vaste rol van de speler uit `rol` in `personas.js`, zoals Jamal die beschrijft (4 november 2026):
-   | Speler | Rol | Uitzondering |
-   |---|---|---|
-   | G. Snoek | spits | |
-   | Petra Selie, Bennie | aanvallend middenveld (meestal de flank) | |
-   | Terry Yaki | aanvallend middenveld (midden of flank) | zonder G. Snoek: spits |
-   | Mo van der Kamp | verdedigend middenveld | zonder G. Snoek en met vier mensen of minder: aanvallend middenveld |
-   | J. Wheatley | verdedigend middenveld | |
-3. Tegenstanders en spelers zonder vaste rol: *middenveld* (algemeen).
-
-**Per wedstrijd** (alleen rijen met minstens 45 minuten en gebeurtenissen van EA), vijf onderdelen:
-| Onderdeel | Cijfers (gelijk gewogen binnen het onderdeel) |
+**Vier fronten**, per wedstrijd (alleen rijen met minstens 45 minuten en gebeurtenissen van EA):
+| Front | Getal |
 |---|---|
-| Afronden | goals; schoten op doel |
-| Creëren | assists; tweede assists (115); geslaagde steekpasses (152) |
-| Passen | geslaagde passes (215); deel dat aankomt (215 / (215 + 216)); deel goede of beste keuze (176 + 177 van 175 + 176 + 177 + 182); deel "had elders moeten passen" (182, lager is beter) |
-| Aan de bal | uitgespeeld (112); balverlies per balactie (lager is beter). Dit is de benadering van "onder druk": druk zelf meet EA niet |
-| Verdedigen | gewonnen tackles; onderscheppingen; kopduels achterin; blokken + wegwerken; balwinst in elk derde (ook druk zetten) |
+| Aanvallen | goals + assists |
+| Passen | geslaagde passes (215) |
+| Balbehoud | balverlies per balactie (lager is beter; minstens vijf balacties) |
+| Verdedigen | gewonnen tackles + onderscheppingen + kopduels achterin + blokken + wegwerken + balwinst (ook druk zetten) |
 
-1. Elk cijfer wordt een percentiel (0–100, gelijke waarden in het midden) binnen **dezelfde EA-positie** (spits tegen
-   aanvallers, middenvelders tegen middenvelders, verdedigers tegen verdedigers), over alle mensen die we tegenkwamen,
-   tegenstanders inbegrepen. Delen (aankomen, keuze) tellen pas bij minstens vijf pogingen; anders 50.
-2. Een onderdeel is het gemiddelde percentiel van zijn cijfers.
-3. De wedstrijdscore is het gewogen gemiddelde van de onderdelen, met de gewichten van de **rol**:
-   | Rol | Afronden | Creëren | Passen | Aan de bal | Verdedigen |
-   |---|---|---|---|---|---|
-   | spits | 1,5 | 1,0 | 0,6 | 1,0 | 0,3 |
-   | aanvallend middenveld | 1,0 | 1,4 | 1,0 | 1,2 | 0,5 |
-   | verdedigend middenveld | 0,3 | 0,7 | 1,4 | 1,0 | 1,5 |
-   | middenveld (algemeen) | 0,7 | 1,1 | 1,2 | 1,1 | 0,9 |
-   | verdediger | 0,2 | 0,4 | 1,0 | 0,8 | 1,6 |
-   | keeper | 0 | 0,3 | 1,0 | 0,5 | 1,2 |
-   Zo telt scoren bij een CDM nauwelijks mee en verdedigen bij een spits nauwelijks, en wordt niemand gestraft voor
-   wat de rol niet vraagt.
+1. Elk getal wordt een percentiel (0–100, gelijke waarden in het midden) tegenover **alle mensen** die we tegenkwamen,
+   tegenstanders inbegrepen, ongeacht positie.
+2. De wedstrijdscore is het gewone gemiddelde van de vier fronten.
+3. Per speler het gemiddelde van de wedstrijdscores, naar 50 getrokken bij weinig wedstrijden: `(som + 5 × 50) / (n + 5)`.
+   Ook per front. Minimaal 3 wedstrijden. Op de tegel staat het zwakste front: compleet is zo sterk als je zwakste kant.
 
-**Per speler**: het gemiddelde van de wedstrijdscores, naar 50 getrokken bij weinig wedstrijden:
-`(som + 5 × 50) / (n + 5)`. Ook per onderdeel. Minimaal 3 wedstrijden om te tonen. In het uitlegscherm staat per speler
-de rol die het vaakst voorkwam en de vijf onderdelen.
+**Wat dit wel en niet is**: het beloont breedte, niet winnen. Middenvelders komen er gemiddeld hoger uit (53) dan
+aanvallers (44), want een spits hoeft niet te verdedigen. Samenhang met het doelsaldo (gecorrigeerd voor sterkte, 670
+speler-wedstrijden): 0,23; de vorige versie met rollen 0,30, die daarvoor 0,35, de EA-matchrating 0,39. Balwinst telt
+deels dubbel met tackles en onderscheppingen (bewust: Jamal wil druk zetten meetellen).
 
 **Labels**: ≥ 58 *uitblinker*, ≥ 53 *boven gemiddeld*, > 47 *gemiddeld*, > 42 *onder gemiddeld*, anders *ver onder*.
 Per wedstrijd: ≥ 70 *topwedstrijd*, ≤ 30 *mindere wedstrijd*.
 
-**Toets** (4 november 2026, zie *Toets* hieronder voor de cijfers): samenhang met de EA-matchrating en met het
-doelsaldo van het eigen team, gecorrigeerd voor sterkte, tegenover de vorige versie.
-
-**Grenzen**: sleutelpasses (een pass die tot een kans leidt die niet wordt afgemaakt) meet EA niet zeker (code 114 is
-onbevestigd), dus wie goede ballen geeft die niet worden afgemaakt, krijgt daar geen credit voor. Steekpass-pogingen
-geeft EA niet, alleen geslaagde.
+**Rollen** (`rol` in `personas.js`, `rolOf` in `frambroos-index.js`) staan vast zoals Jamal ze beschreef (4 november
+2026): G. Snoek spits; Petra Selie en Bennie aanvallend middenveld; Terry Yaki aanvallend middenveld, zonder G. Snoek
+spits; Mo van der Kamp verdedigend middenveld, zonder G. Snoek en met vier of minder aanvallend; J. Wheatley verdedigend.
+De index gebruikt ze niet meer; ze blijven als kennis voor later (bijv. vergelijken binnen een rol).
 
 ## 9c. Spelerskaart: tiers
 
