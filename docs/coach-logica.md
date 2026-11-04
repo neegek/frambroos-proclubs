@@ -329,24 +329,25 @@ Daarnaast *Positiespel en keuzes* en *Al sterk*.
   je winnen, maar je kan wel van ze verliezen." · verloren met veel schoten: "Toeval is logisch." · ver boven normaal:
   "Je gaat het pas zien als je het doorhebt." · ver onder normaal: "Elk nadeel heb z'n voordeel." · monsterscore en
   overig: "Voetbal is simpel, maar het moeilijkste wat er is, is simpel voetballen."
-- **Sessie, waar het schuurde** (sinds 3 november 2026): een kaart direct onder de sessiekop met **hooguit twee
-  regels** over waar we die avond moeite mee hadden, cruijffiaans: kort, simpel, een beetje paradoxaal, in de
-  jullie-vorm ("Jullie hadden moeite met …"). Alleen maten met een verband (§9e), steeds deze avond tegenover het
-  normaal over alle andere wedstrijden, per mens per wedstrijd:
-  1. *Kansen tegen*: schoten op doel van de tegenstander.
-  2. *Eigen kansen*: onze schoten op doel.
-  3. *Afronding*: goals per schot op doel (minstens acht schoten op doel die avond), want genoeg kansen zonder goals is
-     iets anders dan geen kansen.
-  4. *Luchtduels achterin* (zwak verband, alleen bij een grote afwijking): onze gewonnen koppen achterin min die van hen.
-  Een maat telt als hij in de slechte richting minstens 25 % afwijkt én minstens 1,5 standaardfout (spreiding per
-  wedstrijd / √aantal wedstrijden). De sterkste twee winnen.
-  Daarnaast **tegen wie**: hadden de niet-gewonnen potten van de avond (minstens twee) een kenmerk van de tegenstander
-  gemeen (§9a, *Waar we verliezen*, plus *twee of meer menselijke aanvallers én een menselijke verdediger*) dat in de
-  gewonnen potten veel minder voorkwam (minstens de helft minder vaak, of er waren geen zeges), dan staat dat erbij. Waren
-  die tegenstanders gemiddeld sterker (100 of meer), dan zeggen we dat in plaats van het kenmerk: na correctie voor
-  sterkte maken kenmerken geen verschil (§9e). Het is een beschrijving van de avond, geen oorzaak.
-  Niets gevonden: "Geen zwak punt te vinden. Als het goed gaat, moet je niets veranderen." Bij een sessie die bezig
-  is, staat de kaart er niet. Achter de i-knop: waarmee vergeleken is en waarom alleen deze maten.
+- **In het kort** (sessie en wedstrijd, sinds 4 november 2026; vervangt *Waar het schuurde*): één kaart met **hooguit
+  één min en één plus**, elk één korte zin, cruijffiaans, zonder tussenkopjes of cijfers (een uitleg komt later). Alleen
+  wat er echt is: het mag één min zijn, één plus, of één neutrale zin. Voor mobiel eerst. Maten (alleen met verband, §9e):
+  1. *Schoten op doel tegen* en *eigen schoten op doel*, per mens, tegenover het normaal over alle andere wedstrijden.
+     Sessie: minstens 25 % verschil en 1,5 standaardfout. Wedstrijd: minstens 40 % en 1,25 keer de gewone spreiding.
+  2. *Afronding*: goals van mensen tegenover wat je met zoveel schoten op doel normaal maakt (sessie minstens acht,
+     wedstrijd minstens vier schoten op doel; 1,5 standaardfout en 25 % verschil).
+  3. *Sterkte* (skill rating van toen, §3): wedstrijd verloren van 100+ sterker ("Ze waren gewoon beter."), niet
+     verloren van 100+ sterker (plus), verloren van 100+ zwakker (min). Sessie: de niet-gewonnen potten gemiddeld 100+
+     sterker (min), doelsaldo gemiddeld 0,7 of meer boven verwachting over minstens drie potten (plus).
+  Een min bij winst (of een plus bij verlies) alleen als hij er echt uitspringt. Bij een slechte uitslag staat de min
+  eerst, anders de plus. Niets gevonden: winst "Niets sprong eruit. Als het goed gaat, moet je niets veranderen.",
+  verlies "Geen duidelijke oorzaak: het zat in de details." (gelijk telt als niet-slecht).
+  **Opstellingen van de tegenstander staan er bewust niet in**: getoetst op 4 november 2026 (tegenstanders met een
+  menselijke verdediger, twee of meer aanvallers, drie of meer middenvelders, vier of vijf mensen op hun aanvallende
+  helft, meer mensen op hun aanvallende helft dan wij, meer mensen dan wij): na correctie voor sterkte en mensen geen
+  enkel verschil (p 0,13 tot 0,99). Het dichtst bij: een menselijke verdediger (−0,4 goal tov verwachting, 13
+  wedstrijden, p 0,48), niet genoeg om te noemen. Opnieuw toetsen bij meer wedstrijden.
+  Volgende stap (nog niet gebouwd): per min of plus wat je ermee doet.
 - **Wedstrijd**: uitslag, sterkte en mensen van de tegenstander; verloop op basis van kansen; beste speler. Niet meer:
   het verschil met normaal.
 - **Speler, algemeen** (sinds 28 oktober 2026, twee of drie zinnen, geen afgeleide "rollen" meer):
@@ -557,24 +558,26 @@ Dan **Gevaarlijkste spelers** (zie hieronder), de laatste sessie en de
 trofeeënkast, **Nieuws** (kleine kaartjes: beeld links, tekst rechts; op telefoon de laatste vijf als rij), Algemeen
 en Selectie. *Laatste uitslagen* is sinds 3 november 2026 weg: de laatste sessie toont ze al.
 
-**Gevaarlijkste spelers** (herzien op 4 november 2026: zo simpel mogelijk). Zes tegels, elk **één gewone statistiek**,
+**Gevaarlijkste spelers** (herzien op 4 november 2026: zo simpel mogelijk; Afmaker en Druk zetten dezelfde dag
+vervangen door Goals + assists en Compleet: conversie zegt weinig zolang je niet weet hoe moeilijk de kansen waren, en
+goals plus assists per wedstrijd is de hardste maat voor bijdrage). Zes tegels, elk **één gewone statistiek**,
 zonder punten, weging of percentielen:
 | Tegel | Wat | Over | Wie telt mee |
 |---|---|---|---|
 | Topscorer | goals | hele carrière bij de club volgens EA (zoals *Algemeen*) | iedereen |
 | Topassist | assists | idem | iedereen |
-| Afmaker | goals per schot (%) | gevolgde wedstrijden | minstens 20 schoten |
+| Goals + assists | goals plus assists per wedstrijd | hele carrière bij de club volgens EA | iedereen |
 | Steekpasses | geslaagde steekpasses per wedstrijd | gevolgde wedstrijden met gebeurtenissen | minstens vijf wedstrijden |
 | Verdedigen | gewonnen tackles + onderscheppingen + kopduels achterin + blokken + wegwerken, per wedstrijd | idem | idem |
-| Druk zetten | balwinst in het laatste derde van de tegenstander per wedstrijd | idem | idem |
+| Compleet | plek bij goals + assists plus plek bij verdedigen; laagste som wint, bij gelijk de beste plek | beide lijsten | wie in beide lijsten staat |
 Elk uitlegscherm toont **alle** spelers van de selectie; wie de drempel niet haalt, staat onderaan met een streepje.
 Op de tegel: naam, het getal groot, klein waar het op rust (bijv. *36 goals uit 103 schoten*).
 
 *Waarom zo*: de vorige versie (punten per wedstrijd, omgerekend naar een percentiel per teamgrootte, en *Compleet*)
 was niet na te rekenen en bevoordeelde wie veel dribbelt: Terry Yaki stond bovenaan Aanvallend door "tegenstander
 voorbij ½", terwijl Petra Selie meer scoort en Bennie en G. Snoek een hogere conversie hebben. Een gewone statistiek
-zegt precies wat hij zegt. Druk zetten is actief werk en krijgt daarom een eigen tegel; het staat los van
-Verdedigen, zodat een tackle hoog op het veld niet dubbel telt en de verdedigingslijst een verdedigingslijst blijft.
+zegt precies wat hij zegt. Druk zetten telt niet mee bij Verdedigen (een tackle hoog op het veld zou dan dubbel
+tellen) en staat als balwinst op de spelerspagina.
 Of een statistiek samenhangt met winnen, staat in §9e; dat is geen reden om actief werk niet te tonen.
 Vervallen (4 november 2026): de scores Aanvallend, Creëren, Verdedigend en Compleet (3 november 2026), en daarvoor
 een score tegenover alleen onze zes spelers.
@@ -594,10 +597,10 @@ telefoon smallere banen en rondjes zonder naam.
 **Wij tegen hen** (wedstrijd): per cijfer één regel met beide totalen en een verdeelde balk; een tik klapt de regel
 open met alle spelers van beide kanten als balkjes (wij blauw, zij oranje), de beste bovenaan. Vervangt de losse
 ranglijstkaartjes *Spelers* op de wedstrijdpagina. Nieuwe cijfers: één regel in `VS_STATS` (`wedstrijd.js`).
-**Trofeeënkast** (stijl sinds 3 november 2026): geen kaartjes, want die lijken aan te tikken en dat zijn ze niet. Elke
-prijs staat als voorwerp in de kast: EA's gouden badge in een **gouden schaal** (een getekende erebord-schaal met rand
-en spiegel, vaste kleuren los van het thema), op een smal plankje, met eronder gegraveerd het seizoen, de divisie en
-hoe ver we kwamen. Geen rand, geen achtergrond, geen hover.
+**Trofeeënkast** (stijl sinds 3 november 2026, subtieler sinds 4 november): geen kaartjes, want die lijken aan te tikken
+en dat zijn ze niet. Elke prijs staat als voorwerp: EA's gouden badge op een **subtiele schaal** (transparant goudverloop,
+een dunne rand en een fijne zonnestraal zoals guillocheerwerk; vaste kleuren los van het thema), met eronder het seizoen,
+de divisie en hoe ver we kwamen. Geen plankje, geen schaduw, geen rand, geen achtergrond, geen hover.
 Inhoud: wat EA per afgesloten seizoen bewaart (`club/playoffAchievements`): de divisie met EA's eigen
 divisiebadge (`divisioncrest<n>.png` op EA's CDN, met onze beker als terugval) en hoe ver we kwamen (eindgroep 1
 *Kampioen*, 6 *Deelnemer*, daartussen *Eindgroep n*), plus de beste divisie ooit. EA's schaal begint bij Elite: 1 is
@@ -673,7 +676,7 @@ rondjes, en de speler van de sessie of het dichte pack) en **Trofeeën**: per pr
 gebeuren een beker met het moment en de wedstrijd ervoor (uit de snapshots: de teller van EA ging omhoog), plus één
 regel voor wat er al was voordat de app meekeek; verticaal te scrollen. Het nieuws is één compacte rij.
 
-**Menu** (sinds 3 november 2026): rechts in de menubalk een menuknop (op telefoon in de balk onderin) met zoeken door
+**Menu** (sinds 3 november 2026): een pagina een laag dieper (sessie, wedstrijd, rivalen, nieuws, een spelersprofiel) zet **geen** tabblad actief, zodat een tik op het tabblad terug naar de lijst gaat; overal hetzelfde (4 november 2026). rechts in de menubalk een menuknop (op telefoon in de balk onderin) met zoeken door
 tegenstanders, spelers en sessies; de **modus** (alles, alleen league, alleen playoff; geldt voor de hele app en
 wordt per browser onthouden); de rating (nu alleen EA, *eigen* volgt); en thuis- of uittenue. Op telefoon heet
 Wedstrijden in de balk *Games*, zodat alles past.
@@ -896,7 +899,13 @@ daar iets groter gezet zodat ze klein leesbaar blijven. Eén functie (`PlayerCar
 
 De tier staat ook als `title` op de kaart, met de sessie waarop hij rust.
 
-## 9e. Verbanden: methode en uitkomst (3 november 2026)
+## 9e. Verbanden: methode en uitkomst (3 november 2026, ratings van toen sinds 4 november)
+
+**Sterkte op het moment van de wedstrijd** (logische fout tot 4 november 2026): het sterkteverschil gebruikte voor elke
+wedstrijd onze skill rating van nu (1804), terwijl die in deze periode van 1598 naar 1804 steeg. Oude tegenstanders leken
+daardoor zwakker dan ze waren. Nu: onze rating uit het laatste snapshot vóór de wedstrijd (vóór het eerste snapshot het
+eerste, als schatting), die van de tegenstander uit het snapshot het dichtst bij de wedstrijd (`ownRating` in
+`src/data.js`, `gapOf(m)` in `common.js`). De conclusies hieronder blijven gelijk (opnieuw gedraaid).
 
 **Methode** (zo toetsen we elk nieuw verband, en zo is dit gedaan):
 1. **Eenheid is de wedstrijd**, uitkomst het doelsaldo. Alleen league en playoff, geen opgave, alleen wedstrijden met

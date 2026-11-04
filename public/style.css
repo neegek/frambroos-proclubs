@@ -1677,31 +1677,27 @@ html, body { overflow-x: clip; overscroll-behavior-x: none; }
 .rank-dialog .mr-when { display: block; }
 @media (min-width: 900px) { .lose-card .lose-row, .lose-card .lose-kort { max-width: 720px; } }
 
-/* Trofeeënkast (coach-logica §9a): geen kaartjes maar voorwerpen. EA's badge in een gouden schaal op een plankje,
-   gegraveerde tekst eronder; geen rand, geen achtergrond, geen hover. */
+/* Trofeeënkast (coach-logica §9a): geen kaartjes maar voorwerpen. EA's badge in een subtiele, transparante gouden
+   schaal, tekst eronder; geen rand, geen achtergrond, geen hover. */
 .trophies { display: grid; grid-template-rows: auto auto minmax(0, 1fr); }
 .trophy-list { list-style: none; margin: 10px calc(-1 * var(--px, 18px)) 0; padding: 4px var(--px, 18px) 6px; display: grid; grid-auto-flow: column; grid-auto-columns: 132px; gap: 22px; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x proximity; scroll-padding-inline: var(--px, 18px); scrollbar-width: thin; align-items: start; }
 .trophy { display: grid; justify-items: center; text-align: center; gap: 0; scroll-snap-align: start; cursor: default; user-select: none; }
-.tr-plate { position: relative; display: grid; place-items: center; width: 112px; height: 112px; filter: drop-shadow(0 6px 8px rgba(0,0,0,0.35)) drop-shadow(0 1px 1px rgba(0,0,0,0.3)); }
+.tr-plate { position: relative; display: grid; place-items: center; width: 104px; height: 104px; }
 .tr-plate-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.tr-crest { position: relative; display: grid; place-items: center; width: 58px; height: 58px; filter: drop-shadow(0 2px 2px rgba(60,40,0,0.55)); }
+.tr-crest { position: relative; display: grid; place-items: center; width: 60px; height: 60px; }
 .tr-crest img { width: 100%; height: 100%; object-fit: contain; }
 .tr-crest svg { display: none; width: 44px; height: 44px; }
 .tr-crest.no-img img { display: none; } .tr-crest.no-img svg { display: block; }
-.tr-shelf { width: 86px; height: 7px; margin-top: 6px; border-radius: 2px 2px 4px 4px; background: linear-gradient(#5a3b1a, #2e1c0b); box-shadow: 0 4px 8px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,220,160,0.25); }
-:root[data-theme="light"] .tr-shelf { background: linear-gradient(#8a5a2b, #5b3916); box-shadow: 0 3px 6px rgba(28,41,20,0.18), inset 0 1px 0 rgba(255,230,190,0.4); }
-.tr-text { display: grid; gap: 1px; margin-top: 10px; min-width: 0; }
+.tr-text { display: grid; gap: 1px; margin-top: 8px; min-width: 0; }
 .tr-text b { font-weight: 650; font-size: 14px; }
 .tr-text small { font-size: 12.5px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tr-text small.tr-kicker { font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-.trophy.best .tr-plate { filter: drop-shadow(0 0 12px rgba(255,210,0,0.28)) drop-shadow(0 6px 8px rgba(0,0,0,0.35)); }
+
 .trophy-list .empty { grid-column: 1 / -1; color: var(--muted); }
 
-/* Waar het schuurde (sessie, coach-logica §9): hooguit twee korte regels, cruijffiaans; het bewijs klein eronder. */
-.struggles { list-style: none; margin: 10px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 12px 24px; }
-.struggle { display: grid; align-content: start; gap: 3px; padding-left: 12px; border-left: 3px solid var(--neg); min-width: 0; }
-.struggle.none { border-left-color: var(--pos); }
-.struggle .st-label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--neg-text); }
-.struggle p { margin: 0; font-size: 14.5px; line-height: 1.45; color: var(--ink); text-wrap: pretty; }
-.struggle small { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.struggle.none.meh { border-left-color: var(--neutral); }
+/* In het kort (sessie en wedstrijd, coach-logica §9): hooguit een min en een plus, één zin elk. */
+.takeaways { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; }
+.takeaway { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; align-items: start; font-size: 15px; line-height: 1.4; color: var(--ink); text-wrap: pretty; }
+.tk-mark { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; font-weight: 700; font-size: 15px; line-height: 1; color: var(--ink-2); background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.takeaway.bad .tk-mark { color: var(--neg-text); background: color-mix(in srgb, var(--neg) 16%, transparent); }
+.takeaway.good .tk-mark { color: var(--good-text); background: color-mix(in srgb, var(--pos) 16%, transparent); }

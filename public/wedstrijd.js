@@ -111,10 +111,13 @@ function render() {
     <div class="sl-score"><span>${m.goals}–${m.goalsAgainst}</span><span class="pill ${m.result}">${m.result === 'W' ? 'Gewonnen' : m.result === 'L' ? 'Verloren' : 'Gelijk'}</span></div>
     <div class="sl-team">${oppBadge(m.opponent)}<span>${esc(m.opponent.name)}</span></div>`;
   // De tegenstander in woorden: hoeveel mensen er speelden, staat al in het veld.
-  const diff = m.opponent.skillRating && own ? m.opponent.skillRating - own : null;
+  const diff = gapOf(m, own);
   $('#m-meta').textContent = [diff === null ? '' : diff >= 100 ? 'Sterkere tegenstander' : diff <= -100 ? 'Zwakkere tegenstander' : 'Gelijkwaardige tegenstander', m.winnerByDnf ? 'gaf op' : ''].filter(Boolean).join(' · ');
   $('#m-pitches').innerHTML = lineup(m);
   PlayerCard.reveal($('#m-pitches'));
+  // In het kort (coach-logica §9): alleen voor league en playoff; vriendschappelijk telt nergens mee.
+  $('#m-kort-card').hidden = pool !== DATA.matches;
+  if (pool === DATA.matches) $('#m-kort').innerHTML = takeawaysHtml(takeaways([m], DATA.matches.filter(x => x !== m), own));
   $('#m-h2h').innerHTML = h2h(m);
   for (const b of $('#m-h2h').querySelectorAll('.vs-row')) b.addEventListener('click', () => { const it = b.parentElement, open = !it.classList.contains('open'); it.classList.toggle('open', open); b.setAttribute('aria-expanded', String(open)); });
 }

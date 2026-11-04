@@ -39,8 +39,10 @@ const NAV = [
 ];
 (function mountShell() {
   const side = $('#sidebar'); if (!side) return;
-  // Een laag dieper: het tabblad erboven. Een sessie niet: daar is Sessies niet actief, zodat een tik terug naar de lijst gaat.
-  const path = { 'wedstrijd.html': 'wedstrijden.html', 'rivalen.html': 'wedstrijden.html', 'nieuws.html': 'index.html' }[PAGE] || PAGE;
+  // Een laag dieper (sessie, wedstrijd, rivalen, nieuws, een spelersprofiel): geen tabblad actief, zodat een tik op het
+  // tabblad terug naar de lijst gaat. Overal hetzelfde (coach-logica §9a, Menu).
+  const DEEPER = ['sessie.html', 'wedstrijd.html', 'rivalen.html', 'nieuws.html'];
+  const path = DEEPER.includes(PAGE) || (PAGE === 'spelers.html' && location.hash.length > 1) ? null : PAGE;
   side.innerHTML = `<a class="brand" href="index.html">${LOGO}<span>Frambroos<b>Coach</b></span></a>
     <nav class="side-nav" aria-label="Hoofdmenu">${NAV.map(n => n.group ? `<div class="nav-group" id="nav-group-players"><a href="${n.href}" class="nav-group-head ${n.href === path ? 'in-group' : ''}" aria-controls="player-nav" aria-expanded="true">${ICONS[n.icon]}<span>${n.label}</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><div class="sub-nav" id="player-nav" aria-label="Spelers"></div></div>` : `<a href="${n.href}" class="${n.href === path ? 'active' : ''}${n.short ? ' has-short' : ''}"${n.href === path ? ' aria-current="page"' : ''}>${ICONS[n.icon]}<span class="nl-long">${n.label}</span>${n.short ? `<span class="nl-short" aria-hidden="true">${n.short}</span>` : ''}</a>`).join('')}</nav>
     <div class="side-foot"><div class="club" id="club-box"><div class="club-meta">Data laden…</div></div>
@@ -59,6 +61,8 @@ const NAV = [
       <div class="am-seg" role="radiogroup" aria-label="Weergave"><button type="button" role="radio" data-theme-pick="dark">Thuis (donker)</button><button type="button" role="radio" data-theme-pick="light">Uit (licht)</button></div>
       <p class="am-note" id="am-fresh"></p>
     </div></dialog>`);
+  // Spelers: de lijst is het tabblad, een profiel (#naam) een laag dieper.
+  if (PAGE === 'spelers.html') addEventListener('hashchange', () => side.querySelector('.nav-group-head')?.classList.toggle('in-group', location.hash.length <= 1));
 })();
 // Spelersnamen onder het kopje Spelers in het menu; de actieve speler volgt de hash op de spelerspagina.
 function fillPlayerNav() {
@@ -336,8 +340,11 @@ function solve3(A, b) {
   }
   return M.map((row, i) => row[3] / row[i]);
 }
+// Sterkteverschil op het moment van de wedstrijd (coach-logica §3): onze rating van toen (m.ownRating, uit data.js),
+// anders de rating van nu. Positief = de tegenstander was sterker.
+function gapOf(m, fallback = null) { const own = m.ownRating || fallback; return m.opponent.skillRating && own ? m.opponent.skillRating - own : null; }
 function fitModel(matches, ownRating) {
-  const rows = matches.map(m => ({ x1: m.opponent.skillRating && ownRating ? (m.opponent.skillRating - ownRating) / 100 : 0, x2: m.opponentPlayers.length - m.players.length, y: m.goalDiff }));
+  const rows = matches.map(m => ({ x1: (gapOf(m, ownRating) ?? 0) / 100, x2: m.opponentPlayers.length - m.players.length, y: m.goalDiff }));
   let coef = null, fitted = false;
   if (rows.length >= 10) {
     const A = [[0, 0, 0], [0, 0, 0], [0, 0, 0]], b = [0, 0, 0];
@@ -356,7 +363,7 @@ function fitModel(matches, ownRating) {
     }
   }
   if (!coef) coef = [0, -0.6, -0.4];
-  const predict = m => coef[0] + coef[1] * (m.opponent.skillRating && ownRating ? (m.opponent.skillRating - ownRating) / 100 : 0) + coef[2] * (m.opponentPlayers.length - m.players.length);
+  const predict = m => coef[0] + coef[1] * ((gapOf(m, ownRating) ?? 0) / 100) + coef[2] * (m.opponentPlayers.length - m.players.length);
   return { coef, fitted, n: rows.length, predict };
 }
 
@@ -371,8 +378,64 @@ const OPP_TRAITS = [
   { key: 'fwd', label: 'Twee of meer menselijke aanvallers', phrase: 'twee of meer menselijke aanvallers', test: m => oppPos(m, 'forward') >= 2, cruijff: 'Als iedereen aanvalt, verdedigt niemand: één man blijft achter de bal.', tip: 'Eén middenvelder blijft achter de bal; niet met z’n allen mee naar voren.' },
   { key: 'fwddef', label: 'Twee of meer aanvallers en een verdediger', phrase: 'veel mensen voorin en een mens achterin', test: m => oppPos(m, 'forward') >= 2 && oppPos(m, 'defender') > 0, cruijff: 'Als zij met velen aanvallen, moet er bij ons één blijven staan. En voorin eerst combineren: hun man achterin leest de steekpass.', tip: 'Eén middenvelder blijft achter de bal, en voorin eerst combineren: hun verdediger leest de steekpass.' },
   { key: 'mid', label: 'Drie of meer menselijke middenvelders', phrase: 'drie of meer mensen op het middenveld', test: m => oppPos(m, 'midfielder') >= 3, cruijff: 'Is het midden dicht, dan speel je eromheen.', tip: 'Het midden zit dicht: sneller over de flank en in de diepte.' },
-  { key: 'strong', label: 'Sterker volgens EA', phrase: 'een skill rating van 100 of meer boven de onze', test: (m, own) => own && m.opponent.skillRating ? m.opponent.skillRating - own >= 100 : null, cruijff: 'Van betere tegenstanders kun je leren.', tip: 'Eerst de nul houden: compacter staan, minder risico op eigen helft.' },
+  { key: 'strong', label: 'Sterker volgens EA', phrase: 'een skill rating van 100 of meer boven de onze', test: (m, own) => gapOf(m, own) === null ? null : gapOf(m, own) >= 100, cruijff: 'Van betere tegenstanders kun je leren.', tip: 'Eerst de nul houden: compacter staan, minder risico op eigen helft.' },
 ];
+
+// ---------- In het kort: wat schuurde en wat goed ging (coach-logica §9, In het kort) ----------
+// Voor een sessie (meerdere wedstrijden) en voor één wedstrijd. Hooguit één min en één plus, elk één korte zin, en
+// alleen als het er echt is. Alleen maten met een verband (§9e): schoten op doel voor en tegen, afronding, sterkte.
+// Opstellingen van de tegenstander niet: na correctie voor sterkte maken die geen verschil (§9e).
+const evSum = (ps, k) => ps.reduce((a, p) => a + (p.ev?.[k] || 0), 0);
+const withEv = ps => ps.filter(p => p.ev);
+const perHuman = (ps, k) => { const t = withEv(ps); return t.length ? evSum(t, k) / t.length : null; };
+const meanSd = xs => { const m = avg(xs), sd = Math.sqrt(xs.reduce((a, x) => a + (x - m) ** 2, 0) / Math.max(1, xs.length - 1)); return { m, sd }; };
+const TAKE_MEASURES = [
+  { key: 'against', sign: -1, v: m => perHuman(m.opponentPlayers, 'shots_on_target'),
+    bad: 'Ze kwamen te makkelijk voor ons doel.', good: 'Achterin stond het: ze kwamen nauwelijks tot schieten.' },
+  { key: 'for', sign: +1, v: m => perHuman(m.players, 'shots_on_target'),
+    bad: 'We kwamen er niet doorheen.', good: 'We kwamen makkelijk tot kansen.' },
+];
+function takeaways(ms, others, own) {
+  const single = ms.length === 1, bad = [], good = [];
+  const push = (list, text, w) => list.push({ text, w });
+  // Schoten op doel, per mens: deze wedstrijd(en) tegenover het normaal. Bij een sessie de standaardfout (≥ 1,5), bij
+  // één wedstrijd de gewone spreiding (≥ 1,25); en altijd een flink verschil (25 % of meer, bij één wedstrijd 40 %).
+  for (const x of TAKE_MEASURES) {
+    const here = ms.map(x.v).filter(v => v !== null), there = others.map(x.v).filter(v => v !== null);
+    if (!here.length || there.length < 10) continue;
+    const { m: mu, sd } = meanSd(there), xbar = avg(here), z = sd ? x.sign * (xbar - mu) / (single ? sd : sd / Math.sqrt(here.length)) : 0;
+    const rel = mu ? Math.abs(xbar - mu) / mu : 0;
+    if (rel < (single ? 0.4 : 0.25)) continue;
+    if (z <= -(single ? 1.25 : 1.5)) push(bad, x.bad, -z); else if (z >= (single ? 1.25 : 1.5)) push(good, x.good, z);
+  }
+  // Afronding: goals van mensen tegenover wat je met zoveel schoten op doel normaal maakt.
+  const conv = list => { let g = 0, s = 0; for (const m of list) for (const p of withEv(m.players)) { g += p.goals || 0; s += p.ev.shots_on_target || 0; } return { g, s }; };
+  const h = conv(ms), t = conv(others), p0 = t.s ? t.g / t.s : null;
+  if (p0 && h.s >= (single ? 4 : 8)) { const exp = h.s * p0, z = (h.g - exp) / Math.sqrt(h.s * p0 * (1 - p0));
+    if (z <= -1.5 && h.g <= 0.75 * exp) push(bad, 'Kansen genoeg, maar de bal wilde er niet in.', -z);
+    else if (z >= 1.5 && h.g >= 1.25 * exp) push(good, 'Wat we kregen, maakten we af.', z); }
+  // Sterkte van de tegenstander (skill rating volgens EA).
+  if (single) { const m = ms[0], g = gapOf(m, own);
+    if (g !== null && g >= 100 && m.result === 'L') push(bad, 'Ze waren gewoon beter.', g >= 150 ? 2.5 : 1.4);
+    if (g !== null && g >= 100 && m.result !== 'L') push(good, m.result === 'W' ? 'Een sterkere ploeg verslagen.' : 'Tegen een sterkere ploeg toch een punt.', g >= 150 ? 2.5 : 1.6);
+    if (g !== null && g <= -100 && m.result === 'L') push(bad, 'Verloren van een zwakkere ploeg: dat reken je jezelf aan.', 2);
+  } else {
+    const nw = ms.filter(m => m.result !== 'W'), gaps = nw.map(m => gapOf(m, own)).filter(g => g !== null);
+    if (nw.length >= 2 && gaps.length === nw.length && avg(gaps) >= 100) push(bad, 'De punten bleven liggen tegen sterkere ploegen.', 1.6);
+    const res = ms.map(m => m.resid).filter(r => r !== undefined && r !== null);
+    if (res.length >= 3 && avg(res) >= 0.7) push(good, 'Beter dan verwacht tegen deze tegenstanders.', 1.5 + avg(res) / 2);
+  }
+  // Hooguit één min en één plus; een min bij winst (of een plus bij verlies) alleen als hij er echt uitspringt.
+  const top = list => list.sort((a, b) => b.w - a.w)[0];
+  const sm = summarize(ms), poor = single ? ms[0].result === 'L' : sm.ppg < 1.5, great = single ? ms[0].result === 'W' : sm.ppg >= 2;
+  const b = top(bad), g = top(good), out = [];
+  if (b && (!great || b.w >= 2)) out.push({ tone: 'bad', text: b.text });
+  if (g && (!poor || g.w >= 2)) out.push({ tone: 'good', text: g.text });
+  if (!poor) out.reverse();
+  const flat = poor ? 'Geen duidelijke oorzaak: het zat in de details.' : single && ms[0].result === 'D' ? 'Niets sprong eruit: een pot die alle kanten op kon.' : 'Niets sprong eruit. Als het goed gaat, moet je niets veranderen.';
+  return out.length ? out : [{ tone: 'flat', text: flat }];
+}
+const takeawaysHtml = list => list.map(x => `<li class="takeaway ${x.tone}"><span class="tk-mark" aria-label="${x.tone === 'bad' ? 'Schuurde' : x.tone === 'good' ? 'Ging goed' : 'Neutraal'}">${x.tone === 'bad' ? '−' : x.tone === 'good' ? '+' : '·'}</span><span>${esc(x.text)}</span></li>`).join('');
 
 function filtered() {
   const range = $('#range')?.value || 'all', type = $('#type')?.value || 'all';
@@ -651,7 +714,7 @@ const POS_CODE = ['GK', 'SW', 'RWB', 'RB', 'RCB', 'CB', 'LCB', 'LB', 'LWB', 'RDM
 // badge "tov verwachting". Gedeeld door Wedstrijden, Sessies en de Vorm van een speler. Container: .match-cards.
 function matchCard(m, { own = null, player = null } = {}) {
   const t = new Date(m.ts * 1000).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
-  const diff = m.opponent.skillRating && own ? m.opponent.skillRating - own : null;
+  const diff = gapOf(m, own);
   const str = diff === null ? '' : diff >= 250 ? 'veel sterker' : diff >= 100 ? 'sterker' : diff <= -100 ? 'zwakker' : '';
   const p = player ? m.players.find(x => x.name === player) : [...m.players].sort((x, y) => (y.rating ?? 0) - (x.rating ?? 0))[0];
   const foot = !p ? '' : player ? `<b>${p.rating ?? '–'}</b> ${p.goals} G, ${p.assists} A${p.mom ? ' · ★' : ''}`
@@ -669,7 +732,7 @@ function matchCard(m, { own = null, player = null } = {}) {
 // Beste speler: de hoogste EA-rating, met een kroon als die ook man of the match was (coach-logica §9a, Wedstrijden).
 function matchRow(m, own) {
   const when = new Date(m.ts * 1000).toLocaleString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-  const diff = m.opponent.skillRating && own ? m.opponent.skillRating - own : null;
+  const diff = gapOf(m, own);
   const str = diff === null ? '' : diff >= 250 ? 'veel sterker' : diff >= 100 ? 'sterker' : diff <= -100 ? 'zwakker' : 'gelijkwaardig';
   const best = [...m.players].filter(p => p.rating !== null).sort((x, y) => y.rating - x.rating)[0];
   const bestHtml = best ? `<span class="mr-best-name">${esc(proName(best.name))}${best.mom ? ' <span class="crown" title="Man of the match">♛</span>' : ''}</span><b>${f1(best.rating)}</b>` : '';

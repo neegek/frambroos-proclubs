@@ -59,7 +59,7 @@ function sessionSummary(ms, sm, opp, own, prow) {
   const parts = [];
   // 1. Karakter van de avond en tegenstand
   const type = typeLabel(ms) === 'playoff' ? 'playoffavond' : typeLabel(ms) === 'league' ? 'competitieavond' : 'avond';
-  const lbl = opp && own ? strengthLabel(opp - own) : null;
+  const lbl = opp !== null ? strengthLabel(opp) : null;
   const vs = lbl ? ` tegen ${{ gelijkwaardig: 'gelijkwaardige', zwakker: 'zwakkere', sterker: 'sterkere', 'veel sterker': 'veel sterkere' }[lbl]} tegenstanders` : '';
   const char = sm.L === 0 && sm.D === 0 ? 'Een perfecte' : sm.ppg >= 2 ? 'Een sterke' : sm.ppg >= 1.2 ? 'Een wisselende' : 'Een moeizame';
   let lead = sm.W + sm.D === 0 ? `Een ${type} om snel te vergeten${vs}` : `${char} ${type}${vs}`;
@@ -95,7 +95,7 @@ function render() {
   $('#s-title').insertAdjacentHTML('afterend', nav(sessions[at + 1], 'next', 'Volgende sessie'));
   const meta = `${cap(typeLabel(ms))} · ${plural(ms.length, 'wedstrijd', 'wedstrijden')} · ${names.length} spelers`; // alleen voor het kopiëren
 
-  const opp = avg(ms.map(m => m.opponent.skillRating).filter(Boolean));
+  const opp = avg(ms.map(m => gapOf(m, own)).filter(g => g !== null)); // gemiddeld sterkteverschil, met onze rating van toen
   // Sessiekop (coach-logica §9a): het podium als blikvanger, met de naam van de sessie en de uitslag in drie getallen
   // (W-G-V, goals, saldo). Hoe we speelden staat in de radar eronder.
   $('#s-record').innerHTML = `<span class="ss-fig"><b class="ss-rec"><span class="W">${sm.W}</span>-<span class="D">${sm.D}</span>-<span class="L">${sm.L}</span></b><small>W-G-V</small></span>
@@ -135,73 +135,10 @@ function render() {
   }
   // De radar als lijst (coach-logica §9a): per as de onderliggende cijfers van de avond, uitgesplitst, met onderaan het team.
   rankCards($('#s-rank'), axisCards(ms, prow), names); // altijd iedereen die meespeelde (coach-logica §9a)
-  renderStruggles(ms, others, own);
+  $('#s-kort').innerHTML = takeawaysHtml(takeaways(ms, others, own));
   renderMatrix(ms, prow);
   renderRadar(s, ms);
   if (revealPending(s, sessions)) playReveal(s, top, quote); // de testsessie opent alleen met de hand (sessielijst, Club)
-}
-
-// ---------- waar het schuurde (coach-logica §9, Sessie, waar het schuurde) ----------
-// Hooguit twee regels: tegen wie de punten bleven liggen, en de maat met verband (§9e) die het verst de slechte kant op
-// ging tegenover het normaal. Per mens per wedstrijd gerekend (EA telt alleen mensen); getoond per pot voor dit aantal mensen.
-const evSum = (ps, k) => ps.reduce((a, p) => a + (p.ev?.[k] || 0), 0);
-const withEv = ps => ps.filter(p => p.ev);
-const STRUGGLE_MEASURES = [
-  { key: 'against', label: 'Kansen tegen', bad: +1, v: m => { const t = withEv(m.opponentPlayers); return t.length ? evSum(t, 'shots_on_target') / t.length : null; }, scale: m => withEv(m.opponentPlayers).length,
-    unit: 'schoten op doel tegen', text: 'Ze kwamen te makkelijk voor ons doel. Wie de ander laat schieten, moet niet verbaasd zijn dat het een keer raak is.' },
-  { key: 'for', label: 'Eigen kansen', bad: -1, v: m => { const t = withEv(m.players); return t.length ? evSum(t, 'shots_on_target') / t.length : null; }, scale: m => withEv(m.players).length,
-    unit: 'schoten op doel', text: 'Jullie kwamen er niet doorheen. Je moet schieten, anders kun je niet scoren.' },
-  { key: 'air', label: 'Kopduels', bad: -1, z: 2, v: m => { const a = withEv(m.players), b = withEv(m.opponentPlayers); return a.length && b.length ? evSum(a, 'aerial_duels_won_defending') / a.length - evSum(b, 'aerial_duels_won_defending') / b.length : null; },
-    unit: null, text: 'In de lucht waren zij de baas. Een hoge bal is ook gewoon een bal; je moet er alleen eerder bij zijn.',
-    // Bewijs in gewone aantallen per pot: wij achterin gewonnen, zij achterin gewonnen.
-    show: (here, there) => { const per = (list, side) => avg(list.map(m => evSum(withEv(m[side]), 'aerial_duels_won_defending'))); return `per pot ${f1(per(here, 'players'))} koppen achterin gewonnen, zij achterin ${f1(per(here, 'opponentPlayers'))}; normaal ${f1(per(there, 'players'))} tegen ${f1(per(there, 'opponentPlayers'))}`; } },
-];
-const meanSd = xs => { const m = avg(xs), sd = Math.sqrt(xs.reduce((a, x) => a + (x - m) ** 2, 0) / Math.max(1, xs.length - 1)); return { m, sd }; };
-function struggles(ms, others, own) {
-  const out = [];
-  // 1. Tegen wie: een kenmerk dat de niet-gewonnen potten gemeen hadden en dat in de gewonnen potten (of, met minder dan
-  // twee zeges, in al onze andere wedstrijden) duidelijk minder voorkwam. Anders zegt een veelvoorkomend kenmerk niets.
-  const known = ms.filter(m => m.opponent.id && m.opponentPlayers.length), nw = known.filter(m => m.result !== 'W'), w = known.filter(m => m.result === 'W');
-  if (nw.length >= 2) {
-    const share = (list, t) => list.length ? list.filter(m => t.test(m, own)).length / list.length : 0;
-    const base = w.length >= 2 ? w : others.filter(m => m.opponent.id && m.opponentPlayers.length);
-    const cands = OPP_TRAITS.filter(t => t.key !== 'strong').map(t => ({ t, a: share(nw, t), b: share(base, t), n: nw.filter(m => t.test(m, own)).length }))
-      .filter(c => c.n >= 2 && c.a >= 2 / 3 && c.a - c.b >= 0.35).sort((x, y) => (y.a - y.b) - (x.a - x.b) || (y.t.key === 'fwddef') - (x.t.key === 'fwddef'));
-    const gap = list => avg(list.map(m => m.opponent.skillRating && own ? m.opponent.skillRating - own : 0));
-    const strong = own && nw.every(m => m.opponent.skillRating) && gap(nw) >= 100 && (!w.length || gap(w) < gap(nw) - 50);
-    const vs = w.length >= 2 ? `, tegen ${Math.round(100 * (cands[0]?.b || 0))}% van de zeges` : `, normaal ${Math.round(100 * (cands[0]?.b || 0))}% van onze tegenstanders`;
-    if (strong) out.push({ label: 'Tegen wie', text: 'De punten bleven liggen tegen sterkere ploegen. Daar is niets mis mee: van betere tegenstanders kun je leren.', ev: `${plural(nw.length, 'pot', 'potten')} zonder winst, gemiddeld ${Math.round(gap(nw))} skill rating boven de onze`, w: 9 });
-    else if (cands.length) { const c = cands[0], hits = nw.filter(m => c.t.test(m, own));
-      // Waren juist die tegenstanders sterker, dan zegt dat meer dan hun opstelling (coach-logica §9e).
-      out.push({ label: 'Tegen wie', text: `Jullie hadden moeite met ploegen met ${c.t.phrase}. ${gap(hits) >= 100 ? 'Al waren ze ook sterker, en dat telt meer dan hoe ze stonden.' : c.t.cruijff}`, ev: `${c.n} van de ${plural(nw.length, 'pot', 'potten')} zonder winst${vs}`, w: 8 }); }
-  }
-  // 2. Procesmaten: deze avond tegenover het normaal; slecht als ≥ 25 % (of een halve spreiding) en ≥ z standaardfouten.
-  const humans = avg(ms.map(m => m.players.length));
-  for (const x of STRUGGLE_MEASURES) {
-    const here = ms.map(x.v).filter(v => v !== null), there = others.map(x.v).filter(v => v !== null);
-    if (here.length < 2 || there.length < 10) continue;
-    const { m: mu, sd } = meanSd(there), xbar = avg(here), se = sd / Math.sqrt(here.length);
-    const off = (xbar - mu) * x.bad, z = se ? off / se : 0, big = x.unit ? Math.abs(mu) > 0 && off / Math.abs(mu) >= 0.25 : off >= 0.5 * sd;
-    if (off > 0 && big && z >= (x.z || 1.5)) {
-      const k = x.scale ? avg(ms.map(x.scale)) || humans : 1;
-      out.push({ label: x.label, text: x.text, ev: x.show ? x.show(ms, others) : `${f1(xbar * k)} ${x.unit} per pot, normaal ${f1(mu * k)}`, w: z });
-    }
-  }
-  // 3. Afronding: genoeg op doel, maar het ging er niet in (goals van mensen per schot op doel).
-  const conv = list => { let g = 0, s = 0; for (const m of list) for (const p of withEv(m.players)) { g += p.goals || 0; s += p.ev.shots_on_target || 0; } return { g, s, p: s ? g / s : null }; };
-  const cH = conv(ms), cT = conv(others);
-  if (cH.s >= 8 && cT.p) { const z = (cT.p - cH.p) / Math.sqrt(cT.p * (1 - cT.p) / cH.s);
-    if (cH.p <= 0.75 * cT.p && z >= 1.5 && !out.some(o => o.label === 'Eigen kansen')) out.push({ label: 'Afronding', text: 'Kansen genoeg, de bal wilde er alleen niet in. Dan ligt het niet aan het voetballen, maar aan het afmaken.', ev: `${cH.g} goals uit ${cH.s} schoten op doel, normaal ${Math.round(100 * cT.p)}% raak`, w: z }); }
-  // Tegen wie eerst (dat is de vraag), dan de grootste afwijking; hooguit twee.
-  return out.sort((a, b) => b.w - a.w).slice(0, 2);
-}
-function renderStruggles(ms, others, own) {
-  const list = struggles(ms, others, own), ppg = summarize(ms).ppg;
-  // Niets gevonden: op een goede avond is dat goed nieuws, op een mindere avond zit het in de details.
-  const none = ppg >= 1.5 ? 'Geen zwak punt te vinden. Als het goed gaat, moet je niets veranderen.'
-    : 'Geen patroon te vinden: het zat in de kleine dingen. En die zie je pas als je het doorhebt.';
-  $('#s-struggle').innerHTML = list.length ? list.map(x => `<li class="struggle"><span class="st-label">${x.label}</span><p>${x.text}</p><small>${esc(x.ev)}</small></li>`).join('')
-    : `<li class="struggle none${ppg >= 1.5 ? '' : ' meh'}"><p>${none}</p></li>`;
 }
 
 // Kaartjes onder de radar, in de volgorde van de assen. Per speler het totaal van de avond (percentages en rating als

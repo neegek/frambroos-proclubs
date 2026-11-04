@@ -81,12 +81,19 @@ export function buildData(db = realDb) {
   // geen afbeelding op een openbaar adres, getest 27 okt 2026) en de kleuren van alle tenues.
   const clubOf = details => { const k = details?.customKit; return k ? { stadium: k.stadName || null, regionId: details.regionId ?? null, teamId: details.teamId ?? null, crestAssetId: k.crestAssetId ?? null, crestColor: hexOf(k.crestColor),
     kits: { home: [1, 2, 3, 4].map(i => hexOf(k[`kitColor${i}`])), away: [1, 2, 3, 4].map(i => hexOf(k[`kitAColor${i}`])), third: [1, 2, 3, 4].map(i => hexOf(k[`kitThrdColor${i}`])) } } : null; };
+  // Sterkte op het moment van de wedstrijd (coach-logica §3): onze skill rating uit het laatste snapshot vóór de
+  // wedstrijd (vóór ons eerste snapshot: het eerste, als beste schatting), die van de tegenstander uit het snapshot het
+  // dichtst bij de wedstrijd. Tot 4 november 2026 gebruikten we voor elke wedstrijd de rating van nu.
+  const ownSnaps = db.prepare('SELECT taken_at, skill_rating FROM club_snapshots WHERE club_id = ? AND skill_rating IS NOT NULL ORDER BY taken_at').all(clubId);
+  const ownAtTs = ts => { let v = ownSnaps[0]?.skill_rating ?? null; for (const x of ownSnaps) { if (x.taken_at <= ts) v = x.skill_rating; else break; } return v; };
+  const nearestSnapshot = db.prepare('SELECT * FROM club_snapshots WHERE club_id = ? ORDER BY ABS(taken_at - ?) LIMIT 1');
   const matches = matchRows.map(r => {
     const raw = JSON.parse(r.raw);
-    const opp = r.opponent_id ? latestSnapshot.get(r.opponent_id) : null;
+    const opp = r.opponent_id ? nearestSnapshot.get(r.opponent_id, r.ts) : null;
     return {
       matchId: r.match_id, ts: r.ts, matchType: r.match_type,
       goals: r.goals, goalsAgainst: r.goals_against, result: r.result, winnerByDnf: r.winner_by_dnf,
+      ownRating: ownAtTs(r.ts),
       opponent: {
         id: r.opponent_id, name: r.opponent_name || 'Onbekende club', // EA geeft soms geen clubnaam mee
         skillRating: opp?.skill_rating ?? null, gamesPlayed: opp?.games_played ?? null,

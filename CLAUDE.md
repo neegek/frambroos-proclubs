@@ -104,7 +104,7 @@ alleen in Cloudflare.
   Wedstrijden: die is één lijst van `matchRow`-regels, nieuwste eerst, met de beste speler per wedstrijd. Sessies
   begint met een `.scard` per avond (datum, W-G-V, goals, team rating, tijdlijn met
   uitslagen en shirts, speler van de sessie met de portretfoto (`PlayerCard.portrait`, ook bij in vorm) of een icoon in een rondje in de kleuren van de vorm; nergens de duur van een avond); een tik opent
-  `sessie.html?id=<datum>` (bijv. `?id=2026-11-01`, via `sessionHref(s)`; eigen pagina, een laag dieper, zonder terugknop; *Sessies* is daar niet actief in het menu).
+  `sessie.html?id=<datum>` (bijv. `?id=2026-11-01`, via `sessionHref(s)`; eigen pagina, een laag dieper, zonder terugknop; geen tabblad actief).
   Een sessie begint met één kaart met een split (`.sess-stage`, coach-logica §9a): boven het beeld (`.ss-visual`) op
   het stadion (`stadiumSvg()` in `common.js`, vaste kleuren) met gele regel, naam van de sessie, de quote van de beste
   speler (`sessionQuote`: per sessie nieuw, over de statistiek die uitstak, uit `personas.js`) en de top drie als `PlayerCard.tiny` naast elkaar (geen podium; één in het midden, groter;
@@ -113,9 +113,9 @@ alleen in Cloudflare.
   ronde knoppen naar de vorige en volgende sessie (`.ss-nav`, alleen als die bestaat); onder een paneel (`.ss-panel`, themakleuren) met W-G-V, Goals en
   Tegen (rechts uitgelijnd), rechts op dezelfde regel een ingetogen deelknop met menu (afbeelding delen of downloaden, afbeelding
   kopiëren, gegevens kopiëren als tekst),
-  en de wedstrijden als scrollbare `matchCard`-rij. Daaronder *Waar het schuurde* (`renderStruggles` in `sessie.js`,
-  coach-logica §9: hooguit twee cruijffiaanse regels, alleen maten met een verband uit §9e, tegenstanderkenmerken uit
-  `OPP_TRAITS` in `common.js`, gedeeld met *Waar we verliezen*). De deelafbeelding
+  en de wedstrijden als scrollbare `matchCard`-rij. Daaronder *In het kort* (`takeaways`/`takeawaysHtml` in `common.js`,
+  coach-logica §9: hooguit één min en één plus, elk één korte cruijffiaanse zin, geen tussenkopjes; dezelfde kaart op
+  de wedstrijdpagina). De deelafbeelding
   (`shareSession`) tekent dezelfde kop; dan *Zo speelden we*: de radar met alle vlakken zichtbaar, standaard het team het felst, aantallen als totaal van de
   avond, assen Rating, Scoren, Creëren, Passen, Dribbelen, Verdedigen met uitleg achter de knop *Assen*; een tik op een naam licht die speler uit, nog een tik zet hem uit (eerst de knop *Team*); dan *Per wedstrijd* (`renderMatrix`: kolommen spelers met een minikaartje (foto, gemiddelde, naam in het kaartje, kleur van de plek zonder medaille; geen normaal), rijen
   wedstrijden, cellen in goud/zilver/brons/ijzer naar de plek in die rij, een tik op een cel opent `#cell-dialog` met wat de speler die wedstrijd deed; *Spelers deze sessie* is weg, de kaarten
@@ -136,7 +136,9 @@ alleen in Cloudflare.
   bouwen erop), op de spelerspagina als ingeklapt kaartje onder de spelerskaart.
 - Verbanden: eerst toetsen volgens coach-logica §9e (per mens, wij min zij, gecorrigeerd voor sterkte en mensen,
   Benjamini-Hochberg, herhaling in twee helften). Ranglijstkaartjes tonen altijd alle spelers (`rankCards(el, cards,
-  roster)`; zonder getal onderaan met een streepje). Trofeeën zijn voorwerpen (gouden schaal, `PLATE` in `clubhouse.js`), geen kaartjes.
+  roster)`; zonder getal onderaan met een streepje). Trofeeën zijn voorwerpen (subtiele gouden schaal, `PLATE` in `clubhouse.js`), geen kaartjes.
+  Sterkteverschil altijd via `gapOf(m, own)` (onze rating van toen, `m.ownRating`), nooit met de rating van nu.
+- Een laag dieper (sessie, wedstrijd, rivalen, nieuws, spelersprofiel): geen tabblad actief in het menu.
 - Geen vage verbanden: *Wat opvalt*, *Beste tweetallen*, *Wanneer het loopt*, *Patronen*, *Opvallend* (sessie) en
   *Impact* zijn op 27 oktober 2026 weggehaald (coach-logica §9d). Een nieuw verband eerst in coach-logica uitwerken.
 - Compact: kaarten 16 × 18 px binnenruimte, tegels 12 × 16 px, paginatitel 26 px met hooguit één korte regel eronder.

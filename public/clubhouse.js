@@ -61,25 +61,20 @@ const CUP = `<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient i
 const DIV_CREST = n => `https://media.contentapi.ea.com/content/dam/eacom/fc/pro-clubs/divisioncrest${n}.png`;
 const divName = n => !n ? '–' : n === 1 ? 'Elite' : `Divisie ${n - 1}`;
 const finishName = g => !g ? '' : g === 1 ? 'Kampioen' : g >= 6 ? 'Deelnemer' : `Eindgroep ${g}`;
-// De gouden schaal (coach-logica §9a, Trofeeënkast): rand met kraaltjes, een verdiepte spiegel en een glans, vaste
-// kleuren los van het thema. EA's badge ligt in het midden. Ids per schaal, zodat de verlopen niet botsen.
+// De schaal (coach-logica §9a, Trofeeënkast): een transparant goudverloop met een dunne rand en een fijne zonnestraal
+// erin, zoals het guillocheerwerk op een erebord. Subtiel: de badge van EA is het voorwerp, de schaal de achtergrond.
 const PLATE = i => `<svg class="tr-plate-svg" viewBox="0 0 120 120" aria-hidden="true"><defs>
-    <linearGradient id="pl-rim${i}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff3c4"/><stop offset=".35" stop-color="#e6bd57"/><stop offset=".7" stop-color="#a77c1f"/><stop offset="1" stop-color="#5f430c"/></linearGradient>
-    <radialGradient id="pl-well${i}" cx=".5" cy=".42" r=".6"><stop offset="0" stop-color="#fbe7a4"/><stop offset=".55" stop-color="#d4a73f"/><stop offset="1" stop-color="#7a5812"/></radialGradient>
-    <linearGradient id="pl-shine${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
-  <circle cx="60" cy="60" r="58" fill="url(#pl-rim${i})"/>
-  <circle cx="60" cy="60" r="58" fill="none" stroke="#3d2a05" stroke-opacity=".45" stroke-width="1"/>
-  ${Array.from({ length: 36 }, (_, k) => { const a = k * Math.PI / 18; return `<circle cx="${(60 + 52.5 * Math.cos(a)).toFixed(2)}" cy="${(60 + 52.5 * Math.sin(a)).toFixed(2)}" r="1.5" fill="#fff4cc" fill-opacity=".8"/>`; }).join('')}
-  <circle cx="60" cy="60" r="47" fill="#6b4c0f"/>
-  <circle cx="60" cy="61" r="45" fill="url(#pl-well${i})"/>
-  <circle cx="60" cy="60" r="45" fill="none" stroke="#fff4cc" stroke-opacity=".35" stroke-width="1"/>
-  <path d="M18 46a44 44 0 0 1 84 0a52 30 0 0 0-84 0z" fill="url(#pl-shine${i})"/></svg>`;
+    <radialGradient id="pl-fill${i}" cx=".5" cy=".4" r=".62"><stop offset="0" stop-color="#f3d57a" stop-opacity=".30"/><stop offset=".7" stop-color="#d9b04a" stop-opacity=".12"/><stop offset="1" stop-color="#b88a2a" stop-opacity=".04"/></radialGradient></defs>
+  <circle cx="60" cy="60" r="57" fill="url(#pl-fill${i})"/>
+  <g stroke="#e2bd5c" stroke-opacity=".16" stroke-width=".6">${Array.from({ length: 48 }, (_, k) => { const a = k * Math.PI / 24, c = Math.cos(a), s = Math.sin(a); return `<line x1="${(60 + 30 * c).toFixed(1)}" y1="${(60 + 30 * s).toFixed(1)}" x2="${(60 + 52 * c).toFixed(1)}" y2="${(60 + 52 * s).toFixed(1)}"/>`; }).join('')}</g>
+  <circle cx="60" cy="60" r="57" fill="none" stroke="#e2bd5c" stroke-opacity=".55" stroke-width="1.2"/>
+  <circle cx="60" cy="60" r="52" fill="none" stroke="#e2bd5c" stroke-opacity=".25" stroke-width=".6"/></svg>`;
 function trophies() {
   const t = DATA.trophies, el = $('#trophies'); if (!t) { el.innerHTML = ''; return; }
   let i = 0;
   const badge = n => `<span class="tr-plate">${PLATE(i++)}<span class="tr-crest"><img src="${DIV_CREST(n)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add('no-img')">${CUP}</span></span>`;
   // Een voorwerp in de kast, geen kaartje: niets om op te tikken (coach-logica §9a).
-  const item = (cls, img, title, sub, kicker) => `<li class="trophy ${cls}">${img}<span class="tr-shelf" aria-hidden="true"></span><span class="tr-text">${kicker ? `<small class="tr-kicker">${kicker}</small>` : ''}<b>${title}</b><small>${sub}</small></span></li>`;
+  const item = (cls, img, title, sub, kicker) => `<li class="trophy ${cls}">${img}<span class="tr-text">${kicker ? `<small class="tr-kicker">${kicker}</small>` : ''}<b>${title}</b><small>${sub}</small></span></li>`;
   const items = [
     ...[...(t.seasons || [])].sort((a, b) => b.season - a.season).map(x => item('season', badge(x.division), divName(x.division), finishName(x.group), `Seizoen ${x.season ?? '?'}`)),
     t.bestDivision ? item('best', badge(t.bestDivision), divName(t.bestDivision), 'Beste divisie ooit', 'Record') : '',
@@ -114,18 +109,12 @@ function clubCards() {
 // weging, geen percentielen. Elke tegel is één getal dat je in het spel zelf ook zou tellen.
 const evOf = (p, k) => p.ev?.[k] || 0;
 const STATS = [
-  { key: 'conv', cls: 'att', label: 'Afmaker', unit: 'raak', min: 20, minLabel: 'minstens 20 schoten',
-    about: 'Goals per schot over de gevolgde wedstrijden: welk deel van je schoten erin gaat.',
-    num: p => p.goals || 0, den: p => p.shots || 0, fmt: (n, d) => `${Math.round(100 * n / d)}%`, sub: (n, d) => `${n} goals uit ${d} schoten` },
   { key: 'thr', cls: 'cre', label: 'Steekpasses', unit: 'per wedstrijd', min: 5, minLabel: 'minstens vijf wedstrijden',
     about: 'Geslaagde steekpasses per wedstrijd, over de gevolgde wedstrijden.',
     num: p => evOf(p, 'through_balls') },
   { key: 'def', cls: 'def', label: 'Verdedigen', unit: 'per wedstrijd', min: 5, minLabel: 'minstens vijf wedstrijden',
     about: 'Geslaagde verdedigende acties per wedstrijd: gewonnen tackles, onderscheppingen, kopduels achterin, blokken en wegwerken bij elkaar opgeteld.',
     num: p => (p.tacklesMade || 0) + evOf(p, 'interceptions') + evOf(p, 'aerial_duels_won_defending') + evOf(p, 'blocks') + evOf(p, 'clearances') },
-  { key: 'press', cls: 'all', label: 'Druk zetten', unit: 'per wedstrijd', min: 5, minLabel: 'minstens vijf wedstrijden',
-    about: 'Balwinst in het laatste derde van de tegenstander per wedstrijd: de bal terugwinnen door hoog druk te zetten.',
-    num: p => evOf(p, 'possession_won_att_third') },
 ];
 function statRows(ms, s) {
   const by = new Map();
@@ -139,8 +128,8 @@ function statRows(ms, s) {
   return [...rows, ...all.filter(b => !ok(b)).map(b => ({ name: b.name, main: null, sub: s.den ? `${b.den} schoten, ${s.minLabel}` : `${plural(b.n, 'wedstrijd', 'wedstrijden')}, ${s.minLabel}` }))];
 }
 function threats(ms) {
-  // Topscorer en topassist: de carrièretotalen van EA, dezelfde als Algemeen.
-  const C = DATA.members.filter(m => m.gamesPlayed > 0).map(m => ({ name: m.name, n: m.gamesPlayed, g: m.goals || 0, a: m.assists || 0 }));
+  // Topscorer en topassist: de carrièretotalen van EA, dezelfde als Algemeen. Goals + assists per wedstrijd ook.
+  const C = DATA.members.filter(m => m.gamesPlayed > 0).map(m => ({ name: m.name, n: m.gamesPlayed, g: m.goals || 0, a: m.assists || 0, ga: ((m.goals || 0) + (m.assists || 0)) / m.gamesPlayed }));
   const top = key => [...C].sort((a, b) => b[key] - a[key] || a.n - b.n);
   const tile = (cls, key, label, name, val, unit, sub) => `<button type="button" class="threat ${cls}" data-dom="${key}">
       <span class="th-label">${label}</span><b class="th-name">${esc(proName(name))}</b>
@@ -148,12 +137,24 @@ function threats(ms) {
   const totalTile = (cls, label, key, unit) => { const t = top(key)[0]; return t && t[key] ? tile(cls, key, label, t.name, t[key], unit, `${f1(t[key] / t.n)} per wedstrijd, in ${t.n}`) : ''; };
   const roster = DATA.members.map(m => m.name);
   const R = Object.fromEntries(STATS.map(s => [s.key, statRows(ms, s)]));
+  // Goals + assists per wedstrijd over de carrière: wie het meest bijdraagt aan doelpunten.
+  R.ga = top('ga').map(t => ({ name: t.name, v: t.ga, main: f1(t.ga), sub: `${t.g} goals + ${t.a} assists in ${t.n}` }));
+  // Compleet: de plek bij goals + assists plus de plek bij verdedigen; de laagste som wint (bij gelijk: de beste plek).
+  const placeIn = (rows, name) => { const i = rows.findIndex(r => r.name === name && r.main !== null); return i < 0 ? null : i + 1; };
+  R.all = roster.map(name => ({ name, a: placeIn(R.ga, name), d: placeIn(R.def, name) }))
+    .map(x => ({ ...x, sum: x.a && x.d ? x.a + x.d : null }))
+    .sort((x, y) => (x.sum ?? 99) - (y.sum ?? 99) || Math.min(x.a ?? 99, x.d ?? 99) - Math.min(y.a ?? 99, y.d ?? 99) || (x.a ?? 99) - (y.a ?? 99))
+    .map(x => ({ name: x.name, main: x.sum === null ? null : `${x.a}e + ${x.d}e`, sub: x.sum === null ? 'niet in beide lijsten' : `${x.a}e bij goals + assists, ${x.d}e bij verdedigen` }));
+  const tileOf = (cls, key, label, unit) => { const r = R[key][0]; return r && r.main !== null ? tile(cls, key, label, r.name, r.main, unit, r.sub) : ''; };
   $('#threats').innerHTML = totalTile('goals', 'Topscorer', 'g', 'goals') + totalTile('assists', 'Topassist', 'a', 'assists')
-    + STATS.map(s => { const r = R[s.key][0]; return r && r.main !== null ? tile(s.cls, s.key, s.label, r.name, r.main, s.unit, r.sub) : ''; }).join('');
+    + tileOf('att', 'ga', 'Goals + assists', 'per wedstrijd') + tileOf('cre', 'thr', 'Steekpasses', 'per wedstrijd')
+    + tileOf('def', 'def', 'Verdedigen', 'per wedstrijd') + tileOf('all', 'all', 'Compleet', '');
   $('#threats').onclick = e => {
     const btn = e.target.closest('.threat'); if (!btn) return; const k = btn.dataset.dom;
     if (k === 'g' || k === 'a') return openRankList({ label: k === 'g' ? 'Topscorer' : 'Topassist', about: `Het aantal ${k === 'g' ? 'goals' : 'assists'} over de hele carrière bij de club volgens EA, ook van vóór deze app (dezelfde totalen als bij Algemeen). Bij gelijk staat wie het in minder wedstrijden deed hoger.`, who: CAREER,
       rows: top(k).map(t => ({ name: t.name, main: String(t[k]), sub: `${f1(t[k] / t.n)} per wedstrijd, in ${t.n}` })) }, roster);
+    if (k === 'ga') return openRankList({ label: 'Goals + assists', about: 'Goals plus assists per wedstrijd, over de hele carrière bij de club volgens EA: wie het meest bijdraagt aan doelpunten.', who: CAREER, rows: R.ga }, roster);
+    if (k === 'all') return openRankList({ label: 'Compleet', about: 'Wie aan aanvallen én verdedigen het meest bijdraagt: de plek bij goals + assists per wedstrijd plus de plek bij verdedigen per wedstrijd. De laagste som wint; bij gelijk beslist de beste plek.', who: 'Iedereen die in beide lijsten staat.', rows: R.all }, roster);
     const s = STATS.find(x => x.key === k);
     openRankList({ label: s.label, about: s.about, who: `Gevolgde wedstrijden met gebeurtenissen van EA; ${s.minLabel}.`, rows: R[k] }, roster);
   };
