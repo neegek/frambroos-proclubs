@@ -339,6 +339,10 @@ Daarnaast *Positiespel en keuzes* en *Al sterk*.
   3. *Sterkte* (skill rating van toen, §3): wedstrijd verloren van 100+ sterker ("Ze waren gewoon beter."), niet
      verloren van 100+ sterker (plus), verloren van 100+ zwakker (min). Sessie: de niet-gewonnen potten gemiddeld 100+
      sterker (min), doelsaldo gemiddeld 0,7 of meer boven verwachting over minstens drie potten (plus).
+  **Het waarom** (4 november 2026): een regel over sterkte zegt erbij hoe het verschil zichtbaar werd, met de duidelijkste
+  maat uit 1 of 2 die de bijpassende kant op ging (zwakke drempel: de helft van de gewone), in woorden ("ze kwamen twee
+  keer zo vaak voor ons doel dan normaal", "wat we kregen, ging er niet in"). Zonder zo'n maat: "Ze waren een maatje te
+  groot, al gaven we niet meer weg dan anders." Alleen "ze waren gewoon beter" zei te weinig.
   Een min bij winst (of een plus bij verlies) alleen als hij er echt uitspringt. Bij een slechte uitslag staat de min
   eerst, anders de plus. Niets gevonden: winst "Niets sprong eruit. Als het goed gaat, moet je niets veranderen.",
   verlies "Geen duidelijke oorzaak: het zat in de details." (gelijk telt als niet-slecht).
@@ -790,6 +794,12 @@ het aantal per speler per wedstrijd, niet bij welke goal. Alleen als we in een w
 de keten te reconstrueren: wie scoorde, wie de assist gaf en wie de tweede assist. Dat tonen we op de wedstrijdpagina
 als *Zo viel de goal*. Ontbreekt een schakel, dan zeggen we dat (geen assist, of een AI-speler gaf hem: AI-spelers
 staan niet in de data). Bij meer goals verbinden we niets.
+
+**Radar: normaal van het team** (sinds 4 november 2026): tellingen van het team (creëren, passen, dribbelen,
+verdedigen) hangen af van hoeveel mensen er meedoen, want EA telt geen AI. Het team wordt daarom per mens vergeleken met
+andere avonden, en het normaal onder de astitel is omgerekend naar het aantal mensen van deze avond. Daarvoor leek een
+avond met zes man vanzelf beter dan normaal (2 november: 120 verdedigende acties tegen een normaal van 91, terwijl het per
+mens gewoon gemiddeld was). Bij een speler blijft het zoals het was.
 
 ## 9b. Frambroos-index
 

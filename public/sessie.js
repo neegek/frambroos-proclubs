@@ -289,8 +289,12 @@ function nightStats(rows, n = rows.length, nEv = null, goals = null) {
 function teamStats(ms) {
   const rows = ms.flatMap(m => m.players.map(p => ({ m, p })));
   const evMatches = new Set(rows.filter(r => r.p.ev).map(r => r.m)).size;
-  return nightStats(rows, ms.length, evMatches, ms.reduce((a, m) => a + m.goals, 0));
+  return { ...nightStats(rows, ms.length, evMatches, ms.reduce((a, m) => a + m.goals, 0)), humans: avg(ms.map(m => m.players.length)) };
 }
+// Tellingen van het team hangen af van hoeveel mensen er meedoen (EA telt geen AI). Het team vergelijken we daarom per
+// mens met andere avonden, en het normaal staat omgerekend naar het aantal mensen van deze avond (coach-logica §9a).
+const PER_HUMAN = new Set(['creation', 'apm', 'dribbling', 'dpm', 'defending', 'defpm', 'passing']);
+const perHumanSt = st => Object.fromEntries(Object.entries(st).map(([k, v]) => [k, PER_HUMAN.has(k) && v !== null && st.humans ? v / st.humans : v]));
 // Referentie, één keer berekend: per as alle waarden van onze avonden, voor het team en voor de spelers, en per
 // speler en voor het team de waarden per sessie (voor "normaal").
 let radarRef = null;
@@ -300,8 +304,8 @@ function radarReference() {
   radarRef = { team: empty(), players: empty(), bySession: new Map() }; // bySession: id → { team, [naam]: stats }
   for (const sess of sessions) {
     if (sess.matches.length < 2) continue;
-    const entry = { team: teamStats(sess.matches) };
-    for (const a of RADAR_AXES) if (entry.team[a.key] !== null) radarRef.team[a.key].push(entry.team[a.key]);
+    const entry = { team: teamStats(sess.matches) }, tph = perHumanSt(entry.team);
+    for (const a of RADAR_AXES) if (tph[a.key] !== null) radarRef.team[a.key].push(tph[a.key]);
     for (const name of new Set(sess.matches.flatMap(m => m.players.map(p => p.name)))) {
       const rows = sess.matches.map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p);
       if (rows.length < 2) continue;
@@ -314,9 +318,11 @@ function radarReference() {
 }
 const percentile = (list, v) => v === null || !list.length ? null : 100 * (list.filter(x => x < v).length + 0.5 * list.filter(x => x === v).length) / list.length;
 // Normaal: het gemiddelde over de andere avonden, van het team of van die speler.
-function normalOf(key, who, sid) {
-  const vals = [...radarRef.bySession].filter(([id]) => id !== sid).map(([, e]) => e[who]?.[key]).filter(v => v !== null && v !== undefined);
-  return vals.length ? avg(vals) : null;
+// Bij het team en een telling: per mens over de andere avonden, keer het aantal mensen van deze avond (humans).
+function normalOf(key, who, sid, humans = null) {
+  const scale = who === 'team' && humans && PER_HUMAN.has(key);
+  const vals = [...radarRef.bySession].filter(([id]) => id !== sid).map(([, e]) => { const v = e[who]?.[key]; return v === null || v === undefined ? null : scale ? v / e.team.humans : v; }).filter(v => v !== null);
+  return vals.length ? avg(vals) * (scale ? humans : 1) : null;
 }
 
 let radarOn = null; // uitgelichte speler; null = het team (standaard). Nog een tik op dezelfde naam: terug naar het team.
@@ -324,7 +330,7 @@ let radarOn = null; // uitgelichte speler; null = het team (standaard). Nog een 
 function radarModel(ms) {
   const ref = radarReference();
   const pcOf = (pool, st) => Object.fromEntries(RADAR_AXES.map(a => [a.key, percentile(pool[a.key], st[a.key])]));
-  const team = { name: null, n: ms.length, st: teamStats(ms) }; team.pc = pcOf(ref.team, team.st);
+  const team = { name: null, n: ms.length, st: teamStats(ms) }; team.pc = pcOf(ref.team, perHumanSt(team.st));
   const players = [...new Set(ms.flatMap(m => m.players.map(p => p.name)))].map(name => {
     const rows = ms.map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p);
     const st = nightStats(rows);
@@ -345,7 +351,7 @@ function radarSvg(sel, others, sid, label) {
   const ring = v => RADAR_AXES.map((_, i) => pt(i, v).map(n => n.toFixed(1)).join(',')).join(' ');
   const axes = RADAR_AXES.map((a, i) => { const [x, y] = pt(i, 100), [lx, ly0] = pt(i, 128);
     const anchor = Math.abs(lx - c) < 4 ? 'middle' : lx > c ? 'start' : 'end', ly = ly0 < c - 20 ? ly0 - 30 * z : ly0 + (ly0 > c + 20 ? 12 * z : -6 * z);
-    const v = sel.st[a.show], norm = normalOf(a.show, sel.name === null ? 'team' : sel.name, sid);
+    const v = sel.st[a.show], norm = normalOf(a.show, sel.name === null ? 'team' : sel.name, sid, sel.st.humans);
     return `<line x1="${c}" y1="${c}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" class="radar-axis"/><text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}" class="radar-label">${a.label}<tspan x="${lx.toFixed(1)}" class="radar-value sel" style="--pc:${radarColor(sel.name)}" dy="${17 * z}">${v === null ? 'te weinig' : radarShow(a, v, sel.n)}</tspan>${norm === null ? '' : `<tspan x="${lx.toFixed(1)}" dy="${14 * z}" class="radar-norm">normaal ${radarShowNorm(a, norm, sel.n)}</tspan>`}</text>`; }).join('');
   const shape = (x, cls) => `<polygon points="${RADAR_AXES.map((a, i) => pt(i, x.pc[a.key] ?? 0).map(n => n.toFixed(1)).join(',')).join(' ')}" style="stroke:${radarColor(x.name)};fill:${radarColor(x.name)}" class="radar-shape ${cls}"><title>${x.name === null ? 'Team' : esc(proName(x.name))}</title></polygon>`;
   const mx = 90 * z, my = 50 * z;

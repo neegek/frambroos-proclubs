@@ -398,32 +398,47 @@ const TAKE_MEASURES = [
 function takeaways(ms, others, own) {
   const single = ms.length === 1, bad = [], good = [];
   const push = (list, text, w) => list.push({ text, w });
-  // Schoten op doel, per mens: deze wedstrijd(en) tegenover het normaal. Bij een sessie de standaardfout (≥ 1,5), bij
-  // één wedstrijd de gewone spreiding (≥ 1,25); en altijd een flink verschil (25 % of meer, bij één wedstrijd 40 %).
+  // Hoeveel vaker of minder vaak, in woorden.
+  const more = r => r >= 1.8 ? 'twee keer zo vaak' : r >= 1.4 ? 'veel vaker' : 'vaker';
+  const less = r => r <= 0.55 ? 'half zo vaak' : r <= 0.7 ? 'veel minder vaak' : 'minder vaak';
+  // Schoten op doel, per mens: deze wedstrijd(en) tegenover het normaal. Sterk: bij een sessie ≥ 1,5 standaardfout, bij
+  // één wedstrijd ≥ 1,25 keer de gewone spreiding, en een flink verschil (25 %, bij één wedstrijd 40 %). Zwak (alleen als
+  // uitleg bij een regel over sterkte): de helft daarvan.
+  const sig = {};
   for (const x of TAKE_MEASURES) {
     const here = ms.map(x.v).filter(v => v !== null), there = others.map(x.v).filter(v => v !== null);
     if (!here.length || there.length < 10) continue;
     const { m: mu, sd } = meanSd(there), xbar = avg(here), z = sd ? x.sign * (xbar - mu) / (single ? sd : sd / Math.sqrt(here.length)) : 0;
-    const rel = mu ? Math.abs(xbar - mu) / mu : 0;
-    if (rel < (single ? 0.4 : 0.25)) continue;
-    if (z <= -(single ? 1.25 : 1.5)) push(bad, x.bad, -z); else if (z >= (single ? 1.25 : 1.5)) push(good, x.good, z);
+    const r = mu ? xbar / mu : 1, rel = Math.abs(r - 1), zMin = single ? 1.25 : 1.5, relMin = single ? 0.4 : 0.25;
+    sig[x.key] = { z, r, weak: Math.abs(z) >= zMin / 2 && rel >= relMin / 2 };
+    if (rel >= relMin && z <= -zMin) push(bad, x.bad, -z); else if (rel >= relMin && z >= zMin) push(good, x.good, z);
   }
   // Afronding: goals van mensen tegenover wat je met zoveel schoten op doel normaal maakt.
   const conv = list => { let g = 0, s = 0; for (const m of list) for (const p of withEv(m.players)) { g += p.goals || 0; s += p.ev.shots_on_target || 0; } return { g, s }; };
   const h = conv(ms), t = conv(others), p0 = t.s ? t.g / t.s : null;
   if (p0 && h.s >= (single ? 4 : 8)) { const exp = h.s * p0, z = (h.g - exp) / Math.sqrt(h.s * p0 * (1 - p0));
+    sig.conv = { z, weak: Math.abs(z) >= 1 };
     if (z <= -1.5 && h.g <= 0.75 * exp) push(bad, 'Kansen genoeg, maar de bal wilde er niet in.', -z);
     else if (z >= 1.5 && h.g >= 1.25 * exp) push(good, 'Wat we kregen, maakten we af.', z); }
-  // Sterkte van de tegenstander (skill rating volgens EA).
+  // Het waarom bij een regel over sterkte: de duidelijkste maat die (minstens zwak) de goede of slechte kant op ging.
+  const why = tone => {
+    const c = [];
+    const A = sig.against, F = sig.for, C = sig.conv;
+    if (A?.weak && (tone === 'bad' ? A.z < 0 : A.z > 0)) c.push([Math.abs(A.z), tone === 'bad' ? `ze kwamen ${more(A.r)} voor ons doel dan normaal` : `ze kwamen ${less(A.r)} voor ons doel dan normaal`]);
+    if (F?.weak && (tone === 'bad' ? F.z < 0 : F.z > 0)) c.push([Math.abs(F.z), tone === 'bad' ? `we kwamen ${less(F.r)} tot schieten dan normaal` : `we kwamen ${more(F.r)} tot schieten dan normaal`]);
+    if (C?.weak && (tone === 'bad' ? C.z < 0 : C.z > 0)) c.push([Math.abs(C.z), tone === 'bad' ? 'wat we kregen, ging er niet in' : 'wat we kregen, maakten we af']);
+    return c.sort((x, y) => y[0] - x[0])[0]?.[1] || null;
+  };
+  // Sterkte van de tegenstander (skill rating van toen, volgens EA), met het waarom erbij.
   if (single) { const m = ms[0], g = gapOf(m, own);
-    if (g !== null && g >= 100 && m.result === 'L') push(bad, 'Ze waren gewoon beter.', g >= 150 ? 2.5 : 1.4);
-    if (g !== null && g >= 100 && m.result !== 'L') push(good, m.result === 'W' ? 'Een sterkere ploeg verslagen.' : 'Tegen een sterkere ploeg toch een punt.', g >= 150 ? 2.5 : 1.6);
-    if (g !== null && g <= -100 && m.result === 'L') push(bad, 'Verloren van een zwakkere ploeg: dat reken je jezelf aan.', 2);
+    if (g !== null && g >= 100 && m.result === 'L') { const w = why('bad'); push(bad, w ? `Ze waren een maatje te groot: ${w}.` : 'Ze waren een maatje te groot, al gaven we niet meer weg dan anders.', g >= 150 ? 2.5 : 1.4); }
+    if (g !== null && g >= 100 && m.result !== 'L') { const w = why('good'); push(good, `${m.result === 'W' ? 'Een sterkere ploeg verslagen' : 'Tegen een sterkere ploeg toch een punt'}${w ? `: ${w}` : ''}.`, g >= 150 ? 2.5 : 1.6); }
+    if (g !== null && g <= -100 && m.result === 'L') { const w = why('bad'); push(bad, w ? `Verloren van een zwakkere ploeg: ${w}.` : 'Verloren van een zwakkere ploeg. Dat reken je jezelf aan.', 2); }
   } else {
     const nw = ms.filter(m => m.result !== 'W'), gaps = nw.map(m => gapOf(m, own)).filter(g => g !== null);
-    if (nw.length >= 2 && gaps.length === nw.length && avg(gaps) >= 100) push(bad, 'De punten bleven liggen tegen sterkere ploegen.', 1.6);
+    if (nw.length >= 2 && gaps.length === nw.length && avg(gaps) >= 100) { const w = why('bad'); push(bad, `De punten bleven liggen tegen sterkere ploegen${w ? `: ${w}` : ''}.`, 1.6); }
     const res = ms.map(m => m.resid).filter(r => r !== undefined && r !== null);
-    if (res.length >= 3 && avg(res) >= 0.7) push(good, 'Beter dan verwacht tegen deze tegenstanders.', 1.5 + avg(res) / 2);
+    if (res.length >= 3 && avg(res) >= 0.7) { const w = why('good'); push(good, `Beter dan verwacht tegen deze tegenstanders${w ? `: ${w}` : ''}.`, 1.5 + avg(res) / 2); }
   }
   // Hooguit één min en één plus; een min bij winst (of een plus bij verlies) alleen als hij er echt uitspringt.
   const top = list => list.sort((a, b) => b.w - a.w)[0];
