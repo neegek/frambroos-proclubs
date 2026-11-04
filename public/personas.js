@@ -11,6 +11,9 @@
 //   beelden       waar de speler het mee vergelijkt
 //   bio           { titel, feiten: [[label, waarde]], tekst: [alinea's] }: de biografie zoals Jamal die aanlevert, op de
 //                 spelerspagina als kaartje; inspiratie voor quotes en verhalen. Zonder bio toont de app de achtergrond.
+//   rol           vaste rol als EA de speler als middenvelder zet (coach-logica §9b): { standaard, regels: [{ zonder, maxMensen, rol }] }.
+//                 Rollen: spits, aanvallend, verdedigend. Een regel geldt als de genoemde speler niet meedoet (en het
+//                 team hooguit maxMensen mensen telt). Jamal beschrijft de rolverdeling; hier bijwerken als die verandert.
 //   maand         (optioneel) uitspraken voor één avond per maand: de eerste avond van een maand dat deze speler wint.
 //   stats         cruijffiaanse uitspraken per statistiek van de avond (zie quoteFor), twee of meer per maat. De
 //                 statistiek inspireert de zin, maar er staan geen letterlijke getallen of percentages in (sinds
@@ -21,6 +24,7 @@
 const PERSONAS = {
   Neegek: {
     pro: 'Terry Yaki',
+    rol: { standaard: 'aanvallend', regels: [{ zonder: 'KFH Guip 023', rol: 'spits' }] },
     achtergrond: 'Japanner die geen woord Nederlands of Engels spreekt.',
     stem: 'Verbasterd Engels (en een beetje Nederlands) zoals het in katakana klinkt, in romaji geschreven '
       + '(gōruden gēto burijji = golden gate bridge). Inspiratie: honkballer Munenori Kawasaki: vol energie, '
@@ -51,6 +55,7 @@ const PERSONAS = {
     },
   },
   'Highnis 023': {
+    rol: { standaard: 'verdedigend', regels: [{ zonder: 'KFH Guip 023', maxMensen: 4, rol: 'aanvallend' }] },
     pro: 'Mo van der Kamp',
     achtergrond: 'Komt van het woonwagenkamp en waste jaren geld wit; is in de cel bekeerd tot de islam en wil het oude '
       + 'leven achter zich laten. Jamal, 2 november 2026: de bekering en de Koran vooraan, het kamp en het witwassen '
@@ -83,6 +88,7 @@ const PERSONAS = {
     },
   },
   'GoodTimes 023': {
+    rol: { standaard: 'verdedigend' },
     pro: 'J. Wheatley',
     achtergrond: 'Gewone Indonesische man.',
     stem: 'Kalm en vriendelijk, vergelijkt voetbal met het dagelijks leven in Indonesië: rijst, sambal, familie, '
@@ -110,6 +116,7 @@ const PERSONAS = {
     },
   },
   'Xero 023': {
+    rol: { standaard: 'aanvallend' },
     pro: 'Bennie',
     achtergrond: 'Een beetje onzeker door een broer die heel goed is, maar op een mooi pad van groei: steeds meer zichzelf.',
     stem: 'Begint vaak bij de broer en eindigt bij zichzelf. Twijfelt hardop, maar de conclusie wordt steeds zekerder.',
@@ -136,6 +143,7 @@ const PERSONAS = {
     },
   },
   Konijnenlover22: {
+    rol: { standaard: 'aanvallend' },
     pro: 'Petra Selie',
     achtergrond: 'Tweelingzus van Peter en jongere zus van Beter Selie; even goed als Peter maar nooit zo erkend, omdat ze een '
       + 'vrouw is. Bij Frambroos om te laten zien wat ze waard is. Lesbisch, met een zwak voor Yan en Morena, al twijfelt ze '
@@ -172,7 +180,7 @@ const PERSONAS = {
     },
   },
   // Nog zonder achtergrond: neutrale cruijffiaanse zinnen (PERSONA_GENERIC) tot Jamal er een geeft.
-  'KFH Guip 023': { pro: 'G. Snoek', achtergrond: null, stem: null, eigenschappen: [], woorden: [], beelden: [], stats: null },
+  'KFH Guip 023': { pro: 'G. Snoek', rol: { standaard: 'spits' }, achtergrond: null, stem: null, eigenschappen: [], woorden: [], beelden: [], stats: null },
 };
 
 const PERSONA_GENERIC = {
