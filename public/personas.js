@@ -179,8 +179,39 @@ const PERSONAS = {
       ],
     },
   },
-  // Nog zonder achtergrond: neutrale cruijffiaanse zinnen (PERSONA_GENERIC) tot Jamal er een geeft.
-  'KFH Guip 023': { pro: 'G. Snoek', rol: { standaard: 'spits' }, achtergrond: null, stem: null, eigenschappen: [], woorden: [], beelden: [], stats: null },
+  'KFH Guip 023': {
+    pro: 'G. Snoek',
+    rol: { standaard: 'spits' },
+    achtergrond: 'Guido Snoek, politieagent. Golft om het hoofd rustig te houden, zodat het ook voor het doel rustig blijft. '
+      + 'Kan de bal magisch teleporteren, maar alleen één op één met de keeper, op hooguit een centimeter afstand. '
+      + 'Jamal, 5 november 2026.',
+    stem: 'Rustig en beheerst, praat als een agent die een proces-verbaal opmaakt (constateren, aanhouden, de situatie onder '
+      + 'controle) en als een golfer (ademhalen, de swing, de green, de hole). De teleportatie wordt nuchter gebracht, '
+      + 'alsof het een gewone afwerking is. Geen cijfers of percentages.',
+    eigenschappen: ['politieagent', 'golft om het hoofd leeg te maken', 'ijskoud voor het doel', 'houdt van regels en orde',
+      'kan de bal teleporteren, alleen één op één met de keeper', 'pas op een centimeter van de keeper', 'doet alsof dat heel normaal is'],
+    woorden: ['constateren', 'aanhouden', 'proces-verbaal', 'onder controle', 'ademhalen', 'de swing', 'fore', 'hole in one'],
+    beelden: ['de surveillancewagen', 'de bon', 'het bureau', 'de golfbaan', 'de green', 'de put', 'de stilte voor de swing'],
+    bio: {
+      titel: 'De agent die de bal laat verdwijnen',
+      feiten: [['Beroep', 'Politieagent'], ['Hobby', 'Golfen'], ['Positie', 'Spits'], ['Specialiteit', 'De bal teleporteren']],
+      tekst: [
+        'Guido Snoek is politieagent. Overdag houdt Snoek de orde op straat, en op het veld eigenlijk ook.',
+        'In de vrije uren staat Snoek op de golfbaan. Niet om te winnen, maar om het hoofd leeg te maken: ademhalen, swingen, de bal volgen. Die rust neemt Snoek mee het veld op. Waar anderen voor het doel gaan haasten, wordt het bij Snoek juist stil.',
+        'En dan is er het geheim van Snoek. Wie één op één met de keeper staat, schiet. Snoek wacht. Pas als de keeper op een centimeter afstand staat, is de bal ineens weg, en ligt die in het net. Teleportatie, zegt Snoek. Dat noteert Snoek gewoon in het proces-verbaal.',
+      ],
+    },
+    stats: {
+      goals: ['Ik constateer een doelpunt. De keeper heeft niks gezien, en dat klopt ook.', 'Eerst ademhalen, dan de swing. Op de golfbaan heet dat een hole in one.', 'Eén op één, een centimeter, weg. Waar de bal heen ging? In het net. Meer hoeft niemand te weten.'],
+      assists: ['Ik heb de situatie onder controle gebracht. Een collega mocht de aanhouding doen.', 'Ook een agent werkt in koppels. De ander zet de handtekening.', 'Een goede pass is als een goede put: rustig, en recht op de hole.'],
+      mom: ['Man of the match. Ik doe gewoon mijn dienst. De rest staat in het proces-verbaal.', 'Rustig blijven, dat is alles. Op straat en op de green.', 'Ze vragen hoe ik dat doe. Ik zeg: ademhalen. Over de teleportatie zeg ik niks.'],
+      passes: ['Alles netjes afgeleverd. Geen bon nodig.', 'Op de golfbaan sla je ook niet hard als het zacht kan.', 'De bal op de juiste plek. Orde is ook voetbal.'],
+      duels: ['Aangehouden. De bal had geen papieren bij zich.', 'Ik vraag het één keer vriendelijk. Daarna neem ik de bal mee.', 'Wie de bal heeft, moet zich kunnen legitimeren.'],
+      balwinst: ['De bal is in beslag genomen. Die gaat terug naar de rechtmatige eigenaar: ons.', 'Ik zie alles vanuit de surveillancewagen. Ook waar de bal heen gaat.', 'Teruggepakt. Een agent laat niks liggen.'],
+      schoten: ['Veel geschoten, weinig binnen. Ook op de golfbaan ligt er weleens een bal in het water.', 'Als de keeper niet dichtbij komt, werkt de truc niet. Dan moet je gewoon schieten.', 'De keeper bleef te ver weg. Een centimeter, meer vraag ik niet.'],
+      rating: ['Een rustige dienst. Geen incidenten, alles onder controle.', 'Niet elke ronde is een birdie. Par is ook goed.', 'Rustig hoofd, rustige voeten. Zo speel je een avond uit.'],
+    },
+  },
 };
 
 const PERSONA_GENERIC = {
