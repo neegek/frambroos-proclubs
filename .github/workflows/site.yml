@@ -39,7 +39,7 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 12 # GitHub Pages kan traag zijn; deploy-pages wacht zelf hooguit 10 minuten
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

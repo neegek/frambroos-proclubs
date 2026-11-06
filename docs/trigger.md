@@ -30,6 +30,16 @@ gepubliceerd en loopt 's avonds hooguit zo'n 10 minuten achter, overdag hooguit 
 is gratis (draait op donaties) en stuurt alleen een klein verzoek naar GitHub; GitHub Actions is gratis en onbeperkt
 voor openbare repo's. EA krijgt per run twee kleine verzoeken. Lege runs schrijven niets weg en bouwen de site niet.
 
+## Site loopt achter
+
+Op 5 november 2026 om 22:50 werd de wedstrijd tegen House of aces wel opgeslagen, maar bleef GitHub Pages hangen bij het
+publiceren; de deploy werd na 5 minuten afgebroken. Latere runs vonden geen nieuwe wedstrijden en bouwden de site dus
+niet, waardoor de site die wedstrijd miste tot de volgende speelavond. Sindsdien:
+- vergelijkt elke run de nieuwste wedstrijd in de database met die in `data.json` op de site (`siteUrl` in
+  `config.json`). Loopt de site achter, dan bouwt de run hem opnieuw, ook zonder nieuwe data (`stale` in
+  `collect.yml`). Een mislukte deploy herstelt zich zo bij de volgende run, binnen 10 minuten op een speelavond;
+- mag de deploy 12 minuten duren in plaats van 5.
+
 ## Instellen (ongeveer 5 minuten)
 
 Ingesteld op 22 oktober 2026. Sinds 25 oktober 2026 staat de repo op het persoonlijke account **neegek** (werkaccount

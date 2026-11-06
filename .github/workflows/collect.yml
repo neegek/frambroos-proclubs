@@ -24,6 +24,7 @@ jobs:
     timeout-minutes: 5
     outputs:
       changed: ${{ steps.collect.outputs.changed }}
+      stale: ${{ steps.collect.outputs.stale }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -48,7 +49,8 @@ jobs:
 
   site:
     needs: collect
-    if: needs.collect.outputs.changed == 'true'
+    # Ook als de site achterloopt (een eerdere deploy mislukte), zodat het zichzelf herstelt.
+    if: needs.collect.outputs.changed == 'true' || needs.collect.outputs.stale == 'true'
     permissions:
       contents: read
       pages: write

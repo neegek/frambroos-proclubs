@@ -3,5 +3,6 @@
   "clubName": "Frambroos",
   "platform": "common-gen5",
   "dbPath": "data/proclubs.sqlite",
-  "dashboardPort": 3737
+  "dashboardPort": 3737,
+  "siteUrl": "https://neegek.github.io/frambroos-proclubs/"
 }
