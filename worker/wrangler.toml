@@ -1,5 +1,7 @@
 # Cloudflare Worker die de verzamelaar start als iemand de site opent (docs/trigger.md, "Live op de site").
-# Publiceren: npx wrangler deploy (vanuit deze map). Het token gaat er apart in: npx wrangler secret put GITHUB_TOKEN
-name = "frambroos-trigger"
+# Publiceren: Cloudflare bouwt hem zelf bij een push (Workers Builds, hoofdmap `worker`), of npx wrangler deploy
+# vanuit deze map. Het token gaat er apart in: npx wrangler secret put GITHUB_TOKEN (of in het dashboard als Secret).
+# De naam moet gelijk zijn aan die van de Worker in het Cloudflare-dashboard, anders mislukt de build daar.
+name = "frambroos-proclubs"
 main = "trigger.js"
 compatibility_date = "2026-10-01"

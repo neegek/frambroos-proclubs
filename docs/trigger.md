@@ -126,21 +126,24 @@ Lukt de worker niet (niet ingesteld, Cloudflare of GitHub weg), dan werkt de sit
 1. **Token.** Maak een tweede fine-grained token van **neegek** met precies de instellingen uit stap 1 hierboven
    (naam `frambroos-site-trigger`, alleen deze repo, alleen *Actions: Read and write*). Een eigen token, zodat je het
    los van cron-job.org kunt intrekken.
-2. **Cloudflare.** Maak een gratis account op https://dash.cloudflare.com. Dan, in deze repo op de Mac:
-   ```bash
-   cd worker
-   npx wrangler login                 # opent de browser
-   npx wrangler secret put GITHUB_TOKEN   # plak het token
-   npx wrangler deploy                # geeft het adres, bijv. https://frambroos-trigger.<naam>.workers.dev
-   ```
-   (Zonder terminal kan het ook in het dashboard: *Workers & Pages* → *Create* → *Hello World*, de inhoud van
-   `worker/trigger.js` erin plakken, *Deploy*, dan *Settings* → *Variables and Secrets* → `GITHUB_TOKEN` als *Secret*.)
+2. **Cloudflare.** Maak een gratis account op https://dash.cloudflare.com. De Worker heet **`frambroos-proclubs`**
+   (gelijk aan `name` in `worker/wrangler.toml`) en is gekoppeld aan deze GitHub-repo (Workers Builds, 7 november 2026).
+   Bij *Settings* → *Build*:
+   - **Root directory**: `worker`. Zonder dit zoekt Cloudflare in de hoofdmap, vindt geen `wrangler.toml`, houdt
+     `public/` voor een statische site en probeert `npx hugo` te draaien ("could not determine executable to run").
+   - **Deploy command**: `npx wrangler deploy`. Geen build command.
+   - **Build watch paths**: alleen `worker/*`, anders bouwt Cloudflare bij elke datacommit (tientallen per dag).
+   Dan *Settings* → *Variables and Secrets* → `GITHUB_TOKEN` als **Secret** (bij de Worker zelf, niet bij de
+   buildvariabelen). Het adres staat bij *Domains & Routes*, bijv. `https://frambroos-proclubs.<naam>.workers.dev`.
+   (Zonder koppeling met GitHub kan het ook vanaf de Mac: `cd worker`, `npx wrangler login`,
+   `npx wrangler secret put GITHUB_TOKEN`, `npx wrangler deploy`.)
 3. **Controleren.** `curl -X POST <adres>` geeft `{"at":…,"started":true,…}` en in de Actions-tab staat een nieuwe
    run. Een tweede keer geeft `"started":false`.
-4. **Aanzetten.** Zet het adres in `config.json` als `"liveTrigger": "https://frambroos-trigger.<naam>.workers.dev/"`,
+4. **Aanzetten.** Zet het adres in `config.json` als `"liveTrigger": "https://frambroos-proclubs.<naam>.workers.dev/"`,
    commit en push. De site wordt opnieuw gebouwd en start vanaf dan bij elk bezoek de verzamelaar.
 
-Het token verloopt net als het andere; vervang het met `npx wrangler secret put GITHUB_TOKEN`.
+Het token verloopt net als het andere; vervang het in het dashboard (*Variables and Secrets*) of met
+`npx wrangler secret put GITHUB_TOKEN`.
 
 De worker staat alleen verzoeken toe die de site kan lezen vanaf `https://neegek.github.io`. Iemand anders kan het
 adres wel aanroepen, maar meer dan één run per 3 minuten levert dat niet op.
