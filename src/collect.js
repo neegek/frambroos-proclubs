@@ -8,7 +8,7 @@ const db = openDb();
 const now = () => Math.floor(Date.now() / 1000);
 const startedAt = now();
 db.prepare('INSERT INTO collect_runs (started_at) VALUES (?)').run(startedAt);
-const { newMatches, changed, error } = await collectInto(db);
+const { newMatches, changed, error, missed } = await collectInto(db);
 db.prepare('UPDATE collect_runs SET finished_at = ?, new_matches = ?, error = ? WHERE started_at = ?').run(now(), newMatches, error, startedAt);
 const total = db.prepare('SELECT COUNT(*) AS c FROM matches').get().c;
 console.log(`${new Date().toISOString()} ${config.clubName}: ${newMatches} nieuwe wedstrijd(en), ${total} totaal${error ? ` — FOUT: ${error}` : ''}`);
@@ -28,6 +28,7 @@ if (!changed && config.siteUrl) {
 }
 db.exec('PRAGMA wal_checkpoint(TRUNCATE)');
 db.close();
-// In GitHub Actions: alleen committen als er echt iets nieuws is; de site bouwen ook als hij achterloopt.
-if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `changed=${changed}\nstale=${stale}\n`);
+// In GitHub Actions: alleen committen als er echt iets nieuws is; de site bouwen ook als hij achterloopt. missed gaat
+// naar de meldstap in collect.yml (docs/trigger.md, Melding bij problemen).
+if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `changed=${changed}\nstale=${stale}\nmissed=${missed.join(',')}\n`);
 if (error) process.exit(1);

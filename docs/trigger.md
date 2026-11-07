@@ -40,6 +40,17 @@ niet, waardoor de site die wedstrijd miste tot de volgende speelavond. Sindsdien
   `collect.yml`). Een mislukte deploy herstelt zich zo bij de volgende run, binnen 10 minuten op een speelavond;
 - mag de deploy 12 minuten duren in plaats van 5.
 
+## Melding bij problemen
+
+Sinds 7 november 2026 sluit elke run af met de stap *alert* in `collect.yml`. Die meldt problemen als issue in deze
+repo; daar krijgt neegek een mail van (GitHub stuurt issues standaard naar wie de repo volgt).
+- **Mogelijk wedstrijden gemist**: waren alle 10 wedstrijden van een type nieuw (`missed` uit `src/collector.js`), dan
+  komt er meteen een issue, of een reactie op het issue dat al openstaat. Dat sluit niemand automatisch: kijk in de
+  Actions-tab of er runs zijn uitgevallen, en sluit het daarna zelf.
+- **Runs mislukken**: pas bij drie mislukte (of afgebroken) runs op rij een issue, want een losse hapering bij EA of
+  GitHub Pages herstelt de volgende run zelf. 's Avonds is dat na een halfuur, overdag na een paar uur. De eerste run
+  die weer lukt, sluit het issue met een link.
+
 ## Instellen (ongeveer 5 minuten)
 
 Ingesteld op 22 oktober 2026. Sinds 25 oktober 2026 staat de repo op het persoonlijke account **neegek** (werkaccount
@@ -117,6 +128,13 @@ openbare site mag. Wat er gebeurt:
    ongeveer anderhalve minuut.
 4. Is er iets nieuws, dan verschijnt "Eén nieuwe wedstrijd binnen. *Verversen*". Anders verdwijnt de melding en zegt
    het menu "bij EA gekeken 23:14".
+5. Startte de worker geen run (net al gekeken), dan kijkt de pagina toch of er op de site nieuwere data staat dan op
+   de pagina, bijvoorbeeld van een run die een ander startte, en toont dan *Verversen*.
+6. Kom je terug naar een tabblad dat open bleef (een telefoon herlaadt dan niet) of via de vorige-knop, dan begint
+   het opnieuw bij stap 1, hooguit eens per twee minuten (`liveAgain` in `public/common.js`).
+
+Nieuwe wedstrijden telt de pagina op tijdstip, niet op aantal: in de modus *League* of *Playoff* staan er minder
+wedstrijden op de pagina dan in `data.json`.
 
 Lukt de worker niet (niet ingesteld, Cloudflare of GitHub weg), dan werkt de site gewoon zoals eerst. Kosten: geen
 (Cloudflare gratis: 100.000 verzoeken per dag; Actions-minuten gratis voor een openbare repo).

@@ -113,12 +113,12 @@ async function snapshotMembers(q, force) {
 }
 
 // Eén verzamelronde op een geopende database: nieuwe wedstrijden opslaan, snapshots bijwerken.
-// Geeft { newMatches, newIds, changed, error }. Gebruikt door src/collect.js (echte database, GitHub Actions)
+// Geeft { newMatches, newIds, changed, error, missed } (missed: de types waarvan alle 10 wedstrijden nieuw waren). Gebruikt door src/collect.js (echte database, GitHub Actions)
 // en src/live.js (tijdelijke kopie, bij het openen van de lokale app).
 export async function collectInto(db, { backfill = true, log = console.log } = {}) {
   const q = queries(db);
   let newMatches = 0, changed = false, error = null;
-  const newIds = [];
+  const newIds = [], missed = [];
   try {
     if (backfill) {
       const fixed = backfillEventAggregates(db, q);
@@ -135,6 +135,7 @@ export async function collectInto(db, { backfill = true, log = console.log } = {
       if (knownType && matches.length >= 10 && unseen === matches.length) {
         const msg = `Alle ${matches.length} ${matchType}-wedstrijden waren nieuw: mogelijk zijn er oudere gemist sinds de vorige run.`;
         log(process.env.GITHUB_ACTIONS ? `::warning::${msg}` : `WAARSCHUWING: ${msg}`);
+        missed.push(matchType);
       }
       for (const match of matches) {
         if (q.hasMatch.get(String(match.matchId))) continue;
@@ -152,5 +153,5 @@ export async function collectInto(db, { backfill = true, log = console.log } = {
   } catch (e) {
     error = e.message;
   }
-  return { newMatches, newIds, changed, error };
+  return { newMatches, newIds, changed, error, missed };
 }
