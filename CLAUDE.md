@@ -133,7 +133,8 @@ alleen in Cloudflare.
   `revealPending(s, sessions)` uit `public/common.js`. Bezig: alleen wedstrijden en uitslag, alle ranglijsten dicht.
   De nieuwste sessie krijgt na afloop één keer per kijker een pack-reveal (`playReveal` in `public/sessie.js`).
   Rechtsboven in de kop van de nieuwste sessie, op de plek van *volgende sessie*, de vasthoudknop (`packHoldBtn` in
-  `public/pack.js`): 0,7 s ingedrukt houden speelt de reveal; tijdens de avond als kijkje dat niet als geopend telt.
+  `public/pack.js`): 0,7 s ingedrukt houden speelt de reveal, ook tijdens de avond. Geopend is geopend: daarna is de sessie open en werkt
+  alles bij; dicht is alleen bezig én nog niet geopend (`sessionSealed(s)`).
 - Biografie per speler: `bio` in `public/personas.js` (Jamal levert de tekst; verhaal, feiten, quotes en stem
   bouwen erop), op de spelerspagina als ingeklapt kaartje onder de spelerskaart.
 - Verbanden: eerst toetsen volgens coach-logica §9e (per mens, wij min zij, gecorrigeerd voor sterkte en mensen,

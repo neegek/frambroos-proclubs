@@ -325,6 +325,9 @@ const sessionLive = s => Date.now() / 1000 - s.matches[s.matches.length - 1].ts 
 const revealKey = s => `reveal:${s.key}`;
 const revealSeen = s => { try { return !!localStorage.getItem(revealKey(s)); } catch { return true; } };
 const markRevealed = s => { try { localStorage.setItem(revealKey(s), String(Date.now())); } catch {} };
+// Dicht: bezig én nog niet geopend door deze kijker. Eenmaal geopend (ook vroeg, met de vasthoudknop) is de sessie
+// open, ook als er daarna nog wedstrijden bij komen; die werken gewoon bij (coach-logica §9a).
+const sessionSealed = s => sessionLive(s) && !revealSeen(s);
 const revealPending = (s, all) => s === all[all.length - 1] && !sessionLive(s) && !revealSeen(s);
 const sessionHref = s => `sessie.html?id=${s.key ?? s.matches?.[0]?.sessionKey ?? s.sessionKey}`;
 

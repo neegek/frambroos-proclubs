@@ -722,8 +722,10 @@ van het podium staat een dicht pack met "Gaat open als de avond klaar is"; geen 
 2026: die zei hetzelfde als het pack). **Vasthoudknop** (sinds 8 november 2026): bij de nieuwste sessie staat rechtsboven
 in de kop, op de plek van "volgende sessie", een ronde knop met een pack-icoon in dezelfde stijl als de pijltjes. Even
 ingedrukt houden (0,7 seconde, een gele ring loopt vol) speelt de reveal; een korte tik zegt "Houd ingedrukt om het pack
-te openen", met het toetsenbord opent hij meteen. Is de avond nog bezig, dan is het een kijkje met de stand tot nu: dat
-telt niet als geopend, dus de echte reveal na afloop blijft staan. De pagina zelf blijft dicht zolang de avond bezig is. Op *Sessies* staat bij die avond "Bezig".
+te openen", met het toetsenbord opent hij meteen. Is de avond nog bezig, dan opent het pack met de stand tot nu, en
+**geopend is geopend** (sinds 8 november 2026): daarna is de sessie voor deze kijker gewoon open (podium, quote, radar,
+nieuws, overal in de app), ook al is de avond nog bezig. Komen er nog wedstrijden bij, dan werkt alles bij; er volgt
+geen tweede reveal. Dicht is dus: bezig én nog niet geopend (`sessionSealed` in `common.js`). Op *Sessies* staat bij die avond "Bezig".
 Is de **nieuwste** sessie klaar en heeft deze kijker hem nog niet geopend, dan staat er op *Sessies* "Pack staat
 klaar" en speelt de sessiepagina eerst de **reveal**: een pack in clubkleuren, een tik opent het (trillen, lichtflits,
 stralen), dan komen nummer drie, twee en één één voor één tevoorschijn, met als laatste de quote van de winnaar en een

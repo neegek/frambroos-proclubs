@@ -60,7 +60,7 @@ function sessionQuote(sess) {
 const REVEAL_TEST = '2026-10-26';
 // De nieuwste sessie, als die klaar is en deze kijker hem nog niet zag: een pack in clubkleuren; een tik opent het,
 // daarna komen drie, twee en één tevoorschijn, met als laatste de quote van de winnaar. Overslaan kan altijd.
-function playReveal(s, top, quote, { peek = false } = {}) {
+function playReveal(s, top, quote) {
   if (!top.length || document.querySelector('.pack-reveal')) return;
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const card = (r, i) => `<span class="pr-card p${i + 1}" style="--d:${[1.1, 0.55, 0][i]}s">${PlayerCard.tiny(r.name, { session: s.id, rank: r.place, label: proName(r.name), value: f1(r.rH), key: '-r' })}</span>`;
@@ -77,9 +77,8 @@ function playReveal(s, top, quote, { peek = false } = {}) {
   document.body.append(el);
   document.documentElement.classList.add('pr-open');
   PlayerCard.reveal(el);
-  const mark = () => { if (!peek) markRevealed(s); }; // een kijkje tijdens de avond telt niet als geopend
-  const close = () => { mark(); el.classList.add('out'); document.documentElement.classList.remove('pr-open'); setTimeout(() => { el.remove(); dispatchEvent(new Event('pack-closed')); }, still ? 0 : 350); };
-  const open = () => { if (el.classList.contains('opening') || el.classList.contains('open')) return; mark(); el.classList.add('opening'); setTimeout(() => el.classList.replace('opening', 'open'), still ? 0 : 900); };
+  const close = () => { markRevealed(s); el.classList.add('out'); document.documentElement.classList.remove('pr-open'); setTimeout(() => { el.remove(); dispatchEvent(new Event('pack-closed')); }, still ? 0 : 350); };
+  const open = () => { if (el.classList.contains('opening') || el.classList.contains('open')) return; markRevealed(s); el.classList.add('opening'); setTimeout(() => el.classList.replace('opening', 'open'), still ? 0 : 900); };
   el.querySelector('.pr-pack').addEventListener('click', open);
   el.querySelector('.pr-skip').addEventListener('click', close);
   el.querySelector('.pr-done').addEventListener('click', close);
@@ -96,15 +95,15 @@ function openPack(key) {
   playReveal(s, sessionRanking(s.matches).filter(r => r.rH !== null).slice(0, 3), sessionQuote(s));
 }
 // Vasthoudknop (coach-logica §9a): rechtsboven in de sessiekop, op de plek van "volgende sessie" bij de nieuwste
-// sessie. Even ingedrukt houden (0,7 s, een ring loopt vol) opent het pack; ook als de avond nog bezig is, dan als
-// kijkje met de stand tot nu, zonder dat de echte reveal na afloop verdwijnt. Een korte tik zegt hoe het werkt.
+// sessie. Even ingedrukt houden (0,7 s, een ring loopt vol) opent het pack, ook als de avond nog bezig is: dan met de
+// stand tot nu. Geopend is geopend; komen er daarna nog wedstrijden bij, dan werkt alles bij. Een korte tik zegt hoe het werkt.
 const HOLD_MS = 700;
 const packHoldBtn = s => `<button type="button" class="ss-nav next ss-pack" data-hold="${s.key}" aria-label="Pack openen: houd ingedrukt" title="Houd ingedrukt om het pack te openen">
   <svg class="ss-ring" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18.5"/></svg>
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l1 18H5z"/><path d="M8.5 9.5l3.5 2.5 3.5-2.5"/></svg></button>`;
 function holdOpen(btn) {
   const s = sessionsOf(DATA.matches).find(x => x.key === btn.dataset.hold); if (!s) return;
-  playReveal(s, sessionRanking(s.matches).filter(r => r.rH !== null).slice(0, 3), sessionQuote(s), { peek: sessionLive(s) });
+  playReveal(s, sessionRanking(s.matches).filter(r => r.rH !== null).slice(0, 3), sessionQuote(s));
 }
 {
   let timer = null, btn = null, done = false;
@@ -136,7 +135,7 @@ function sessionCardHtml(s, sessions, { kicker = '' } = {}) {
     const ms = s.matches, sm = summarize(ms), ppg = ppgOf(ms); // punten per wedstrijd alleen voor de kleur van het kopvlak
     const tone = ppg >= 2 ? 'good' : ppg < 1 ? 'bad' : '';
     const team = avg(ms.flatMap(m => m.players.map(p => p.rating)).filter(v => v !== null));
-    const live = sessionLive(s), pending = !live && packReady(s, sessions);
+    const live = sessionSealed(s), pending = !sessionLive(s) && packReady(s, sessions);
     const mvp = live || pending ? null : bestOfNight(ms), photo = mvp && PlayerCard.portrait(mvp.n); // rondje: altijd het portret; rand en achtergrond volgen de vorm
     const sealed = live ? `<span class="scard-pack live"><span class="pack-mini" aria-hidden="true"></span><span><b>Bezig</b><small>Het pack gaat open als de avond klaar is</small></span></span>`
       : pending ? `<span class="scard-pack ready" role="button" tabindex="0" data-pack="${s.key}"><span class="pack-mini" aria-hidden="true"></span><span><b>Pack staat klaar</b><small>Tik om het te openen</small></span><span class="scard-pack-btn">Openen</span></span>` : '';

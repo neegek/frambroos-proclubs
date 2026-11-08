@@ -40,7 +40,7 @@ function seasonTop() {
 // Laatste sessie: één tik naar de avond. Bezig of nog niet geopend: het pack, anders de speler van de sessie.
 function lastSession() {
   const all = sessionsOf(DATA.matches), s = all.at(-1), el = $('#last-session'); if (!s) { el.innerHTML = '<p class="empty">Nog geen sessies.</p>'; return; }
-  const sm = summarize(s.matches), live = sessionLive(s), pending = !live && packReady(s, all), mvp = live || pending ? null : bestOfNight(s.matches);
+  const sm = summarize(s.matches), live = sessionSealed(s), pending = !sessionLive(s) && packReady(s, all), mvp = live || pending ? null : bestOfNight(s.matches);
   const photo = mvp && PlayerCard.portrait(mvp.n);
   el.href = sessionHref(s);
   el.innerHTML = `<span class="ls-kicker">${live ? 'Nu bezig' : 'Laatste sessie'}</span>

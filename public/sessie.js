@@ -127,7 +127,7 @@ function render() {
   PlayerCard.reveal($('#s-podium'));
   SESSION_ID = s.id;
   // Bezig (coach-logica §9a): alles wat een ranglijst is blijft dicht; alleen de wedstrijden en de uitslag.
-  const live = sessionLive(s);
+  const live = sessionSealed(s); // bezig en nog niet geopend; vroeg geopend is gewoon open
   $('#session-detail').classList.toggle('is-live', live);
   if (live) {
     $('#s-podium').innerHTML = `<div class="ss-sealed"><span class="pack-big" aria-hidden="true"><img src="crest.png" alt=""></span><b>Het pack is nog dicht</b><small>Gaat open als de avond klaar is</small></div>`;
@@ -410,6 +410,7 @@ $('#axes-dialog').addEventListener('click', e => { if (e.target === e.currentTar
 $('#player-dialog').addEventListener('click', e => { if (e.target === e.currentTarget || e.target.closest('.rd-close')) e.currentTarget.close(); });
 
 onWidthChange(() => DATA && render());
+addEventListener('pack-closed', () => DATA && render()); // vroeg geopend: meteen de hele sessie
 window.rerender = () => render(); // thema wisselen: kaarten opnieuw in thuis- of uitkleuren
 Promise.all([loadData(), PlayerCard.load().catch(() => {})]).then(() => { sessions = sessionsOf(DATA.matches); selectedId = (sessions.find(x => x.key === ID_PARAM) || (/^\d+$/.test(ID_PARAM || '') ? sessions.find(x => x.id === Number(ID_PARAM)) : null))?.id ?? null; render(); }).catch(showError);
 
