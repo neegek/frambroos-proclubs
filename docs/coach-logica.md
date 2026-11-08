@@ -718,7 +718,12 @@ wedstrijd minder dan 3 uur geleden is (dezelfde grens als waarmee wedstrijden ee
 kan er niets meer bij en is hij **klaar**. Zolang een sessie bezig is, is alles wat een ranglijst is dicht: geen
 podium, geen quote, geen speler van de sessie, geen *Zo speelden we* of *Ratings per wedstrijd*, geen deelknop en geen
 nieuwsartikel. Wel zichtbaar: datum, W-G-V, goals, saldo en de wedstrijden zelf (die werken gewoon bij). Op de plek
-van het podium staat een dicht pack met "Gaat open als de avond klaar is". Op *Sessies* staat bij die avond "Bezig".
+van het podium staat een dicht pack met "Gaat open als de avond klaar is"; geen regel onder de titel (sinds 8 november
+2026: die zei hetzelfde als het pack). **Vasthoudknop** (sinds 8 november 2026): bij de nieuwste sessie staat rechtsboven
+in de kop, op de plek van "volgende sessie", een ronde knop met een pack-icoon in dezelfde stijl als de pijltjes. Even
+ingedrukt houden (0,7 seconde, een gele ring loopt vol) speelt de reveal; een korte tik zegt "Houd ingedrukt om het pack
+te openen", met het toetsenbord opent hij meteen. Is de avond nog bezig, dan is het een kijkje met de stand tot nu: dat
+telt niet als geopend, dus de echte reveal na afloop blijft staan. De pagina zelf blijft dicht zolang de avond bezig is. Op *Sessies* staat bij die avond "Bezig".
 Is de **nieuwste** sessie klaar en heeft deze kijker hem nog niet geopend, dan staat er op *Sessies* "Pack staat
 klaar" en speelt de sessiepagina eerst de **reveal**: een pack in clubkleuren, een tik opent het (trillen, lichtflits,
 stralen), dan komen nummer drie, twee en één één voor één tevoorschijn, met als laatste de quote van de winnaar en een

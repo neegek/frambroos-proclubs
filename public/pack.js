@@ -60,7 +60,7 @@ function sessionQuote(sess) {
 const REVEAL_TEST = '2026-10-26';
 // De nieuwste sessie, als die klaar is en deze kijker hem nog niet zag: een pack in clubkleuren; een tik opent het,
 // daarna komen drie, twee en één tevoorschijn, met als laatste de quote van de winnaar. Overslaan kan altijd.
-function playReveal(s, top, quote) {
+function playReveal(s, top, quote, { peek = false } = {}) {
   if (!top.length || document.querySelector('.pack-reveal')) return;
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const card = (r, i) => `<span class="pr-card p${i + 1}" style="--d:${[1.1, 0.55, 0][i]}s">${PlayerCard.tiny(r.name, { session: s.id, rank: r.place, label: proName(r.name), value: f1(r.rH), key: '-r' })}</span>`;
@@ -77,8 +77,9 @@ function playReveal(s, top, quote) {
   document.body.append(el);
   document.documentElement.classList.add('pr-open');
   PlayerCard.reveal(el);
-  const close = () => { markRevealed(s); el.classList.add('out'); document.documentElement.classList.remove('pr-open'); setTimeout(() => { el.remove(); dispatchEvent(new Event('pack-closed')); }, still ? 0 : 350); };
-  const open = () => { if (el.classList.contains('opening') || el.classList.contains('open')) return; markRevealed(s); el.classList.add('opening'); setTimeout(() => el.classList.replace('opening', 'open'), still ? 0 : 900); };
+  const mark = () => { if (!peek) markRevealed(s); }; // een kijkje tijdens de avond telt niet als geopend
+  const close = () => { mark(); el.classList.add('out'); document.documentElement.classList.remove('pr-open'); setTimeout(() => { el.remove(); dispatchEvent(new Event('pack-closed')); }, still ? 0 : 350); };
+  const open = () => { if (el.classList.contains('opening') || el.classList.contains('open')) return; mark(); el.classList.add('opening'); setTimeout(() => el.classList.replace('opening', 'open'), still ? 0 : 900); };
   el.querySelector('.pr-pack').addEventListener('click', open);
   el.querySelector('.pr-skip').addEventListener('click', close);
   el.querySelector('.pr-done').addEventListener('click', close);
@@ -93,6 +94,34 @@ const packReady = (s, all) => revealPending(s, all) || s.key === REVEAL_TEST;
 function openPack(key) {
   const s = sessionsOf(DATA.matches).find(x => x.key === key); if (!s) return;
   playReveal(s, sessionRanking(s.matches).filter(r => r.rH !== null).slice(0, 3), sessionQuote(s));
+}
+// Vasthoudknop (coach-logica §9a): rechtsboven in de sessiekop, op de plek van "volgende sessie" bij de nieuwste
+// sessie. Even ingedrukt houden (0,7 s, een ring loopt vol) opent het pack; ook als de avond nog bezig is, dan als
+// kijkje met de stand tot nu, zonder dat de echte reveal na afloop verdwijnt. Een korte tik zegt hoe het werkt.
+const HOLD_MS = 700;
+const packHoldBtn = s => `<button type="button" class="ss-nav next ss-pack" data-hold="${s.key}" aria-label="Pack openen: houd ingedrukt" title="Houd ingedrukt om het pack te openen">
+  <svg class="ss-ring" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18.5"/></svg>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l1 18H5z"/><path d="M8.5 9.5l3.5 2.5 3.5-2.5"/></svg></button>`;
+function holdOpen(btn) {
+  const s = sessionsOf(DATA.matches).find(x => x.key === btn.dataset.hold); if (!s) return;
+  playReveal(s, sessionRanking(s.matches).filter(r => r.rH !== null).slice(0, 3), sessionQuote(s), { peek: sessionLive(s) });
+}
+{
+  let timer = null, btn = null, done = false;
+  const stop = () => { clearTimeout(timer); timer = null; btn?.classList.remove('holding'); };
+  document.addEventListener('pointerdown', e => {
+    const b = e.target.closest('[data-hold]'); if (!b || e.button > 0) return;
+    btn = b; done = false; b.classList.add('holding');
+    timer = setTimeout(() => { done = true; stop(); navigator.vibrate?.(30); holdOpen(b); }, HOLD_MS);
+  });
+  for (const t of ['pointerup', 'pointercancel']) document.addEventListener(t, stop, true);
+  document.addEventListener('pointerleave', e => { if (e.target === btn) stop(); }, true); // van de knop af geschoven
+  document.addEventListener('contextmenu', e => { if (e.target.closest('[data-hold]')) e.preventDefault(); }, true);
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-hold]'); if (!b) return; e.preventDefault();
+    if (e.detail === 0) return holdOpen(b); // toetsenbord (Enter of spatie): meteen open
+    if (!done && typeof toast === 'function') toast('Houd ingedrukt om het pack te openen');
+  });
 }
 document.addEventListener('keydown', e => { const t = (e.key === 'Enter' || e.key === ' ') && e.target.closest?.('[data-pack]'); if (t) { e.preventDefault(); openPack(t.dataset.pack); } }, true);
 document.addEventListener('click', e => { const t = e.target.closest('[data-pack]'); if (!t) return; e.preventDefault(); e.stopPropagation(); openPack(t.dataset.pack); }, true);

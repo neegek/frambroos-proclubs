@@ -1003,6 +1003,14 @@ a.ftok:hover .ftok-c { transform: translateY(-2px); }
 .ss-nav svg { width: 18px; height: 18px; }
 .ss-nav.empty { visibility: hidden; }
 .ss-nav:hover { background: rgba(255,255,255,0.14); }
+/* Vasthoudknop voor het pack: een ring loopt vol zolang je drukt (pack.js, HOLD_MS). */
+.ss-pack { position: relative; padding: 0; font: inherit; cursor: pointer; touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.ss-pack svg:not(.ss-ring) { width: 18px; height: 18px; }
+.ss-ring { position: absolute; inset: -1px; width: calc(100% + 2px); height: calc(100% + 2px); transform: rotate(-90deg); pointer-events: none; }
+.ss-ring circle { fill: none; stroke: #f5c518; stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 116.3; stroke-dashoffset: 116.3; }
+.ss-pack.holding .ss-ring circle { stroke-dashoffset: 0; transition: stroke-dashoffset 0.7s linear; }
+.ss-pack.holding { transform: scale(0.94); transition: transform 0.7s ease; }
+@media (prefers-reduced-motion: reduce) { .ss-pack.holding { transform: none; } }
 .ss-pick .fut-tiny { --w: 108px; transition: transform .15s; }
 .ss-pick.p1 .fut-tiny { --w: 144px; }
 .ss-pick:hover .fut-tiny { transform: translateY(-3px); }
@@ -1117,7 +1125,6 @@ a.ftok:hover .ftok-c { transform: translateY(-2px); }
 .ss-sealed { display: grid; justify-items: center; gap: 6px; text-align: center; color: #fff; padding: 8px 0; }
 .ss-sealed b { font-size: 16px; font-weight: 700; }
 .ss-sealed small { font-size: 13px; color: #d9d4e0; }
-.ss-live-note { font-style: normal !important; font-size: 15px !important; color: #efeaf3; }
 /* Een dicht pack: goudfolie op clubpaars, met een zachte ademende gloed. */
 .pack-big, .pack-mini { position: relative; display: grid; place-items: center; border-radius: 14px; background: linear-gradient(160deg, #6a2a7a 0%, #2a0f33 60%, #12081a 100%); border: 2px solid #e9c767; box-shadow: 0 0 0 1px rgba(0,0,0,0.4), 0 0 24px rgba(233,199,103,0.35); overflow: hidden; }
 .pack-big { width: 112px; height: 160px; animation: pack-breathe 2.4s ease-in-out infinite; }

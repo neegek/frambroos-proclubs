@@ -92,7 +92,8 @@ function render() {
   const at = sessions.indexOf(s), nav = (to, cls, label) => navArrow(cls, to ? sessionHref(to) : null, to ? `${label}: ${cap(longDate(to.matches[0].ts))}` : '');
   $('#s-titlebar').querySelectorAll('.ss-nav').forEach(a => a.remove());
   $('#s-title').insertAdjacentHTML('beforebegin', nav(sessions[at - 1], 'prev', 'Vorige sessie'));
-  $('#s-title').insertAdjacentHTML('afterend', nav(sessions[at + 1], 'next', 'Volgende sessie'));
+  // De nieuwste sessie heeft geen volgende: op die plek de vasthoudknop voor het pack (pack.js).
+  $('#s-title').insertAdjacentHTML('afterend', sessions[at + 1] ? nav(sessions[at + 1], 'next', 'Volgende sessie') : packHoldBtn(s));
   const meta = `${cap(typeLabel(ms))} · ${plural(ms.length, 'wedstrijd', 'wedstrijden')} · ${names.length} spelers`; // alleen voor het kopiëren
 
   const opp = avg(ms.map(m => gapOf(m, own)).filter(g => g !== null)); // gemiddeld sterkteverschil, met onze rating van toen
@@ -130,7 +131,7 @@ function render() {
   $('#session-detail').classList.toggle('is-live', live);
   if (live) {
     $('#s-podium').innerHTML = `<div class="ss-sealed"><span class="pack-big" aria-hidden="true"><img src="crest.png" alt=""></span><b>Het pack is nog dicht</b><small>Gaat open als de avond klaar is</small></div>`;
-    $('#s-quote').innerHTML = `<p class="ss-live-note">De avond is nog bezig. De wedstrijden werken bij; wie de besten waren, zie je zodra de avond klaar is.</p>`;
+    $('#s-quote').innerHTML = ''; // geen regel onder de titel: het dichte pack zegt het al
     return;
   }
   // De radar als lijst (coach-logica §9a): per as de onderliggende cijfers van de avond, uitgesplitst, met onderaan het team.
