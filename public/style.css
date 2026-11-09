@@ -1139,7 +1139,7 @@ a.ftok:hover .ftok-c { transform: translateY(-2px); }
 .scard-pack small { font-size: 12px; color: var(--ink-2); }
 .scard-pack.ready { border-color: #e9c767; background: color-mix(in srgb, #e9c767 12%, var(--surface-2)); }
 .scard-pack.ready b { color: var(--brand-text); }
-.scard.is-live .scard-date::after { content: "Bezig"; margin-left: 8px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #fff; background: var(--neg); animation: live-pulse 1.6s ease-in-out infinite; }
+.scard.is-live .scard-date::after { content: "Bezig"; margin-left: 8px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #fff; background: var(--neg); animation: live-pulse 1.6s ease-in-out infinite; } }
 @keyframes live-pulse { 50% { opacity: 0.55; } }
 
 /* De reveal: schermvullend, eigen kleuren (los van het thema), zoals een pack openen in FUT. */
@@ -1201,6 +1201,12 @@ html.pr-open #s-podium, html.pr-open #s-quote { visibility: hidden; }
 /* ---------- menu (coach-logica §9a, Menu) ---------- */
 .nl-short { display: none; }
 .icon-btn.has-mode { position: relative; }
+/* Bij EA kijken (common.js, liveBusy): geen melding, een zacht pulserend bolletje bij de versheid en op de menuknop. */
+.live-checking .freshness::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; background: var(--brand); vertical-align: 1px; animation: live-pulse 1.6s ease-in-out infinite; }
+.live-checking #menu-btn { position: relative; }
+@media (max-width: 600px) { .live-checking #menu-btn::before { content: ""; position: absolute; top: 6px; left: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--brand); animation: live-pulse 1.6s ease-in-out infinite; }
+@keyframes live-pulse { 0%, 100% { opacity: 0.25; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.15); } }
+@media (prefers-reduced-motion: reduce) { .live-checking .freshness::before, .live-checking #menu-btn::before { animation: none; opacity: 0.8; } }
 .icon-btn.has-mode::after { content: ""; position: absolute; top: 7px; right: 7px; width: 8px; height: 8px; border-radius: 50%; background: var(--brand); }
 .am-search { display: flex; align-items: center; gap: 10px; margin: 12px 0 0; padding: 0 12px; min-height: 46px; border-radius: 12px; border: 1px solid var(--border-strong); background: var(--surface); }
 .am-search svg { width: 18px; height: 18px; flex: none; color: var(--muted); }

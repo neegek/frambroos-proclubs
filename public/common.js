@@ -508,7 +508,7 @@ async function loadDataInner() {
 // webpagina mag EA niet zelf aanroepen). Zodra die klaar is en nieuwe data heeft gepubliceerd, verschijnt een knop.
 // Lukt iets niet, dan blijft gewoon de opgeslagen data staan. Ook bij terugkeren naar een tabblad dat open bleef
 // (liveAgain, onderaan): dan kijkt de site opnieuw (docs/trigger.md, Live op de site).
-let liveRunning = false, liveLast = 0, liveNote = null;
+let liveRunning = false, liveNote = null;
 const newestTs = d => Math.max(0, ...[...(d.matches || []), ...(d.friendlies || [])].map(m => m.ts || 0));
 function liveNoteSet(html, ready = false) {
   if (!liveNote?.isConnected) {
@@ -518,7 +518,6 @@ function liveNoteSet(html, ready = false) {
   liveNote.innerHTML = html; liveNote.dataset.ready = ready ? '1' : '';
   return liveNote;
 }
-function liveNoteClear() { liveNote?.remove(); liveNote = null; }
 // Staat er op de site nieuwere data dan op deze pagina? Nieuwe wedstrijden tellen op tijdstip (de modus filtert
 // DATA.matches, dus het aantal zegt niets). Geeft { published, added }; bij nieuwe wedstrijden de knop Verversen.
 async function liveCheckSite() {
@@ -531,30 +530,52 @@ async function liveCheckSite() {
   }
   return { published, added };
 }
+// Niet steeds opnieuw ophalen (docs/trigger.md, Live op de site): is de data op deze pagina jonger dan LIVE_FRESH_MS,
+// of heeft deze browser (op welke pagina ook) zo kort geleden al gekeken, dan niets doen. Loopt er al een run die een
+// andere pagina volgde, dan volgen we die stil verder in plaats van een nieuwe te vragen.
+const LIVE_FRESH_MS = 5 * 60 * 1000, LIVE_KEY = 'liveCheck';
+const liveState = () => { try { return JSON.parse(localStorage.getItem(LIVE_KEY) || '{}'); } catch { return {}; } };
+const liveSave = v => { try { localStorage.setItem(LIVE_KEY, JSON.stringify({ ...liveState(), ...v })); } catch {} };
+// Ophalen bezig: geen melding, alleen een zacht pulserend bolletje bij de versheid in het menu en op de menuknop.
+function liveBusy(on) {
+  document.documentElement.classList.toggle('live-checking', on);
+  const f = $('#club-box .freshness'); if (f) f.title = on ? 'Bij EA kijken of er nieuwe wedstrijden zijn' : '';
+  const b = $('#menu-btn'); if (b) b.title = on ? 'Bij EA kijken of er nieuwe wedstrijden zijn' : 'Menu: zoeken, modus en instellingen';
+}
 async function liveTrigger() {
   const url = window.FRAMBROOS_TRIGGER;
   // Staat de knop Verversen er al, dan valt er niets meer te melden tot iemand ververst.
   if (!STATIC || !url || liveRunning || !DATA || (liveNote?.isConnected && liveNote.dataset.ready)) return;
-  liveRunning = true; liveLast = Date.now();
-  try { await liveFollow(url); } finally { liveRunning = false; }
+  const now = Date.now(), st = liveState();
+  const following = st.followSince && now - st.followAt < 6 * 60 * 1000; // een run die een andere pagina volgde
+  const recent = now - (st.checkedAt || 0) < LIVE_FRESH_MS || now - (DATA.lastRun?.started_at || 0) * 1000 < LIVE_FRESH_MS;
+  if (recent && !following) return;
+  liveRunning = true;
+  try { await liveFollow(url, following ? st.followSince : null); } finally { liveRunning = false; liveBusy(false); }
 }
-async function liveFollow(url) {
+async function liveFollow(url, resumeSince) {
   const call = method => fetch(url, { method, cache: 'no-store' }).then(r => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)));
   const wait = ms => new Promise(r => setTimeout(r, ms));
   const clock = ts => new Date(ts * 1000).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
   const setFresh = text => { const f = $('#club-box .freshness'); if (f) f.textContent = text; };
-  let res;
-  try { res = await call('POST'); } catch { return; }
-  const busy = res.run && res.run.status !== 'completed';
-  if (!res.started && !busy) {
-    if (res.run?.conclusion === 'success') setFresh(`bij EA gekeken ${clock(res.run.updatedAt)}`);
-    // Net al gekeken (door deze of een andere bezoeker), maar misschien staat er intussen nieuwere data op de site.
-    await liveCheckSite();
-    return;
+  const done = () => liveSave({ checkedAt: Date.now(), followSince: null, followAt: 0 });
+  let since = resumeSince;
+  if (!since) {
+    let res;
+    try { res = await call('POST'); } catch { return; }
+    const busy = res.run && res.run.status !== 'completed';
+    if (!res.started && !busy) {
+      if (res.run?.conclusion === 'success') setFresh(`bij EA gekeken ${clock(res.run.updatedAt)}`);
+      done();
+      // Net al gekeken (door deze of een andere bezoeker), maar misschien staat er intussen nieuwere data op de site.
+      await liveCheckSite();
+      return;
+    }
+    // De run die we volgen: de net gestarte (verschijnt pas na een paar seconden) of de run die al liep.
+    since = res.started ? res.at - 5 : res.run.createdAt;
   }
-  // De run die we volgen: de net gestarte (verschijnt pas na een paar seconden) of de run die al liep.
-  const since = res.started ? res.at - 5 : res.run.createdAt;
-  liveNoteSet('Nieuwe wedstrijden worden bij EA opgehaald, dat duurt ongeveer twee minuten.');
+  liveSave({ followSince: since, followAt: Date.now() });
+  liveBusy(true);
   for (let i = 0; i < 24; i++) { // hooguit zes minuten volgen
     await wait(15000);
     const run = (await call('GET').catch(() => ({}))).run;
@@ -563,19 +584,17 @@ async function liveFollow(url) {
     // De run publiceert de site zelf; GitHub Pages kan een paar seconden achterlopen.
     for (let j = 0; j < 4; j++) {
       const { published, added } = await liveCheckSite();
-      if (added > 0) return;
+      if (added > 0) return done();
       if (published) break; // nieuwe publicatie zonder nieuwe wedstrijden
       await wait(5000);
     }
-    liveNoteClear();
-    return;
+    return done();
   }
-  liveNoteClear();
+  done();
 }
 // Terug naar een tabblad dat open bleef (een telefoon herlaadt dan niet) of terug via de vorige-knop: opnieuw kijken,
-// hooguit eens per twee minuten. De worker start zelf hooguit eens per drie minuten een run.
-const LIVE_AGAIN_MS = 120000;
-function liveAgain() { if (document.visibilityState === 'visible' && Date.now() - liveLast > LIVE_AGAIN_MS) liveTrigger(); }
+// met dezelfde grens van vijf minuten (liveTrigger). De worker start zelf hooguit eens per drie minuten een run.
+function liveAgain() { if (document.visibilityState === 'visible') liveTrigger(); }
 document.addEventListener('visibilitychange', liveAgain);
 window.addEventListener('pageshow', e => { if (e.persisted) liveAgain(); });
 
@@ -588,7 +607,7 @@ function syncMenu() {
   for (const b of document.querySelectorAll('#app-menu [data-mode]')) { const on = b.dataset.mode === mode; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); }
   for (const b of document.querySelectorAll('#app-menu [data-theme-pick]')) { const on = (b.dataset.themePick === 'light') === light; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); }
   $('#menu-btn')?.classList.toggle('has-mode', mode !== 'all');
-  const f = $('#am-fresh'); if (f) f.textContent = DATA?.freshness ? `Data: ${DATA.freshness}.` : '';
+  const f = $('#am-fresh'); if (f) f.textContent = DATA?.freshness ? `Data: ${DATA.freshness}.${document.documentElement.classList.contains('live-checking') ? ' Nu bij EA aan het kijken.' : ''}` : '';
 }
 // Zoeken: tegenstanders (wedstrijden), spelers (pro-naam of accountnaam) en datums (sessies), hooguit twaalf treffers.
 function menuSearch(q) {

@@ -124,8 +124,11 @@ openbare site mag. Wat er gebeurt:
 1. De pagina toont meteen de opgeslagen data en vraagt de worker op de achtergrond om een run.
 2. De worker start `collect.yml`, tenzij er al een loopt of de laatste minder dan 3 minuten geleden begon. Veel
    bezoekers tegelijk geven dus hooguit één run per 3 minuten.
-3. Zolang de run loopt, staat bovenaan "Nieuwe wedstrijden worden bij EA opgehaald". Een run plus publicatie duurt
-   ongeveer anderhalve minuut.
+3. Zolang de run loopt, pulseert er zacht een bolletje bij de versheid in het menu en op de menuknop (geen melding
+   meer, sinds 9 november 2026). Een run plus publicatie duurt ongeveer anderhalve minuut.
+   Niet steeds opnieuw: is de data op de pagina jonger dan vijf minuten, of heeft deze browser in de laatste vijf
+   minuten al gekeken (op welke pagina ook, onthouden in de browser), dan vraagt de site niets. Loopt er nog een run
+   die een andere pagina volgde, dan volgt de nieuwe pagina die stil verder in plaats van een nieuwe te vragen.
 4. Is er iets nieuws, dan verschijnt "Eén nieuwe wedstrijd binnen. *Verversen*". Anders verdwijnt de melding en zegt
    het menu "bij EA gekeken 23:14".
 5. Startte de worker geen run (net al gekeken), dan kijkt de pagina toch of er op de site nieuwere data staat dan op
