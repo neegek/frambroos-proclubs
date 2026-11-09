@@ -312,6 +312,12 @@ Daarnaast *Positiespel en keuzes* en *Al sterk*.
   quote**: komt dezelfde speler met dezelfde maat terug, dan de volgende variant. Karakter (achtergrond, stem,
   eigenschappen, woorden, beelden) en de uitspraken per maat staan in `public/personas.js`, de verzamelplek om verder
   op te bouwen. Spelers zonder achtergrond krijgen een neutrale cruijffiaanse zin.
+  **Vorm van een quote** (Jamal, 9 november 2026): hooguit **twee korte zinnen**, de tweede is de punchline. Geen derde
+  zin die de grap uitlegt. Uitgangspunt per speler zijn de uitspraken die Jamal zelf aanleverde; het karakter kleurt de
+  zin, maar één kenmerk mag niet elke keer terugkomen. Bij Petra Selie draait het om trash talk, droge humor, de
+  katten en de broers; dat Petra een vrouw is of ongesteld is een **zeldzaam extraatje**: de maandbank hooguit eens in
+  de twee maanden (de eerste gewonnen avond van een maand, en minstens 60 dagen na de vorige), en in de gewone
+  uitspraken hooguit één op de vier.
   Wie de beste was staat niet in de tekst: dat laat de top drie als kaarten zien (§9a).
   Anekdotes, in volgorde van kracht (de sterkste wint; bij gelijke kracht de meest recente):
   hattrick of meer in één pot; iemand scoorde in elke wedstrijd; iemand was elke wedstrijd man of the match;

@@ -44,9 +44,11 @@ function sessionQuote(sess) {
       const stat = standoutStat(rowsOf(x.matches, best.n), rowsOf(DATA.matches.filter(m => m.session !== x.id), best.n));
       const k = `${best.n}|${stat.key}`, i = used.get(k) || 0; used.set(k, i + 1);
       q = { text: quoteFor(best.n, stat, i), who: proName(best.n), stat: stat.key };
-      // Eén keer per maand een uitspraak uit de maandbank (personas.js), bij de eerste avond van die maand dat die speler wint.
-      const month = `${best.n}|${new Date(x.matches[0].ts * 1000).toISOString().slice(0, 7)}`, bank = PERSONAS[best.n]?.maand;
-      if (bank?.length && !used.has(month)) { used.set(month, 1); q.text = bank[(used.get(`${best.n}|maand`) || 0) % bank.length]; used.set(`${best.n}|maand`, (used.get(`${best.n}|maand`) || 0) + 1); }
+      // Zeldzaam extraatje uit de maandbank (personas.js): de eerste gewonnen avond van een maand, en minstens 60 dagen
+      // na de vorige keer, dus hooguit eens in de twee maanden (coach-logica §9, Sessie).
+      const ts = x.matches[0].ts, month = `${best.n}|${new Date(ts * 1000).toISOString().slice(0, 7)}`, bank = PERSONAS[best.n]?.maand;
+      const lastKey = `${best.n}|maand-ts`, longAgo = !used.has(lastKey) || ts - used.get(lastKey) >= 60 * 86400;
+      if (bank?.length && !used.has(month) && longAgo) { used.set(month, 1); used.set(lastKey, ts); q.text = bank[(used.get(`${best.n}|maand`) || 0) % bank.length]; used.set(`${best.n}|maand`, (used.get(`${best.n}|maand`) || 0) + 1); }
     }
     QUOTES.set(x.id, q);
   }

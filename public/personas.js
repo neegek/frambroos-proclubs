@@ -15,7 +15,8 @@
 //                 Rollen: spits, aanvallend, verdedigend. Een regel geldt als de genoemde speler niet meedoet (en het
 //                 team hooguit maxMensen mensen telt). Jamal beschrijft de rolverdeling; hier bijwerken als die verandert.
 //   maand         (optioneel) uitspraken voor één avond per maand: de eerste avond van een maand dat deze speler wint.
-//   stats         cruijffiaanse uitspraken per statistiek van de avond (zie quoteFor), twee of meer per maat. De
+//   stats         cruijffiaanse uitspraken per statistiek van de avond (zie quoteFor), twee of meer per maat. Hooguit
+//                 twee korte zinnen, de tweede is de punchline (Jamal, 9 november 2026). De
 //                 statistiek inspireert de zin, maar er staan geen letterlijke getallen of percentages in (sinds
 //                 1 november 2026). Plekhouders blijven mogelijk ({w}, {g2}), maar liever niet gebruiken.
 // Maten: goals, assists, mom (man of the match), passes (percentage gelukt), duels (gewonnen tackles), balwinst,
@@ -44,14 +45,14 @@ const PERSONAS = {
       ],
     },
     stats: {
-      goals: ['Mai nēmu izu Terī. Mi amu Japanīzu. Mi raiku gōru!', 'Ōh iē! Gōru! Sankyū bōru, sankyū gōru, sankyū evuribadi!'],
-      assists: ['Mi raiku pasu. Yū raiku gōru. Wī ā furendo!', 'Mi nō gōru, nō purobrem. Mai furendo gōru, mi happī.'],
-      mom: ['Man obu za matchi? Mī? Sorī fō mai Ingurisshu. Sankyū beri matchi!', 'Mi amu Japanīzu. Mi amu man obu za matchi. Mi bau. Arigatō!'],
-      passes: ['Mi raiku tsū pasu. Evuribadi izu mai furendo!', 'Pasu, pasu, pasu. Bōru izu happī, mi amu happī.'],
-      duels: ['Mi rabu bōru. Bōru kamu bakku tsū mī. Nebā gibu appu!', 'Bigu man, mi amu sumōru. Bātto mi amu Japanīzu. Nebā gibu appu!'],
-      balwinst: ['Bōru, kamu hōmu! Okaeri! Mi mīsu yū.', 'Zei habu bōru. Mi sei: sorī, mai bōru. Sankyū!'],
-      schoten: ['Shūto, shūto, shūto. Nō gōru. Nebā gibu appu! Tomorō, gōru!', 'Gōru izu shai. Mi sei harō. Gōru sei nō. Okē!'],
-      rating: ['Mi don andāsutando nambā. Bātto mi amu happī. Ōh iē!', 'Mai nēmu izu Terī Yaki. Mi purei futtobōru. Sankyū evuribadi!'],
+      goals: ['Mai nēmu izu Terī. Mi raiku gōru!', 'Ōh iē, gōru! Sankyū evuribadi!'],
+      assists: ['Mi pasu, yū gōru. Wī ā furendo!', 'Mi nō gōru, nō purobrem. Mai furendo gōru, mi happī.'],
+      mom: ['Man obu za matchi? Sorī fō mai Ingurisshu.', 'Mi amu man obu za matchi. Mi bau, arigatō!'],
+      passes: ['Pasu, pasu, pasu. Evuribadi izu mai furendo!', 'Bōru izu happī. Mi amu happī.'],
+      duels: ['Bigu man, mi amu sumōru. Bātto nebā gibu appu!', 'Mi rabu bōru. Bōru kamu bakku tsū mī.'],
+      balwinst: ['Bōru, kamu hōmu! Okaeri!', 'Zei habu bōru. Sorī, mai bōru, sankyū!'],
+      schoten: ['Shūto, shūto, shūto. Tomorō gōru!', 'Gōru izu shai. Mi sei harō, gōru sei nō.'],
+      rating: ['Mi don andāsutando nambā. Bātto mi amu happī!', 'Mai nēmu izu Terī Yaki. Sankyū evuribadi!'],
     },
   },
   'Highnis 023': {
@@ -64,7 +65,8 @@ const PERSONAS = {
       + 'inshallah, subhanallah. Af en toe glipt er een oude uitdrukking van het kamp of uit het witwassen uit, meteen gevolgd '
       + 'door een correctie (astaghfirullah, "dat zeg ik niet meer"). Nooit spottend over het geloof; de grap zit in de slip.',
     eigenschappen: ['bekeerd en oprecht gelovig', 'citeert de Koran bij alles', 'oude woorden glippen er soms uit, en dat wil Mo niet',
-      'denkt nog in boekhouding en bewijs', 'rustig en dankbaar', 'trots op het kamp, maar niet op wat er gebeurde'],
+      'denkt nog in boekhouding en bewijs', 'rustig en dankbaar', 'trots op het kamp, maar niet op wat er gebeurde',
+      'heet hoofd: snel op de pikkie getrapt', 'eenmaal in de sas dekt Mo iedereen af en maakt er wat leuks van'],
     woorden: ['broer', 'alhamdulillah', 'inshallah', 'subhanallah', 'astaghfirullah', 'wallah', 'het kamp', 'de briefjes'],
     beelden: ['de Koran', 'het kamp', 'witwassen', 'de cel', 'boekhouden', 'de recherche'],
     bio: {
@@ -77,14 +79,14 @@ const PERSONAS = {
       ],
     },
     stats: {
-      goals: ['Met de moeilijkheid komt de verlichting, soera 94. Vanavond kwam de verlichting via mijn rechter.', 'Vroeger telde ik briefjes, nu tel ik ballen. Alhamdulillah, deze zijn schoon.', 'Die ging erin als een tas met… nee. Astaghfirullah. Die ging er gewoon mooi in.'],
-      assists: ['Wie goed doet, krijgt het tienvoudig terug, soera 6. Eén pass, één goal, dat is al winst.', 'Ik regel het, een ander zet zijn naam eronder. Dat kende ik al van vroeger, maar nu is het halal.', 'Ik geef en vraag niks terug. Op het kamp noemden we dat anders, maar dit is beter.'],
-      mom: ['Man of the match. Eerste keer dat ik in de krant kom zonder advocaat. Alhamdulillah.', 'Wees niet trots, zegt soera 31. Dus ik zeg alleen: dank aan het team, en aan Hem.', 'Ze noemen mijn naam. Vroeger stond ik dan al in de bus naar het kamp. Nu blijf ik gewoon staan.'],
-      passes: ['Alles kwam aan. Een sluitende boekhouding, en deze keer echt sluitend.', 'Spreek het goede woord, soera 2. Een goede pass is ook een goed woord.', 'Elke pass moet ergens landen, net als geld vroeg… nee. Net als een gebed. Astaghfirullah.'],
-      duels: ['Ik weet hoe het voelt als ze je komen halen. Nu haal ik de bal, en verder niks, wallah.', 'Wees geduldig, Allah is met de geduldigen, soera 2. Geduld, en dan de tackle.', 'Op het kamp pakte je wat je pakken kon. Astaghfirullah. Vanavond alleen de bal.'],
-      balwinst: ['Wat van ons is, komt terug, inshallah.', 'Hun bal, onze bal. Vroeger heette dat anders. Nu heet het gewoon voetbal.', 'Alles keert terug naar waar het hoort, soera 2. De bal ook.'],
-      schoten: ['Veel geschoten, weinig binnen. Sommige dingen kun je niet witwassen, broer.', 'Allah belast niemand boven zijn vermogen, soera 2. Maar die keeper kwam dichtbij.', 'Ik bleef schieten. Geduld is de helft van het geloof. De andere helft is mikken.'],
-      rating: ['Netjes, en alles op de bon. Zo hoort het nu.', 'Geen gedoe, geen vragen. Gewoon voetballen, broer. Alhamdulillah.', 'Een gewone avond is ook een gave, soera 14: wie dankbaar is, krijgt meer.'],
+      goals: ['Met de moeilijkheid komt de verlichting, soera 94. Vanavond via mijn rechter.', 'Vroeger telde ik briefjes. Nu tel ik goals, en die zijn schoon.', 'Die ging erin als een tas met… Astaghfirullah, gewoon mooi erin.'],
+      assists: ['Ik regel het, een ander zet zijn naam eronder. Nu is dat halal.', 'Wie goed doet, krijgt het tienvoudig terug, soera 6. Ik krijg een high five.'],
+      mom: ['Man of the match. Eerste keer in de krant zonder advocaat.', 'Wees niet trots, zegt soera 31. Maar kijk die naam daar staan, broer.'],
+      passes: ['Een sluitende boekhouding. Deze keer echt sluitend.', 'Elke pass landde waar het moest. Net als vroeger het gel… astaghfirullah.'],
+      duels: ['Eerst trapten ze op mijn pikkie. Daarna dekte ik iedereen af.', 'Wees geduldig, zegt soera 2. Na de derde trap was het geduld op.', 'Op het kamp pakte je wat je pakken kon. Vanavond alleen de bal, wallah.'],
+      balwinst: ['Eenmaal in mijn sas sta ik overal. Alhamdulillah, iedereen gedekt.', 'Hun bal, onze bal. Vroeger heette dat anders.'],
+      schoten: ['Veel geschoten, weinig binnen. Sommige dingen kun je niet witwassen.', 'Allah belast niemand boven zijn vermogen. Die keeper kwam dichtbij.'],
+      rating: ['Eerst even boos, toen lekker in mijn sas. Dan maak ik er wat leuks van.', 'Alles op de bon vanavond. Zo hoort het nu.'],
     },
   },
   'GoodTimes 023': {
@@ -93,9 +95,9 @@ const PERSONAS = {
     achtergrond: 'Gewone Indonesische man.',
     stem: 'Kalm en vriendelijk, vergelijkt voetbal met het dagelijks leven in Indonesië: rijst, sambal, familie, '
       + 'het verkeer in Jakarta. Af en toe een woord Indonesisch (pelan-pelan = rustig aan).',
-    eigenschappen: ['geduldig', 'familieman', 'nuchter, laat zich niet opjagen'],
+    eigenschappen: ['geduldig', 'familieman', 'nuchter, laat zich niet opjagen', 'maakt graag de eigen nasi, en pakt ook graag de eigen nasi'],
     woorden: ['pelan-pelan', 'santai', 'enak'],
-    beelden: ['rijst koken', 'sambal', 'het verkeer in Jakarta', 'zijn moeder'],
+    beelden: ['rijst koken', 'de eigen nasi', 'sambal', 'het verkeer in Jakarta', 'moeder'],
     bio: {
       titel: 'De rustigste man van Jakarta',
       feiten: [['Afkomst', 'Indonesië'], ['Karakter', 'Geduldig, nuchter'], ['Motto', 'Pelan-pelan'], ['Thuis', 'Rijst, sambal en moeder']],
@@ -105,14 +107,14 @@ const PERSONAS = {
       ],
     },
     stats: {
-      goals: ['Mijn moeder zegt: niet te veel sambal. Ik luisterde niet.', 'Goals zijn als rijst: één korrel tegelijk, pelan-pelan.'],
-      assists: ['Ik kook, een ander eet. Zo hoort het in de familie.', 'Goed geven is beter dan goed nemen. Enak.'],
-      mom: ['Man of the match. Morgen gewoon weer rijst koken.', 'Ik krijg de prijs, maar de hele familie heeft gekookt.'],
-      passes: ['Zonder haast, zoals een scooter in Jakarta: je komt er altijd.', 'Kort, kort, kort. Lange passes zijn voor mensen met haast.'],
-      duels: ['In de file leer je wie eerst gaat.', 'Rustig blijven en dan pakken. Santai.'],
-      balwinst: ['Wat je uitleent, komt bij ons altijd terug.', 'Geduld. De bal komt vanzelf weer langs, net als de bus.'],
-      schoten: ['Rijst die niet gaar is, kook je gewoon langer.', 'Het doel stond stil, ik niet. Volgende keer.'],
-      rating: ['Niet te pittig, niet te flauw. Enak.', 'Een gewone avond is ook een goede avond.'],
+      goals: ['Mijn moeder zegt: niet te veel sambal. Ik luisterde niet.', 'Ik maak mijn eigen nasi. Mijn eigen goals ook.'],
+      assists: ['Ik kook, een ander eet. Zo gaat het in de familie.', 'Deze keer mocht een ander van mijn nasi. Eén keer.'],
+      mom: ['Man of the match. Morgen gewoon weer nasi.', 'Ik pak graag mijn eigen nasi. Vanavond ook de prijs.'],
+      passes: ['Zonder haast, als een scooter in Jakarta. Je komt er altijd.', 'Kort, kort, kort. Lange passes zijn voor mensen met haast.'],
+      duels: ['In de file leer je wie eerst gaat. Ik dus.', 'Rustig blijven en dan pakken. Santai.'],
+      balwinst: ['Je pakt toch ook niet zomaar iemands nasi? Die bal was van mij.', 'Geduld. De bal komt vanzelf langs, net als de bus.'],
+      schoten: ['Rijst die niet gaar is, kook je langer. Volgende keer gaar.', 'Het doel stond stil, ik niet. Pelan-pelan.'],
+      rating: ['Niet te pittig, niet te flauw. Enak.', 'Een gewone avond is ook een goede avond. Met nasi.'],
     },
   },
   'Xero 023': {
@@ -133,13 +135,13 @@ const PERSONAS = {
     },
     stats: {
       goals: ['Mijn broer heeft er meer. Maar deze zijn van mij.', 'Ik dacht: wat zou mijn broer doen? Toen deed ik het zelf.'],
-      assists: ['Ik hoef niet te scoren om er te zijn.', 'Mijn broer zoekt het doel. Ik zoek de ander. Ook een kunst.'],
-      mom: ['Man of the match. Ik heb het mijn broer nog niet verteld. Misschien morgen.', 'Ze noemden mijn naam. Niet die van mijn broer. Gek gevoel.'],
-      passes: ['Ik twijfelde minder, dus de bal ook.', 'Simpel spelen. Mijn broer kan het, en ik blijkbaar ook.'],
-      duels: ['Tegen mijn broer verloor ik ze altijd. Vanavond niet.', 'Eerst twijfel je, dan stap je erin. Ik stap er nu eerder in.'],
+      assists: ['Ik hoef niet te scoren om er te zijn.', 'Mijn broer zoekt het doel. Ik zoek de ander.'],
+      mom: ['Man of the match. Mijn broer hoort het morgen wel.', 'Ze noemden mijn naam, niet die van mijn broer. Went wel.'],
+      passes: ['Ik twijfelde minder, dus de bal ook.', 'Simpel spelen. Mijn broer kan het, ik blijkbaar ook.'],
+      duels: ['Tegen mijn broer verloor ik ze altijd. Vanavond niet.', 'Eerst twijfelen, dan erin. Ik stap er nu eerder in.'],
       balwinst: ['Ik pak wat ik vroeger liet liggen.', 'De bal kwam terug. Ik ook, eigenlijk.'],
       schoten: ['Mijn broer zou zeggen: blijf schieten. Deze keer heeft mijn broer gelijk.', 'Raak of niet, ik durfde. Dat is nieuw.'],
-      rating: ['Niet het cijfer van mijn broer. Het mijne.', 'Een gewone avond. Vroeger was dat voor mij al heel wat.'],
+      rating: ['Niet het cijfer van mijn broer. Het mijne.', 'Een gewone avond. Vroeger was dat al heel wat.'],
     },
   },
   Konijnenlover22: {
@@ -148,25 +150,28 @@ const PERSONAS = {
     achtergrond: 'Tweelingzus van Peter en jongere zus van Beter Selie; even goed als Peter maar nooit zo erkend, omdat ze een '
       + 'vrouw is. Bij Frambroos om te laten zien wat ze waard is. Lesbisch, met een zwak voor Yan en Morena, al twijfelt ze '
       + 'als Bennie zijn haar los draagt. Eén keer per maand ongesteld (maandbank).',
-    stem: 'Recht voor zijn raap, droog en een tikje grof; trash talk met een knipoog. Wil zich bewijzen tegenover haar '
-      + 'broers en iedereen die haar onderschatte. Korte zinnen, punchlines, af en toe een kattengeluid.',
-    eigenschappen: ['onderschat, nooit minder getalenteerd', 'tweelingzus van Peter (weer op de middelbare school)',
+    stem: 'Recht voor zijn raap, droog en een tikje grof; trash talk met een knipoog. Uitgangspunt zijn Jamals eigen '
+      + 'uitspraken (dubbel B, rust op de lijn, miauw miauw, buitenspel met kansen). Hooguit twee zinnen, de tweede is '
+      + 'de punchline. Vrouw-zijn of ongesteld is een zeldzaam extraatje, niet het onderwerp.',
+    eigenschappen: ['trash talk met een knipoog, droog en een tikje grof', 'wordt stiekem boos als de rest van het team het opgeeft',
+      'onderschat, nooit minder getalenteerd', 'tweelingzus van Peter (weer op de middelbare school)',
       'zus van Beter (stratenmaker op zee)', 'single, maar niet zonder opties', 'zwak voor Yan en Morena', 'twijfelt bij Bennie met zijn haar los',
-      'grote mond, nog groter hart', 'één keer per maand ongesteld'],
+      'grote mond, nog groter hart', 'zelden (extraatje, niet de kern): vrouw-zijn en ongesteld'],
     woorden: ['miauw miauw', 'dubbel B', 'rust op de lijn', 'schat'],
     beelden: ['Peter en Beter', 'een kat met klauwen', 'buitenspel', 'Bennie met zijn haar los'],
     stats: {
-      goals: ['Liever 100x buitenspel met 10 kansen, dan 0x buitenspel met 0 kansen.', 'Peter scoort op het schoolplein. Ik scoor hier. Zoek de verschillen.', 'Ze zeiden: goed voor een meisje. Ik ben gewoon goed.'],
-      assists: ['The only way is dubbel B.', 'Ik leg hem klaar, Bennie maakt hem af. Met dat haar mag hij alles.', 'Een assist van een vrouw telt ook gewoon voor één. Niet schrikken.'],
-      mom: ['Man of the match? Woman of the match, schat.', 'Peter krijgt een sticker op school. Ik krijg dit.', 'Beter legt stenen op zee. Ik leg ze in het doel.'],
-      passes: ['Rust op de lijn speelt fijn.', 'Kort, zuiver, en niemand die vraagt of ik dat wel kan.'],
-      duels: ['Miauw miauw!', 'Ik wil niet kwaad spreken over je vrouw maar ik vind het een kankerhoer.', 'Ze dachten dat ik ging huilen. Ik ging erin.'],
-      balwinst: ['Miauw miauw! Die bal is van mij.', 'Afpakken en niet teruggeven. Zo ging het thuis ook met Peter.'],
+      goals: ['Liever 100x buitenspel met 10 kansen, dan 0x buitenspel met 0 kansen.', 'Peter scoort op het schoolplein. Ik scoor hier.', 'Miauw miauw. Deze kat heeft klauwen.'],
+      assists: ['The only way is dubbel B.', 'Ik leg hem klaar. Afmaken is jullie werk, schat.', 'Jullie hadden het al opgegeven. Ik niet, dus alsjeblieft.'],
+      mom: ['Man of the match? Woman of the match, schat.', 'Peter krijgt een sticker op school. Ik krijg dit.', 'Beter legt stenen op zee. Ik leg ze in het doel.', 'Hoofden omlaag bij de rest. Dan doe ik het wel.'],
+      passes: ['Rust op de lijn speelt fijn.', 'Kort en zuiver. Probeer het ook eens, jongens.'],
+      duels: ['Miauw miauw!', 'Ik wil niet kwaad spreken over je vrouw maar ik vind het een kankerhoer.', 'Niemand die nog wilde? Dan ga ik er zelf wel in.'],
+      balwinst: ['Miauw miauw! Die bal is van mij.', 'Afpakken en niet teruggeven. Zo ging het thuis met Peter ook.'],
       schoten: ['Liever 100x buitenspel met 10 kansen, dan 0x buitenspel met 0 kansen.', 'Wheatley heeft me aangerand in de spelerstunnel. Daarom stond het vizier scheef.'],
-      rating: ['Rust op de lijn speelt fijn.', 'Onderschat? Prima. Dan schrik je straks harder.', 'Bennie had zijn haar los. Ik kon me even niet concentreren.'],
+      rating: ['Rust op de lijn speelt fijn.', 'Onderschat? Prima. Dan schrik je straks harder.', 'Bennie had het haar los. Ik kon me even niet concentreren.'],
     },
-    // Eén keer per maand, bij de eerste avond van die maand dat Petra wint (sessie.js, sessionQuote).
-    maand: ['Ik bloed als een rund en ik ben nog steeds beter dan jullie. Huilen jullie maar.', 'Kramp in mijn buik, bloed in mijn broek en toch man of the match. Wie is hier nou het zwakke geslacht?', 'Ongesteld, chagrijnig en nergens zin in. Behalve in jullie kapotmaken.', 'Ik zat met een tampon zo dik als een duim in het veld. Jullie hadden alleen maar een excuus.'],
+    // Een zeldzaam extraatje (Jamal, 9 november 2026): bij de eerste gewonnen avond van een maand, en minstens 60 dagen
+    // na de vorige keer (pack.js, sessionQuote). Dat Petra een vrouw is, is niet de kern van de grap.
+    maand: ['Ik bloed als een rund en ben nog steeds beter dan jullie. Huilen jullie maar.', 'Kramp in mijn buik en toch de beste. Wie is hier het zwakke geslacht?', 'Ongesteld en nergens zin in. Behalve in jullie kapotmaken.', 'Tampon zo dik als een duim en toch beter. Jullie hadden alleen een excuus.'],
     bio: {
       titel: 'De onderschatte ster van Frambroos',
       feiten: [['Familie', 'Tweelingzus van Peter Selie, jongere zus van Beter Selie'], ['Club', 'Frambroos'], ['Positie', 'Voetbalster'], ['Relatiestatus', 'Single (maar niet zonder opties)']],
@@ -189,6 +194,7 @@ const PERSONAS = {
       + 'controle) en als een golfer (ademhalen, de swing, de green, de hole). De teleportatie wordt nuchter gebracht, '
       + 'alsof het een gewone afwerking is. Geen cijfers of percentages.',
     eigenschappen: ['politieagent', 'golft om het hoofd leeg te maken', 'ijskoud voor het doel', 'houdt van regels en orde',
+      'scoort alleen als er een goede sfeer in de groep is; anders gaat alles mis of tegen de keeper',
       'kan de bal teleporteren, alleen één op één met de keeper', 'pas op een centimeter van de keeper', 'doet alsof dat heel normaal is'],
     woorden: ['constateren', 'aanhouden', 'proces-verbaal', 'onder controle', 'ademhalen', 'de swing', 'fore', 'hole in one'],
     beelden: ['de surveillancewagen', 'de bon', 'het bureau', 'de golfbaan', 'de green', 'de put', 'de stilte voor de swing'],
@@ -202,14 +208,14 @@ const PERSONAS = {
       ],
     },
     stats: {
-      goals: ['Ik constateer een doelpunt. De keeper heeft niks gezien, en dat klopt ook.', 'Eerst ademhalen, dan de swing. Op de golfbaan heet dat een hole in one.', 'Eén op één, een centimeter, weg. Waar de bal heen ging? In het net. Meer hoeft niemand te weten.'],
-      assists: ['Ik heb de situatie onder controle gebracht. Een collega mocht de aanhouding doen.', 'Ook een agent werkt in koppels. De ander zet de handtekening.', 'Een goede pass is als een goede put: rustig, en recht op de hole.'],
-      mom: ['Man of the match. Ik doe gewoon mijn dienst. De rest staat in het proces-verbaal.', 'Rustig blijven, dat is alles. Op straat en op de green.', 'Ze vragen hoe ik dat doe. Ik zeg: ademhalen. Over de teleportatie zeg ik niks.'],
-      passes: ['Alles netjes afgeleverd. Geen bon nodig.', 'Op de golfbaan sla je ook niet hard als het zacht kan.', 'De bal op de juiste plek. Orde is ook voetbal.'],
-      duels: ['Aangehouden. De bal had geen papieren bij zich.', 'Ik vraag het één keer vriendelijk. Daarna neem ik de bal mee.', 'Wie de bal heeft, moet zich kunnen legitimeren.'],
-      balwinst: ['De bal is in beslag genomen. Die gaat terug naar de rechtmatige eigenaar: ons.', 'Ik zie alles vanuit de surveillancewagen. Ook waar de bal heen gaat.', 'Teruggepakt. Een agent laat niks liggen.'],
-      schoten: ['Veel geschoten, weinig binnen. Ook op de golfbaan ligt er weleens een bal in het water.', 'Als de keeper niet dichtbij komt, werkt de truc niet. Dan moet je gewoon schieten.', 'De keeper bleef te ver weg. Een centimeter, meer vraag ik niet.'],
-      rating: ['Een rustige dienst. Geen incidenten, alles onder controle.', 'Niet elke ronde is een birdie. Par is ook goed.', 'Rustig hoofd, rustige voeten. Zo speel je een avond uit.'],
+      goals: ['Ik constateer een doelpunt. De keeper heeft niks gezien, en dat klopt.', 'Goede sfeer in de groep, rustig hoofd. Dan verdwijnt de bal vanzelf.', 'Eén op één, een centimeter, weg. Meer hoeft niemand te weten.'],
+      assists: ['Situatie onder controle gebracht. Een collega mocht de aanhouding doen.', 'Ook een agent werkt in koppels. De ander zet de handtekening.'],
+      mom: ['Man of the match. Ik doe gewoon mijn dienst.', 'Ze vragen hoe ik dat doe. Ademhalen, en over de teleportatie zeg ik niks.'],
+      passes: ['Alles netjes afgeleverd. Geen bon nodig.', 'Op de golfbaan sla je ook niet hard als het zacht kan.'],
+      duels: ['Aangehouden. De bal had geen papieren bij zich.', 'Ik vraag het één keer vriendelijk. Daarna neem ik de bal mee.'],
+      balwinst: ['De bal is in beslag genomen. Die gaat terug naar ons.', 'Teruggepakt. Een agent laat niks liggen.'],
+      schoten: ['Slechte sfeer, slechte swing. Alles op de keeper.', 'Zonder goede vibe werkt de truc niet. Dan raak je alleen de keeper.'],
+      rating: ['Rustige dienst, geen incidenten. Alles onder controle.', 'Niet elke ronde is een birdie. Par is ook goed.'],
     },
   },
 };
