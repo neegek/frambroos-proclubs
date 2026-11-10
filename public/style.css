@@ -842,7 +842,7 @@ details.build-form-card[open] > summary { margin-bottom: 12px; }
 .radar-wrap { display: grid; grid-template-columns: minmax(0, 560px) minmax(0, 1fr); gap: 12px 24px; align-items: center; }
 .radar-svg { width: 100%; height: auto; display: block; overflow: visible; font: 12px system-ui, -apple-system, "Segoe UI", sans-serif; }
 .radar-ring { fill: none; stroke: var(--grid); stroke-width: 1; }
-.radar-ring.radar-normal { stroke: var(--ink-2); stroke-dasharray: 4 4; stroke-opacity: 0.6; } /* 50: een gewone avond */
+.radar-normal { fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-dasharray: 5 4; stroke-opacity: 0.75; pointer-events: none; } /* het normaal van wie is uitgelicht */
 .radar-norm { fill: var(--muted); font: 500 11.5px var(--num-font); }
 .radar-axis { stroke: var(--grid); stroke-width: 1; }
 .radar-label { fill: var(--ink); font-size: 15px; font-weight: 650; }

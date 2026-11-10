@@ -162,15 +162,15 @@ function axisCards(ms, prow) {
       rows: prow.filter(r => r.rH !== null).sort((a, b) => b.rH - a.rH || b.n - a.n).map(r => ({ name: r.name, main: f1(r.rH), sub: wed(r.n) })),
       team: { label: 'Team', main: rated.length ? f1(avg(rated)) : '–', sub: 'gemiddelde van alle ratings' } },
     count('a-goals', 'Goals', 'Doelpunten deze avond (de as Scoren). Bij het team alle goals van de uitslag, ook die van AI.', r => s(r, p => p.goals), () => ms.reduce((a, m) => a + m.goals, 0)),
-    ratio('a-conv', 'Conversie', 'Goals per schot deze avond (de as Scoren kijkt naar goals én naar hoe vaak een schot raak was). Klein goals / schoten.', r => s(r, p => p.goals), r => s(r, p => p.shots), 3, r => `${s(r, p => p.goals)} / ${s(r, p => p.shots)}`),
+    ratio('a-conv', 'Conversie', 'Goals per schot deze avond. Klein goals / schoten.', r => s(r, p => p.goals), r => s(r, p => p.shots), 3, r => `${s(r, p => p.goals)} / ${s(r, p => p.shots)}`),
     count('a-assists', 'Assists', 'De laatste pass voor een doelpunt (de as Creëren).', r => s(r, p => p.assists)),
-    count('a-second', 'Tweede assists', 'De pass vóór de assist (telt voor 70% mee in Creëren).', r => e(r, 'second_assists')),
-    count('a-through', 'Steekpasses', 'Passes in de ruimte achter de verdediging (tellen voor 35% mee in Creëren).', r => e(r, 'through_balls')),
+    count('a-second', 'Tweede assists', 'De pass vóór de assist (telt mee in Creëren).', r => e(r, 'second_assists')),
+    count('a-through', 'Steekpasses', 'Passes in de ruimte achter de verdediging.', r => e(r, 'through_balls')),
     ratio('a-pass', 'Passes', 'Geslaagde passes van alle passes (de as Passen). Klein gelukt / pogingen.', r => s(r, p => p.passesMade), r => s(r, p => p.passAttempts), 10, r => `${s(r, p => p.passesMade)} / ${s(r, p => p.passAttempts)}`),
     { ...count('a-dribbles', 'Dribbels', 'Geslaagde dribbels (de as Dribbelen), met klein hoeveel tegenstanders daarbij voorbij werden gespeeld.', r => e(r, 'dribbles_completed')),
       rows: prow.map(r => { const rows = rowsOf(r.name); return { name: r.name, v: e(rows, 'dribbles_completed'), b: e(rows, 'players_beaten'), sub: wed(rows.length) }; }).sort((a, b) => b.v - a.v || b.b - a.b).map(x => ({ name: x.name, main: String(x.v), small: `${x.b} uitgespeeld`, sub: x.sub })),
       team: { label: 'Team', main: String(e(all, 'dribbles_completed')), small: `${e(all, 'players_beaten')} uitgespeeld`, sub: `samen in ${wed(ms.length)}` } },
-    count('a-tackles', 'Tackles gewonnen', 'Gewonnen tackles (de as Verdedigen, gewogen met hoe vaak het lukte).', r => s(r, p => p.tacklesMade)),
+    count('a-tackles', 'Tackles gewonnen', 'Gewonnen tackles (de as Verdedigen).', r => s(r, p => p.tacklesMade)),
     count('a-inter', 'Onderscheppingen', 'Onderschepte passes (de as Verdedigen).', r => e(r, 'interceptions')),
     count('a-mom', 'Man of the match', 'Hoe vaak EA iemand deze avond tot man of the match koos.', r => s(r, p => p.mom)),
   ];
@@ -258,32 +258,33 @@ const RADAR_AXES = [
   { key: 'rating', show: 'rating', label: 'Rating', code: 'RAT', fmt: v => f1(v),
     about: 'De gemiddelde EA-rating over de wedstrijden van deze avond.' },
   { key: 'scoring', show: 'gpm', label: 'Scoren', code: 'SCO', count: true,
-    about: 'Goals per wedstrijd plus de kwaliteit van de afronding (goals per schot); bij minder dan vijf schoten telt die afronding naar rato minder, zodat één raak schot niet alles bepaalt. Onder de titel het aantal goals.' },
+    about: 'Goals per wedstrijd. Onder de titel het aantal goals van de avond.' },
   { key: 'creation', show: 'apm', label: 'Creëren', code: 'CRE', count: true,
-    about: 'Assists per wedstrijd, met tweede assists voor 70% en steekpasses voor 35%. Onder de titel het aantal assists.' },
+    about: 'Assists plus tweede assists (de pass vóór de assist) per wedstrijd. Onder de titel het aantal van de avond.' },
   { key: 'passing', show: 'ppct', label: 'Passen', code: 'PAS', fmt: v => `${Math.round(100 * v)}%`,
-    about: 'Geslaagde passes per wedstrijd, gewogen met de passnauwkeurigheid: veel passes én weinig balverlies. Onder de titel de nauwkeurigheid.' },
+    about: 'Passnauwkeurigheid: geslaagde passes van alle passes (minstens tien passes).' },
   { key: 'dribbling', show: 'dpm', label: 'Dribbelen', code: 'DRI', count: true,
     about: 'Tegenstanders uitgespeeld plus geslaagde dribbels per wedstrijd, uit de gebeurtenissen die EA meegeeft. Onder de titel het totaal.' },
   { key: 'defending', show: 'defpm', label: 'Verdedigen', code: 'VER', count: true,
-    about: 'Gewonnen tackles per wedstrijd, gewogen met het slagingspercentage, plus onderscheppingen per wedstrijd. Onder de titel gewonnen tackles plus onderscheppingen.' },
+    about: 'Gewonnen tackles plus onderscheppingen per wedstrijd. Onder de titel het aantal van de avond.' },
 ];
 // De maten van een avond. n = wedstrijden, nEv = wedstrijden met gebeurtenissen (voor het team: per wedstrijd van het
 // team, niet per speler); goals = eigen goals (het team: alle goals van de uitslag, ook die van AI).
 function nightStats(rows, n = rows.length, nEv = null, goals = null) {
   const sum = f => rows.reduce((a, r) => a + (f(r.p) || 0), 0), ev = rows.filter(r => r.p.ev), evSum = f => ev.reduce((a, r) => a + (f(r.p.ev) || 0), 0);
   const ne = nEv ?? ev.length, rated = rows.map(r => r.p.rating).filter(v => v !== null);
-  const G = goals ?? sum(p => p.goals), S = sum(p => p.shots), A = sum(p => p.assists), pm = sum(p => p.passesMade), pa = sum(p => p.passAttempts);
-  const tm = sum(p => p.tacklesMade), ta = sum(p => p.tackleAttempts), inter = evSum(e => e.interceptions);
-  const conv = S ? Math.min(1, G / S) : 0;
+  const G = goals ?? sum(p => p.goals), A = sum(p => p.assists), pm = sum(p => p.passesMade), pa = sum(p => p.passAttempts);
+  const tm = sum(p => p.tacklesMade), inter = evSum(e => e.interceptions);
   return {
     rating: rated.length ? avg(rated) : null,
-    scoring: G / n + 0.5 * conv * Math.min(1, S / 5), gpm: G / n,
-    creation: (A + 0.7 * evSum(e => e.second_assists) + 0.35 * evSum(e => e.through_balls)) / n, apm: A / n,
-    passing: pa >= 10 ? (pm / n) * (pm / pa) : null, ppct: pa >= 10 ? pm / pa : null,
+    // Het vlak gebruikt hetzelfde getal als onder de astitel (coach-logica §9a, sinds 10 november 2026), zodat binnen
+    // of buiten de stippellijn altijd klopt met "normaal".
+    scoring: G / n, gpm: G / n,
+    creation: (A + evSum(e => e.second_assists)) / n, apm: (A + evSum(e => e.second_assists)) / n,
+    passing: pa >= 10 ? pm / pa : null, ppct: pa >= 10 ? pm / pa : null,
     dribbling: ne ? (evSum(e => e.players_beaten) + evSum(e => e.dribbles_completed)) / ne : null,
     dpm: ne ? (evSum(e => e.players_beaten) + evSum(e => e.dribbles_completed)) / ne : null,
-    defending: (tm / n) * (ta ? tm / ta : 0) + (ne ? inter / ne : 0), defpm: tm / n + (ne ? inter / ne : 0),
+    defending: tm / n + (ne ? inter / ne : 0), defpm: tm / n + (ne ? inter / ne : 0),
   };
 }
 // Het team over een avond: dezelfde maten per wedstrijd van het hele team; rating als gemiddelde van alle spelers.
@@ -294,7 +295,7 @@ function teamStats(ms) {
 }
 // Tellingen van het team hangen af van hoeveel mensen er meedoen (EA telt geen AI). Het team vergelijken we daarom per
 // mens met andere avonden, en het normaal staat omgerekend naar het aantal mensen van deze avond (coach-logica §9a).
-const PER_HUMAN = new Set(['creation', 'apm', 'dribbling', 'dpm', 'defending', 'defpm', 'passing']);
+const PER_HUMAN = new Set(['creation', 'apm', 'dribbling', 'dpm', 'defending', 'defpm']); // passnauwkeurigheid is al een verhouding
 const perHumanSt = st => Object.fromEntries(Object.entries(st).map(([k, v]) => [k, PER_HUMAN.has(k) && v !== null && st.humans ? v / st.humans : v]));
 // Referentie, één keer berekend: per as alle waarden van onze avonden, voor het team en voor de spelers, en per
 // speler en voor het team de waarden per sessie (voor "normaal").
@@ -355,10 +356,15 @@ function radarSvg(sel, others, sid, label) {
     const v = sel.st[a.show], norm = normalOf(a.show, sel.name === null ? 'team' : sel.name, sid, sel.st.humans);
     return `<line x1="${c}" y1="${c}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" class="radar-axis"/><text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}" class="radar-label">${a.label}<tspan x="${lx.toFixed(1)}" class="radar-value sel" style="--pc:${radarColor(sel.name)}" dy="${17 * z}">${v === null ? 'te weinig' : radarShow(a, v, sel.n)}</tspan>${norm === null ? '' : `<tspan x="${lx.toFixed(1)}" dy="${14 * z}" class="radar-norm">normaal ${radarShowNorm(a, norm, sel.n)}</tspan>`}</text>`; }).join('');
   const shape = (x, cls) => `<polygon points="${RADAR_AXES.map((a, i) => pt(i, x.pc[a.key] ?? 0).map(n => n.toFixed(1)).join(',')).join(' ')}" style="stroke:${radarColor(x.name)};fill:${radarColor(x.name)}" class="radar-shape ${cls}"><title>${x.name === null ? 'Team' : esc(proName(x.name))}</title></polygon>`;
+  // Stippellijn: het normaal van wie is uitgelicht, op dezelfde maat en in dezelfde groep als het vlak (coach-logica
+  // §9a). Binnen de lijn is slechter dan normaal, erbuiten beter. Zonder eerdere avonden: het midden (50).
+  const ref = radarReference(), pool = sel.name === null ? ref.team : ref.players;
+  const normPc = a => { const v = sel.name === null ? normalOf(a.key, 'team', sid, 1) : normalOf(a.key, sel.name, sid); return v === null ? 50 : percentile(pool[a.key], v); };
+  const normPts = RADAR_AXES.map((a, i) => pt(i, normPc(a)).map(n => n.toFixed(1)).join(',')).join(' ');
   const mx = 90 * z, my = 50 * z;
   return `<svg viewBox="${-mx} ${-my} ${S + 2 * mx} ${S + 2 * my}" class="radar-svg" role="img" aria-label="${label}">
-    ${[25, 75, 100].map(v => `<polygon points="${ring(v)}" class="radar-ring"/>`).join('')}<polygon points="${ring(50)}" class="radar-ring radar-normal"/>${axes}
-    ${others.map(x => shape(x, 'dim')).join('')}${shape(sel, 'on')}</svg>`;
+    ${[25, 50, 75, 100].map(v => `<polygon points="${ring(v)}" class="radar-ring"/>`).join('')}${axes}
+    ${others.map(x => shape(x, 'dim')).join('')}${shape(sel, 'on')}<polygon points="${normPts}" class="radar-normal"><title>Normaal</title></polygon></svg>`;
 }
 function renderRadar(sess, ms) {
   const { team, players } = radarModel(ms);
@@ -402,7 +408,7 @@ function openPlayer(name) {
 // Uitleg van de zes assen (de knop Assen bij Zo speelden we).
 $('#axes-btn')?.addEventListener('click', () => {
   const d = $('#axes-dialog');
-  d.querySelector('.rd-body').innerHTML = `<h2 id="ax-title">Assen</h2><p>Elke as vergelijkt deze avond met al onze eigen avonden: groot is beter dan meestal, de gestippelde ring is een gewone avond.</p>
+  d.querySelector('.rd-body').innerHTML = `<h2 id="ax-title">Assen</h2><p>Elke as vergelijkt deze avond met al onze eigen avonden: groot is beter dan meestal. De stippellijn is het normaal van wie is uitgelicht: binnen de lijn slechter dan normaal, erbuiten beter.</p>
     <ul class="axes-list">${RADAR_AXES.map(a => `<li><span class="ax-code">${a.code}</span><div><b>${a.label}</b><p>${a.about}</p></div></li>`).join('')}</ul>`;
   d.showModal();
 });

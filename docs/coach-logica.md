@@ -770,20 +770,25 @@ een aparte knop *Team*). Knoppen: eerst *Team*, dan de spelers; uitzetten van ee
 **Alle vlakken zijn altijd zichtbaar**: zonder keuze is het team het felst en de spelers vaag,
 met een naam gekozen is die speler het felst en de rest (het team ook) vaag. Zes assen; elke as is een **percentiel tegenover onze eigen avonden**. Het teamvlak (standaard) vergelijkt
 het team deze avond met alle avonden van het team (minstens 2 wedstrijden); een spelersvlak vergelijkt die speler
-met alle avonden van al onze spelers. 50 is een gewone avond (de gestippelde ring), 100 de beste ooit. De assen:
+met alle avonden van al onze spelers. 100 is de beste ooit.
+**De stippellijn is het normaal van wie is uitgelicht** (sinds 10 november 2026): per as het gemiddelde van die
+speler (of het team) over de andere avonden, als percentiel in dezelfde groep als het vlak. Binnen de stippellijn is
+slechter dan normaal, erbuiten beter, en dat klopt altijd met "normaal" onder de astitel, want **het vlak gebruikt
+hetzelfde getal als onder de titel**. Daarvoor was de stippellijn een vaste ring op 50 (de middelste avond van iedereen
+samen) en gebruikte het vlak bredere maten (scoren met een bonus voor afronding, passen met volume, verdedigen gewogen
+met het tacklesucces). Daardoor kon iemand onder het eigen normaal toch buiten de stippellijn vallen. De assen:
 
-| As | Maat over de avond (voor de vorm) | Onder de titel |
-|---|---|---|
-| Rating | gemiddelde EA-rating | de rating |
-| Scoren | goals per wedstrijd + ½ × goals per schot; bij minder dan vijf schoten telt dat tweede deel naar rato minder | goals |
-| Creëren | (assists + 0,7 × tweede assists + 0,35 × steekpasses) per wedstrijd | assists |
-| Passen | geslaagde passes per wedstrijd × passnauwkeurigheid (minstens 10 passes) | passnauwkeurigheid |
-| Dribbelen | (tegenstanders uitgespeeld + geslaagde dribbels) per wedstrijd, uit de events | totaal |
-| Verdedigen | gewonnen tackles per wedstrijd × slagingspercentage + onderscheppingen per wedstrijd | gewonnen tackles + onderscheppingen |
+| As | Maat over de avond (vlak én getal onder de titel) |
+|---|---|
+| Rating | gemiddelde EA-rating |
+| Scoren | goals per wedstrijd (onder de titel: goals van de avond) |
+| Creëren | assists + tweede assists per wedstrijd (onder de titel: het aantal van de avond) |
+| Passen | passnauwkeurigheid (minstens 10 passes) |
+| Dribbelen | (tegenstanders uitgespeeld + geslaagde dribbels) per wedstrijd, uit de events |
+| Verdedigen | gewonnen tackles + onderscheppingen per wedstrijd |
 
-Sinds 2 november 2026 (daarvoor scoren, creëren, passnauwkeurigheid, balwinst en duels als losse cijfers): bredere
-maten die meer van het spel vangen en beter aansluiten bij wat de EA-rating draagt (goals, assists, dribbels,
-balafpakken; §3). Een knop **Assen** bij de radar opent de uitleg per as (code, naam, één zin). **Normaal** onder een
+Van 2 tot 10 november 2026 gebruikte het vlak bredere samengestelde maten; die zijn teruggedraaid omdat ze niet
+klopten met het getal onder de titel (zie hierboven). Een knop **Assen** bij de radar opent de uitleg per as (code, naam, één zin). **Normaal** onder een
 as is het gemiddelde van dezelfde speler (of het team) over **alle andere** avonden, dus zonder deze avond zelf; bij
 aantallen omgerekend naar het aantal wedstrijden van deze avond.
 
