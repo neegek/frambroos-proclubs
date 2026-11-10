@@ -576,8 +576,13 @@ async function liveFollow(url, resumeSince) {
   }
   liveSave({ followSince: since, followAt: Date.now() });
   liveBusy(true);
-  for (let i = 0; i < 24; i++) { // hooguit zes minuten volgen
-    await wait(15000);
+  // Elke 5 seconden: na 40 s kijken we zelf of de site al nieuwe data heeft (GitHub Pages, de traagste stap, is dan
+  // meestal klaar); elke 15 s vragen we de worker of de run klaar is (zonder nieuwe wedstrijden publiceert die niets).
+  const t0 = Date.now();
+  for (let i = 0; i < 72; i++) { // hooguit zes minuten volgen
+    await wait(5000);
+    if (Date.now() - t0 > 40000 && (await liveCheckSite()).added > 0) return done();
+    if (i % 3 !== 2) continue;
     const run = (await call('GET').catch(() => ({}))).run;
     if (!run || run.createdAt < since || run.status !== 'completed') continue;
     if (run.conclusion === 'success') setFresh(`bij EA gekeken ${clock(run.updatedAt)}`);

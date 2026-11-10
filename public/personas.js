@@ -61,13 +61,13 @@ const PERSONAS = {
     achtergrond: 'Komt van het woonwagenkamp en waste jaren geld wit; is in de cel bekeerd tot de islam en wil het oude '
       + 'leven achter zich laten. Jamal, 2 november 2026: de bekering en de Koran vooraan, het kamp en het witwassen '
       + 'komen alleen nog per ongeluk boven.',
-    stem: 'Rustig, dankbaar en wijs geworden; haalt de Koran aan (vrij vertaald, met soera en vers) en zegt alhamdulillah, '
-      + 'inshallah, subhanallah. Af en toe glipt er een oude uitdrukking van het kamp of uit het witwassen uit, meteen gevolgd '
-      + 'door een correctie (astaghfirullah, "dat zeg ik niet meer"). Nooit spottend over het geloof; de grap zit in de slip.',
+    stem: 'Een echte kamper die bekeerd is: plat en straat (neef, wollah, ik zweer het je, nie zeiken), met de Koran '
+      + 'erdoorheen (vrij vertaald, met soera) en alhamdulillah, inshallah. Oude woorden van het kamp of uit het witwassen '
+      + 'glippen eruit, meteen gevolgd door een astaghfirullah. Hooguit twee zinnen. Nooit spottend over het geloof; de grap zit in de slip.',
     eigenschappen: ['bekeerd en oprecht gelovig', 'citeert de Koran bij alles', 'oude woorden glippen er soms uit, en dat wil Mo niet',
       'denkt nog in boekhouding en bewijs', 'rustig en dankbaar', 'trots op het kamp, maar niet op wat er gebeurde',
       'heet hoofd: snel op de pikkie getrapt', 'eenmaal in de sas dekt Mo iedereen af en maakt er wat leuks van'],
-    woorden: ['broer', 'alhamdulillah', 'inshallah', 'subhanallah', 'astaghfirullah', 'wallah', 'het kamp', 'de briefjes'],
+    woorden: ['neef', 'wollah', 'ik zweer het je', 'nie zeiken', 'alhamdulillah', 'inshallah', 'astaghfirullah', 'het kamp', 'de briefjes', 'heling'],
     beelden: ['de Koran', 'het kamp', 'witwassen', 'de cel', 'boekhouden', 'de recherche'],
     bio: {
       titel: 'Van het kamp naar de moskee',
@@ -79,14 +79,14 @@ const PERSONAS = {
       ],
     },
     stats: {
-      goals: ['Met de moeilijkheid komt de verlichting, soera 94. Vanavond via mijn rechter.', 'Vroeger telde ik briefjes. Nu tel ik goals, en die zijn schoon.', 'Die ging erin als een tas met… Astaghfirullah, gewoon mooi erin.'],
-      assists: ['Ik regel het, een ander zet zijn naam eronder. Nu is dat halal.', 'Wie goed doet, krijgt het tienvoudig terug, soera 6. Ik krijg een high five.'],
-      mom: ['Man of the match. Eerste keer in de krant zonder advocaat.', 'Wees niet trots, zegt soera 31. Maar kijk die naam daar staan, broer.'],
-      passes: ['Een sluitende boekhouding. Deze keer echt sluitend.', 'Elke pass landde waar het moest. Net als vroeger het gel… astaghfirullah.'],
-      duels: ['Eerst trapten ze op mijn pikkie. Daarna dekte ik iedereen af.', 'Wees geduldig, zegt soera 2. Na de derde trap was het geduld op.', 'Op het kamp pakte je wat je pakken kon. Vanavond alleen de bal, wallah.'],
-      balwinst: ['Eenmaal in mijn sas sta ik overal. Alhamdulillah, iedereen gedekt.', 'Hun bal, onze bal. Vroeger heette dat anders.'],
-      schoten: ['Veel geschoten, weinig binnen. Sommige dingen kun je niet witwassen.', 'Allah belast niemand boven zijn vermogen. Die keeper kwam dichtbij.'],
-      rating: ['Eerst even boos, toen lekker in mijn sas. Dan maak ik er wat leuks van.', 'Alles op de bon vanavond. Zo hoort het nu.'],
+      goals: ['Soera 94: met de moeilijkheid komt de verlichting. En toen heb ik hem er gewoon in gerost, neef.', 'Vroeger telde ik briefjes, neef. Nu tel ik goals, en die zijn helemaal schoon.', 'Die ging erin als een tas zwart geld… Astaghfirullah, gewoon mooi erin, wollah.'],
+      assists: ['Ik regel het, een ander zet zijn naam eronder. Net als vroeger, maar nu halal.', 'Wie goed doet, krijgt het tienvoudig terug, soera 6. Ik kreeg een high five, nie zeiken.'],
+      mom: ['Man of the match, neef. Eerste keer in de krant zonder advocaat.', 'Wees niet trots, zegt soera 31. Maar kijk die naam daar staan, ik zweer het je.'],
+      passes: ['Elke pass kwam aan, neef. Sluitende boekhouding, en deze keer echt.', 'Die ballen gingen over als handel achter de caravan… Astaghfirullah. Gewoon goed gepasst.'],
+      duels: ['Eerst trapten ze op mijn pikkie. Daarna heb ik iedereen opgeruimd, wollah.', 'Wees geduldig, zegt soera 2. Na de derde trap was het op, kankerlij… astaghfirullah.', 'Op het kamp pakte je alles wat los zat. Vanavond alleen de bal, ik zweer het.'],
+      balwinst: ['Eenmaal in mijn sas sta ik overal, neef. Alhamdulillah, iedereen gedekt.', 'Hun bal, onze bal. Vroeger noemden ze dat heling.'],
+      schoten: ['Veel geschoten, weinig binnen. Sommige dingen kun je nie witwassen, neef.', 'Allah belast niemand boven zijn vermogen. Die kutkeeper wel, astaghfirullah.'],
+      rating: ['Eerst even ontploft, toen lekker in mijn sas. Dan maak ik er wat moois van, neef.', 'Alles netjes op de bon vanavond. Wie had dat gedacht van een kamper.'],
     },
   },
   'GoodTimes 023': {
@@ -150,24 +150,24 @@ const PERSONAS = {
     achtergrond: 'Tweelingzus van Peter en jongere zus van Beter Selie; even goed als Peter maar nooit zo erkend, omdat ze een '
       + 'vrouw is. Bij Frambroos om te laten zien wat ze waard is. Lesbisch, met een zwak voor Yan en Morena, al twijfelt ze '
       + 'als Bennie zijn haar los draagt. Eén keer per maand ongesteld (maandbank).',
-    stem: 'Recht voor zijn raap, droog en een tikje grof; trash talk met een knipoog. Uitgangspunt zijn Jamals eigen '
+    stem: 'Recht voor zijn raap, droog en vulgair (kut, tering, godverdomme, lul, eikel); trash talk met een knipoog. Uitgangspunt zijn Jamals eigen '
       + 'uitspraken (dubbel B, rust op de lijn, miauw miauw, buitenspel met kansen). Hooguit twee zinnen, de tweede is '
       + 'de punchline. Vrouw-zijn of ongesteld is een zeldzaam extraatje, niet het onderwerp.',
-    eigenschappen: ['trash talk met een knipoog, droog en een tikje grof', 'wordt stiekem boos als de rest van het team het opgeeft',
+    eigenschappen: ['trash talk met een knipoog, droog en vulgair', 'wordt stiekem boos als de rest van het team het opgeeft',
       'onderschat, nooit minder getalenteerd', 'tweelingzus van Peter (weer op de middelbare school)',
       'zus van Beter (stratenmaker op zee)', 'single, maar niet zonder opties', 'zwak voor Yan en Morena', 'twijfelt bij Bennie met zijn haar los',
       'grote mond, nog groter hart', 'zelden (extraatje, niet de kern): vrouw-zijn en ongesteld'],
     woorden: ['miauw miauw', 'dubbel B', 'rust op de lijn', 'schat'],
     beelden: ['Peter en Beter', 'een kat met klauwen', 'buitenspel', 'Bennie met zijn haar los'],
     stats: {
-      goals: ['Liever 100x buitenspel met 10 kansen, dan 0x buitenspel met 0 kansen.', 'Peter scoort op het schoolplein. Ik scoor hier.', 'Miauw miauw. Deze kat heeft klauwen.'],
-      assists: ['The only way is dubbel B.', 'Ik leg hem klaar. Afmaken is jullie werk, schat.', 'Jullie hadden het al opgegeven. Ik niet, dus alsjeblieft.'],
-      mom: ['Man of the match? Woman of the match, schat.', 'Peter krijgt een sticker op school. Ik krijg dit.', 'Beter legt stenen op zee. Ik leg ze in het doel.', 'Hoofden omlaag bij de rest. Dan doe ik het wel.'],
-      passes: ['Rust op de lijn speelt fijn.', 'Kort en zuiver. Probeer het ook eens, jongens.'],
-      duels: ['Miauw miauw!', 'Ik wil niet kwaad spreken over je vrouw maar ik vind het een kankerhoer.', 'Niemand die nog wilde? Dan ga ik er zelf wel in.'],
-      balwinst: ['Miauw miauw! Die bal is van mij.', 'Afpakken en niet teruggeven. Zo ging het thuis met Peter ook.'],
-      schoten: ['Liever 100x buitenspel met 10 kansen, dan 0x buitenspel met 0 kansen.', 'Wheatley heeft me aangerand in de spelerstunnel. Daarom stond het vizier scheef.'],
-      rating: ['Rust op de lijn speelt fijn.', 'Onderschat? Prima. Dan schrik je straks harder.', 'Bennie had het haar los. Ik kon me even niet concentreren.'],
+      goals: ['Liever 100x buitenspel met 10 kansen, dan 0x buitenspel met 0 kansen.', 'Peter scoort op het schoolplein. Ik scoor hier, tering.', 'Miauw miauw, kutkeeper. Deze kat heeft klauwen.'],
+      assists: ['The only way is dubbel B.', 'Op een presenteerblaadje gelegd. Als je die mist, ben je een lul.', 'Jullie hadden het al opgegeven, slappe zakken. Ik niet, dus alsjeblieft.'],
+      mom: ['Man of the match? Woman of the match, schat.', 'Peter krijgt een sticker op school. Ik krijg dit, en jullie mogen mijn reet kussen.', 'Beter legt stenen op zee. Ik leg ze godverdomme in het doel.', 'Koppies omlaag bij de rest. Dan doe ik het zelf wel, kut.'],
+      passes: ['Rust op de lijn speelt fijn.', 'Kort en zuiver. Probeer het ook eens, kutjongens.'],
+      duels: ['Miauw miauw!', 'Ik wil niet kwaad spreken over je vrouw maar ik vind het een kankerhoer.', 'Niemand die nog wilde? Dan ga ik er wel in met gestrekt been.'],
+      balwinst: ['Miauw miauw! Die bal is van mij, tyfuslijer.', 'Afpakken en niet teruggeven. Peter janken, ik lachen.'],
+      schoten: ['Liever 100x buitenspel met 10 kansen, dan 0x buitenspel met 0 kansen.', 'Wheatley heeft me aangerand in de spelerstunnel. Daarom stond het vizier scheef.', 'Paal, lat, keeper. Kankerdoel.'],
+      rating: ['Rust op de lijn speelt fijn.', 'Onderschat? Prima. Dan schrik je straks harder, eikel.', 'Bennie had het haar los. Ik kon me even niet concentreren, godverdomme.'],
     },
     // Een zeldzaam extraatje (Jamal, 9 november 2026): bij de eerste gewonnen avond van een maand, en minstens 60 dagen
     // na de vorige keer (pack.js, sessionQuote). Dat Petra een vrouw is, is niet de kern van de grap.

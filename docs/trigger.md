@@ -125,7 +125,11 @@ openbare site mag. Wat er gebeurt:
 2. De worker start `collect.yml`, tenzij er al een loopt of de laatste minder dan 3 minuten geleden begon. Veel
    bezoekers tegelijk geven dus hooguit één run per 3 minuten.
 3. Zolang de run loopt, pulseert er zacht een bolletje bij de versheid in het menu en op de menuknop (geen melding
-   meer, sinds 9 november 2026). Een run plus publicatie duurt ongeveer anderhalve minuut.
+   meer, sinds 9 november 2026). Een run plus publicatie duurt ongeveer anderhalve minuut. Gemeten op 9 november
+   (run met een nieuwe wedstrijd, 1 min 41 s): opstarten en Node 10 s, EA ophalen 9 s, database committen 3 s, site
+   bouwen 7 s, **GitHub Pages publiceren 53 s**, melding 5 s, plus telkens een paar seconden voor een nieuwe runner.
+   EA zelf is dus het kleinste deel; Pages is de rem. Daarom kijkt de site sinds 10 november na 40 s elke 5 seconden
+   zelf of `data.json` al nieuw is, in plaats van te wachten tot de hele run (met de melding) klaar is.
    Niet steeds opnieuw: is de data op de pagina jonger dan vijf minuten, of heeft deze browser in de laatste vijf
    minuten al gekeken (op welke pagina ook, onthouden in de browser), dan vraagt de site niets. Loopt er nog een run
    die een andere pagina volgde, dan volgt de nieuwe pagina die stil verder in plaats van een nieuwe te vragen.
