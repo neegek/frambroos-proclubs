@@ -16,8 +16,8 @@
 //                 team hooguit maxMensen mensen telt). Jamal beschrijft de rolverdeling; hier bijwerken als die verandert.
 //   maand         (optioneel) uitspraken voor één avond per maand: de eerste avond van een maand dat deze speler wint.
 //   stats         cruijffiaanse uitspraken per statistiek van de avond (zie quoteFor), twee of meer per maat. Kort maar
-//                 krachtig: hooguit twee zinnen en acht woorden, de tweede is de punchline ("Paal, lat, keeper.
-//                 Kankerdoel."). Alleen Jamals eigen uitspraken mogen langer (Jamal, 10 november 2026). De
+//                 krachtig: één goede zin van hooguit acht woorden, eventueel een paar woorden erachter als punchline
+//                 ("Paal, lat, keeper. Kankerdoel."). Alleen Jamals eigen uitspraken mogen langer (Jamal, 10 november 2026). De
 //                 statistiek inspireert de zin, maar er staan geen letterlijke getallen of percentages in (sinds
 //                 1 november 2026). Plekhouders blijven mogelijk ({w}, {g2}), maar liever niet gebruiken.
 // Maten: goals, assists, mom (man of the match), passes (percentage gelukt), duels (gewonnen tackles), balwinst,
@@ -46,11 +46,11 @@ const PERSONAS = {
       ],
     },
     stats: {
-      goals: ['Mai nēmu izu Terī. Mi raiku gōru!', 'Ōh iē, gōru! Sankyū evuribadi!', 'Tēringu! Gōru! Arigatō.'],
+      goals: ['Mai nēmu izu Terī. Mi raiku gōru!', 'Ōh iē, gōru! Sankyū evuribadi!', 'Tēringu, gōru! Arigatō.'],
       assists: ['Mi pasu, yū gōru. Furendo!', 'Nō gōru, nō purobrem. Mi happī.'],
       mom: ['Man obu za matchi? Sorī Ingurisshu.', 'Mi bau. Arigatō!', 'Kūto, mi amu besuto! Sankyū.'],
       passes: ['Pasu, pasu, pasu. Furendo!', 'Bōru izu happī. Mi amu happī.'],
-      duels: ['Bigu man, mi sumōru. Nebā gibu appu!', 'Mi rabu bōru. Bōru kamu bakku.', 'Rurū! Mai bōru. Sorī!'],
+      duels: ['Bigu man, mi sumōru. Nebā gibu appu!', 'Mi rabu bōru. Bōru kamu bakku.', 'Rurū, mai bōru! Sorī.'],
       balwinst: ['Bōru, kamu hōmu! Okaeri!', 'Sorī, mai bōru. Sankyū!'],
       schoten: ['Shūto, shūto, shūto. Tomorō gōru!', 'Kankā dōru. Sorī, sankyū.', 'Godofēdomu! Nō gōru.'],
       rating: ['Mi don andāsutando nambā. Mi happī!', 'Mai nēmu izu Terī. Sankyū!'],
@@ -152,8 +152,8 @@ const PERSONAS = {
       + 'vrouw is. Bij Frambroos om te laten zien wat ze waard is. Lesbisch, met een zwak voor Yan en Morena, al twijfelt ze '
       + 'als Bennie zijn haar los draagt. Eén keer per maand ongesteld (maandbank).',
     stem: 'Recht voor zijn raap, droog en vulgair (kut, tering, godverdomme, lul, eikel); trash talk met een knipoog. Uitgangspunt zijn Jamals eigen '
-      + 'uitspraken (dubbel B, rust op de lijn, miauw miauw, buitenspel met kansen). Hooguit twee zinnen, de tweede is '
-      + 'de punchline. Vrouw-zijn of ongesteld is een zeldzaam extraatje, niet het onderwerp.',
+      + 'uitspraken (dubbel B, rust op de lijn, miauw miauw, buitenspel met kansen), ook in grammatica: hele, gewone '
+      + 'schrijftaalzinnen met onderwerp en werkwoord ("Rust op de lijn speelt fijn."), geen telegramstijl. Eén goede zin. Vrouw-zijn of ongesteld is een zeldzaam extraatje, niet het onderwerp.',
     eigenschappen: ['trash talk met een knipoog, droog en vulgair', 'wordt stiekem boos als de rest van het team het opgeeft',
       'onderschat, nooit minder getalenteerd', 'tweelingzus van Peter (weer op de middelbare school)',
       'zus van Beter (stratenmaker op zee)', 'single, maar niet zonder opties', 'zwak voor Yan en Morena', 'twijfelt bij Bennie met zijn haar los',
@@ -161,18 +161,18 @@ const PERSONAS = {
     woorden: ['miauw miauw', 'dubbel B', 'rust op de lijn', 'schat'],
     beelden: ['Peter en Beter', 'een kat met klauwen', 'buitenspel', 'Bennie met zijn haar los'],
     stats: {
-      goals: ['Liever 100x buitenspel met 10 kansen, dan 0x buitenspel met 0 kansen.', 'Peter op het schoolplein. Ik hier, tering.', 'Miauw miauw, kutkeeper.'],
-      assists: ['The only way is dubbel B.', 'Op een bordje. Missen, lul.', 'Jullie gaven op. Ik niet, slappe zakken.'],
-      mom: ['Man of the match? Woman of the match, schat.', 'Peter een sticker. Ik dit. Reet kussen.', 'Beter legt stenen. Ik leg ze erin.', 'Koppies omlaag? Dan doe ik het wel, kut.'],
-      passes: ['Rust op de lijn speelt fijn.', 'Kort en zuiver, kutjongens.'],
-      duels: ['Miauw miauw!', 'Ik wil niet kwaad spreken over je vrouw maar ik vind het een kankerhoer.', 'Gestrekt been. Tering, wat lekker.'],
-      balwinst: ['Miauw miauw! Mijn bal, tyfuslijer.', 'Afpakken, niet teruggeven. Peter janken.'],
+      goals: ['Liever 100x buitenspel met 10 kansen, dan 0x buitenspel met 0 kansen.', 'Peter scoort op school, ik scoor hier.', 'Die keeper kan beter gaan breien, tering.'],
+      assists: ['The only way is dubbel B.', 'Als je die mist, ben je een lul.', 'Jullie gaven het op, ik niet.'],
+      mom: ['Man of the match? Woman of the match, schat.', 'Peter krijgt een sticker, ik krijg dit.', 'Beter legt stenen, ik leg ze erin.', 'Als jullie opgeven, doe ik het zelf wel.'],
+      passes: ['Rust op de lijn speelt fijn.', 'Kort en zuiver, zo moeilijk is het niet.'],
+      duels: ['Miauw miauw!', 'Ik wil niet kwaad spreken over je vrouw maar ik vind het een kankerhoer.', 'Wie tegen mij ingaat, ligt eruit.'],
+      balwinst: ['Miauw miauw! Die bal is van mij.', 'Wat ik afpak, geef ik niet meer terug.'],
       schoten: ['Liever 100x buitenspel met 10 kansen, dan 0x buitenspel met 0 kansen.', 'Wheatley heeft me aangerand in de spelerstunnel. Daarom stond het vizier scheef.', 'Paal, lat, keeper. Kankerdoel.'],
-      rating: ['Rust op de lijn speelt fijn.', 'Onderschat? Prima, eikel.', 'Bennie had het haar los. Godverdomme.'],
+      rating: ['Rust op de lijn speelt fijn.', 'Onderschat me maar, dan schrik je harder.', 'Bennie had het haar los, ik was weg.'],
     },
     // Een zeldzaam extraatje (Jamal, 9 november 2026): bij de eerste gewonnen avond van een maand, en minstens 60 dagen
     // na de vorige keer (pack.js, sessionQuote). Dat Petra een vrouw is, is niet de kern van de grap.
-    maand: ['Bloeden als een rund. Nog steeds beter.', 'Kramp in mijn buik. Zwakke geslacht, mijn reet.', 'Ongesteld en chagrijnig. Jullie kapot.', 'Tampon als een duim. Jullie hadden een excuus.'],
+    maand: ['Ik bloed als een rund en ben nog steeds beter.', 'Ik ben ongesteld, dus jullie gaan eraan.', 'Met kramp ben ik nog beter dan jullie.', 'Ik heb een tampon in, jullie een excuus.'],
     bio: {
       titel: 'De onderschatte ster van Frambroos',
       feiten: [['Familie', 'Tweelingzus van Peter Selie, jongere zus van Beter Selie'], ['Club', 'Frambroos'], ['Positie', 'Voetbalster'], ['Relatiestatus', 'Single (maar niet zonder opties)']],
@@ -211,11 +211,11 @@ const PERSONAS = {
     stats: {
       goals: ['Doelpunt geconstateerd. Keeper zag niks.', 'Goede sfeer, rustig hoofd. Bal weg.', 'Eén op één, een centimeter. Weg.'],
       assists: ['Situatie onder controle. Collega mocht aanhouden.', 'Agenten werken in koppels.'],
-      mom: ['Man of the match. Gewoon dienst.', 'Ademhalen. Over teleportatie zeg ik niks.'],
+      mom: ['Man of the match. Gewoon dienst.', 'Over teleportatie zeg ik niks.'],
       passes: ['Netjes afgeleverd. Geen bon nodig.', 'Zacht als het kan. Net als golf.'],
       duels: ['Aangehouden. Bal had geen papieren.', 'Eén keer vriendelijk vragen. Daarna mee.'],
-      balwinst: ['Bal in beslag genomen.', 'Teruggepakt. Een agent laat niks liggen.'],
-      schoten: ['Slechte sfeer, slechte swing. Alles op de keeper.', 'Geen vibe, geen truc.'],
+      balwinst: ['Bal in beslag genomen.', 'Een agent laat niks liggen.'],
+      schoten: ['Slechte sfeer, alles op de keeper.', 'Geen vibe, geen truc.'],
       rating: ['Rustige dienst. Alles onder controle.', 'Geen birdie. Par is ook goed.'],
     },
   },
