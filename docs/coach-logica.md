@@ -312,8 +312,9 @@ Daarnaast *Positiespel en keuzes* en *Al sterk*.
   quote**: komt dezelfde speler met dezelfde maat terug, dan de volgende variant. Karakter (achtergrond, stem,
   eigenschappen, woorden, beelden) en de uitspraken per maat staan in `public/personas.js`, de verzamelplek om verder
   op te bouwen. Spelers zonder achtergrond krijgen een neutrale cruijffiaanse zin.
-  **Vorm van een quote** (Jamal, 9 november 2026): hooguit **twee korte zinnen**, de tweede is de punchline. Geen derde
-  zin die de grap uitlegt. Uitgangspunt per speler zijn de uitspraken die Jamal zelf aanleverde; het karakter kleurt de
+  **Vorm van een quote** (Jamal, 9 en 10 november 2026): **kort maar krachtig**, hooguit twee zinnen en **acht woorden**,
+  de tweede is de punchline ("Paal, lat, keeper. Kankerdoel."). Geen zin die de grap uitlegt. Alleen Jamals eigen
+  uitspraken mogen langer. Terry Yaki pikt soms verbasterd vulgair Nederlands op van de teamgenoten (tēringu, kankā dōru). Uitgangspunt per speler zijn de uitspraken die Jamal zelf aanleverde; het karakter kleurt de
   zin, maar één kenmerk mag niet elke keer terugkomen. Bij Petra Selie draait het om trash talk, droge humor, de
   katten en de broers; dat Petra een vrouw is of ongesteld is een **zeldzaam extraatje**: de maandbank hooguit eens in
   de twee maanden (de eerste gewonnen avond van een maand, en minstens 60 dagen na de vorige), en in de gewone
