@@ -73,12 +73,12 @@ alleen in Cloudflare.
   build bepaalt wat goed is, iedereen dezelfde opbouw, samenvattingen kwalitatief in drie of vier zinnen.
 - Kleur van de plek (coach-logica §9c): bij kaartjes met `rank` volgen rand en, bij een gewone kaart (tier goud), ook het
   vlak de plek: goud, zilver, brons, leigrijs voor de rest (`faceOf` in `playercard.js`); in vorm en topvorm houden hun vlak.
-- `public/pack.js`: rangorde van een avond (`sessionRanking`, `roleOf`), de quote (`sessionQuote`), de pack-reveal (`playReveal`, `packOnLoad`) en de sessiekaart (`sessionCardHtml`); geladen door sessie, sessielijst en Club. In het menu heet de startpagina *Club*.
+- `public/pack.js`: de quote (`sessionQuote`), de pack-reveal (`playReveal`, `packOnLoad`) en de sessiekaart (`sessionCardHtml`); geladen door sessie, sessielijst en Club. In het menu heet de startpagina *Club*.
 - Horizontaal scrollen in een kaart: de rij loopt tot de rand van de kaart (negatieve marge en binnenruimte van `--px`),
   niet afgesneden door de binnenruimte. Tegenstanders met logo via `oppBadge(m.opponent)` (terugval: shirt).
 - Dialogen: sluitknop vast rechtsboven, onderaan een vaste balk met een rustige knop naar een andere pagina en eventueel
   vorige/volgende met portret (`dialogFoot(d, href, label, { prev, next })` in `common.js`).
-- Plek op een avond: op het exacte gemiddelde; bij precies gelijk beslist de rolmaat (`roleOf` in `sessie.js`), pas dan een gedeelde plek (`r.place`).
+- Plek op een avond: één rangorde voor alles (`sessionRanking` in `common.js`): alleen wie minstens de helft van de wedstrijden speelde dingt mee (`ok`), dan het exacte gemiddelde, bij precies gelijk de rolmaat (`roleOf`), pas dan een gedeelde plek (`r.place`). `bestOfNight` is de nummer één daarvan.
 - Een naam bij een spelerskaart(je) staat ín het kaartje (`label` bij `PlayerCard.tiny`), niet eronder.
 - Namen voluit zoals EA ze geeft (Petra Selie, niet P. Selie); te lang: afkappen met …, nooit zelf afkorten.
 - Over spelers geen *hij* of *zij*. Waar de app over onze spelers praat of ze noemt (samenvattingen, nieuws, ranglijsten,

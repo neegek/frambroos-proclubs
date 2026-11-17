@@ -158,8 +158,8 @@ function threats(ms) {
   const top = key => [...C].sort((a, b) => b[key] - a[key] || a.n - b.n);
   const tile = (cls, key, label, name, val, unit, sub) => `<button type="button" class="threat ${cls}" data-dom="${key}">
       <span class="th-label">${label}</span><b class="th-name">${esc(proName(name))}</b>
-      <span class="th-val"><b>${val}</b><small>${unit}</small></span><small class="th-sub">${esc(sub)}</small></button>`;
-  const totalTile = (cls, label, key, unit) => { const t = top(key)[0]; return t && t[key] ? tile(cls, key, label, t.name, t[key], unit, `${f1(t[key] / t.n)} per wedstrijd, in ${t.n}`) : ''; };
+      <span class="th-val"><b>${val}</b><small>${unit}</small></span><small class="th-sub">${sub}</small></button>`;
+  const totalTile = (cls, label, key, unit) => { const t = top(key)[0]; return t && t[key] ? tile(cls, key, label, t.name, t[key], unit, esc(`${f1(t[key] / t.n)} per wedstrijd, in ${t.n}`)) : ''; };
   const roster = DATA.members.map(m => m.name);
   const R = Object.fromEntries(STATS.map(s => [s.key, statRows(ms, s)]));
   // Goals + assists per wedstrijd over de carrière: wie het meest bijdraagt aan doelpunten.
@@ -167,18 +167,17 @@ function threats(ms) {
   // Compleet (coach-logica §9a): de gemiddelde plek over alle cijfers van de spelerspagina (stats.js), dezelfde
   // rondjes als daar; lager is beter. Bij Overall met de totalen van EA, in een periode over die periode.
   const comp = completeRanking(statContext(ms, { ea: !period }));
-  R.all = comp.map(b => ({ name: b.name, main: f1(b.avg), sub: `${b.firsts}× eerste in ${b.ranks.length} cijfers` }));
-  const allSub = r => r.sub;
-  const tileOf = (cls, key, label, unit, subOf) => { const r = R[key][0]; return r && r.main !== null ? tile(cls, key, label, r.name, r.main, unit, subOf ? subOf(r) : r.sub) : ''; };
+  R.all = comp.map(b => ({ name: b.name, main: f1(b.avg), subHtml: medalsHtml(b.medals), sub: '' }));
+  const tileOf = (cls, key, label, unit, subOf) => { const r = R[key][0]; return r && r.main !== null ? tile(cls, key, label, r.name, r.main, unit, r.subHtml ?? esc(r.sub)) : ''; };
   $('#threats').innerHTML = totalTile('goals', 'Topscorer', 'g', 'goals') + totalTile('assists', 'Topassist', 'a', 'assists')
     + tileOf('att', 'ga', 'Goals + assists', 'per wedstrijd') + tileOf('cre', 'pass', 'Passes', 'per wedstrijd')
-    + tileOf('def', 'def', 'Verdedigen', 'per wedstrijd') + tileOf('all', 'all', 'Compleet', 'gem. plek', allSub);
+    + tileOf('def', 'def', 'Verdedigen', 'per wedstrijd') + tileOf('all', 'all', 'Compleet', 'gem. plek');
   $('#threats').onclick = e => {
     const btn = e.target.closest('.threat'); if (!btn) return; const k = btn.dataset.dom;
     if (k === 'g' || k === 'a') return openRankList({ label: k === 'g' ? 'Topscorer' : 'Topassist', about: `Het aantal ${k === 'g' ? 'goals' : 'assists'}${period ? '' : ' over de hele carrière bij de club volgens EA, ook van vóór deze app (dezelfde totalen als bij Algemeen)'}. Bij gelijk staat wie het in minder wedstrijden deed hoger.`, who: SRC,
       rows: top(k).map(t => ({ name: t.name, main: String(t[k]), sub: `${f1(t[k] / t.n)} per wedstrijd, in ${t.n}` })) }, roster);
     if (k === 'ga') return openRankList({ label: 'Goals + assists', about: 'Goals plus assists per wedstrijd: wie het meest bijdraagt aan doelpunten.', who: SRC, rows: R.ga }, roster);
-    if (k === 'all') return openRankList({ label: 'Compleet', about: `De gemiddelde plek ten opzichte van het team over alle cijfers van de spelerspagina (aanvallen, passen, verdedigen en discipline; ${comp[0]?.of ?? ''} cijfers). Per cijfer dezelfde plek als het rondje op de spelerspagina; lager is beter. Bij gelijk wint wie vaker eerste is.`, who: `${SRC} Mee doet wie bij minstens de helft van de cijfers een plek heeft.`, rows: R.all }, roster);
+    if (k === 'all') return openRankList({ label: 'Compleet', about: `De gemiddelde plek ten opzichte van het team over alle cijfers van de spelerspagina (aanvallen, passen, verdedigen en discipline; ${comp[0]?.of ?? ''} cijfers). Per cijfer dezelfde plek als het rondje op de spelerspagina; lager is beter. Bij gelijk wint wie meer gouden, dan zilveren, dan bronzen plekken heeft.`, who: `${period ? SRC : 'Goals, assists, schoten, conversie, passes en tackles over de hele carrière bij de club volgens EA; de andere cijfers over de gevolgde wedstrijden, zoals op de spelerspagina.'} Mee doet wie bij minstens de helft van de cijfers een plek heeft.`, rows: R.all }, roster);
     const s = STATS.find(x => x.key === k);
     openRankList({ label: s.label, about: s.about, who: `Gevolgde wedstrijden met gebeurtenissen van EA; ${s.minLabel}.`, rows: R[k] }, roster);
   };

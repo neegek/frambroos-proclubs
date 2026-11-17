@@ -96,9 +96,12 @@ function completeRanking(ctx) {
   const items = statDefs(false).flatMap(([, list]) => list).filter(it => it.cmp);
   const by = new Map();
   for (const it of items) for (const e of statRanking(it, ctx)) {
-    const b = by.get(e.name) || { name: e.name, ranks: [], firsts: 0 }; b.ranks.push(e.rank); if (e.rank === 1) b.firsts++; by.set(e.name, b);
+    const b = by.get(e.name) || { name: e.name, ranks: [], firsts: 0, medals: [0, 0, 0] }; b.ranks.push(e.rank); if (e.rank === 1) b.firsts++;
+    if (e.rank <= 3) b.medals[e.rank - 1]++; by.set(e.name, b);
   }
   return [...by.values()].filter(b => b.ranks.length >= items.length / 2)
     .map(b => ({ ...b, avg: b.ranks.reduce((a, r) => a + r, 0) / b.ranks.length, of: items.length }))
-    .sort((a, b) => a.avg - b.avg || b.firsts - a.firsts);
+    .sort((a, b) => a.avg - b.avg || b.medals[0] - a.medals[0] || b.medals[1] - a.medals[1] || b.medals[2] - a.medals[2]);
 }
+// De medailles van Compleet: goud, zilver en brons zoals de rondjes op de spelerspagina, met het aantal erachter.
+const medalsHtml = m => `<span class="medals">${m.map((c, i) => `<span class="medal-count${c ? '' : ' none'}" title="${c}× plek ${i + 1}"><span class="rank-dot metal-${RIM(i + 1)}">${i + 1}</span>×${c}</span>`).join('')}</span>`;

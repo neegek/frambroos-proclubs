@@ -720,16 +720,40 @@ const plural = (n, one, more) => `${n} ${n === 1 ? one : more}`;
 const dayLabel = ts => new Date(ts * 1000).toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' });
 
 // Beste speler van een avond: de hoogste gemiddelde rating onder wie minstens de helft van de wedstrijden speelde.
+// Rol van een speler op een avond (de positie die het vaakst voorkwam) en de rolmaat die bij precies hetzelfde
+// gemiddelde beslist (coach-logica §9a): aanval goals plus assists, middenveld passnauwkeurigheid, verdediging
+// gewonnen tackles van de pogingen, keeper reddingen; alles per wedstrijd.
+const ROLE_STATS = { forward: ['goals', 'assists'], midfielder: ['assists', 'pass', 'won'], defender: ['won', 'duels', 'pass'], goalkeeper: ['pass'] };
+function roleOf(ms, name) {
+  const ps = ms.map(m => m.players.find(p => p.name === name)).filter(Boolean), n = ps.length || 1, cnt = {};
+  for (const p of ps) cnt[p.pos] = (cnt[p.pos] || 0) + 1;
+  const role = Object.entries(cnt).sort((a, b) => b[1] - a[1])[0]?.[0] || 'midfielder', sum = f => ps.reduce((a, p) => a + (f(p) || 0), 0);
+  const ratio = (a, b) => b ? a / b : 0;
+  const tb = role === 'forward' ? (sum(p => p.goals) + sum(p => p.assists)) / n : role === 'defender' ? ratio(sum(p => p.tacklesMade), sum(p => p.tackleAttempts))
+    : role === 'goalkeeper' ? sum(p => p.saves) / n : ratio(sum(p => p.passesMade), sum(p => p.passAttempts));
+  return { role, tb };
+}
+
+
+// De spelers van een avond op volgorde (coach-logica §9a). Meedingen naar een plek in de top doet wie minstens de helft
+// van de wedstrijden van die avond speelde (ok); daarbinnen het exacte gemiddelde, bij gelijk de rolmaat, dan een
+// gedeelde plek. Wie minder speelde, staat erachter, ook met een hogere rating: twee goede potten zijn geen avond.
+// Eén rangorde voor alles: top drie, Per wedstrijd, speler van de sessie in de lijst, nieuws en de quote.
+const nightMin = ms => Math.max(1, Math.ceil(ms.length / 2));
+function sessionRanking(ms) {
+  const names = [...new Set(ms.flatMap(m => m.players.map(p => p.name)))], min = nightMin(ms);
+  const list = names.map(name => { const rs = ms.map(m => m.players.find(p => p.name === name)).filter(Boolean);
+    const rH = avg(rs.map(p => p.rating).filter(v => v !== null));
+    return { name, n: rs.length, rH, ok: rH !== null && rs.length >= min, ...roleOf(ms, name) }; })
+    .sort((x, y) => (y.ok - x.ok) || (y.rH ?? -1) - (x.rH ?? -1) || y.tb - x.tb);
+  list.forEach((r, i) => { const p = list[i - 1]; r.place = p && p.ok === r.ok && p.rH === r.rH && p.tb === r.tb ? p.place : i + 1; });
+  return list;
+}
+// Speler van de sessie: de nummer één van sessionRanking, met goals, assists en man of the match van die avond.
 function bestOfNight(night) {
-  const per = new Map();
-  for (const m of night) for (const p of m.players) {
-    const x = per.get(p.name) || { n: p.name, r: [], g: 0, a: 0, mom: 0 };
-    if (p.rating !== null) x.r.push(p.rating);
-    x.g += p.goals || 0; x.a += p.assists || 0; x.mom += p.mom || 0;
-    per.set(p.name, x);
-  }
-  return [...per.values()].filter(x => x.r.length && x.r.length >= Math.max(1, night.length / 2))
-    .map(x => ({ ...x, v: avg(x.r) })).sort((a, b) => b.v - a.v)[0] || null;
+  const top = sessionRanking(night).find(r => r.ok); if (!top) return null;
+  const ps = night.map(m => m.players.find(p => p.name === top.name)).filter(Boolean), sum = f => ps.reduce((a, p) => a + (f(p) || 0), 0);
+  return { n: top.name, v: top.rH, g: sum(p => p.goals), a: sum(p => p.assists), mom: sum(p => p.mom) };
 }
 
 // Reeks van één speler (coach-logica §9c): per wedstrijd een rondje in de kleur van de uitslag met de rating die de
@@ -806,7 +830,7 @@ function openRankList(c, roster = null) {
     <h3>Waar het op gebaseerd is</h3><p>${c.about}</p>
     <h3>Wie meetelt</h3><p>${c.who}</p>
     <h3>De hele lijst</h3>
-    <ol class="rd-list">${c.rows.map(r => `<li class="${r.cls || ''}${r.none ? ' none' : ''}"><span>${r.none ? '' : ++i}</span><span>${esc(proName(r.name))}</span><b>${r.main}</b>${r.sub ? `<small>${esc(r.sub)}</small>` : ''}</li>`).join('') || `<li class="empty">${c.empty || 'Nog te weinig wedstrijden.'}</li>`}${(c.teams || (c.team ? [c.team] : [])).map(t => `<li class="rd-club ${t.cls || ''}"><span></span><span>${esc(t.label)}</span><b>${t.main}</b>${t.sub ? `<small>${esc(t.sub)}</small>` : ''}</li>`).join('')}</ol>`;
+    <ol class="rd-list">${c.rows.map(r => `<li class="${r.cls || ''}${r.none ? ' none' : ''}"><span>${r.none ? '' : ++i}</span><span>${esc(proName(r.name))}</span><b>${r.main}</b>${r.subHtml ? `<small>${r.subHtml}</small>` : r.sub ? `<small>${esc(r.sub)}</small>` : ''}</li>`).join('') || `<li class="empty">${c.empty || 'Nog te weinig wedstrijden.'}</li>`}${(c.teams || (c.team ? [c.team] : [])).map(t => `<li class="rd-club ${t.cls || ''}"><span></span><span>${esc(t.label)}</span><b>${t.main}</b>${t.sub ? `<small>${esc(t.sub)}</small>` : ''}</li>`).join('')}</ol>`;
   d.showModal();
 }
 // Sluiten werkt overal hetzelfde, ook op telefoon: een tik op het kruisje of naast het scherm. Op pointerup én click,

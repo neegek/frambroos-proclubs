@@ -596,8 +596,9 @@ Op de tegel: naam, het getal groot, klein waar het op rust (bijv. *36 goals uit 
 *Compleet* (Jamal, 17 november 2026): wie gemiddeld het hoogst staat ten opzichte van het team, over **alle** cijfers
 die de spelerspagina meet (Aanvallen, Passen, Verdedigen, Discipline; reddingen tellen niet, die zijn alleen voor
 keepers). Per cijfer de plek onder onze spelers zoals het rondje op de spelerspagina, dan het gemiddelde van die
-plekken; lager is beter. Op de tegel groot de gemiddelde plek (bijv. *2,3*), klein in hoeveel cijfers die speler
-eerste is. Zo is het na te rekenen: dezelfde rondjes als op de spelerspagina. Topscorer en topassist volgen de
+plekken; lager is beter. Op de tegel groot de gemiddelde plek (bijv. *2,3*), klein de **medailles**: goud, zilver
+en brons (de rondjes 1, 2 en 3 van de spelerspagina) met het aantal erachter, ook als dat nul is (17 november 2026).
+Bij een gelijke gemiddelde plek beslist eerst goud, dan zilver, dan brons. Zo is het na te rekenen: dezelfde rondjes als op de spelerspagina. Topscorer en topassist volgen de
 periode (zie *Periode*): bij *Overall* de carrière volgens EA, anders de gevolgde wedstrijden in die periode.
 
 *Waarom zo*: de vorige versie (punten per wedstrijd, omgerekend naar een percentiel per teamgrootte, en *Compleet*)
@@ -605,6 +606,12 @@ was niet na te rekenen en bevoordeelde wie veel dribbelt: Terry Yaki stond boven
 voorbij ½", terwijl Petra Selie meer scoort en Bennie en G. Snoek een hogere conversie hebben. Een gewone statistiek
 zegt precies wat hij zegt. Druk zetten telt niet mee bij Verdedigen (een tackle hoog op het veld zou dan dubbel
 tellen) en staat als balwinst op de spelerspagina.
+**Rangorde van een avond** (Jamal, 17 november 2026; `sessionRanking` in `common.js`): meedingen naar een plek in de
+top doet alleen wie **minstens de helft van de wedstrijden** van die avond speelde; daarbinnen het gemiddelde, bij gelijk
+de rolmaat. Wie minder speelde, staat erachter, ook met een hogere rating (twee goede potten zijn geen avond; bijvoorbeeld
+16 november: Terry Yaki 8,2 in 2 van de 8, Bennie 6,8 in 8). Eén rangorde voor alles: de top drie in de sessiekop,
+*Per wedstrijd*, de speler van de sessie in de sessielijst en op de Club, het nieuws, de quote en de pack-reveal.
+Daarvoor rekende de sessiepagina zonder minimum en de lijst met, zodat ze elkaar tegenspraken.
 Of een statistiek samenhangt met winnen, staat in §9e; dat is geen reden om actief werk niet te tonen.
 Vervallen (4 november 2026): de scores Aanvallend, Creëren, Verdedigend en Compleet (3 november 2026), en daarvoor
 een score tegenover alleen onze zes spelers.

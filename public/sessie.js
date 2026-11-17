@@ -104,14 +104,14 @@ function render() {
   $('#s-matches').innerHTML = ms.map(m => matchCard(m, { own })).join('');
 
   // Spelers: rating deze avond tegenover het eigen normaal (alle andere wedstrijden), goals, assists, man of the match.
-  const prow = names.map(name => {
-    const here = ms.map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p);
-    const there = others.map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p);
-    const rH = avg(here.map(r => r.p.rating).filter(v => v !== null)), rT = avg(there.map(r => r.p.rating).filter(v => v !== null));
-    return { name, n: here.length, nT: there.length, rH, rT, d: rT === null || rH === null ? null : rH - rT, g: pSum(here, p => p.goals), a: pSum(here, p => p.assists), mom: pSum(here, p => p.mom) };
-  }).map(r => ({ ...r, ...roleOf(ms, r.name) })).sort((x, y) => (y.rH ?? -1) - (x.rH ?? -1) || y.tb - x.tb);
-  // Plek: op het exacte gemiddelde; alleen bij precies hetzelfde gemiddelde én dezelfde rolmaat een gedeelde plek.
-  prow.forEach((r, i) => { const p = prow[i - 1]; r.place = p && p.rH === r.rH && p.tb === r.tb ? p.place : i + 1; });
+  // Rangorde (sessionRanking in common.js, dezelfde als overal), met per speler het eigen normaal (alle andere
+  // wedstrijden), goals, assists en man of the match van deze avond.
+  const prow = sessionRanking(ms).map(r => {
+    const here = ms.map(m => ({ m, p: m.players.find(p => p.name === r.name) })).filter(x => x.p);
+    const there = others.map(m => ({ m, p: m.players.find(p => p.name === r.name) })).filter(x => x.p);
+    const rT = avg(there.map(x => x.p.rating).filter(v => v !== null));
+    return { ...r, nT: there.length, rT, d: rT === null || r.rH === null ? null : r.rH - rT, g: pSum(here, p => p.goals), a: pSum(here, p => p.assists), mom: pSum(here, p => p.mom) };
+  });
   const sum = sessionSummary(ms, sm, opp, own, prow);
   // De quote: een cruijffiaanse uitspraak van de beste speler van de avond, in de eigen stem (personas.js).
   const quote = sessionQuote(s);
@@ -119,7 +119,7 @@ function render() {
   SHARE = { ms, sm, quote, prow, meta };
   // Top drie naast elkaar: één in het midden en groter, twee links, drie rechts. Plek als medaille en naam in het kaartje,
   // rand en vlak in de kleur van de plek (coach-logica §9c). Een tik scrollt naar Per wedstrijd.
-  const top = prow.filter(r => r.rH !== null).slice(0, 3);
+  const top = prow.filter(r => r.ok).slice(0, 3); // alleen wie minstens de helft van de avond speelde
   const pick = (r, i) => `<a class="ss-pick p${i + 1}" href="spelers.html#${encodeURIComponent(r.name)}" data-n="${esc(r.name)}" aria-haspopup="dialog" title="${esc(proName(r.name))}: rating ${f1(r.rH)} deze avond">
       ${PlayerCard.tiny(r.name, { session: s.id, rank: r.place, label: proName(r.name), value: f1(r.rH), key: '-p' })}</a>`;
   $('#s-podium').innerHTML = [1, 0, 2].filter(i => top[i]).map(i => pick(top[i], i)).join('');
@@ -388,10 +388,10 @@ function openPlayer(name) {
   const table = me ? `<table class="pd-table"><thead><tr><th></th><th>Deze avond</th><th>Normaal</th></tr></thead><tbody>${RADAR_AXES.map(a => {
     const v = me.st[a.show], norm = normalOf(a.show, name, SESSION_ID);
     return `<tr><th scope="row">${a.label}</th><td>${v === null ? '–' : radarShow(a, v, me.n)}</td><td>${norm === null ? '–' : radarShowNorm(a, norm, me.n)}</td></tr>`; }).join('')}</tbody></table>` : '';
-  const portrait = PlayerCard.portrait(name), place = (SHARE?.prow || []).find(r => r.name === name)?.place;
+  const portrait = PlayerCard.portrait(name), pr = (SHARE?.prow || []).find(r => r.name === name), place = pr?.place;
   d.querySelector('.rd-body').innerHTML = `<div class="pd-head">
       <span class="pd-face">${portrait ? `<img src="${portrait}" alt="">` : `<span class="rd-face-icon">${esc(proName(name).charAt(0))}</span>`}</span>
-      <div><h2 id="pd-title">${esc(proName(name))}</h2><p>${esc(cap(longDate(ms[0].ts)))}${place ? ` · ${place === 1 ? 'beste van de avond' : `plek ${place}`}` : ''}</p></div>
+      <div><h2 id="pd-title">${esc(proName(name))}</h2><p>${esc(cap(longDate(ms[0].ts)))}${pr && !pr.ok ? ` · ${pr.n} van ${ms.length} wedstrijden, te weinig voor de top` : place ? ` · ${place === 1 ? 'beste van de avond' : `plek ${place}`}` : ''}</p></div>
     </div>
     ${playerQuote(name, sess) ? `<blockquote class="pd-quote">„${esc(playerQuote(name, sess))}”</blockquote>` : ''}
     <dl class="pd-facts">${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>

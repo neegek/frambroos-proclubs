@@ -1737,3 +1737,8 @@ html, body { overflow-x: clip; overscroll-behavior-x: none; }
 .hh-season .st-stat small { color: rgba(255,255,255,0.72); }
 .hh-season .sv-delta { color: rgba(255,255,255,0.7); }
 .hh-season .sv-delta.up { color: #7fe39a; } .hh-season .sv-delta.down { color: #ff9a9a; }
+/* Medailles van Compleet (stats.js, medalsHtml): het rondje van de plek met het aantal erachter. */
+.medals { display: inline-flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.medal-count { display: inline-flex; align-items: center; gap: 3px; font: 600 12px/1 var(--num-font); color: var(--ink-2); }
+.medal-count .rank-dot { width: 18px; height: 18px; font-size: 10px; }
+.medal-count.none { opacity: 0.45; }

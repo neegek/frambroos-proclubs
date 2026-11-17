@@ -2,30 +2,7 @@
 // een avond, de quote van de winnaar en de reveal-animatie. Heeft common.js, playercard.js en personas.js nodig.
 const packDay = ts => { const d = new Date(ts * 1000); const t = d.toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' }); return t.charAt(0).toUpperCase() + t.slice(1); };
 
-// Rol van een speler op een avond (de positie die het vaakst voorkwam) en de rolmaat die bij precies hetzelfde
-// gemiddelde beslist (coach-logica §9a): aanval goals plus assists, middenveld passnauwkeurigheid, verdediging
-// gewonnen tackles van de pogingen, keeper reddingen; alles per wedstrijd.
-const ROLE_STATS = { forward: ['goals', 'assists'], midfielder: ['assists', 'pass', 'won'], defender: ['won', 'duels', 'pass'], goalkeeper: ['pass'] };
-function roleOf(ms, name) {
-  const ps = ms.map(m => m.players.find(p => p.name === name)).filter(Boolean), n = ps.length || 1, cnt = {};
-  for (const p of ps) cnt[p.pos] = (cnt[p.pos] || 0) + 1;
-  const role = Object.entries(cnt).sort((a, b) => b[1] - a[1])[0]?.[0] || 'midfielder', sum = f => ps.reduce((a, p) => a + (f(p) || 0), 0);
-  const ratio = (a, b) => b ? a / b : 0;
-  const tb = role === 'forward' ? (sum(p => p.goals) + sum(p => p.assists)) / n : role === 'defender' ? ratio(sum(p => p.tacklesMade), sum(p => p.tackleAttempts))
-    : role === 'goalkeeper' ? sum(p => p.saves) / n : ratio(sum(p => p.passesMade), sum(p => p.passAttempts));
-  return { role, tb };
-}
-
-
-// De spelers van een avond op volgorde (coach-logica §9a): exact gemiddelde, bij gelijk de rolmaat, dan een gedeelde plek.
-function sessionRanking(ms) {
-  const names = [...new Set(ms.flatMap(m => m.players.map(p => p.name)))];
-  const list = names.map(name => { const rs = ms.map(m => m.players.find(p => p.name === name)).filter(Boolean);
-    return { name, n: rs.length, rH: avg(rs.map(p => p.rating).filter(v => v !== null)), ...roleOf(ms, name) }; })
-    .sort((x, y) => (y.rH ?? -1) - (x.rH ?? -1) || y.tb - x.tb);
-  list.forEach((r, i) => { const p = list[i - 1]; r.place = p && p.rH === r.rH && p.tb === r.tb ? p.place : i + 1; });
-  return list;
-}
+// roleOf en sessionRanking staan in common.js: dezelfde rangorde overal (sessie, lijst, Club, nieuws, quote).
 
 // De quote van een avond (coach-logica §9, Sessie): de beste speler (hoogste gemiddelde rating) over de statistiek die
 // die avond het meest uitstak, in de eigen stem (personas.js). Elke sessie een nieuwe: komt dezelfde speler met dezelfde
@@ -37,8 +14,7 @@ function sessionQuote(sess) {
   for (const x of sessionsOf((DATA.allMatches || DATA.matches))) { // over alles: de quote van een avond hangt niet af van de periode
     const names = [...new Set(x.matches.flatMap(m => m.players.map(p => p.name)))];
     const rowsOf = (list, n) => list.map(m => ({ m, p: m.players.find(p => p.name === n) })).filter(r => r.p);
-    const best = names.map(n => ({ n, r: avg(rowsOf(x.matches, n).map(r => r.p.rating).filter(v => v !== null)) }))
-      .filter(b => b.r !== null).sort((a, b) => b.r - a.r)[0];
+    const top = sessionRanking(x.matches).find(r => r.ok), best = top ? { n: top.name, r: top.rH } : null; // dezelfde nummer één als overal
     let q = null;
     if (best) {
       const stat = standoutStat(rowsOf(x.matches, best.n), rowsOf((DATA.allMatches || DATA.matches).filter(m => m.session !== x.id), best.n));
@@ -94,7 +70,7 @@ function playReveal(s, top, quote) {
 const packReady = (s, all) => revealPending(s, all) || s.key === REVEAL_TEST;
 function openPack(key) {
   const s = sessionsOf((DATA.allMatches || DATA.matches)).find(x => x.key === key); if (!s) return;
-  playReveal(s, sessionRanking(s.matches).filter(r => r.rH !== null).slice(0, 3), sessionQuote(s));
+  playReveal(s, sessionRanking(s.matches).filter(r => r.ok).slice(0, 3), sessionQuote(s));
 }
 // Vasthoudknop (coach-logica §9a): rechtsboven in de sessiekop, op de plek van "volgende sessie" bij de nieuwste
 // sessie. Even ingedrukt houden (0,7 s, een ring loopt vol) opent het pack, ook als de avond nog bezig is: dan met de
@@ -105,7 +81,7 @@ const packHoldBtn = s => `<button type="button" class="ss-nav next ss-pack" data
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l1 18H5z"/><path d="M8.5 9.5l3.5 2.5 3.5-2.5"/></svg></button>`;
 function holdOpen(btn) {
   const s = sessionsOf((DATA.allMatches || DATA.matches)).find(x => x.key === btn.dataset.hold); if (!s) return;
-  playReveal(s, sessionRanking(s.matches).filter(r => r.rH !== null).slice(0, 3), sessionQuote(s));
+  playReveal(s, sessionRanking(s.matches).filter(r => r.ok).slice(0, 3), sessionQuote(s));
 }
 {
   let timer = null, btn = null, done = false;
