@@ -55,6 +55,15 @@ const NAV = [
       <h3>Modus</h3>
       <div class="am-seg" role="radiogroup" aria-label="Modus">${[['all', 'Alles'], ['leagueMatch', 'League'], ['playoffMatch', 'Playoff']].map(([v, l]) => `<button type="button" role="radio" data-mode="${v}">${l}</button>`).join('')}</div>
       <p class="am-note">Geldt voor de hele app: alleen die wedstrijden tellen mee.</p>
+      <h3>Periode</h3>
+      <div class="am-seg" role="radiogroup" aria-label="Periode">${[['all', 'Overall'], ['month', 'Maand'], ['range', 'Eigen periode']].map(([v, l]) => `<button type="button" role="radio" data-period="${v}">${l}</button>`).join('')}</div>
+      <div class="am-period" id="am-period" hidden>
+        <label class="am-field" data-for="month">Maand <input type="month" id="am-month"></label>
+        <label class="am-field" data-for="range">Van <input type="date" id="am-from"></label>
+        <label class="am-field" data-for="range">Tot en met <input type="date" id="am-to"></label>
+        <button type="button" class="am-apply" id="am-apply">Toepassen</button>
+      </div>
+      <p class="am-note">Vergelijkt met de vorige even lange periode. Een sessie of wedstrijd zelf blijft altijd te openen.</p>
       <h3>Rating</h3>
       <div class="am-seg" role="radiogroup" aria-label="Rating"><button type="button" role="radio" aria-checked="true" class="on">EA</button><button type="button" role="radio" aria-checked="false" disabled>Eigen <small>binnenkort</small></button></div>
       <h3>Weergave</h3>
@@ -328,7 +337,8 @@ const markRevealed = s => { try { localStorage.setItem(revealKey(s), String(Date
 // Dicht: bezig én nog niet geopend door deze kijker. Eenmaal geopend (ook vroeg, met de vasthoudknop) is de sessie
 // open, ook als er daarna nog wedstrijden bij komen; die werken gewoon bij (coach-logica §9a).
 const sessionSealed = s => sessionLive(s) && !revealSeen(s);
-const revealPending = (s, all) => s === all[all.length - 1] && !sessionLive(s) && !revealSeen(s);
+// De nieuwste sessie van alles, niet van de gekozen periode: een oudere maand heeft geen pack dat nog dicht is.
+const revealPending = (s, all) => s.key === sessionsOf(DATA?.allMatches || all.flatMap(x => x.matches)).at(-1)?.key && !sessionLive(s) && !revealSeen(s);
 const sessionHref = s => `sessie.html?id=${s.key ?? s.matches?.[0]?.sessionKey ?? s.sessionKey}`;
 
 // Verwachtingsmodel: doelsaldo ~ a + b·(skillverschil/100) + c·(mensen tegenstander − eigen mensen).
@@ -482,6 +492,14 @@ async function loadDataInner() {
   for (const m of DATA.matches) { m.expected = DATA.model.predict(m); m.resid = m.goalDiff - m.expected; }
   // Modus uit het menu: alleen league of alleen playoff. Na het model en de sessies, zodat die op alles gerekend blijven.
   const mode = getMode(); if (mode !== 'all') DATA.matches = DATA.matches.filter(m => m.matchType === mode);
+  // Periode uit het menu (coach-logica §9a, Menu): DATA.matches wordt de periode, DATA.prevMatches de vorige even lange
+  // periode om mee te vergelijken. DATA.allMatches houdt alles (bijvoorbeeld voor de vorm van een speler).
+  DATA.allMatches = DATA.matches;
+  DATA.period = PERIOD_FREE.includes(PAGE) ? { type: 'all', label: 'Overall' } : periodOf();
+  if (DATA.period.type !== 'all') {
+    DATA.prevMatches = DATA.matches.filter(m => inPeriod(m, DATA.period.prev));
+    DATA.matches = DATA.matches.filter(m => inPeriod(m, DATA.period));
+  }
   const counts = new Map();
   for (const m of DATA.matches) for (const p of m.players) counts.set(p.name, (counts.get(p.name) || 0) + 1);
   DATA.players = [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([name]) => name);
@@ -499,6 +517,12 @@ async function loadDataInner() {
     const note = document.createElement('p'); note.className = 'live-note'; note.setAttribute('role', 'status');
     note.textContent = `${capFirst(numWord(L.newMatches))} ${L.newMatches === 1 ? 'wedstrijd is' : 'wedstrijden zijn'} net live bij EA opgehaald en ${L.newMatches === 1 ? 'telt' : 'tellen'} al mee. Opslaan gebeurt bij de volgende verzamelrun.`;
     $('.page-head, .home-hero, .back-link, .player-hero, .sess-stage')?.insertAdjacentElement('afterend', note);
+  }
+  if (DATA.period.type !== 'all') {
+    const note = document.createElement('p'); note.className = 'period-note';
+    note.innerHTML = `<span><b>${esc(DATA.period.label)}</b>${DATA.matches.length ? `, vergeleken met ${esc(DATA.period.prev.label)}` : ': geen wedstrijden in deze periode'}.</span><button type="button" class="more-btn period-change">Periode wijzigen</button>`;
+    $('.page-head, .home-hero, .back-link, .player-hero, #squad')?.insertAdjacentElement(PAGE === 'index.html' ? 'beforebegin' : 'afterend', note);
+    note.querySelector('button').addEventListener('click', () => { syncMenu(); $('#app-menu').showModal(); });
   }
   liveTrigger(); // site: op de achtergrond, de pagina wacht er niet op
   return DATA;
@@ -603,6 +627,31 @@ function liveAgain() { if (document.visibilityState === 'visible') liveTrigger()
 document.addEventListener('visibilitychange', liveAgain);
 window.addEventListener('pageshow', e => { if (e.persisted) liveAgain(); });
 
+// ---------- periode (coach-logica §9a, Menu) ----------
+// Overall, een maand of een eigen periode (datums als 2026-11-01, in Nederlandse tijd zoals dayKey). Onthouden per
+// browser. periodOf geeft de huidige en de vorige even lange periode: de maand ervoor, of evenveel dagen direct ervoor.
+const PERIOD_KEY = 'period';
+const getPeriod = () => { try { const p = JSON.parse(localStorage.getItem(PERIOD_KEY) || 'null'); return p && p.type ? p : { type: 'all' }; } catch { return { type: 'all' }; } };
+const addDays = (day, n) => { const d = new Date(`${day}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+const monthName = ym => new Date(`${ym}-15T12:00:00Z`).toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' });
+const shortDay = day => new Date(`${day}T12:00:00Z`).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' }).replace('.', '');
+const prevMonth = ym => { const [y, m] = ym.split('-').map(Number); return m === 1 ? `${y - 1}-12` : `${y}-${String(m - 1).padStart(2, '0')}`; };
+const nextMonth = ym => { const [y, m] = ym.split('-').map(Number); return m === 12 ? `${y + 1}-01` : `${y}-${String(m + 1).padStart(2, '0')}`; };
+function periodOf(p = getPeriod()) {
+  if (p.type === 'month' && /^\d{4}-\d{2}$/.test(p.month || '')) {
+    const pm = prevMonth(p.month), last = ym => addDays(`${nextMonth(ym)}-01`, -1);
+    return { type: 'month', from: `${p.month}-01`, to: last(p.month), label: capFirst(monthName(p.month)), prev: { from: `${pm}-01`, to: last(pm), label: monthName(pm) } };
+  }
+  if (p.type === 'range' && p.from && p.to && p.from <= p.to) {
+    const days = Math.round((new Date(p.to) - new Date(p.from)) / 864e5) + 1, pt = addDays(p.from, -1), pf = addDays(p.from, -days);
+    return { type: 'range', from: p.from, to: p.to, label: `${shortDay(p.from)} t/m ${shortDay(p.to)}`, prev: { from: pf, to: pt, label: `${shortDay(pf)} t/m ${shortDay(pt)}` } };
+  }
+  return { type: 'all', label: 'Overall' };
+}
+const inPeriod = (m, r) => { const d = dayKey(m.ts); return d >= r.from && d <= r.to; };
+// Pagina's die één avond of wedstrijd tonen, volgen de periode niet: die avond blijft gewoon te openen.
+const PERIOD_FREE = ['sessie.html', 'wedstrijd.html', 'nieuws.html'];
+
 // ---------- menu: zoeken, modus en instellingen ----------
 // Modus: alle wedstrijden, alleen league of alleen playoff (onthouden per browser; loadData filtert erop).
 const MODE_KEY = 'mode';
@@ -611,7 +660,8 @@ function syncMenu() {
   const mode = getMode(), light = document.documentElement.dataset.theme === 'light';
   for (const b of document.querySelectorAll('#app-menu [data-mode]')) { const on = b.dataset.mode === mode; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); }
   for (const b of document.querySelectorAll('#app-menu [data-theme-pick]')) { const on = (b.dataset.themePick === 'light') === light; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); }
-  $('#menu-btn')?.classList.toggle('has-mode', mode !== 'all');
+  $('#menu-btn')?.classList.toggle('has-mode', mode !== 'all' || getPeriod().type !== 'all');
+  syncPeriod(getPeriod().type);
   const f = $('#am-fresh'); if (f) f.textContent = DATA?.freshness ? `Data: ${DATA.freshness}.${document.documentElement.classList.contains('live-checking') ? ' Nu bij EA aan het kijken.' : ''}` : '';
 }
 // Zoeken: tegenstanders (wedstrijden), spelers (pro-naam of accountnaam) en datums (sessies), hooguit twaalf treffers.
@@ -625,6 +675,25 @@ function menuSearch(q) {
   out.innerHTML = hits.slice(0, 12).join('') || '<li class="empty">Niets gevonden.</li>';
 }
 $('#menu-btn')?.addEventListener('click', () => { syncMenu(); $('#app-menu').showModal(); });
+// Periode kiezen: Overall meteen; bij Maand of Eigen periode eerst de datums, dan Toepassen. Standaard de maand van de
+// nieuwste wedstrijd, of de laatste dertig dagen.
+function syncPeriod(type) {
+  const p = getPeriod(), box = $('#am-period'); if (!box) return;
+  for (const b of document.querySelectorAll('#app-menu [data-period]')) { const on = b.dataset.period === type; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); }
+  box.hidden = type === 'all';
+  for (const f of box.querySelectorAll('.am-field')) f.hidden = f.dataset.for !== type;
+  const last = DATA?.allMatches?.length ? dayKey(DATA.allMatches.at(-1).ts) : new Date().toISOString().slice(0, 10);
+  $('#am-month').value = p.type === 'month' ? p.month : last.slice(0, 7);
+  $('#am-from').value = p.type === 'range' ? p.from : addDays(last, -29);
+  $('#am-to').value = p.type === 'range' ? p.to : last;
+}
+const setPeriod = p => { try { p.type === 'all' ? localStorage.removeItem(PERIOD_KEY) : localStorage.setItem(PERIOD_KEY, JSON.stringify(p)); } catch {} location.reload(); };
+for (const b of document.querySelectorAll('#app-menu [data-period]')) b.addEventListener('click', () => b.dataset.period === 'all' ? setPeriod({ type: 'all' }) : syncPeriod(b.dataset.period));
+$('#am-apply')?.addEventListener('click', () => {
+  const type = document.querySelector('#app-menu [data-period].on')?.dataset.period;
+  if (type === 'month' && $('#am-month').value) setPeriod({ type, month: $('#am-month').value });
+  else if (type === 'range' && $('#am-from').value && $('#am-to').value) { const [a, b] = [$('#am-from').value, $('#am-to').value].sort(); setPeriod({ type, from: a, to: b }); }
+});
 $('#am-q')?.addEventListener('input', e => menuSearch(e.target.value));
 for (const b of document.querySelectorAll('#app-menu [data-mode]')) b.addEventListener('click', () => {
   try { b.dataset.mode === 'all' ? localStorage.removeItem(MODE_KEY) : localStorage.setItem(MODE_KEY, b.dataset.mode); } catch {}

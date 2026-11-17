@@ -456,6 +456,15 @@ Geen reeksen: die staan al in de rondjes bovenaan.
    tegenstanders uitgespeeld. *Passen*: passes gelukt van pogingen, passes, steekpasses, aandeel vooruit.
    *Verdedigen*: balwinst, onderscheppingen, tackles gewonnen van pogingen, de nul gehouden, reddingen (keepers).
    *Discipline*: balverlies, uit positie, overtredingen, kaarten. Alleen wat EA telt (§2 en docs/event-codes.md).
+   **Totalen van EA** (Jamal, 17 november 2026): bij de periode *Overall* staan goals, assists, schoten, conversie,
+   passes, passes gelukt en tackles gewonnen als **carrièretotaal bij de club volgens EA** (`members/stats`, ook van
+   vóór deze app), met per wedstrijd het totaal gedeeld door de wedstrijden bij EA; die regels krijgen een klein
+   *EA*-label. Schoten leiden we af uit goals en het schotpercentage van EA (EA geeft geen aantal schoten), pogingen
+   bij passes en tackles net zo. De andere cijfers geeft EA niet als totaal (tweede assists, dribbels, steekpasses,
+   balwinst, onderscheppingen, discipline, de nul): die blijven over de gevolgde wedstrijden. In een **periode**
+   (maand of eigen periode) komt alles uit de gevolgde wedstrijden in die periode: sinds 13 oktober 2026 volgen we elke
+   wedstrijd, dus dat is hetzelfde als wat EA telt. Dan staat per cijfer ook een klein verschil met de vorige even
+   lange periode (groen beter, rood slechter, met *lower* omgekeerd).
    Vóór de speler staat per regel een **rondje met de plek** van de speler onder onze spelers (sinds 31 oktober 2026),
    in goud, zilver, brons of leigrijs zoals bij de sessies. De plek gaat op het getal per wedstrijd (bij een percentage
    het percentage), niet op het totaal: wie meer speelt, telt anders vanzelf meer. Wie hetzelfde getal heeft zoals het
@@ -581,9 +590,15 @@ zonder punten, weging of percentielen:
 | Goals + assists | goals plus assists per wedstrijd | hele carrière bij de club volgens EA | iedereen |
 | Verdedigen | gewonnen tackles + onderscheppingen + kopduels achterin + blokken + wegwerken, per wedstrijd | idem | idem |
 | Passes | geslaagde passes per wedstrijd, klein het deel dat aankomt | gevolgde wedstrijden | minstens vijf wedstrijden |
-| Compleet | Frambroos-index (§9b): gemiddelde van vier fronten | gevolgde wedstrijden | minstens drie |
+| Compleet | **gemiddelde plek** over alle cijfers van de spelerspagina (sinds 17 november 2026; daarvoor de Frambroos-index, §9b) | zoals de spelerspagina | wie bij minstens de helft van de cijfers een plek heeft |
 Elk uitlegscherm toont **alle** spelers van de selectie; wie de drempel niet haalt, staat onderaan met een streepje.
 Op de tegel: naam, het getal groot, klein waar het op rust (bijv. *36 goals uit 103 schoten*).
+*Compleet* (Jamal, 17 november 2026): wie gemiddeld het hoogst staat ten opzichte van het team, over **alle** cijfers
+die de spelerspagina meet (Aanvallen, Passen, Verdedigen, Discipline; reddingen tellen niet, die zijn alleen voor
+keepers). Per cijfer de plek onder onze spelers zoals het rondje op de spelerspagina, dan het gemiddelde van die
+plekken; lager is beter. Op de tegel groot de gemiddelde plek (bijv. *2,3*), klein in hoeveel cijfers die speler
+eerste is. Zo is het na te rekenen: dezelfde rondjes als op de spelerspagina. Topscorer en topassist volgen de
+periode (zie *Periode*): bij *Overall* de carrière volgens EA, anders de gevolgde wedstrijden in die periode.
 
 *Waarom zo*: de vorige versie (punten per wedstrijd, omgerekend naar een percentiel per teamgrootte, en *Compleet*)
 was niet na te rekenen en bevoordeelde wie veel dribbelt: Terry Yaki stond bovenaan Aanvallend door "tegenstander
@@ -690,7 +705,14 @@ regel voor wat er al was voordat de app meekeek; verticaal te scrollen. Het nieu
 
 **Menu** (sinds 3 november 2026): een pagina een laag dieper (sessie, wedstrijd, rivalen, nieuws, een spelersprofiel) zet **geen** tabblad actief, zodat een tik op het tabblad terug naar de lijst gaat; overal hetzelfde (4 november 2026). rechts in de menubalk een menuknop (op telefoon in de balk onderin) met zoeken door
 tegenstanders, spelers en sessies; de **modus** (alles, alleen league, alleen playoff; geldt voor de hele app en
-wordt per browser onthouden); de rating (nu alleen EA, *eigen* volgt); en thuis- of uittenue. Op telefoon heet
+wordt per browser onthouden); de **periode** (sinds 17 november 2026: *Overall*, *Maand* met een maandkeuze, of *Eigen
+periode* met een begin- en einddatum; per browser onthouden). Een periode geldt voor de overzichtspagina's (Club,
+Sessies, Wedstrijden, Rivalen, Spelers); een sessie- of wedstrijdpagina toont altijd die ene avond of wedstrijd.
+Met een periode staat bovenaan elke overzichtspagina één regel (*November 2026, vergeleken met oktober 2026*) en
+vergelijkt de app met de **vorige even lange periode**: de maand ervoor, of bij een eigen periode evenveel dagen
+direct ervoor. Vergelijkingen staan op de Club-kop (balans van de periode met verschil in winstpercentage, goals en
+tegengoals per wedstrijd) en per cijfer op de spelerspagina. Bij *Overall* geen vergelijking. Vóór 13 oktober 2026
+hebben we geen wedstrijden: een periode daarvoor is leeg en dat staat er dan. de rating (nu alleen EA, *eigen* volgt); en thuis- of uittenue. Op telefoon heet
 Wedstrijden in de balk *Games*, zodat alles past.
 
 **Wedstrijdpagina** (sinds 3 november 2026, één kaart): bovenin, met het stadion erachter, de dag als titel met de

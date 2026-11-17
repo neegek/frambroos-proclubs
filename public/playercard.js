@@ -114,7 +114,7 @@ const photoOf = (name, tier) => (tier !== 'goud' && PHOTOS[`${slugOf(name)}-vorm
 // Zonder session de kaart van nu (carrièrecijfers van EA, tier van de laatste sessie); met session de sessiekaart:
 // tier, foto en zes cijfers van die avond (coach-logica §9c); met rank linksboven de plek op rating in plaats van de overall. key maakt de SVG-ids uniek als een kaart vaker op een pagina staat.
 function cardOf(name, { session = null, key = '', rank = null } = {}) {
-  const all = DATA.matches.map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p);
+  const all = (DATA.allMatches || DATA.matches).map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p); // vorm van nu, ook in een periode
   const rows = session === null ? all : all.filter(r => r.m.session === session);
   const career = DATA.members.find(x => x.name === name);
   const arch = lastArch(rows), info = ARCHETYPE_INFO[arch];
@@ -156,7 +156,7 @@ function cardOf(name, { session = null, key = '', rank = null } = {}) {
 const TREND = { up: ['▲', 'sterker dan normaal'], down: ['▼', 'zwakker dan normaal'], same: ['–', 'gelijk aan normaal'] };
 // medal: false laat de plek weg (de rand houdt de kleur); label: een naam onderin het kaartje.
 function tinyOf(name, { session, rank = null, trend = null, value, key = '-t', medal = true, label: nameLabel = '' }) {
-  const all = DATA.matches.map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p);
+  const all = (DATA.allMatches || DATA.matches).map(m => ({ m, p: m.players.find(p => p.name === name) })).filter(r => r.p); // vorm van nu, ook in een periode
   const tier = tierAt(all.filter(x => x.p.rating !== null), session), photo = photoOf(name, tier.tier), rim = rimOf(rank);
   const badge = rank && medal ? `<span class="ft-rank metal-${rim}">${rank}</span>` : rank ? '' : trend ? `<span class="ft-rank ft-trend ${trend}">${TREND[trend][0]}</span>` : '';
   const label = rank ? `plek ${rank}` : trend ? TREND[trend][1] : '';

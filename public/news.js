@@ -6,7 +6,7 @@ const bigNum = (v, small = '') => `<span class="news-big">${v}${small ? `<small>
 // Het artikel van één sessie: de kop van het sterkste bericht (volgorde van de tabel in §9a), anders de speelavond.
 function articleFor(sess, latest) {
   const night = sess.matches, end = night.at(-1).ts, start = night[0].ts;
-  const upTo = DATA.matches.filter(m => m.ts <= end), before = DATA.matches.filter(m => m.ts < start);
+  const all = (DATA.allMatches || DATA.matches), upTo = all.filter(m => m.ts <= end), before = all.filter(m => m.ts < start);
   const s = summarize(night), gd = night.reduce((a, m) => a + m.goalDiff, 0), best = bestOfNight(night);
   const weekday = new Date(end * 1000).toLocaleDateString('nl-NL', { weekday: 'long' });
   const parts = [s.W ? `${numWord(s.W)} ${s.W === 1 ? 'zege' : 'zeges'}` : '', s.D ? `${numWord(s.D)} ${s.D === 1 ? 'gelijkspel' : 'gelijke spelen'}` : '', s.L ? `${numWord(s.L)} ${s.L === 1 ? 'nederlaag' : 'nederlagen'}` : ''].filter(Boolean);

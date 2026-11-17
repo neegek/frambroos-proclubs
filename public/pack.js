@@ -34,14 +34,14 @@ const QUOTES = new Map();
 function sessionQuote(sess) {
   if (QUOTES.has(sess.id)) return QUOTES.get(sess.id);
   const used = new Map();
-  for (const x of sessionsOf(DATA.matches)) {
+  for (const x of sessionsOf((DATA.allMatches || DATA.matches))) { // over alles: de quote van een avond hangt niet af van de periode
     const names = [...new Set(x.matches.flatMap(m => m.players.map(p => p.name)))];
     const rowsOf = (list, n) => list.map(m => ({ m, p: m.players.find(p => p.name === n) })).filter(r => r.p);
     const best = names.map(n => ({ n, r: avg(rowsOf(x.matches, n).map(r => r.p.rating).filter(v => v !== null)) }))
       .filter(b => b.r !== null).sort((a, b) => b.r - a.r)[0];
     let q = null;
     if (best) {
-      const stat = standoutStat(rowsOf(x.matches, best.n), rowsOf(DATA.matches.filter(m => m.session !== x.id), best.n));
+      const stat = standoutStat(rowsOf(x.matches, best.n), rowsOf((DATA.allMatches || DATA.matches).filter(m => m.session !== x.id), best.n));
       const k = `${best.n}|${stat.key}`, i = used.get(k) || 0; used.set(k, i + 1);
       q = { text: quoteFor(best.n, stat, i), who: proName(best.n), stat: stat.key };
       // Zeldzaam extraatje uit de maandbank (personas.js): de eerste gewonnen avond van een maand, en minstens 60 dagen
@@ -93,7 +93,7 @@ function playReveal(s, top, quote) {
 // (of de testsessie) een knop; een tik speelt de reveal op dezelfde pagina, zonder te navigeren.
 const packReady = (s, all) => revealPending(s, all) || s.key === REVEAL_TEST;
 function openPack(key) {
-  const s = sessionsOf(DATA.matches).find(x => x.key === key); if (!s) return;
+  const s = sessionsOf((DATA.allMatches || DATA.matches)).find(x => x.key === key); if (!s) return;
   playReveal(s, sessionRanking(s.matches).filter(r => r.rH !== null).slice(0, 3), sessionQuote(s));
 }
 // Vasthoudknop (coach-logica §9a): rechtsboven in de sessiekop, op de plek van "volgende sessie" bij de nieuwste
@@ -104,7 +104,7 @@ const packHoldBtn = s => `<button type="button" class="ss-nav next ss-pack" data
   <svg class="ss-ring" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18.5"/></svg>
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l1 18H5z"/><path d="M8.5 9.5l3.5 2.5 3.5-2.5"/></svg></button>`;
 function holdOpen(btn) {
-  const s = sessionsOf(DATA.matches).find(x => x.key === btn.dataset.hold); if (!s) return;
+  const s = sessionsOf((DATA.allMatches || DATA.matches)).find(x => x.key === btn.dataset.hold); if (!s) return;
   playReveal(s, sessionRanking(s.matches).filter(r => r.rH !== null).slice(0, 3), sessionQuote(s));
 }
 {

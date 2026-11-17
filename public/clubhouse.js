@@ -25,6 +25,7 @@ function homeHero(ms) {
 // ---------- seizoen (coach-logica §9a): de balans volgens EA ----------
 // Groot de W-G-V met een balk in de uitslagkleuren, daarnaast doelpunten, tegengoals en clean sheets.
 function seasonTop() {
+  if (DATA.period.type !== 'all') return periodTop();
   const s = DATA.snapshot, el = $('#season-top'); if (!s) { el.innerHTML = ''; return; }
   const g = s.gamesPlayed || 0, w = g ? 100 * s.wins / g : 0, d = g ? 100 * s.ties / g : 0;
   const stat = (label, v, sub) => `<div class="st-stat"><b>${v}</b><span>${label}</span>${sub ? `<small>${sub}</small>` : ''}</div>`;
@@ -35,6 +36,24 @@ function seasonTop() {
       <div class="st-cap"><b>${g ? Math.round(w) : '–'}% gewonnen</b> · ${g} wedstrijden</div>
     </div>
     <div class="st-stats">${stat('Goals', s.goals)}${stat('Tegen', s.goalsAgainst)}${stat('Saldo', `${s.goals - s.goalsAgainst > 0 ? '+' : ''}${s.goals - s.goalsAgainst}`)}${stat('De nul', s.cleanSheets ?? '–')}</div>`;
+}
+
+// Met een periode (coach-logica §9a, Menu): de balans van de gevolgde wedstrijden in die periode, met het verschil
+// tegenover de vorige even lange periode (winstpercentage, goals en tegengoals per wedstrijd).
+function periodTop() {
+  const el = $('#season-top'), now = summarize(DATA.matches), was = summarize(DATA.prevMatches);
+  if (!now.n) { el.innerHTML = `<div class="st-cap">Geen wedstrijden in ${esc(DATA.period.label.toLowerCase())}.</div>`; return; }
+  const w = 100 * now.W / now.n, d = 100 * now.D / now.n, nul = DATA.matches.filter(m => m.goalsAgainst === 0).length;
+  const delta = (a, b, digits, lowerBetter = false, unit = '') => { if (!was.n || b === null) return '';
+    const x = a - b, r = Math.round(x * 10 ** digits) / 10 ** digits, tone = r === 0 ? '' : (r > 0) !== lowerBetter ? 'up' : 'down';
+    return `<em class="sv-delta ${tone}" title="Tegenover ${esc(DATA.period.prev.label)}">${r > 0 ? '+' : ''}${digits ? f1(r) : r}${unit}</em>`; };
+  const stat = (label, v, sub) => `<div class="st-stat"><b>${v}</b><span>${label}</span>${sub || ''}</div>`;
+  el.innerHTML = `<div class="st-record">
+      <div class="st-nums"><span class="W">${now.W}</span><i>-</i><span class="D">${now.D}</span><i>-</i><span class="L">${now.L}</span></div>
+      <div class="st-bar" aria-hidden="true"><span class="W" style="width:${w}%"></span><span class="D" style="width:${d}%"></span><span class="L" style="width:${100 - w - d}%"></span></div>
+      <div class="st-cap"><b>${Math.round(w)}% gewonnen</b> · ${now.n} wedstrijden ${delta(w, was.n ? 100 * was.W / was.n : null, 0, false, ' pt')}</div>
+    </div>
+    <div class="st-stats">${stat('Goals', now.gf, `<small>${f1(now.gf / now.n)} p/w</small>${was.n ? delta(now.gf / now.n, was.gf / was.n, 1) : ''}`)}${stat('Tegen', now.ga, `<small>${f1(now.ga / now.n)} p/w</small>${was.n ? delta(now.ga / now.n, was.ga / was.n, 1, true) : ''}`)}${stat('Saldo', `${now.gf - now.ga > 0 ? '+' : ''}${now.gf - now.ga}`)}${stat('De nul', nul)}</div>`;
 }
 
 // Laatste sessie: één tik naar de avond. Bezig of nog niet geopend: het pack, anders de speler van de sessie.
@@ -130,7 +149,12 @@ function statRows(ms, s) {
 }
 function threats(ms) {
   // Topscorer en topassist: de carrièretotalen van EA, dezelfde als Algemeen. Goals + assists per wedstrijd ook.
-  const C = DATA.members.filter(m => m.gamesPlayed > 0).map(m => ({ name: m.name, n: m.gamesPlayed, g: m.goals || 0, a: m.assists || 0, ga: ((m.goals || 0) + (m.assists || 0)) / m.gamesPlayed }));
+  // Met een periode: de gevolgde wedstrijden in die periode (EA bewaart geen totalen per periode).
+  const period = DATA.period.type !== 'all';
+  const C = period ? [...new Set(ms.flatMap(m => m.players.map(p => p.name)))].map(name => { const rows = ms.flatMap(m => m.players.filter(p => p.name === name));
+      const g = rows.reduce((a, p) => a + (p.goals || 0), 0), a = rows.reduce((x, p) => x + (p.assists || 0), 0); return { name, n: rows.length, g, a, ga: (g + a) / rows.length }; })
+    : DATA.members.filter(m => m.gamesPlayed > 0).map(m => ({ name: m.name, n: m.gamesPlayed, g: m.goals || 0, a: m.assists || 0, ga: ((m.goals || 0) + (m.assists || 0)) / m.gamesPlayed }));
+  const SRC = period ? `Alleen ${DATA.period.label.toLowerCase()}, over de gevolgde wedstrijden.` : CAREER;
   const top = key => [...C].sort((a, b) => b[key] - a[key] || a.n - b.n);
   const tile = (cls, key, label, name, val, unit, sub) => `<button type="button" class="threat ${cls}" data-dom="${key}">
       <span class="th-label">${label}</span><b class="th-name">${esc(proName(name))}</b>
@@ -140,23 +164,21 @@ function threats(ms) {
   const R = Object.fromEntries(STATS.map(s => [s.key, statRows(ms, s)]));
   // Goals + assists per wedstrijd over de carrière: wie het meest bijdraagt aan doelpunten.
   R.ga = top('ga').map(t => ({ name: t.name, v: t.ga, main: f1(t.ga), sub: `${t.g} goals + ${t.a} assists in ${t.n}` }));
-  // Compleet (coach-logica §9b): het gemiddelde van vier fronten, elk tegenover alle mensen. 50 = gemiddeld.
-  R.all = roster.map(name => ({ name, f: DATA.fi?.[name] })).filter(x => x.f)
-    .sort((x, y) => (y.f.score ?? -1) - (x.f.score ?? -1))
-    .map(({ name, f }) => ({ name, main: f.score === null ? null : String(Math.round(f.score)),
-      sub: f.score === null ? `${plural(f.n, 'wedstrijd', 'wedstrijden')}, minstens drie nodig` : FI_PARTS.map(q => `${q.label.toLowerCase()} ${Math.round(f.parts[q.key])}`).join(' · ') }));
-  // Op de tegel het zwakste front: compleet is zo sterk als je zwakste kant.
-  const allSub = r => { const f = DATA.fi[r.name], low = [...FI_PARTS].sort((a, b) => f.parts[a.key] - f.parts[b.key])[0]; return `zwakst: ${low.label.toLowerCase()} ${Math.round(f.parts[low.key])}`; };
+  // Compleet (coach-logica §9a): de gemiddelde plek over alle cijfers van de spelerspagina (stats.js), dezelfde
+  // rondjes als daar; lager is beter. Bij Overall met de totalen van EA, in een periode over die periode.
+  const comp = completeRanking(statContext(ms, { ea: !period }));
+  R.all = comp.map(b => ({ name: b.name, main: f1(b.avg), sub: `${b.firsts}× eerste in ${b.ranks.length} cijfers` }));
+  const allSub = r => r.sub;
   const tileOf = (cls, key, label, unit, subOf) => { const r = R[key][0]; return r && r.main !== null ? tile(cls, key, label, r.name, r.main, unit, subOf ? subOf(r) : r.sub) : ''; };
   $('#threats').innerHTML = totalTile('goals', 'Topscorer', 'g', 'goals') + totalTile('assists', 'Topassist', 'a', 'assists')
     + tileOf('att', 'ga', 'Goals + assists', 'per wedstrijd') + tileOf('cre', 'pass', 'Passes', 'per wedstrijd')
-    + tileOf('def', 'def', 'Verdedigen', 'per wedstrijd') + tileOf('all', 'all', 'Compleet', '', allSub);
+    + tileOf('def', 'def', 'Verdedigen', 'per wedstrijd') + tileOf('all', 'all', 'Compleet', 'gem. plek', allSub);
   $('#threats').onclick = e => {
     const btn = e.target.closest('.threat'); if (!btn) return; const k = btn.dataset.dom;
-    if (k === 'g' || k === 'a') return openRankList({ label: k === 'g' ? 'Topscorer' : 'Topassist', about: `Het aantal ${k === 'g' ? 'goals' : 'assists'} over de hele carrière bij de club volgens EA, ook van vóór deze app (dezelfde totalen als bij Algemeen). Bij gelijk staat wie het in minder wedstrijden deed hoger.`, who: CAREER,
+    if (k === 'g' || k === 'a') return openRankList({ label: k === 'g' ? 'Topscorer' : 'Topassist', about: `Het aantal ${k === 'g' ? 'goals' : 'assists'}${period ? '' : ' over de hele carrière bij de club volgens EA, ook van vóór deze app (dezelfde totalen als bij Algemeen)'}. Bij gelijk staat wie het in minder wedstrijden deed hoger.`, who: SRC,
       rows: top(k).map(t => ({ name: t.name, main: String(t[k]), sub: `${f1(t[k] / t.n)} per wedstrijd, in ${t.n}` })) }, roster);
-    if (k === 'ga') return openRankList({ label: 'Goals + assists', about: 'Goals plus assists per wedstrijd, over de hele carrière bij de club volgens EA: wie het meest bijdraagt aan doelpunten.', who: CAREER, rows: R.ga }, roster);
-    if (k === 'all') return openRankList({ label: 'Compleet', about: 'Hoe hoog je op elk front scoort, allemaal even zwaar: aanvallen (goals + assists), passen (geslaagde passes), balbehoud (balverlies per keer aan de bal, lager is beter) en verdedigen (tackles, onderscheppingen, kopduels achterin, blokken, wegwerken en balwinst, ook door druk zetten). Per wedstrijd per front: beter dan zoveel procent van alle mensen die we ooit tegenkwamen, tegenstanders inbegrepen. Compleet is het gemiddelde van de vier. 50 is gemiddeld.', who: 'Gevolgde wedstrijden van 45 minuten of langer met gebeurtenissen van EA; minstens drie. Bij weinig wedstrijden trekken we het getal naar 50.', rows: R.all }, roster);
+    if (k === 'ga') return openRankList({ label: 'Goals + assists', about: 'Goals plus assists per wedstrijd: wie het meest bijdraagt aan doelpunten.', who: SRC, rows: R.ga }, roster);
+    if (k === 'all') return openRankList({ label: 'Compleet', about: `De gemiddelde plek ten opzichte van het team over alle cijfers van de spelerspagina (aanvallen, passen, verdedigen en discipline; ${comp[0]?.of ?? ''} cijfers). Per cijfer dezelfde plek als het rondje op de spelerspagina; lager is beter. Bij gelijk wint wie vaker eerste is.`, who: `${SRC} Mee doet wie bij minstens de helft van de cijfers een plek heeft.`, rows: R.all }, roster);
     const s = STATS.find(x => x.key === k);
     openRankList({ label: s.label, about: s.about, who: `Gevolgde wedstrijden met gebeurtenissen van EA; ${s.minLabel}.`, rows: R[k] }, roster);
   };

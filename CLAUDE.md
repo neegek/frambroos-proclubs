@@ -161,6 +161,14 @@ alleen in Cloudflare.
   eerst *In het kort* (`.kort`: drie regels in woorden, coach-logica §9a), dan de totalen zonder badges
   (`.totals-band`) en de vormgrafiek (staafjes per wedstrijd plus één lijn: doelsaldo over vijf), met twee kerncijfers
   via `figsHtml` in de kop. Geen "verwacht" of "tov ons" op de startpagina. Geen aparte analysepagina. De app is bewust eenvoudig: liever één duidelijke kaart dan drie tabellen.
+- Periode (coach-logica §9a, *Menu*): in het menu *Overall*, *Maand* of *Eigen periode* (`getPeriod`/`periodOf` in
+  `common.js`, localStorage). `loadData` zet dan `DATA.matches` op de periode, `DATA.prevMatches` op de vorige even
+  lange periode en houdt `DATA.allMatches`; sessie-, wedstrijd- en nieuwspagina volgen de periode niet. Wat altijd over
+  alles gaat (vorm op de kaart, quotes, reveal, nieuwscontext), gebruikt `DATA.allMatches`. Vergelijking met de vorige
+  periode op de Club-kop en per cijfer op de spelerspagina.
+- Spelerscijfers en *Compleet*: `public/stats.js` (`statDefs`, `statContext`, `statRanking`, `completeRanking`),
+  geladen door spelers en Club. Bij *Overall* EA-carrièretotalen waar EA ze heeft (label *EA*), anders de gevolgde
+  wedstrijden. *Compleet* = gemiddelde plek over alle cijfers van de spelerspagina.
 - *Spelers* opent de selectie (`renderSquad` in `spelers.js`, met de AI onderaan); `spelers.html#<accountnaam>` is het
   profiel, met een keuzemenu (`#p-pick`) om te wisselen, geen pillen.
 - Spelerspagina (coach-logica §9a): zonder tabbladen, filters, samenvatting en *Algemeen* (dat staat op de kaart);
